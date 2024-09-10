@@ -6,7 +6,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "NEVER ADMIN PANEL",
-  description: "NEVER ADMIN PANEL FOR MANGING NEVERBE WEBSITE",
+  description: "NEVER ADMIN PANEL FOR MANGING NEVERBE WEBSITE.",
 };
 
 export default function RootLayout({

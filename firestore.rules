@@ -1,0 +1,26 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+     match /sliders/{document=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+     match /shoes/{document=**} {
+      allow read: if true;
+      allow write: if true;
+    }
+    match /reviews/{document=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+    match /shops/{document=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+     match /cart/{document=**} {
+      allow read: if true;
+      allow write: if true;
+    }
+  }
+}
