@@ -3,22 +3,25 @@ import Toast from "@/components/Toast";
 import {AnimatePresence} from "framer-motion";
 import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch, RootState} from "@/lib/store";
-import {getUserById, logUser, observeAuthState} from "@/firebase/firebaseConfig";
+import {getCurrentUser, getUserById, logUser} from "@/firebase/firebaseConfig";
 import {showToast} from "@/lib/toastSlice/toastSlice";
 import {FaEye} from "react-icons/fa";
 import {FaEyeSlash} from "react-icons/fa6";
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import {useRouter} from "next/navigation";
 import {setUser} from "@/lib/userSlice/userSlice";
-import LoadingView from "@/app/components/LoadingView";
 
 export default function Home() {
-    const [isLoading, setIsLoading] = useState(true)
     const router = useRouter();
+    const [showPassword, setShowPassword] = useState(false)
+    const {user} = useSelector((state: RootState) => state.authSlice);
+
+    if(getCurrentUser() && user){
+        router.replace("/adminPanel");
+    }
 
     const isToastShowing = useSelector((state: RootState) => state.toastSlice.showToast);
     const dispatch: AppDispatch = useDispatch();
-    const [showPassword, setShowPassword] = useState(false)
 
     const onFormSubmit = async (evt: any) => {
         evt.preventDefault();
@@ -27,44 +30,25 @@ export default function Home() {
             const credential = await logUser(email.value, password.value);
 
             // Set user if exists or show error
-            if (credential.user != null) {
+            if (credential.user) {
                 const user = await getUserById(credential.user.uid);
-                if (user == null) {
-                    throw new Error("User not found, Please contact administrator!");
-                } else {
+
+                if (user) {
                     dispatch(setUser(user));
                     router.replace("/adminPanel");
+                } else {
+                    setToast("User not found, Please contact administrator!");
                 }
             }
         } catch (e: any) {
-            setToast(e)
+            setToast("Invalid credentials, Please try again!");
             console.error(e);
         }
     }
 
-    useEffect(() => {
-        try {
-            observeAuthState((user) => {
-                if (user != null) {
-                    getUserById(user.uid).then((user) => {
-                        dispatch(setUser(user));
-                        router.replace("/adminPanel");
-                    }).catch((e) => {
-                        setIsLoading(false);
-                        setToast(e)
-                    })
-                } else {
-                    setIsLoading(false);
-                }
-            });
-        } catch (e: any) {
-            setToast(e);
-        }
-    })
-
-    const setToast = (e: any) => {
+    const setToast = (message: string) => {
         dispatch(showToast({
-            message: e.message.split("/")[1]?.substring(0, e.message?.split("/")[1].length - 2)?.replace("-", " ") || "Something went wrong",
+            message: message,
             type: "Error",
             showToast: true
         }));
@@ -73,7 +57,7 @@ export default function Home() {
     return (
 
         <main className="relative overflow-clip flex min-w-full min-h-screen flex-col items-center justify-center">
-            {isLoading ? <LoadingView/> : <div className="px-12 py-8">
+            <div className="px-12 py-8">
                 <h1 className="text-4xl font-bold">NEVER PANEL</h1>
                 <p className="text-sm capitalize text-slate-500 ">Login to your account using provided credentials</p>
                 <div className="mt-4 w-full flex-row flex">
@@ -97,7 +81,7 @@ export default function Home() {
                         </button>
                     </form>
                 </div>
-            </div>}
+            </div>
             <footer>
                 <p className="text-sm text-slate-500">© {new Date().getFullYear().toString()} NEVERBE. All Rights
                     Reserved.</p>

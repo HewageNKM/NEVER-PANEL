@@ -35,7 +35,7 @@ export const logUser = async (email: string, password: string) => {
 
 export const getUserById = async (id: string) => {
     const document = await getDoc(doc(usersCollectionRef, id));
-    return document.data();
+    return document ? document.data() : null;
 };
 
 export const observeAuthState = (callback: (user: any) => void) => {
@@ -43,7 +43,9 @@ export const observeAuthState = (callback: (user: any) => void) => {
         callback(user);
     });
 }
-
+export const getCurrentUser = () => {
+    return auth.currentUser;
+}
 export const logout = async () => {
     await auth.signOut();
 }
