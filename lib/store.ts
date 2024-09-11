@@ -1,4 +1,4 @@
-import { configureStore } from '@reduxjs/toolkit'
+import {configureStore} from '@reduxjs/toolkit'
 import toastSlice from "@/lib/toastSlice/toastSlice";
 import authSlice from "@/lib/userSlice/userSlice";
 

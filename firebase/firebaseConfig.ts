@@ -25,7 +25,7 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 const db = getFirestore(app);
 
-
+// Firestore collection references
 const usersCollectionRef = collection(db, "users");
 
 export const logUser = async (email: string, password: string) => {
@@ -42,4 +42,8 @@ export const observeAuthState = (callback: (user: any) => void) => {
     onAuthStateChanged(auth, (user) => {
         callback(user);
     });
+}
+
+export const logout = async () => {
+    await auth.signOut();
 }

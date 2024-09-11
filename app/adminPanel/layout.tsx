@@ -1,13 +1,13 @@
 "use client"
 import React, {ReactNode} from 'react';
-import {useSelector} from "react-redux";
-import {RootState} from "@/lib/store";
+import AuthProvider from "@/components/AuthProvider";
 
 const Layout = ({children}: { children: ReactNode }) => {
-    const {} = useSelector((state: RootState) => state);
     return (
         <>
-            {children}
+            <AuthProvider>
+                {children}
+            </AuthProvider>
         </>
     );
 };

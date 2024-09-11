@@ -10,8 +10,7 @@ import {FaEyeSlash} from "react-icons/fa6";
 import React, {useEffect, useState} from "react";
 import {useRouter} from "next/navigation";
 import {setUser} from "@/lib/userSlice/userSlice";
-import Lottie from "lottie-react";
-import {Loading} from "@/assets";
+import LoadingView from "@/app/components/LoadingView";
 
 export default function Home() {
     const [isLoading, setIsLoading] = useState(true)
@@ -27,7 +26,6 @@ export default function Home() {
         try {
             const credential = await logUser(email.value, password.value);
 
-            console.log(credential);
             // Set user if exists or show error
             if (credential.user != null) {
                 const user = await getUserById(credential.user.uid);
@@ -53,18 +51,18 @@ export default function Home() {
                         router.replace("/adminPanel");
                     }).catch((e) => {
                         setIsLoading(false);
-                        throw new Error("User not found, Please contact administrator!");
-                    });
-                }else {
+                        setToast(e)
+                    })
+                } else {
                     setIsLoading(false);
-                    throw new Error("User not found, Please contact administrator!");
                 }
             });
-        }catch (e:any) {
+        } catch (e: any) {
             setToast(e);
         }
     })
-    const setToast = (e:any) => {
+
+    const setToast = (e: any) => {
         dispatch(showToast({
             message: e.message.split("/")[1]?.substring(0, e.message?.split("/")[1].length - 2)?.replace("-", " ") || "Something went wrong",
             type: "Error",
@@ -75,7 +73,7 @@ export default function Home() {
     return (
 
         <main className="relative overflow-clip flex min-w-full min-h-screen flex-col items-center justify-center">
-            {isLoading ? <div><Lottie animationData={Loading}/></div> : <div className="px-12 py-8">
+            {isLoading ? <LoadingView/> : <div className="px-12 py-8">
                 <h1 className="text-4xl font-bold">NEVER PANEL</h1>
                 <p className="text-sm capitalize text-slate-500 ">Login to your account using provided credentials</p>
                 <div className="mt-4 w-full flex-row flex">

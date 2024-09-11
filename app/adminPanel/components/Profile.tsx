@@ -1,16 +1,43 @@
 "use client"
-import React from 'react';
+import React, {useState} from 'react';
+import {useDispatch, useSelector} from "react-redux";
+import {AppDispatch, RootState} from "@/lib/store";
+import {RxAvatar} from "react-icons/rx";
 import Image from "next/image";
-import {useSelector} from "react-redux";
-import {RootState} from "@/lib/store";
+import Link from "next/link";
+import {AnimatePresence, motion} from "framer-motion";
+import {clearUser} from "@/lib/userSlice/userSlice";
+import {useRouter} from "next/navigation";
+import {logout} from "@/firebase/firebaseConfig";
 
 const Profile = () => {
-    const {user} = useSelector((state:RootState) => state.authSlice);
+    const [showMenu, setShowMenu] = useState(false)
+    const dispatch:AppDispatch = useDispatch();
+    const router = useRouter();
+
+    const {user} = useSelector((state: RootState) => state.authSlice);
+    const userLogout = async () => {
+        await logout();
+        dispatch(clearUser());
+        router.replace("/")
+    }
     return (
         <div className="absolute top-5 flex justify-center items-center right-3 shadow-primary rounded-full">
-            <div className="p-2 rounded-full">
-                {user?.imageUrl.length == 0 ? <Image width={30} height={30} src={user.imageUrl} alt="prfile"/> : <span className="text-2xl font-bold">No</span>}
-                <Image width={30} height={30} src={""} alt="prfile"/>
+            <div className="p-2 relative rounded-full flex justify-center items-center">
+                {user?.imageUrl ? (<Image src={user?.imageUrl} className="bg-cover w-10 h-10" alt={user?.username}/>) : (
+                    <button onClick={()=>setShowMenu(prevState => !prevState)}><RxAvatar size={40}/></button>)}
+                <AnimatePresence>
+                    {showMenu && (
+                        <motion.div animate={{opacity:1,y:0}} exit={{opacity:0,y:'1vh'}} initial={{opacity:0,y:'1vh'}} className="absolute z-50 -bottom-[7.3rem] right-0 bg-white shadow-primary p-2 rounded-lg">
+                            <p className="text-xs font-bold">{user?.username}</p>
+                            <p className="text-xs text-slate-500">{user?.email}</p>
+                            <ul className="mt-2 text-lg">
+                                <li className="hover:text-slate-600 font-medium"><Link href="">Profile</Link></li>
+                                <li className='hover:text-slate-600 font-medium'><button onClick={()=> userLogout()}>Logout</button></li>
+                            </ul>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
         </div>
     );
