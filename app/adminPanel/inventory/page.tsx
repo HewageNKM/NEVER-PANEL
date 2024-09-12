@@ -3,7 +3,7 @@ import React, {useState} from 'react';
 import {brands} from "@/constant";
 import {IoAdd, IoEye, IoPencil, IoSearch, IoTrash} from "react-icons/io5";
 import {AnimatePresence} from "framer-motion";
-import AddForm from "@/components/AddForm";
+import AddForm from "@/app/adminPanel/inventory/components/AddForm";
 
 const Page = () => {
     const [addForm, setAddForm] = useState(false)
@@ -22,7 +22,7 @@ const Page = () => {
     }
     return (
         <div className="relative">
-            <div className="pt-16 px-4 py-4 flex flex-col relative">
+            <div className="md:pt-24 pt-32 px-4 py-4 flex flex-col relative">
                 <h1 className="text-3xl font-bold">Inventory</h1>
                 <div className="mt-2 flex justify-between flex-wrap gap-5 flex-row">
                     <div className="flex flex-col gap-1">

@@ -9,7 +9,7 @@ import {
 import {collection, doc, getDoc, getFirestore} from "@firebase/firestore";
 
 // Firebase configuration
-const firebaseConfig = {
+const config = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
     authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
     databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL,
@@ -21,31 +21,13 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig);
+const app = initializeApp(config);
 export const auth = getAuth(app);
-const db = getFirestore(app);
+export const db = getFirestore(app);
 
 // Firestore collection references
-const usersCollectionRef = collection(db, "users");
+export const usersCollectionRef = collection(db, "users");
+export const inventoryCollectionRef = collection(db, "inventory");
+export const ordersCollectionRef = collection(db, "orders");
 
-export const logUser = async (email: string, password: string) => {
-    await setPersistence(auth, browserLocalPersistence);
-    return await signInWithEmailAndPassword(auth, email, password);
-};
 
-export const getUserById = async (id: string) => {
-    const document = await getDoc(doc(usersCollectionRef, id));
-    return document ? document.data() : null;
-};
-
-export const observeAuthState = (callback: (user: any) => void) => {
-    onAuthStateChanged(auth, (user) => {
-        callback(user);
-    });
-}
-export const getCurrentUser = () => {
-    return auth.currentUser;
-}
-export const logout = async () => {
-    await auth.signOut();
-}

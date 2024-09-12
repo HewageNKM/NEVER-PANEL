@@ -1,10 +1,10 @@
 "use client";
 import React, {ReactNode, useState} from 'react';
-import {getUserById, logout, observeAuthState} from "@/firebase/firebaseConfig";
 import {setUser} from "@/lib/userSlice/userSlice";
 import {useDispatch} from "react-redux";
 import {AppDispatch} from "@/lib/store";
 import LoadingView from "@/app/components/LoadingView";
+import {getUserById, logout, observeAuthState} from "@/firebase/serviceAPI";
 
 const AuthProvider = ({children}: { children: ReactNode }) => {
     const [isLoading, setIsLoading] = useState(true)
@@ -17,11 +17,11 @@ const AuthProvider = ({children}: { children: ReactNode }) => {
                     if (user) {
                         dispatch(setUser(user));
                     } else {
-                        console.error("User not found, Please contact administrator!");
+                        console.log("User not found!");
                     }
                 }).catch((e) => {
                     logout().then(() => {
-                        console.error("User Logged out!")
+                        console.log("User Logged out!")
                     })
                     console.error(e);
                 }).finally(() => {
@@ -29,13 +29,11 @@ const AuthProvider = ({children}: { children: ReactNode }) => {
                 });
             } else {
                 setIsLoading(false);
-                console.error("User not found, Please contact administrator!");
             }
         });
     } catch (e: any) {
         console.error(e);
     }
-    console.log(isLoading)
     return (
         <>
             {isLoading ? (<LoadingView/>) : (children)}
