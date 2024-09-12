@@ -12,9 +12,9 @@ const Page = () => {
     const [id, setId] = useState('');
     const [manufacture, setManufacture] = useState('none')
     const [name, setName] = useState('')
-    const [buyingPrice, setBuyingPrice] = useState(0)
-    const [sellingPrice, setSellingPrice] = useState(0)
-    const [discount, setDiscount] = useState(0)
+    const [buyingPrice, setBuyingPrice] = useState("")
+    const [sellingPrice, setSellingPrice] = useState("")
+    const [discount, setDiscount] = useState("")
 
     const onSubmit = (evt: any) => {
         evt.preventDefault();
@@ -45,7 +45,7 @@ const Page = () => {
                     </div>
                     <div className="flex justify-center items-center">
                         <button onClick={() => setAddForm(true)}
-                                className="bg-black text-white flex flex-row justify-center items-center h-[2.8rem] px-3 py-1 rounded hover:bg-gray-800">
+                                className="bg-primary-100 text-white flex flex-row justify-center items-center h-[2.8rem] px-3 py-1 rounded hover:bg-primary-200">
                             <IoAdd size={30}/>
                             Add Item
                         </button>

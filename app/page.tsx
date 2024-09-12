@@ -1,6 +1,4 @@
 "use client";
-import Toast from "@/components/Toast";
-import {AnimatePresence} from "framer-motion";
 import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch, RootState} from "@/lib/store";
 import {showToast} from "@/lib/toastSlice/toastSlice";
@@ -24,7 +22,6 @@ export default function Home() {
         redirect("/adminPanel/dashboard");
     }
 
-    const isToastShowing = useSelector((state: RootState) => state.toastSlice.showToast);
     const dispatch: AppDispatch = useDispatch();
 
     const onFormSubmit = async (evt: any) => {
@@ -97,9 +94,6 @@ export default function Home() {
                 <p className="text-sm text-slate-500">© {new Date().getFullYear().toString()} NEVERBE. All Rights
                     Reserved.</p>
             </footer>
-            <AnimatePresence>
-                {isToastShowing && <Toast/>}
-            </AnimatePresence>
         </main>
     )
 }

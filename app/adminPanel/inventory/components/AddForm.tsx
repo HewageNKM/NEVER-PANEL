@@ -27,9 +27,9 @@ const AddForm = ({
     manufacture: string,
     setId: React.Dispatch<React.SetStateAction<string>>,
     setAddForm: React.Dispatch<React.SetStateAction<boolean>>,
-    setDiscount: React.Dispatch<React.SetStateAction<number>>,
-    setSellingPrice: React.Dispatch<React.SetStateAction<number>>,
-    setBuyingPrice: React.Dispatch<React.SetStateAction<number>>,
+    setDiscount: React.Dispatch<React.SetStateAction<string>>,
+    setSellingPrice: React.Dispatch<React.SetStateAction<string>>,
+    setBuyingPrice: React.Dispatch<React.SetStateAction<string>>,
     setName: React.Dispatch<React.SetStateAction<string>>,
     setManufacture: React.Dispatch<React.SetStateAction<string>>,
     onSubmit: (evt:any)=>void
@@ -85,7 +85,7 @@ const AddForm = ({
                     </div>
                     <div className='w-full flex justify-center'>
                         <button
-                            className="bg-black text-white flex flex-row justify-center items-center h-[2.8rem] px-3 py-1 rounded hover:bg-gray-800">
+                            className="bg-primary-100 text-white flex flex-row justify-center items-center h-[2.8rem] px-3 py-1 rounded hover:bg-primary-200">
                             <IoAdd size={30}/>
                             Add Item
                         </button>
@@ -96,9 +96,9 @@ const AddForm = ({
                         setId('')
                         setManufacture('none')
                         setName('')
-                        setBuyingPrice(0)
-                        setSellingPrice(0)
-                        setDiscount(0)
+                        setBuyingPrice("")
+                        setSellingPrice("")
+                        setDiscount("")
 
                         setAddForm(false)
                     }}>
