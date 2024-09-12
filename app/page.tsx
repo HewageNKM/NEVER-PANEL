@@ -40,7 +40,7 @@ export default function Home() {
 
                 if (user) {
                     dispatch(setUser(user));
-                    router.replace("/adminPanel");
+                    router.replace("/adminPanel/dashboard");
                 } else {
                     setToast("User not found, Please contact administrator!");
                 }

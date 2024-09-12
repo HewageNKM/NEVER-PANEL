@@ -7,7 +7,7 @@ import AuthProvider from "@/components/AuthProvider";
 const inter = Inter({subsets: ["latin"]});
 
 export const metadata: Metadata = {
-    title: "NEVER ADMIN PANEL",
+    title: "NEVER PANEL",
     description: "NEVER ADMIN PANEL FOR MANGING NEVERBE WEBSITE.",
 };
 
