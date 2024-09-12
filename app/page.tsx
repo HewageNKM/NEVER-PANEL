@@ -21,7 +21,7 @@ export default function Home() {
     const {user} = useSelector((state: RootState) => state.authSlice);
 
     if (getCurrentUser() && user) {
-        router.replace("/adminPanel");
+        router.replace("/adminPanel/dashboard");
     }
 
     const isToastShowing = useSelector((state: RootState) => state.toastSlice.showToast);
@@ -87,7 +87,7 @@ export default function Home() {
                         {isLoading && <div className="absolute w-full bottom-4  justify-center"><Lottie
                             animationData={ButtonLoading} className="h-20"/></div>}
                         <button disabled={isLoading} type="submit"
-                                className="bg-black rounded-lg text-white mt-5 px-4 py-2 font-bold hover:bg-gray-900 hover:scale-105 transition-all duration-300">
+                                className="bg-black rounded-lg text-white mt-5 px-4 py-2 font-bold lg:hover:opacity-80 lg:hover:shadow-primary transition-all duration-300">
                             Login
                         </button>
                     </form>

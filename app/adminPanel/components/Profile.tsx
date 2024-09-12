@@ -22,7 +22,7 @@ const Profile = () => {
         router.replace("/")
     }
     return (
-        <div className="absolute top-5 flex justify-center items-center right-3 shadow-primary rounded-full">
+        <div className="absolute top-5 z-50 flex justify-center items-center right-3 shadow-primary rounded-full">
             <div className="p-2 relative rounded-full flex justify-center items-center">
                 {user?.imageUrl ? (<Image src={user?.imageUrl} className="bg-cover w-10 h-10" alt={user?.username}/>) : (
                     <button onClick={()=>setShowMenu(prevState => !prevState)}><RxAvatar size={40}/></button>)}
@@ -32,8 +32,8 @@ const Profile = () => {
                             <p className="text-xs font-bold">{user?.username}</p>
                             <p className="text-xs text-slate-500">{user?.email}</p>
                             <ul className="mt-2 text-lg">
-                                <li className="hover:text-slate-600 font-medium"><Link href="">Profile</Link></li>
-                                <li className='hover:text-slate-600 font-medium'><button onClick={()=> userLogout()}>Logout</button></li>
+                                <li className="hover:text-primary-100 font-medium"><Link href="">Profile</Link></li>
+                                <li className='hover:text-primary-100 font-medium'><button onClick={()=> userLogout()}>Logout</button></li>
                             </ul>
                         </motion.div>
                     )}

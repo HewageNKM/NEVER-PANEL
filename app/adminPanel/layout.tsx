@@ -1,9 +1,11 @@
 "use client"
-import React, {ReactNode, useState} from 'react';
+import React, {ReactNode} from 'react';
 import {useRouter} from "next/navigation";
 import {useSelector} from "react-redux";
 import {RootState} from "@/lib/store";
 import {getCurrentUser} from "@/firebase/firebaseConfig";
+import Profile from "@/app/adminPanel/components/Profile";
+import NavMenu from "@/app/adminPanel/components/NavMenu";
 
 const Layout = ({children}: { children: ReactNode }) => {
     const router = useRouter();
@@ -20,7 +22,9 @@ const Layout = ({children}: { children: ReactNode }) => {
 
     return (
         <>
+            <NavMenu/>
             {children}
+            <Profile/>
         </>
     );
 };
