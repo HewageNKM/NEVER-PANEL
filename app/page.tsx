@@ -1,17 +1,15 @@
 "use client";
-import Toast from "@/components/Toast";
-import {AnimatePresence} from "framer-motion";
 import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch, RootState} from "@/lib/store";
-import {getCurrentUser, getUserById, logUser} from "@/firebase/firebaseConfig";
 import {showToast} from "@/lib/toastSlice/toastSlice";
 import {FaEye} from "react-icons/fa";
 import {FaEyeSlash} from "react-icons/fa6";
 import React, {useState} from "react";
-import {useRouter} from "next/navigation";
+import {redirect, useRouter} from "next/navigation";
 import {setUser} from "@/lib/userSlice/userSlice";
 import Lottie from "lottie-react";
 import {ButtonLoading} from "@/assets/animations";
+import {getCurrentUser, getUserById, logUser} from "@/firebase/serviceAPI";
 
 export default function Home() {
     const router = useRouter();
@@ -21,10 +19,9 @@ export default function Home() {
     const {user} = useSelector((state: RootState) => state.authSlice);
 
     if (getCurrentUser() && user) {
-        router.replace("/adminPanel/dashboard");
+        redirect("/adminPanel/dashboard");
     }
 
-    const isToastShowing = useSelector((state: RootState) => state.toastSlice.showToast);
     const dispatch: AppDispatch = useDispatch();
 
     const onFormSubmit = async (evt: any) => {
@@ -46,7 +43,7 @@ export default function Home() {
                 }
             }
         } catch (e: any) {
-            setToast("Invalid credentials, Please try again!");
+            setToast(e.toString());
             console.error(e);
         } finally {
             setIsLoading(false);
@@ -97,9 +94,6 @@ export default function Home() {
                 <p className="text-sm text-slate-500">© {new Date().getFullYear().toString()} NEVERBE. All Rights
                     Reserved.</p>
             </footer>
-            <AnimatePresence>
-                {isToastShowing && <Toast/>}
-            </AnimatePresence>
         </main>
     )
 }

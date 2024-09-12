@@ -6,12 +6,12 @@ import {AnimatePresence, motion} from "framer-motion";
 const NavMenu = () => {
     const [shoeMenu, setShoeMenu] = useState(false)
     return (
-        <div className="absolute flex flex-col z-40 top-5 left-3">
+        <div className="absolute z-50 flex flex-col top-8 md:top-5 left-3">
                 <div>
                     <button onClick={() => setShoeMenu(prevState => !prevState)}
                             className="text-2xl font-bold flex flex-row gap-1 justify-center items-center">
                         {shoeMenu ? <IoClose size={35}/> : <IoMenu size={35}/>}
-                        Menu
+                        <p className="md:block hidden">Menu</p>
                     </button>
                 </div>
             <AnimatePresence>

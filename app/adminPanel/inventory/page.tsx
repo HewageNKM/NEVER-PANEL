@@ -3,7 +3,7 @@ import React, {useState} from 'react';
 import {brands} from "@/constant";
 import {IoAdd, IoEye, IoPencil, IoSearch, IoTrash} from "react-icons/io5";
 import {AnimatePresence} from "framer-motion";
-import AddForm from "@/components/AddForm";
+import AddForm from "@/app/adminPanel/inventory/components/AddForm";
 
 const Page = () => {
     const [addForm, setAddForm] = useState(false)
@@ -12,9 +12,9 @@ const Page = () => {
     const [id, setId] = useState('');
     const [manufacture, setManufacture] = useState('none')
     const [name, setName] = useState('')
-    const [buyingPrice, setBuyingPrice] = useState(0)
-    const [sellingPrice, setSellingPrice] = useState(0)
-    const [discount, setDiscount] = useState(0)
+    const [buyingPrice, setBuyingPrice] = useState("")
+    const [sellingPrice, setSellingPrice] = useState("")
+    const [discount, setDiscount] = useState("")
 
     const onSubmit = (evt: any) => {
         evt.preventDefault();
@@ -22,7 +22,7 @@ const Page = () => {
     }
     return (
         <div className="relative">
-            <div className="pt-16 px-4 py-4 flex flex-col relative">
+            <div className="md:pt-24 pt-32 px-4 py-4 flex flex-col relative">
                 <h1 className="text-3xl font-bold">Inventory</h1>
                 <div className="mt-2 flex justify-between flex-wrap gap-5 flex-row">
                     <div className="flex flex-col gap-1">
@@ -45,7 +45,7 @@ const Page = () => {
                     </div>
                     <div className="flex justify-center items-center">
                         <button onClick={() => setAddForm(true)}
-                                className="bg-black text-white flex flex-row justify-center items-center h-[2.8rem] px-3 py-1 rounded hover:bg-gray-800">
+                                className="bg-primary-100 text-white flex flex-row justify-center items-center h-[2.8rem] px-3 py-1 rounded hover:bg-primary-200">
                             <IoAdd size={30}/>
                             Add Item
                         </button>
