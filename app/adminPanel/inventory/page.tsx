@@ -3,7 +3,7 @@ import React, {useState} from 'react';
 import {brands} from "@/constant";
 import {IoAdd, IoEye, IoPencil, IoSearch, IoTrash} from "react-icons/io5";
 import {AnimatePresence} from "framer-motion";
-import AddForm from "@/app/adminPanel/inventory/components/AddForm";
+import AddForm from "@/components/AddForm";
 
 const Page = () => {
     const [addForm, setAddForm] = useState(false)
@@ -20,7 +20,6 @@ const Page = () => {
         evt.preventDefault();
         console.log(evt)
     }
-
     return (
         <div className="relative">
             <div className="pt-16 px-4 py-4 flex flex-col relative">

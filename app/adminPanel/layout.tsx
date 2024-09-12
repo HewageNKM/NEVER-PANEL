@@ -4,8 +4,8 @@ import {useRouter} from "next/navigation";
 import {useSelector} from "react-redux";
 import {RootState} from "@/lib/store";
 import {getCurrentUser} from "@/firebase/firebaseConfig";
-import Profile from "@/app/adminPanel/components/Profile";
-import NavMenu from "@/app/adminPanel/components/NavMenu";
+import Profile from "@/components/Profile";
+import NavMenu from "@/components/NavMenu";
 
 const Layout = ({children}: { children: ReactNode }) => {
     const router = useRouter();
