@@ -6,7 +6,7 @@ import {AnimatePresence, motion} from "framer-motion";
 const NavMenu = () => {
     const [shoeMenu, setShoeMenu] = useState(false)
     return (
-        <div className="absolute flex flex-col z-50 top-5 left-3">
+        <div className="absolute flex flex-col z-40 top-5 left-3">
                 <div>
                     <button onClick={() => setShoeMenu(prevState => !prevState)}
                             className="text-2xl font-bold flex flex-row gap-1 justify-center items-center">

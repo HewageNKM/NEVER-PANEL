@@ -22,7 +22,7 @@ const Profile = () => {
         router.replace("/")
     }
     return (
-        <div className="absolute top-5 z-50 flex justify-center items-center right-3 shadow-primary rounded-full">
+        <div className="absolute top-5 z-40 flex justify-center items-center right-3 shadow-primary rounded-full">
             <div className="p-2 relative rounded-full flex justify-center items-center">
                 {user?.imageUrl ? (<Image src={user?.imageUrl} className="bg-cover w-10 h-10" alt={user?.username}/>) : (
                     <button onClick={()=>setShowMenu(prevState => !prevState)}><RxAvatar size={40}/></button>)}
