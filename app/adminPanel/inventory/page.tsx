@@ -4,9 +4,15 @@ import {brands} from "@/constant";
 import {IoAdd, IoEye, IoPencil, IoSearch, IoTrash} from "react-icons/io5";
 import {AnimatePresence} from "framer-motion";
 import AddForm from "@/app/adminPanel/inventory/components/AddForm";
+import {AppDispatch} from "@/lib/store";
+import {useDispatch} from "react-redux";
+import {showToast} from "@/lib/toastSlice/toastSlice";
+import AddVariantForm from "@/app/adminPanel/inventory/components/AddVariantForm";
 
 const Page = () => {
     const [addForm, setAddForm] = useState(false)
+    const [addVariantForm, setAddVariantForm] = useState(false)
+    const dispatch:AppDispatch = useDispatch();
 
     // Add Item Form
     const [id, setId] = useState('');
@@ -16,9 +22,24 @@ const Page = () => {
     const [sellingPrice, setSellingPrice] = useState("")
     const [discount, setDiscount] = useState("")
 
+    // Add Variant Form
+    const [variantId, setVariantId] = useState('')
+    const [colorCode, setColorCode] = useState('')
+    const [images, setImages] = useState([])
+
+
     const onSubmit = (evt: any) => {
         evt.preventDefault();
-        console.log(evt)
+
+        if(manufacture === "none"){
+            dispatch(showToast({
+                message: "Please select a manufacture",
+                type: "Error",
+                showToast: true
+            }))
+            setTimeout(() => dispatch(showToast({message: "", type: "", showToast: false})), 3000);
+            return;
+        }
     }
     return (
         <div className="relative">
@@ -73,7 +94,7 @@ const Page = () => {
                             <td className="p-1 font-medium flex flex-row flex-wrap gap-2 justify-start items-center">
                                 <p>10</p>
                                 <button className="text-blue-500 hover:underline"><IoEye size={25}/></button>
-                                <button className="text-blue-500 hover:underline"><IoAdd size={25}/></button>
+                                <button className="text-blue-500 hover:underline" onClick={()=> setAddVariantForm(true)}><IoAdd size={25}/></button>
                             </td>
                             <td className="p-1 font-medium">$200</td>
                             <td className="p-1 font-medium">$300</td>
@@ -97,6 +118,7 @@ const Page = () => {
                              setSellingPrice={setSellingPrice}
                              id={id} setId={setId}
                      onSubmit={onSubmit}/>)}
+                {addVariantForm && <AddVariantForm setAddVariantForm={setAddVariantForm} colorCode={colorCode} variantId={variantId} setColorCode={setColorCode} setVariantId={setVariantId} images={images} setImages={setImages}/>}
             </AnimatePresence>
         </div>
     );

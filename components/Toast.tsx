@@ -13,7 +13,7 @@ const Toast = () => {
         <AnimatePresence>
             <motion.div initial={{opacity: 0, x: '100vw'}} animate={{opacity: 1, x: 0}} exit={{opacity: 0, x: '100vw'}}
                         transition={{type: "spring", damping: 20, stiffness: 180}}
-                        className="absolute top-0 right-0">
+                        className="absolute z-50 top-0 right-0">
                 <div
                     className={`p-4 relative m-4 px-4 py-2 rounded-lg ${type == "Error" && 'bg-red-500 text-red-200'}`}>
                     <p className="font-bold capitalize">{type}</p>
