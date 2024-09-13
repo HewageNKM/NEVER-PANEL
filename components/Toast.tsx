@@ -11,7 +11,7 @@ const Toast = () => {
 
     return (
         <AnimatePresence>
-            <motion.div initial={{opacity: 0, x: '100vw'}} animate={{opacity: 1, x: 0}} exit={{opacity: 0, x: '100vw'}}
+            <motion.div initial={{opacity: 0, y: '5vw'}} animate={{opacity: 1, y: 0}} exit={{opacity: 0, y: '5vw'}}
                         transition={{type: "spring", damping: 20, stiffness: 180}}
                         className="absolute z-50 top-0 right-0">
                 <div

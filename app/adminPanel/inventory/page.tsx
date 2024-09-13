@@ -42,7 +42,7 @@ const Page = () => {
         }
     }
     return (
-        <div className="relative">
+        <div className="relative w-full h-screen">
             <div className="md:pt-24 pt-32 px-4 py-4 flex flex-col relative">
                 <h1 className="text-3xl font-bold">Inventory</h1>
                 <div className="mt-2 flex justify-between flex-wrap gap-5 flex-row">

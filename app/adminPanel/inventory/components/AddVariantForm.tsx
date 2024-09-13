@@ -12,8 +12,10 @@ const AddVariantForm = ({setVariantId, setImages, variantId, setAddVariantForm, 
     setVariantId: React.Dispatch<React.SetStateAction<string>>,
     setColorCode: React.Dispatch<React.SetStateAction<string>>,
     setAddVariantForm: React.Dispatch<React.SetStateAction<boolean>>,
-    images: string[],
-    setImages: React.Dispatch<React.SetStateAction<string[]>>
+    images: object[],
+    setImages: React.Dispatch<React.SetStateAction<object[]>>,
+    selectedThumbnail: string,
+    setSelectedThumbnail: React.Dispatch<React.SetStateAction<string>>
 }) => {
     const [file, setFile] = React.useState<string | undefined>(null);
 
@@ -38,7 +40,7 @@ const AddVariantForm = ({setVariantId, setImages, variantId, setAddVariantForm, 
             setTimeout(() => dispatch(showToast({message: "", type: "", showToast: false})), 3000);
             return;
         }
-        setImages(prevState => [...prevState, URL.createObjectURL(evt.target.files[0])])
+        setImages(prevState => [...prevState, {file:evt.target.files[0],url:URL.createObjectURL(evt.target.files[0])}])
         setFile("")
         console.log(images)
     }
@@ -49,19 +51,23 @@ const AddVariantForm = ({setVariantId, setImages, variantId, setAddVariantForm, 
                     <legend className="text-2xl font-bold">
                         Add Variant
                     </legend>
-                    <div className="mt-2 flex flex-row justify-center items-center flex-wrap gap-5">
-                        {images.map((image, index) => (
-                            <div key={index} className="relative">
-                                <Image width={20} height={20} src={image} alt="variant" className="w-20 h-20 rounded object-cover"/>
-                                <button className="absolute top-0 right-0" onClick={() => {
+                    <div className="mt-2 flex flex-col justify-center items-start flex-wrap gap-5">
+                        {images.length > 0 && <h2 className="text-lg font-bold">Select Thumbnail</h2>}
+                     <div className="gap-5 flex-row w-full flex justify-center items-center flex-wrap">
+                         {images.map((image, index) => (
+                             <div key={index} className="relative">
+                                 <Image width={20} height={20} src={image.url} alt="variant"
+                                        className="w-20 h-20 rounded object-cover"/>
+                                 <button className="absolute top-0 right-0" onClick={() => {
 
-                                }}>
-                                    <IoClose size={20} onClick={()=>{
-                                        setImages(prevState => prevState.filter((img, i) => i !== index))
-                                    }}/>
-                                </button>
-                            </div>
-                        ))}
+                                 }}>
+                                     <IoClose size={20} onClick={() => {
+                                         setImages(prevState => prevState.filter((img, i) => i !== index))
+                                     }}/>
+                                 </button>
+                             </div>
+                         ))}
+                     </div>
                     </div>
                     <div className="mt-5 flex flex-row justify-center items-center flex-wrap gap-5">
                         <label className="flex-col hidden gap-1">
@@ -82,7 +88,8 @@ const AddVariantForm = ({setVariantId, setImages, variantId, setAddVariantForm, 
                         <label className="flex-col flex justify-center items-center gap-1">
                             <div className="flex  relative justify-center items-center flex-col">
                                 <IoCloudUpload size={30}/>
-                                <input value={file} onChange={(file) => handleFileSelect(file)} type="file" multiple accept="image/*"
+                                <input value={file} onChange={(file) => handleFileSelect(file)} type="file" multiple
+                                       accept="image/*"
                                        className="absolute w-[5rem] opacity-0 bg-black"/>
                             </div>
                             <span className="font-medium"> Upload Images(5 Max)</span>
@@ -101,6 +108,8 @@ const AddVariantForm = ({setVariantId, setImages, variantId, setAddVariantForm, 
                         setAddVariantForm(false)
                         setColorCode('')
                         setVariantId('')
+                        setImages([])
+                        setFile("")
                     }}>
                         <IoClose size={30}/>
                     </button>
