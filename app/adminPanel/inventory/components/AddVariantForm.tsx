@@ -6,7 +6,7 @@ import {AppDispatch} from "@/lib/store";
 import {showToast} from "@/lib/toastSlice/toastSlice";
 import Image from "next/image";
 
-const AddVariantForm = ({setVariantId, setImages, variantId, setAddVariantForm, colorCode, setColorCode, images}: {
+const AddVariantForm = ({setVariantId, setImages, variantId, setAddVariantForm, colorCode, setColorCode, images, selectedThumbnail, setSelectedThumbnail}: {
     variantId: string,
     colorCode: string,
     setVariantId: React.Dispatch<React.SetStateAction<string>>,
@@ -14,10 +14,10 @@ const AddVariantForm = ({setVariantId, setImages, variantId, setAddVariantForm, 
     setAddVariantForm: React.Dispatch<React.SetStateAction<boolean>>,
     images: object[],
     setImages: React.Dispatch<React.SetStateAction<object[]>>,
-    selectedThumbnail: string,
-    setSelectedThumbnail: React.Dispatch<React.SetStateAction<string>>
+    selectedThumbnail: object,
+    setSelectedThumbnail: React.Dispatch<React.SetStateAction<object>>
 }) => {
-    const [file, setFile] = React.useState<string | undefined>(null);
+    const [file, setFile] = React.useState<string | undefined>("");
 
     const dispatch: AppDispatch = useDispatch();
     const handleFileSelect = (evt: any) => {
@@ -42,8 +42,8 @@ const AddVariantForm = ({setVariantId, setImages, variantId, setAddVariantForm, 
         }
         setImages(prevState => [...prevState, {file:evt.target.files[0],url:URL.createObjectURL(evt.target.files[0])}])
         setFile("")
-        console.log(images)
     }
+    console.log(selectedThumbnail)
     return (
         <DropShadow>
             <div className="bg-white z-50 max-w-[90vw] flex h-fit rounded p-4 relative">
@@ -56,14 +56,14 @@ const AddVariantForm = ({setVariantId, setImages, variantId, setAddVariantForm, 
                      <div className="gap-5 flex-row w-full flex justify-center items-center flex-wrap">
                          {images.map((image, index) => (
                              <div key={index} className="relative">
-                                 <Image width={20} height={20} src={image.url} alt="variant"
-                                        className="w-20 h-20 rounded object-cover"/>
+                                 <Image onClick={()=>{
+                                        setSelectedThumbnail(image)
+                                 }} width={20} height={20} src={image.url} alt="variant"
+                                        className={`w-20 h-20 rounded object-cover ${selectedThumbnail.url == image.url  && "border-primary-100 border-4"}`}/>
                                  <button className="absolute top-0 right-0" onClick={() => {
-
+                                     setImages(prevState => prevState.filter((img, i) => i !== index))
                                  }}>
-                                     <IoClose size={20} onClick={() => {
-                                         setImages(prevState => prevState.filter((img, i) => i !== index))
-                                     }}/>
+                                     <IoClose size={20}/>
                                  </button>
                              </div>
                          ))}
@@ -110,6 +110,7 @@ const AddVariantForm = ({setVariantId, setImages, variantId, setAddVariantForm, 
                         setVariantId('')
                         setImages([])
                         setFile("")
+                        setSelectedThumbnail({})
                     }}>
                         <IoClose size={30}/>
                     </button>

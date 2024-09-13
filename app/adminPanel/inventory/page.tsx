@@ -26,6 +26,7 @@ const Page = () => {
     const [variantId, setVariantId] = useState('')
     const [colorCode, setColorCode] = useState('')
     const [images, setImages] = useState([])
+    const [selectedThumbnail, setSelectedThumbnail] = useState({})
 
 
     const onSubmit = (evt: any) => {
@@ -118,7 +119,7 @@ const Page = () => {
                              setSellingPrice={setSellingPrice}
                              id={id} setId={setId}
                      onSubmit={onSubmit}/>)}
-                {addVariantForm && <AddVariantForm setAddVariantForm={setAddVariantForm} colorCode={colorCode} variantId={variantId} setColorCode={setColorCode} setVariantId={setVariantId} images={images} setImages={setImages}/>}
+                {addVariantForm && <AddVariantForm setAddVariantForm={setAddVariantForm} colorCode={colorCode} variantId={variantId} setColorCode={setColorCode} setVariantId={setVariantId} images={images} setImages={setImages} selectedThumbnail={selectedThumbnail} setSelectedThumbnail={setSelectedThumbnail}/>}
             </AnimatePresence>
         </div>
     );
