@@ -12,7 +12,7 @@ import AddVariantForm from "@/app/adminPanel/inventory/components/AddVariantForm
 const Page = () => {
     const [addForm, setAddForm] = useState(false)
     const [addVariantForm, setAddVariantForm] = useState(false)
-    const dispatch:AppDispatch = useDispatch();
+    const dispatch: AppDispatch = useDispatch();
 
     // Add Item Form
     const [id, setId] = useState('');
@@ -27,12 +27,12 @@ const Page = () => {
     const [colorCode, setColorCode] = useState('')
     const [images, setImages] = useState([])
     const [selectedThumbnail, setSelectedThumbnail] = useState({})
-
+    const [sizes, setSizes] = useState([])
 
     const onSubmit = (evt: any) => {
         evt.preventDefault();
 
-        if(manufacture === "none"){
+        if (manufacture === "none") {
             dispatch(showToast({
                 message: "Please select a manufacture",
                 type: "Error",
@@ -95,7 +95,8 @@ const Page = () => {
                             <td className="p-1 font-medium flex flex-row flex-wrap gap-2 justify-start items-center">
                                 <p>10</p>
                                 <button className="text-blue-500 hover:underline"><IoEye size={25}/></button>
-                                <button className="text-blue-500 hover:underline" onClick={()=> setAddVariantForm(true)}><IoAdd size={25}/></button>
+                                <button className="text-blue-500 hover:underline"
+                                        onClick={() => setAddVariantForm(true)}><IoAdd size={25}/></button>
                             </td>
                             <td className="p-1 font-medium">$200</td>
                             <td className="p-1 font-medium">$300</td>
@@ -118,8 +119,12 @@ const Page = () => {
                              setBuyingPrice={setBuyingPrice} setName={setName} setManufacture={setManufacture}
                              setSellingPrice={setSellingPrice}
                              id={id} setId={setId}
-                     onSubmit={onSubmit}/>)}
-                {addVariantForm && <AddVariantForm setAddVariantForm={setAddVariantForm} colorCode={colorCode} variantId={variantId} setColorCode={setColorCode} setVariantId={setVariantId} images={images} setImages={setImages} selectedThumbnail={selectedThumbnail} setSelectedThumbnail={setSelectedThumbnail}/>}
+                             onSubmit={onSubmit}/>)}
+                {addVariantForm &&
+                    <AddVariantForm setAddVariantForm={setAddVariantForm} colorCode={colorCode} variantId={variantId}
+                                    setColorCode={setColorCode} setVariantId={setVariantId} images={images}
+                                    setImages={setImages} selectedThumbnail={selectedThumbnail}
+                                    setSelectedThumbnail={setSelectedThumbnail} setSizes={setSizes} sizes={sizes}/>}
             </AnimatePresence>
         </div>
     );
