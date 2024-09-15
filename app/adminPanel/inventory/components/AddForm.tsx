@@ -41,11 +41,11 @@ const AddForm = ({
     return (
         <DropShadow>
             <div className="bg-white z-50 w-[90vw] flex h-fit rounded p-4 relative">
-                <form onSubmit={onSubmit} className="flex-col flex gap-5">
+                <form onSubmit={onSubmit} className="flex-col w-full  flex gap-5">
                     <legend className="text-2xl font-bold">
                         Add Item
                     </legend>
-                    <div className="mt-5 flex flex-row justify-center items-center flex-wrap gap-5">
+                    <div className="mt-5 flex w-full flex-row justify-center items-center flex-wrap gap-8">
                         <label className="flex-col hidden gap-1">
                             <span className="font-medium">Product ID</span>
                             <input value={id} onChange={(txt) => setId(txt.target.value)} type="text"

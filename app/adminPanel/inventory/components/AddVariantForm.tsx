@@ -163,7 +163,7 @@ const AddVariantForm = ({
                                 Sizes
                             </h2>
                         </div>
-                        <div className="flex flex-row justify-evenly items-center">
+                        <div className="flex flex-row justify-evenly gap-5 items-center">
                             <label className="flex flex-col gap-1">
                                 <span>Size</span>
                                 <select
