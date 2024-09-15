@@ -1,5 +1,5 @@
 'use client';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {brands} from "@/constant";
 import {IoAdd, IoEye, IoPencil, IoSearch, IoTrash} from "react-icons/io5";
 import {AnimatePresence} from "framer-motion";
@@ -8,11 +8,17 @@ import {AppDispatch} from "@/lib/store";
 import {useDispatch} from "react-redux";
 import {showToast} from "@/lib/toastSlice/toastSlice";
 import AddVariantForm from "@/app/adminPanel/inventory/components/AddVariantForm";
+import {generateId} from "@/utils/genarateIds";
+import {deleteInventoryItem, getInventory, saveToInventory} from "@/firebase/serviceAPI";
+import {Item} from "@/interfaces";
 
 const Page = () => {
     const [addForm, setAddForm] = useState(false)
     const [addVariantForm, setAddVariantForm] = useState(false)
     const dispatch: AppDispatch = useDispatch();
+    const [inventoryList, setInventoryList] = useState([] as Item[])
+    const [tableLoading, setTableLoading] = useState(true)
+    const [refreshTable, setRefreshTable] = useState(false)
 
     // Add Item Form
     const [id, setId] = useState('');
@@ -29,19 +35,128 @@ const Page = () => {
     const [selectedThumbnail, setSelectedThumbnail] = useState({})
     const [sizes, setSizes] = useState([])
 
-    const onSubmit = (evt: any) => {
+    const onSubmit = async (evt: any) => {
         evt.preventDefault();
 
         if (manufacture === "none") {
             dispatch(showToast({
                 message: "Please select a manufacture",
-                type: "Error",
+                type: "Warning",
                 showToast: true
             }))
             setTimeout(() => dispatch(showToast({message: "", type: "", showToast: false})), 3000);
             return;
         }
+        if (id.trim().length === 0) {
+            const genId: string = generateId("item", manufacture);
+
+            const item: Item = {
+                buyingPrice: Number.parseInt(buyingPrice),
+                discount: Number.parseInt(discount),
+                itemId: genId,
+                manufacturer: manufacture,
+                name: name,
+                sellingPrice: Number.parseInt(sellingPrice)
+
+            }
+            try {
+                await saveToInventory(item);
+                setAddForm(false)
+                setRefreshTable(prevState => !prevState)
+                dispatch(showToast({
+                    message: "Item added successfully",
+                    type: "Success",
+                    showToast: true
+                }))
+                setTimeout(() => dispatch(showToast({message: "", type: "", showToast: false})), 3000);
+                clearAddFormField();
+            } catch (e: any) {
+                dispatch(showToast({
+                    message: e.message,
+                    type: "Error",
+                    showToast: true
+                }))
+                setTimeout(() => dispatch(showToast({message: "", type: "", showToast: false})), 3000);
+            }
+        } else if (id.trim().length > 0) {
+            const item: Item = {
+                buyingPrice: Number.parseInt(buyingPrice),
+                discount: Number.parseInt(discount),
+                itemId: id,
+                manufacturer: manufacture,
+                name: name,
+                sellingPrice: Number.parseInt(sellingPrice)
+
+            }
+            try {
+                await saveToInventory(item);
+                setAddForm(false)
+                setRefreshTable(prevState => !prevState)
+                dispatch(showToast({
+                    message: "Item updated successfully",
+                    type: "Success",
+                    showToast: true
+                }))
+                setTimeout(() => dispatch(showToast({message: "", type: "", showToast: false})), 3000);
+                clearAddFormField();
+            } catch (e: any) {
+                dispatch(showToast({
+                    message: e.message,
+                    type: "Error",
+                    showToast: true
+                }))
+                setTimeout(() => dispatch(showToast({message: "", type: "", showToast: false})), 3000);
+            }
+        }
+
     }
+
+    // Delete Item
+    const deleteItemFromInventory = async (id: string) => {
+        const response = confirm(`Are you sure you want to delete this item with ID ${id}?`);
+        if (response) {
+            try {
+                await deleteInventoryItem(id);
+                setRefreshTable(prevState => !prevState)
+                dispatch(showToast({
+                    message: "Item deleted successfully",
+                    type: "Success",
+                    showToast: true
+                }))
+                setTimeout(() => dispatch(showToast({message: "", type: "", showToast: false})), 3000);
+            } catch (e: any) {
+                dispatch(showToast({
+                    message: e.message,
+                    type: "Error",
+                    showToast: true
+                }))
+                setTimeout(() => dispatch(showToast({message: "", type: "", showToast: false})), 3000);
+            }
+        }
+    }
+    useEffect(() => {
+        setTableLoading(true)
+        getInventory().then((items) => {
+            setInventoryList(items)
+        }).catch((e) => {
+            dispatch(showToast({
+                message: e.message,
+                type: "Error",
+                showToast: true
+            }))
+            setTimeout(() => dispatch(showToast({message: "", type: "", showToast: false})), 3000);
+        }).finally(() => setTableLoading(false))
+    }, [refreshTable])
+    
+    const clearAddFormField = () => {
+        setManufacture("none")
+        setName("")
+        setBuyingPrice("")
+        setSellingPrice("")
+        setDiscount("")
+        setId("")
+    }
+
     return (
         <div className="relative w-full h-screen">
             <div className="md:pt-24 pt-32 px-4 py-4 flex flex-col relative">
@@ -83,12 +198,47 @@ const Page = () => {
                             <th className="p-3">Variations</th>
                             <th className="p-3">Buying Price(Rs)</th>
                             <th className="p-3">Selling Price(Rs)</th>
+                            <th className="p-3">Discount(%)</th>
                             <th className="p-3">Profit Margin(%)</th>
                             <th className="p-3">Actions</th>
                         </tr>
                         </thead>
                         <tbody>
-                        <tr className="odd:bg-slate-200 hover:bg-white even:bg-slate-300">
+                        {!tableLoading && inventoryList.map((item, index) => (
+                            <tr key={index}
+                                className={`odd:bg-slate-200 hover:bg-white even:bg-slate-300`}>
+                                <td className="p-1 font-medium uppercase">{item.itemId}</td>
+                                <td className="p-1 font-medium capitalize">{item.manufacturer}</td>
+                                <td className="p-1 font-medium capitalize">{item.name}</td>
+                                <td className="p-1 font-medium flex flex-row flex-wrap gap-2 justify-start items-center">
+                                    <p>{0}</p>
+                                    <button className="text-blue-500 hover:underline"><IoEye size={25}/></button>
+                                    <button className="text-blue-500 hover:underline"
+                                            onClick={() => setAddVariantForm(true)}><IoAdd size={25}/></button>
+                                </td>
+                                <td className="p-1 font-medium">{item.buyingPrice}</td>
+                                <td className="p-1 font-medium">{item.sellingPrice}</td>
+                                <td className="p-1 font-medium">{item.discount}</td>
+                                <td className="p-1 font-medium">{((item.sellingPrice - item.buyingPrice) / item.buyingPrice * 100).toFixed(2)}</td>
+                                <td className="p-1 font-medium flex gap-2">
+                                    <button onClick={() => {
+                                        setId(item.itemId)
+                                        setManufacture(item.manufacturer)
+                                        setName(item.name)
+                                        setBuyingPrice(item.buyingPrice.toString())
+                                        setSellingPrice(item.sellingPrice.toString())
+                                        setDiscount(item.discount.toString())
+                                        setAddForm(true)
+                                    }} className="bg-yellow-300 text-white px-3 py-1 rounded hover:bg-yellow-400">
+                                        <IoPencil size={20}/></button>
+                                    <button onClick={() => deleteItemFromInventory(item.itemId)}
+                                            className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">
+                                        <IoTrash
+                                            size={20}/></button>
+                                </td>
+                            </tr>
+                        ))}
+                        {/*<tr className="odd:bg-slate-200 hover:bg-white even:bg-slate-300">
                             <td className="p-1 font-medium">1</td>
                             <td className="p-1 font-medium">Adidas</td>
                             <td className="p-1 font-medium">Yeezy</td>
@@ -100,6 +250,7 @@ const Page = () => {
                             </td>
                             <td className="p-1 font-medium">$200</td>
                             <td className="p-1 font-medium">$300</td>
+                            <td className="p-1 font-medium">20%</td>
                             <td className="p-1 font-medium">50%</td>
                             <td className="p-1 font-medium flex gap-2">
                                 <button className="bg-yellow-300 text-white px-3 py-1 rounded hover:bg-yellow-400">
@@ -107,9 +258,12 @@ const Page = () => {
                                 <button className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"><IoTrash
                                     size={20}/></button>
                             </td>
-                        </tr>
+                        </tr>*/}
                         </tbody>
                     </table>
+                    {tableLoading && <div>
+                        <h1>Loading...</h1>
+                    </div>}
                 </div>
             </div>
             <AnimatePresence>

@@ -69,7 +69,7 @@ const AddVariantForm = ({
         if (selectedSize === "none") {
             dispatch(showToast({
                 message: "Please select a size",
-                type: "Error",
+                type: "Warning",
                 showToast: true
             }))
             setTimeout(() => dispatch(showToast({message: "", type: "", showToast: false})), 3000);
@@ -79,7 +79,7 @@ const AddVariantForm = ({
         if (stock <= 0) {
             dispatch(showToast({
                 message: "Please enter a valid stock",
-                type: "Error",
+                type: "Warning",
                 showToast: true
             }))
             setTimeout(() => dispatch(showToast({message: "", type: "", showToast: false})), 3000);

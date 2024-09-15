@@ -1,6 +1,9 @@
 import {browserLocalPersistence, onAuthStateChanged, setPersistence, signInWithEmailAndPassword} from "@firebase/auth";
-import {doc, getDoc} from "@firebase/firestore";
-import {auth, usersCollectionRef} from "@/firebase/config";
+import {deleteDoc, doc, getDoc, getDocs, setDoc} from "@firebase/firestore";
+import {auth, inventoryCollectionRef, usersCollectionRef} from "@/firebase/config";
+import {Item} from "@/interfaces";
+import {util} from "protobufjs";
+import merge = util.merge;
 
 export const logUser = async (email: string, password: string) => {
     await setPersistence(auth, browserLocalPersistence);
@@ -22,4 +25,19 @@ export const getCurrentUser = () => {
 }
 export const logout = async () => {
     await auth.signOut();
+}
+export const saveToInventory = async (item: Item) => {
+    await setDoc(doc(inventoryCollectionRef, item.itemId), item,{merge: true });
+}
+export const getInventory = async () => {
+    let docs = await getDocs(inventoryCollectionRef);
+    let items: Item[] = [];
+    docs.forEach(doc => {
+        items.push(doc.data() as Item);
+    })
+
+    return items;
+}
+export const deleteInventoryItem = async (itemId: string) => {
+    await deleteDoc(doc(inventoryCollectionRef, itemId));
 }
