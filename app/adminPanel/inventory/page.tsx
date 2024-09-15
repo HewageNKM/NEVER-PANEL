@@ -189,7 +189,7 @@ const Page = () => {
             }))
             setTimeout(() => dispatch(showToast({message: "", type: "", showToast: false})), 3000);
         }).finally(() => setTableLoading(false))
-    }, [refreshTable])
+    }, [refreshTable,dispatch])
 
     const clearAddFormField = () => {
         setManufacture("none")
