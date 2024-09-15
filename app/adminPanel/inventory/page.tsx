@@ -10,7 +10,7 @@ import {showToast} from "@/lib/toastSlice/toastSlice";
 import AddVariantForm from "@/app/adminPanel/inventory/components/AddVariantForm";
 import {generateId} from "@/utils/genarateIds";
 import {deleteInventoryItem, getInventory, saveToInventory} from "@/firebase/serviceAPI";
-import {Item} from "@/interfaces";
+import {Item, Size} from "@/interfaces";
 
 const Page = () => {
     const [addForm, setAddForm] = useState(false)
@@ -27,13 +27,14 @@ const Page = () => {
     const [buyingPrice, setBuyingPrice] = useState("")
     const [sellingPrice, setSellingPrice] = useState("")
     const [discount, setDiscount] = useState("")
+    const [updateState, setUpdateState] = useState(false)
 
     // Add Variant Form
     const [variantId, setVariantId] = useState('')
     const [colorCode, setColorCode] = useState('')
     const [images, setImages] = useState([])
     const [selectedThumbnail, setSelectedThumbnail] = useState({})
-    const [sizes, setSizes] = useState([])
+    const [sizes, setSizes] = useState([] as Size[])
 
     const onSubmit = async (evt: any) => {
         evt.preventDefault();
@@ -92,6 +93,7 @@ const Page = () => {
                 await saveToInventory(item);
                 setAddForm(false)
                 setRefreshTable(prevState => !prevState)
+                setUpdateState(false)
                 dispatch(showToast({
                     message: "Item updated successfully",
                     type: "Success",
@@ -147,7 +149,7 @@ const Page = () => {
             setTimeout(() => dispatch(showToast({message: "", type: "", showToast: false})), 3000);
         }).finally(() => setTableLoading(false))
     }, [refreshTable])
-    
+
     const clearAddFormField = () => {
         setManufacture("none")
         setName("")
@@ -228,6 +230,7 @@ const Page = () => {
                                         setBuyingPrice(item.buyingPrice.toString())
                                         setSellingPrice(item.sellingPrice.toString())
                                         setDiscount(item.discount.toString())
+                                        setUpdateState(true)
                                         setAddForm(true)
                                     }} className="bg-yellow-300 text-white px-3 py-1 rounded hover:bg-yellow-400">
                                         <IoPencil size={20}/></button>
@@ -268,7 +271,7 @@ const Page = () => {
             </div>
             <AnimatePresence>
                 {addForm && (
-                    <AddForm discount={discount} sellingPrice={sellingPrice} buyingPrice={buyingPrice} name={name}
+                    <AddForm updateState={updateState} setUpdateState={setUpdateState} discount={discount} sellingPrice={sellingPrice} buyingPrice={buyingPrice} name={name}
                              manufacture={manufacture} setAddForm={setAddForm} setDiscount={setDiscount}
                              setBuyingPrice={setBuyingPrice} setName={setName} setManufacture={setManufacture}
                              setSellingPrice={setSellingPrice}

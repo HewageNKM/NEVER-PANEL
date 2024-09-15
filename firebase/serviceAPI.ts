@@ -2,8 +2,6 @@ import {browserLocalPersistence, onAuthStateChanged, setPersistence, signInWithE
 import {deleteDoc, doc, getDoc, getDocs, setDoc} from "@firebase/firestore";
 import {auth, inventoryCollectionRef, usersCollectionRef} from "@/firebase/config";
 import {Item} from "@/interfaces";
-import {util} from "protobufjs";
-import merge = util.merge;
 
 export const logUser = async (email: string, password: string) => {
     await setPersistence(auth, browserLocalPersistence);
@@ -27,7 +25,7 @@ export const logout = async () => {
     await auth.signOut();
 }
 export const saveToInventory = async (item: Item) => {
-    await setDoc(doc(inventoryCollectionRef, item.itemId), item,{merge: true });
+    await setDoc(doc(inventoryCollectionRef, item.itemId), item, {merge: true});
 }
 export const getInventory = async () => {
     let docs = await getDocs(inventoryCollectionRef);

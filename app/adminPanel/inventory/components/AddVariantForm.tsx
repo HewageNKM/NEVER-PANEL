@@ -6,6 +6,7 @@ import {AppDispatch} from "@/lib/store";
 import {showToast} from "@/lib/toastSlice/toastSlice";
 import Image from "next/image";
 import {sizeList} from "@/constant";
+import {Size} from "@/interfaces";
 
 const AddVariantForm = ({
                             setVariantId,
@@ -29,8 +30,8 @@ const AddVariantForm = ({
     setImages: React.Dispatch<React.SetStateAction<object[]>>,
     selectedThumbnail: object,
     setSelectedThumbnail: React.Dispatch<React.SetStateAction<object>>,
-    setSizes: React.Dispatch<React.SetStateAction<object[]>>
-    sizes: object[]
+    setSizes: React.Dispatch<React.SetStateAction<Size[]>>
+    sizes: Size[]
 }) => {
     const [file, setFile] = React.useState<string | undefined>("");
     const [selectedSize, setSelectedSize] = useState("none")
