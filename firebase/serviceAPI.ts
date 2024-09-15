@@ -1,5 +1,5 @@
 import {browserLocalPersistence, onAuthStateChanged, setPersistence, signInWithEmailAndPassword} from "@firebase/auth";
-import {deleteDoc, doc, getDoc, getDocs, setDoc} from "@firebase/firestore";
+import {deleteDoc, doc, getDoc, getDocs, query, setDoc, where} from "@firebase/firestore";
 import {auth, inventoryCollectionRef, usersCollectionRef} from "@/firebase/config";
 import {Item} from "@/interfaces";
 
@@ -38,4 +38,24 @@ export const getInventory = async () => {
 }
 export const deleteInventoryItem = async (itemId: string) => {
     await deleteDoc(doc(inventoryCollectionRef, itemId));
+}
+
+export const filterInventoryByBrands = async (brand:string) => {
+    const filteredQuery = query(inventoryCollectionRef, where("manufacturer", "==", brand));
+    const docs = await getDocs(filteredQuery);
+    let items: Item[] = [];
+    docs.forEach(doc => {
+        items.push(doc.data() as Item);
+    })
+    return items ? items : [];
+}
+
+export const searchInventoryByPhrase = async (name:string) => {
+    const filteredQuery = query(inventoryCollectionRef, where("name", "==", name), where("itemId", "==", name), where("manufacturer", "==", name));
+    const docs = await getDocs(filteredQuery);
+    let items: Item[] = [];
+    docs.forEach(doc => {
+        items.push(doc.data() as Item);
+    })
+    return items ? items : [];
 }
