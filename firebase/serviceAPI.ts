@@ -51,11 +51,13 @@ export const filterInventoryByBrands = async (brand:string) => {
 }
 
 export const searchInventoryByPhrase = async (name:string) => {
-    const filteredQuery = query(inventoryCollectionRef, where("name", "==", name), where("itemId", "==", name), where("manufacturer", "==", name));
+    console.log(name);
+    const filteredQuery = query(inventoryCollectionRef, where("name", "==", name));
     const docs = await getDocs(filteredQuery);
     let items: Item[] = [];
     docs.forEach(doc => {
         items.push(doc.data() as Item);
     })
+    console.log(items);
     return items ? items : [];
 }
