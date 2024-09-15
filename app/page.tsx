@@ -43,7 +43,7 @@ export default function Home() {
                 }
             }
         } catch (e: any) {
-            setToast(e.toString());
+            setToast(e.message);
             console.error(e);
         } finally {
             setIsLoading(false);

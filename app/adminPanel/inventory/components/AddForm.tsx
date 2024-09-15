@@ -4,7 +4,7 @@ import {IoAdd, IoClose} from "react-icons/io5";
 import DropShadow from "@/components/DropShadow";
 
 const AddForm = ({
-    onSubmit,
+                     onSubmit,
                      setAddForm,
                      id,
                      setId,
@@ -17,7 +17,9 @@ const AddForm = ({
                      setSellingPrice,
                      sellingPrice,
                      setDiscount,
-                     discount
+                     discount,
+                     setUpdateState,
+                     updateState
                  }: {
     id: string,
     discount: number,
@@ -32,7 +34,9 @@ const AddForm = ({
     setBuyingPrice: React.Dispatch<React.SetStateAction<string>>,
     setName: React.Dispatch<React.SetStateAction<string>>,
     setManufacture: React.Dispatch<React.SetStateAction<string>>,
-    onSubmit: (evt:any)=>void
+    onSubmit: (evt: any) => void,
+    updateState: boolean,
+    setUpdateState: React.Dispatch<React.SetStateAction<boolean>>
 }) => {
     return (
         <DropShadow>
@@ -50,7 +54,7 @@ const AddForm = ({
                         </label>
                         <label className="flex-col flex gap-1">
                             <span className="font-medium">Manufacture</span>
-                            <select required value={manufacture} onChange={(txt) => setManufacture(txt.target.value)}
+                            <select disabled={updateState} required value={manufacture} onChange={(txt) => setManufacture(txt.target.value)}
                                     defaultValue="none" className="p-1 border-2 border-slate-300 rounded">
                                 {brands.map((brand, index) => (
                                     <option key={index} value={brand.value}>{brand.name}</option>
@@ -62,7 +66,7 @@ const AddForm = ({
                             <span className="font-medium">Name</span>
                             <input required value={name} onChange={(txt) => setName(txt.target.value)} type="text"
                                    placeholder="Nike Air Max 90"
-                                   className="p-1 border-2 border-slate-300 rounded"/>
+                                   className="p-1 border-2 capitalize border-slate-300 rounded"/>
                         </label>
                         <label className="flex-col flex gap-1">
                             <span className="font-medium">Buying Price(Rs)</span>
@@ -78,16 +82,16 @@ const AddForm = ({
                         </label>
                         <label className="flex-col flex gap-1">
                             <span className="font-medium">Discount(%)</span>
-                            <input required value={discount} onChange={(txt) => setDiscount(txt.target.value)} type="number"
+                            <input required value={discount} onChange={(txt) => setDiscount(txt.target.value)}
+                                   type="number"
                                    placeholder="20"
                                    className="p-1 border-2 border-slate-300 rounded"/>
                         </label>
                     </div>
                     <div className='w-full flex justify-center'>
                         <button
-                            className="bg-primary-100 text-white flex flex-row justify-center items-center h-[2.8rem] px-3 py-1 rounded hover:bg-primary-200">
-                            <IoAdd size={30}/>
-                            Add Item
+                            className="bg-primary-100 text-white flex font-medium flex-row justify-center items-center h-[2.8rem] px-3 py-1 rounded hover:bg-primary-200">
+                            {updateState ? "Update" : "Save"}
                         </button>
                     </div>
                 </form>
@@ -101,6 +105,7 @@ const AddForm = ({
                         setDiscount("")
 
                         setAddForm(false)
+                        setUpdateState(false)
                     }}>
                         <IoClose size={30}/>
                     </button>

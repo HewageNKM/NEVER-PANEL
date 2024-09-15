@@ -1,6 +1,7 @@
 import {browserLocalPersistence, onAuthStateChanged, setPersistence, signInWithEmailAndPassword} from "@firebase/auth";
-import {doc, getDoc} from "@firebase/firestore";
-import {auth, usersCollectionRef} from "@/firebase/config";
+import {deleteDoc, doc, getDoc, getDocs, query, setDoc, where} from "@firebase/firestore";
+import {auth, inventoryCollectionRef, usersCollectionRef} from "@/firebase/config";
+import {Item} from "@/interfaces";
 
 export const logUser = async (email: string, password: string) => {
     await setPersistence(auth, browserLocalPersistence);
@@ -22,4 +23,41 @@ export const getCurrentUser = () => {
 }
 export const logout = async () => {
     await auth.signOut();
+}
+export const saveToInventory = async (item: Item) => {
+    await setDoc(doc(inventoryCollectionRef, item.itemId), item, {merge: true});
+}
+export const getInventory = async () => {
+    let docs = await getDocs(inventoryCollectionRef);
+    let items: Item[] = [];
+    docs.forEach(doc => {
+        items.push(doc.data() as Item);
+    })
+
+    return items;
+}
+export const deleteInventoryItem = async (itemId: string) => {
+    await deleteDoc(doc(inventoryCollectionRef, itemId));
+}
+
+export const filterInventoryByBrands = async (brand:string) => {
+    const filteredQuery = query(inventoryCollectionRef, where("manufacturer", "==", brand));
+    const docs = await getDocs(filteredQuery);
+    let items: Item[] = [];
+    docs.forEach(doc => {
+        items.push(doc.data() as Item);
+    })
+    return items ? items : [];
+}
+
+export const searchInventoryByPhrase = async (name:string) => {
+    console.log(name);
+    const filteredQuery = query(inventoryCollectionRef, where("name", "==", name));
+    const docs = await getDocs(filteredQuery);
+    let items: Item[] = [];
+    docs.forEach(doc => {
+        items.push(doc.data() as Item);
+    })
+    console.log(items);
+    return items ? items : [];
 }
