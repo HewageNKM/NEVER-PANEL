@@ -1,6 +1,6 @@
 import React from 'react';
 import {brands, types} from "@/constant";
-import {IoAdd, IoClose} from "react-icons/io5";
+import {IoClose} from "react-icons/io5";
 import DropShadow from "@/components/DropShadow";
 
 const AddForm = ({
@@ -54,6 +54,13 @@ const AddForm = ({
                         Add Item
                     </legend>
                     <div className="mt-5 flex w-full flex-row justify-center items-center flex-wrap gap-8">
+                        <label className="flex-col hidden gap-1">
+                            <input required type="text"
+                                   value={id}
+                                   onChange={(txt) => setId(txt.target.value)}
+                                   placeholder="Jordan, Campus......"
+                                   className="p-1 border-2 capitalize border-slate-300 rounded"/>
+                        </label>
                         <label className="flex-col flex gap-1">
                             <span className="font-medium">Type</span>
                             <select disabled={updateState} required value={type}
@@ -80,7 +87,7 @@ const AddForm = ({
                             <span className="font-medium">Brand</span>
                             <input required type="text"
                                    value={brand}
-                                   onChange={(txt)=> setBrand(txt.target.value)}
+                                   onChange={(txt) => setBrand(txt.target.value)}
                                    placeholder="Jordan, Campus......"
                                    className="p-1 border-2 capitalize border-slate-300 rounded"/>
                         </label>
