@@ -7,7 +7,7 @@ import AddForm from "@/app/adminPanel/inventory/components/AddForm";
 import {AppDispatch} from "@/lib/store";
 import {useDispatch} from "react-redux";
 import {showToast} from "@/lib/toastSlice/toastSlice";
-import AddVariantForm from "@/app/adminPanel/inventory/components/AddVariantForm";
+import ManageVariantsForm from "@/app/adminPanel/inventory/components/ManageVariantsForm";
 import {generateId} from "@/utils/genarateIds";
 import {
     deleteInventoryItem,
@@ -36,6 +36,8 @@ const Page = () => {
     const [sellingPrice, setSellingPrice] = useState("")
     const [discount, setDiscount] = useState("")
     const [updateState, setUpdateState] = useState(false)
+    const [type, setType] = useState("none")
+    const [brand, setBrand] = useState("")
 
     // Add Variant Form
     const [variantId, setVariantId] = useState('')
@@ -56,10 +58,23 @@ const Page = () => {
             setTimeout(() => dispatch(showToast({message: "", type: "", showToast: false})), 3000);
             return;
         }
+
+        if (type === "none") {
+            dispatch(showToast({
+                message: "Please select a type",
+                type: "Warning",
+                showToast: true
+            }))
+            setTimeout(() => dispatch(showToast({message: "", type: "", showToast: false})), 3000);
+            return;
+        }
+
         if (id.trim().length === 0) {
             const genId: string = generateId("item", manufacture);
 
             const item: Item = {
+                type:type.toLowerCase(),
+                brand:brand,
                 buyingPrice: Number.parseInt(buyingPrice),
                 discount: Number.parseInt(discount),
                 itemId: genId.toLowerCase(),
@@ -73,6 +88,7 @@ const Page = () => {
 
         } else if (id.trim().length > 0) {
             const item: Item = {
+                type:type.toLowerCase(),
                 buyingPrice: Number.parseInt(buyingPrice),
                 discount: Number.parseInt(discount),
                 itemId: id.toLowerCase(),
@@ -198,6 +214,8 @@ const Page = () => {
         setSellingPrice("")
         setDiscount("")
         setId("")
+        setBrand("")
+        setType("none")
     }
 
     return (
@@ -244,6 +262,7 @@ const Page = () => {
                         <thead>
                         <tr className="bg-slate-600 text-white">
                             <th className="p-3">Product ID</th>
+                            <th className="p-3">Type</th>
                             <th className="p-3">Manufacturer</th>
                             <th className="p-3">Name</th>
                             <th className="p-3">Variations</th>
@@ -259,13 +278,13 @@ const Page = () => {
                             <tr key={index}
                                 className={`odd:bg-slate-200 hover:bg-white even:bg-slate-300`}>
                                 <td className="p-1 font-medium uppercase">{item.itemId}</td>
+                                <td className="p-1 font-medium uppercase">{item.type}</td>
                                 <td className="p-1 font-medium capitalize">{item.manufacturer}</td>
                                 <td className="p-1 font-medium capitalize">{item.name}</td>
-                                <td className="p-1 font-medium flex flex-row flex-wrap gap-2 justify-start items-center">
+                                <td className="p-1 font-medium flex flex-row flex-wrap justify-center gap-1 items-end">
                                     <p>{0}</p>
-                                    <button className="text-blue-500 hover:underline"><IoEye size={25}/></button>
                                     <button className="text-blue-500 hover:underline"
-                                            onClick={() => setAddVariantForm(true)}><IoAdd size={25}/></button>
+                                            onClick={() => setAddVariantForm(true)}><IoEye size={25}/></button>
                                 </td>
                                 <td className="p-1 font-medium">{item.buyingPrice}</td>
                                 <td className="p-1 font-medium">{item.sellingPrice}</td>
@@ -273,6 +292,8 @@ const Page = () => {
                                 <td className="p-1 font-medium">{((item.sellingPrice - item.buyingPrice) / item.buyingPrice * 100).toFixed(2)}</td>
                                 <td className="p-1 font-medium flex justify-center items-center gap-2">
                                     <button onClick={() => {
+                                        setType(item.type)
+                                        setBrand(item.brand)
                                         setId(item.itemId)
                                         setManufacture(item.manufacturer)
                                         setName(item.name)
@@ -297,17 +318,17 @@ const Page = () => {
             </div>
             <AnimatePresence>
                 {addForm && (
-                    <AddForm updateState={updateState} setUpdateState={setUpdateState} discount={discount} sellingPrice={sellingPrice} buyingPrice={buyingPrice} name={name}
+                    <AddForm brand={brand} setBrand={setBrand} updateState={updateState} setUpdateState={setUpdateState} discount={discount} sellingPrice={sellingPrice} buyingPrice={buyingPrice} name={name}
                              manufacture={manufacture} setAddForm={setAddForm} setDiscount={setDiscount}
                              setBuyingPrice={setBuyingPrice} setName={setName} setManufacture={setManufacture}
                              setSellingPrice={setSellingPrice}
                              id={id} setId={setId}
-                             onSubmit={onSubmit}/>)}
+                             onSubmit={onSubmit} setType={setType} type={type}/>)}
                 {addVariantForm &&
-                    <AddVariantForm setAddVariantForm={setAddVariantForm} colorCode={colorCode} variantId={variantId}
-                                    setColorCode={setColorCode} setVariantId={setVariantId} images={images}
-                                    setImages={setImages} selectedThumbnail={selectedThumbnail}
-                                    setSelectedThumbnail={setSelectedThumbnail} setSizes={setSizes} sizes={sizes}/>}
+                    <ManageVariantsForm setAddVariantForm={setAddVariantForm} colorCode={colorCode} variantId={variantId}
+                                        setColorCode={setColorCode} setVariantId={setVariantId} images={images}
+                                        setImages={setImages} selectedThumbnail={selectedThumbnail}
+                                        setSelectedThumbnail={setSelectedThumbnail} setSizes={setSizes} sizes={sizes}/>}
             </AnimatePresence>
         </div>
     );

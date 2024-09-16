@@ -1,5 +1,5 @@
 "use client"
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch, RootState} from "@/lib/store";
 import {RxAvatar} from "react-icons/rx";
@@ -11,8 +11,9 @@ import {useRouter} from "next/navigation";
 import {logout} from "@/firebase/serviceAPI";
 
 const Profile = () => {
-    const [showMenu, setShowMenu] = useState(false)
+    const [time, setTime] = useState("");
     const [date, setDate] = useState(new Date());
+    const [showMenu, setShowMenu] = useState(false)
     const dispatch:AppDispatch = useDispatch();
     const router = useRouter();
 
@@ -22,9 +23,20 @@ const Profile = () => {
         dispatch(clearUser());
         router.replace("/")
     }
-    setInterval(() => {
-        setDate(new Date())
-    }, 1000)
+
+    useEffect(() => {
+        const updateClock = () => {
+            const d = new Date();
+            setTime(`${d.getHours()}:${d.getMinutes()}`);
+            setDate(d);
+        };
+
+        updateClock(); // Set initial time immediately
+        const intervalId = setInterval(updateClock, 1000); // Update every minute
+
+        return () => clearInterval(intervalId); // Cleanup on component unmount
+    }, []);
+
     return (
         <div className="absolute top-5 z-40 h-[4rem] w-[13rem] flex justify-center items-center right-3 shadow-primary rounded-full">
             <div className="p-2 relative rounded-full flex justify-center items-center">
@@ -45,7 +57,7 @@ const Profile = () => {
             </div>
             <div className="px-2 flex flex-col">
                 <h3 className="font-medium w-[7rem] text-lg">
-                    {date.toLocaleTimeString()}
+                    {time}
                 </h3>
                 <p className="text-sm font-medium">
                     {date.toDateString()}
