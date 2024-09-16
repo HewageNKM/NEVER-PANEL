@@ -5,10 +5,10 @@ import {useDispatch} from "react-redux";
 import {AppDispatch} from "@/lib/store";
 import {showToast} from "@/lib/toastSlice/toastSlice";
 import Image from "next/image";
-import {sizeList} from "@/constant";
+import {shoeSizesList} from "@/constant";
 import {Size} from "@/interfaces";
 
-const AddVariantForm = ({
+const ManageVariantsForm = ({
                             setVariantId,
                             setImages,
                             variantId,
@@ -111,7 +111,7 @@ const AddVariantForm = ({
             <div className="bg-white z-50 max-w-[90vw] flex h-fit rounded p-4 relative">
                 <form className="flex-col flex gap-5">
                     <legend className="text-2xl font-bold">
-                        Add Variant
+                        Manage Variants
                     </legend>
                     <div className="mt-2 flex flex-col justify-center items-start flex-wrap gap-5">
                         {images.length > 0 && <h2 className="text-lg font-bold">Select Thumbnail</h2>}
@@ -175,14 +175,14 @@ const AddVariantForm = ({
                                     <option value="none">
                                         Select Size
                                     </option>
-                                    {sizeList.map((size, index) => (
+                                    {shoeSizesList.map((size, index) => (
                                         <option key={index} value={size}>{size}</option>
                                     ))}
                                 </select>
                             </label>
                             <label className="flex flex-col gap-1">
                                 <span>Stock</span>
-                                <input value={stock} onChange={(txt)=> setStock(txt.target.value)} type="number"
+                                <input value={stock} onChange={(txt)=> setStock(Number.parseInt(txt.target.value))} type="number"
                                        className="p-1 text-center w-[10vw] border-2 border-slate-300 rounded"/>
                             </label>
                             <div className="flex pt-7 items-center justify-center">
@@ -237,6 +237,24 @@ const AddVariantForm = ({
                             Add Variant
                         </button>
                     </div>
+                    <div>
+                        <h2 className="text-2xl font-bold">
+                            Variants
+                        </h2>
+                        <div className="mt-2">
+                            <table className="min-w-full table-auto text-center">
+                                <thead>
+                                <tr className="bg-slate-600 text-white">
+                                    <th className="px-2">Variant ID</th>
+                                    <th className="px-2">Color Code</th>
+                                    <th className="px-2">Action</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </form>
                 <div className="absolute top-1 right-1">
                     <button onClick={() => {
@@ -258,4 +276,4 @@ const AddVariantForm = ({
     );
 };
 
-export default AddVariantForm;
+export default ManageVariantsForm;

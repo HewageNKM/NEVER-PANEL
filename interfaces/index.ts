@@ -7,6 +7,8 @@ export interface Profile {
 
 export interface Item {
     itemId: string,
+    type: string,
+    brand: string,
     manufacturer: string,
     name: string,
     buyingPrice: number,

@@ -1,5 +1,5 @@
 import React from 'react';
-import {brands} from "@/constant";
+import {brands, types} from "@/constant";
 import {IoAdd, IoClose} from "react-icons/io5";
 import DropShadow from "@/components/DropShadow";
 
@@ -19,7 +19,11 @@ const AddForm = ({
                      setDiscount,
                      discount,
                      setUpdateState,
-                     updateState
+                     updateState,
+                     type,
+                     setType,
+                     brand,
+                     setBrand,
                  }: {
     id: string,
     discount: number,
@@ -36,7 +40,11 @@ const AddForm = ({
     setManufacture: React.Dispatch<React.SetStateAction<string>>,
     onSubmit: (evt: any) => void,
     updateState: boolean,
-    setUpdateState: React.Dispatch<React.SetStateAction<boolean>>
+    setUpdateState: React.Dispatch<React.SetStateAction<boolean>>,
+    type: string,
+    setType: React.Dispatch<React.SetStateAction<string>>,
+    brand: string,
+    setBrand: React.Dispatch<React.SetStateAction<string>>,
 }) => {
     return (
         <DropShadow>
@@ -46,21 +54,35 @@ const AddForm = ({
                         Add Item
                     </legend>
                     <div className="mt-5 flex w-full flex-row justify-center items-center flex-wrap gap-8">
-                        <label className="flex-col hidden gap-1">
-                            <span className="font-medium">Product ID</span>
-                            <input value={id} onChange={(txt) => setId(txt.target.value)} type="text"
-                                   placeholder="XXXXXXXXXX"
-                                   className="p-1 border-2 border-slate-300 rounded"/>
+                        <label className="flex-col flex gap-1">
+                            <span className="font-medium">Type</span>
+                            <select disabled={updateState} required value={type}
+                                    onChange={(txt) => setType(txt.target.value)}
+                                    defaultValue="none" className="p-1 border-2 border-slate-300 rounded">
+                                {types.map((types, index) => (
+                                    <option key={index} value={types.value}>{types.name}</option>
+                                ))}
+                                <option key={0} value="none">Select</option>
+                            </select>
                         </label>
                         <label className="flex-col flex gap-1">
                             <span className="font-medium">Manufacture</span>
-                            <select disabled={updateState} required value={manufacture} onChange={(txt) => setManufacture(txt.target.value)}
+                            <select disabled={updateState} required value={manufacture}
+                                    onChange={(txt) => setManufacture(txt.target.value)}
                                     defaultValue="none" className="p-1 border-2 border-slate-300 rounded">
                                 {brands.map((brand, index) => (
                                     <option key={index} value={brand.value}>{brand.name}</option>
                                 ))}
                                 <option key={0} value="none">Select</option>
                             </select>
+                        </label>
+                        <label className="flex-col flex gap-1">
+                            <span className="font-medium">Brand</span>
+                            <input required type="text"
+                                   value={brand}
+                                   onChange={(txt)=> setBrand(txt.target.value)}
+                                   placeholder="Jordan, Campus......"
+                                   className="p-1 border-2 capitalize border-slate-300 rounded"/>
                         </label>
                         <label className="flex-col flex gap-1">
                             <span className="font-medium">Name</span>
@@ -103,6 +125,8 @@ const AddForm = ({
                         setBuyingPrice("")
                         setSellingPrice("")
                         setDiscount("")
+                        setType("none")
+                        setBrand('')
 
                         setAddForm(false)
                         setUpdateState(false)

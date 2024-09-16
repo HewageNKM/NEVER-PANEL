@@ -16,22 +16,32 @@ export const brands = [
     },
     {
         id: 4,
-        name:"New Balance",
+        name: "New Balance",
         value: "new balance"
     },
     {
-        id:5,
-        name:"Cross",
-        value:"cross"
+        id: 5,
+        name: "Cross",
+        value: "cross"
     },
     {
-        id:6,
-        name:"Luvion Vuitton",
-        value:"luvion vuitton"
+        id: 6,
+        name: "Luvion Vuitton",
+        value: "luvion vuitton"
+    },
+    {
+        id: 7,
+        name: "China",
+        value: "china"
+    },
+    {
+        id: 8,
+        name: "Polo",
+        value: "polo"
     }
 
 ]
-export const sizeList= [
+export const shoeSizesList = [
     "30",
     "31",
     "32",
@@ -53,4 +63,21 @@ export const sizeList= [
     "48",
     "49",
     "50",
+]
+export const types = [
+    {
+        id: 1,
+        name:"Shoe",
+        value: "shoe"
+    },
+    {
+        id: 2,
+        name:"Accessories",
+        value: "accessories"
+    },
+    {
+        id: 3,
+        name:"Slippers",
+        value: "slippers"
+    }
 ]
