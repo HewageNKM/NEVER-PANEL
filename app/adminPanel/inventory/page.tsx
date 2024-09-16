@@ -214,6 +214,8 @@ const Page = () => {
         setSellingPrice("")
         setDiscount("")
         setId("")
+        setBrand("")
+        setType("none")
     }
 
     return (
@@ -290,6 +292,8 @@ const Page = () => {
                                 <td className="p-1 font-medium">{((item.sellingPrice - item.buyingPrice) / item.buyingPrice * 100).toFixed(2)}</td>
                                 <td className="p-1 font-medium flex justify-center items-center gap-2">
                                     <button onClick={() => {
+                                        setType(item.type)
+                                        setBrand(item.brand)
                                         setId(item.itemId)
                                         setManufacture(item.manufacturer)
                                         setName(item.name)

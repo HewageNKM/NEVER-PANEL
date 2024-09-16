@@ -55,7 +55,8 @@ const AddForm = ({
                     </legend>
                     <div className="mt-5 flex w-full flex-row justify-center items-center flex-wrap gap-8">
                         <label className="flex-col hidden gap-1">
-                            <input required type="text"
+                            <span className="font-medium">Product ID</span>
+                            <input type="text"
                                    value={id}
                                    onChange={(txt) => setId(txt.target.value)}
                                    placeholder="Jordan, Campus......"
