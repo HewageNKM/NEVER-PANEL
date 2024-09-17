@@ -16,8 +16,6 @@ const ManageVariantsForm = ({
                                 variantName,
                                 setVariantName,
                                 images,
-                                selectedThumbnail,
-                                setSelectedThumbnail,
                                 setSizes,
                                 sizes,
                                 selectedItem,
@@ -32,8 +30,6 @@ const ManageVariantsForm = ({
     setAddVariantForm: React.Dispatch<React.SetStateAction<boolean>>,
     images: object[],
     setImages: React.Dispatch<React.SetStateAction<object[]>>,
-    selectedThumbnail: object,
-    setSelectedThumbnail: React.Dispatch<React.SetStateAction<object>>,
     setSizes: React.Dispatch<React.SetStateAction<Size[]>>
     sizes: Size[],
     selectedItem: Item,
@@ -116,7 +112,7 @@ const ManageVariantsForm = ({
         setSelectedSize("none")
         setStock(0)
     }
-
+    console.log(images)
     return (
         <DropShadow>
             <div className="bg-white z-50 max-w-[90vw] flex flex-col h-fit rounded p-4 relative">
@@ -128,19 +124,14 @@ const ManageVariantsForm = ({
                         Manage Variants
                     </legend>
                     <div className="mt-2 flex flex-col justify-center items-start flex-wrap gap-5">
-                        {images.length > 0 && <h2 className="text-lg font-bold">Select Thumbnail</h2>}
+                        {images.length > 0 && <h2 className="text-lg font-bold">Images</h2>}
                         <div className="gap-5 flex-row w-full flex justify-center items-center flex-wrap">
                             {images.map((image, index) => (
                                 <div key={index} className="relative">
-                                    <button type="button" disabled={updateState} onClick={() => {
-                                        setSelectedThumbnail(image)
-                                    }}>
                                         <Image width={20} height={20} src={image.url} alt="variant"
-                                               className={`w-36 h-36 rounded object-cover ${selectedThumbnail.url == image.url && "border-primary-100 border-4"}`}/>
-                                    </button>
+                                               className="w-36 h-36 rounded object-cover"/>
                                     <button disabled={updateState} className="absolute top-0 right-0" onClick={() => {
                                         setImages(prevState => prevState.filter((img, i) => i !== index))
-                                        setSelectedThumbnail({})
                                     }}>
                                         <IoClose size={20}/>
                                     </button>
@@ -309,7 +300,6 @@ const ManageVariantsForm = ({
                         setVariantId('')
                         setImages([])
                         setFile("")
-                        setSelectedThumbnail({})
                         setSizes([])
                         setSelectedSize("none")
                         setStock(0)

@@ -43,7 +43,6 @@ const Page = () => {
     const [variantId, setVariantId] = useState('')
     const [variantName, setVariantName] = useState('')
     const [images, setImages] = useState([] as File[])
-    const [selectedThumbnail, setSelectedThumbnail] = useState({} as File)
     const [sizes, setSizes] = useState([] as Size[])
     const [selectedItem, setSelectedItem] = useState({} as Item)
 
@@ -62,7 +61,6 @@ const Page = () => {
 
         if (id.trim().length === 0) {
             const genId: string = generateId("item", manufacture);
-
             const item: Item = {
                 thumbnail: "",
                 variants: [],
@@ -74,26 +72,25 @@ const Page = () => {
                 manufacturer: manufacture.toLowerCase(),
                 name: name.toLowerCase(),
                 sellingPrice: Number.parseInt(sellingPrice)
-
             }
 
             await saveItem(item, "Item added successfully")
 
         } else if (id.trim().length > 0) {
+            const i = inventoryList.find((item) => item.itemId === id);
+
             const item: Item = {
                 brand: brand.toLowerCase(),
-                variants: [],
                 type: type.toLowerCase(),
-                thumbnail: "",
                 buyingPrice: Number.parseInt(buyingPrice),
                 discount: Number.parseInt(discount),
                 itemId: id.toLowerCase(),
                 manufacturer: manufacture.toLowerCase(),
                 name: name.toLowerCase(),
-                sellingPrice: Number.parseInt(sellingPrice)
-
+                sellingPrice: Number.parseInt(sellingPrice),
+                thumbnail:i?.thumbnail || "",
+                variants:i?.variants || []
             }
-
             // Update Item and setUpdateState to false so when add manufacture name can be edited
             await saveItem(item, "Item updated successfully")
             setUpdateState(false)
@@ -122,7 +119,6 @@ const Page = () => {
         } else{
             const genId = generateId("variant",selectedItem.itemId);
             try {
-                const thumbnailUrl = await uploadImages([selectedThumbnail],`inventory/${selectedItem.itemId}/${genId}/thumbnail/`);
                 const imagesUrl = await uploadImages(images,`inventory/${selectedItem.itemId}/${genId}/`)
                 console.log(imagesUrl)
                 const variant:Variant = {
@@ -131,10 +127,11 @@ const Page = () => {
                 }
 
                 selectedItem.variants.push(variant)
-                selectedItem.thumbnail = thumbnailUrl[0]
+                selectedItem.thumbnail = imagesUrl.pop() || ""
                 setSelectedItem(selectedItem)
                 await saveItem(selectedItem,"Successfully added variant successfully")
             }catch (e:any){
+                console.log(e)
                 showMessage(e.message,"Error")
             }
         }
@@ -148,6 +145,7 @@ const Page = () => {
             clearAddFormField();
             clearAddVariantFormField();
         } catch (e: any) {
+            console.log(e)
             showMessage(e.message, "Error")
         }
     }
@@ -235,7 +233,6 @@ const Page = () => {
         setVariantId("")
         setVariantName("")
         setImages([])
-        setSelectedThumbnail({} as File)
         setSizes([])
     }
     const showMessage = (message: string, type: string) => {
@@ -373,8 +370,6 @@ const Page = () => {
                                         setVariantId={setVariantId}
                                         images={images}
                                         setImages={setImages}
-                                        selectedThumbnail={selectedThumbnail}
-                                        setSelectedThumbnail={setSelectedThumbnail}
                                         setSizes={setSizes} sizes={sizes} selectedItem={selectedItem}
                                         deleteVariant={deleteVariant}
                     />}
