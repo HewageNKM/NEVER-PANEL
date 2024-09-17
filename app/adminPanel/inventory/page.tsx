@@ -27,6 +27,7 @@ const Page = () => {
     const [inventoryList, setInventoryList] = useState([] as Item[])
     const [refreshItemTable, setRefreshItemTable] = useState(false)
     const [search, setSearch] = useState('')
+    const [itemsCount, setItemsCount] = useState(0)
 
     // Add Item Form
     const [id, setId] = useState('');
@@ -208,11 +209,11 @@ const Page = () => {
         setLoadItemTable(true)
         getInventory().then((items) => {
             setInventoryList(items)
+            setItemsCount(items.length || 0)
         }).catch((e) => {
             showMessage(e.message, "Error")
         }).finally(() => setLoadItemTable(false))
     }, [refreshItemTable, dispatch])
-
 
     //Delete Variant by id
     const deleteVariant = async (variantId: string) => {
@@ -297,6 +298,9 @@ const Page = () => {
                     Table for Inventory
                 */}
                 <div className="w-full mt-5 overflow-auto">
+                    <div className="w-full flex mt-1 justify-end items-center">
+                        <h1 className="text-xl font-bold">Total Items: {itemsCount}</h1>
+                    </div>
                     <table className="min-w-full table-auto text-left">
                         <thead>
                         <tr className="bg-slate-600 text-white">
