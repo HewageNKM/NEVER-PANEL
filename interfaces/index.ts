@@ -9,6 +9,8 @@ export interface Item {
     itemId: string,
     type: string,
     brand: string,
+    thumbnail:string,
+    variants: Variant[],
     manufacturer: string,
     name: string,
     buyingPrice: number,
@@ -21,7 +23,7 @@ export interface Size{
 }
 export interface Variant {
     variantId: string,
-    colorCode: string,
+    variantName: string,
     images: string[],
     sizes: Size[],
 }

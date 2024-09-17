@@ -14,10 +14,12 @@ import {
     filterInventoryByBrands,
     getInventory,
     saveToInventory,
-    searchInventoryByPhrase
+    searchInventoryByPhrase, uploadImages
 } from "@/firebase/serviceAPI";
-import {Item, Size} from "@/interfaces";
+import {Item, Size, Variant} from "@/interfaces";
 import Loading from "@/app/adminPanel/components/Loading";
+import {type} from "node:os";
+import {id} from "postcss-selector-parser";
 
 const Page = () => {
     const [addForm, setAddForm] = useState(false)
@@ -39,33 +41,25 @@ const Page = () => {
     const [type, setType] = useState("none")
     const [brand, setBrand] = useState("")
 
-    // Add Variant Form
+    // Mange Variant Form
     const [variantId, setVariantId] = useState('')
-    const [colorCode, setColorCode] = useState('')
-    const [images, setImages] = useState([])
-    const [selectedThumbnail, setSelectedThumbnail] = useState({})
+    const [variantName, setVariantName] = useState('')
+    const [images, setImages] = useState([] as File[])
+    const [selectedThumbnail, setSelectedThumbnail] = useState({} as File)
     const [sizes, setSizes] = useState([] as Size[])
+    const [selectedItem, setSelectedItem] = useState({} as Item)
 
-    const onSubmit = async (evt: any) => {
+
+    const onAddItemFormSubmit = async (evt: any) => {
         evt.preventDefault();
 
         if (manufacture === "none") {
-            dispatch(showToast({
-                message: "Please select a manufacture",
-                type: "Warning",
-                showToast: true
-            }))
-            setTimeout(() => dispatch(showToast({message: "", type: "", showToast: false})), 3000);
+            showMessage("Please, select the manufacture","Warning")
             return;
         }
 
         if (type === "none") {
-            dispatch(showToast({
-                message: "Please select a type",
-                type: "Warning",
-                showToast: true
-            }))
-            setTimeout(() => dispatch(showToast({message: "", type: "", showToast: false})), 3000);
+            showMessage("Please, select the type","Warning")
             return;
         }
 
@@ -73,8 +67,10 @@ const Page = () => {
             const genId: string = generateId("item", manufacture);
 
             const item: Item = {
+                thumbnail: "",
+                variants:[],
                 type:type.toLowerCase(),
-                brand:brand,
+                brand:brand.toLowerCase(),
                 buyingPrice: Number.parseInt(buyingPrice),
                 discount: Number.parseInt(discount),
                 itemId: genId.toLowerCase(),
@@ -88,7 +84,10 @@ const Page = () => {
 
         } else if (id.trim().length > 0) {
             const item: Item = {
+                brand: brand.toLowerCase(),
+                variants:[],
                 type:type.toLowerCase(),
+                thumbnail:"",
                 buyingPrice: Number.parseInt(buyingPrice),
                 discount: Number.parseInt(discount),
                 itemId: id.toLowerCase(),
@@ -104,25 +103,50 @@ const Page = () => {
         }
 
     }
+    const onVariantFormSubmit = async (evt: any) => {
+        evt.preventDefault();
+
+        if(images.length === 0){
+            showMessage("Please, upload at least 5 images","Warning")
+            return;
+        }
+
+        if (sizes.length === 0) {
+            showMessage("Please, add the sizes","Warning")
+            return;
+        }
+        if(selectedThumbnail.file === null || selectedThumbnail.file === undefined){
+            showMessage("Please, select the thumbnail","Warning")
+            return;
+        }
+        const genId = generateId("variant",selectedItem.itemId);
+        console.log(genId)
+        try {
+            const thumbnailUrl = await uploadImages([selectedThumbnail],`inventory/${selectedItem.itemId}/${genId}/thumbnail/`);
+            const imagesUrl = await uploadImages(images,`inventory/${selectedItem.itemId}/${genId}/`)
+            console.log(imagesUrl)
+            const variant:Variant = {
+                images: imagesUrl, sizes: sizes, variantId: genId, variantName: variantName
+
+            }
+            selectedItem.variants.push(variant)
+            selectedItem.thumbnail = thumbnailUrl[0]
+            await saveItem(selectedItem,"Successfully added variant successfully")
+
+        }catch (e:any){
+            showMessage(e.message,"Error")
+        }
+    }
     const saveItem = async (item:Item, message:string) => {
         try {
             await saveToInventory(item);
             setAddForm(false)
             setRefreshTable(prevState => !prevState)
-            dispatch(showToast({
-                message: message,
-                type: "Success",
-                showToast: true
-            }))
-            setTimeout(() => dispatch(showToast({message: "", type: "", showToast: false})), 3000);
+            showMessage(message,"Success")
             clearAddFormField();
+            clearAddVariantFormField();
         } catch (e: any) {
-            dispatch(showToast({
-                message: e.message,
-                type: "Error",
-                showToast: true
-            }))
-            setTimeout(() => dispatch(showToast({message: "", type: "", showToast: false})), 3000);
+            showMessage(e.message,"Error")
         }
     }
 
@@ -133,48 +157,28 @@ const Page = () => {
             try {
                 await deleteInventoryItem(id);
                 setRefreshTable(prevState => !prevState)
-                dispatch(showToast({
-                    message: "Item deleted successfully",
-                    type: "Success",
-                    showToast: true
-                }))
-                setTimeout(() => dispatch(showToast({message: "", type: "", showToast: false})), 3000);
+                showMessage("Item updated successfully","Success")
+                return;
             } catch (e: any) {
-                dispatch(showToast({
-                    message: e.message,
-                    type: "Error",
-                    showToast: true
-                }))
-                setTimeout(() => dispatch(showToast({message: "", type: "", showToast: false})), 3000);
+                showMessage(e.message,"Error")
             }
         }
     }
 
     const filterInventory = async (brands:string) => {
         if(brands === "all") {setRefreshTable(prevState => !prevState)}
-
         try {
             const items = await filterInventoryByBrands(brands.toLowerCase())
             setInventoryList(items)
         }catch (e:any){
-            dispatch(showToast({
-                message: e.message,
-                type: "Error",
-                showToast: true
-            }))
-            setTimeout(() => dispatch(showToast({message: "", type: "", showToast: false})), 3000);
+            showMessage(e.message,"Error")
         }
     }
 
     const searchInventory = async () => {
 
         if(search.trim().length === 0) {
-            dispatch(showToast({
-                message: "Please enter a search query",
-                type: "Warning",
-                showToast: true
-            }))
-            setTimeout(() => dispatch(showToast({message: "", type: "", showToast: false})), 3000);
+            showMessage("Please, enter the search query","Warning")
             return;
         }
         try {
@@ -182,12 +186,7 @@ const Page = () => {
             const searchList = await searchInventoryByPhrase(search.toLowerCase());
             setInventoryList(searchList)
         }catch (e:any){
-            dispatch(showToast({
-                message: e.message,
-                type: "Error",
-                showToast: true
-            }))
-            setTimeout(() => dispatch(showToast({message: "", type: "", showToast: false})), 3000);
+            showMessage(e.message,"Error")
         }finally {
             setTableLoading(false)
         }
@@ -198,12 +197,7 @@ const Page = () => {
         getInventory().then((items) => {
             setInventoryList(items)
         }).catch((e) => {
-            dispatch(showToast({
-                message: e.message,
-                type: "Error",
-                showToast: true
-            }))
-            setTimeout(() => dispatch(showToast({message: "", type: "", showToast: false})), 3000);
+            showMessage(e.message,"Error")
         }).finally(() => setTableLoading(false))
     }, [refreshTable,dispatch])
 
@@ -217,7 +211,18 @@ const Page = () => {
         setBrand("")
         setType("none")
     }
-
+    const clearAddVariantFormField = () => {
+        setVariantId("")
+        setVariantName("")
+        setImages([])
+        setSelectedThumbnail({} as File)
+        setSizes([])
+    }
+    const showMessage = (message:string,type:string)=>{
+        dispatch(showToast({message: message, type:type, showToast: true}))
+        setTimeout(() => dispatch(showToast({message: "", type: "", showToast: false})), 3000);
+        return;
+    }
     return (
         <div className="relative w-full h-screen">
             <div className="md:pt-24 pt-32 px-4 py-4 flex flex-col relative">
@@ -282,9 +287,12 @@ const Page = () => {
                                 <td className="p-1 font-medium capitalize">{item.manufacturer}</td>
                                 <td className="p-1 font-medium capitalize">{item.name}</td>
                                 <td className="p-1 font-medium flex flex-row flex-wrap justify-center gap-1 items-end">
-                                    <p>{0}</p>
+                                    <p>{item.variants.length || 0}</p>
                                     <button className="text-blue-500 hover:underline"
-                                            onClick={() => setAddVariantForm(true)}><IoEye size={25}/></button>
+                                            onClick={() => {
+                                                setSelectedItem(item)
+                                                setAddVariantForm(true)
+                                            }}><IoEye size={25}/></button>
                                 </td>
                                 <td className="p-1 font-medium">{item.buyingPrice}</td>
                                 <td className="p-1 font-medium">{item.sellingPrice}</td>
@@ -323,12 +331,12 @@ const Page = () => {
                              setBuyingPrice={setBuyingPrice} setName={setName} setManufacture={setManufacture}
                              setSellingPrice={setSellingPrice}
                              id={id} setId={setId}
-                             onSubmit={onSubmit} setType={setType} type={type}/>)}
+                             onSubmit={onAddItemFormSubmit} setType={setType} type={type}/>)}
                 {addVariantForm &&
-                    <ManageVariantsForm setAddVariantForm={setAddVariantForm} colorCode={colorCode} variantId={variantId}
-                                        setColorCode={setColorCode} setVariantId={setVariantId} images={images}
+                    <ManageVariantsForm onSubmit={onVariantFormSubmit} setAddVariantForm={setAddVariantForm} variantName={variantName} variantId={variantId}
+                                        setVariantName={setVariantName} setVariantId={setVariantId} images={images}
                                         setImages={setImages} selectedThumbnail={selectedThumbnail}
-                                        setSelectedThumbnail={setSelectedThumbnail} setSizes={setSizes} sizes={sizes}/>}
+                                        setSelectedThumbnail={setSelectedThumbnail} setSizes={setSizes} sizes={sizes} selectedItem={selectedItem}/>}
             </AnimatePresence>
         </div>
     );

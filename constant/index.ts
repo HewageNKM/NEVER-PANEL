@@ -72,12 +72,54 @@ export const types = [
     },
     {
         id: 2,
-        name:"Accessories",
-        value: "accessories"
+        name:"Accessory",
+        value: "accessory"
     },
     {
         id: 3,
-        name:"Slippers",
-        value: "slippers"
+        name:"Slipper",
+        value: "slipper"
+    }
+]
+export const accessoriesSizesList = [
+    {
+        id: 1,
+        name: "200ml",
+        value: "200ml"
+    },
+    {
+        id: 2,
+        name: "250ml",
+        value: "250ml"
+    },
+    {
+        id: 3,
+        name: "500ml",
+        value: "500ml"
+    },
+    {
+        id: 4,
+        name: "750ml",
+        value: "750ml"
+    },
+    {
+        id: 5,
+        name: "S",
+        value: "s",
+    },
+    {
+        id: 6,
+        name: "M",
+        value: "m"
+    },
+    {
+        id: 7,
+        name: "X",
+        value: "x",
+    },
+    {
+        id: 8,
+        name: "XL",
+        value: "xl",
     }
 ]

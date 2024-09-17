@@ -7,6 +7,7 @@ import {
     signInWithEmailAndPassword
 } from "@firebase/auth";
 import {collection, doc, getDoc, getFirestore} from "@firebase/firestore";
+import {getStorage} from "@firebase/storage";
 
 // Firebase configuration
 const config = {
@@ -24,6 +25,7 @@ const config = {
 const app = initializeApp(config);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+export const storage = getStorage(app);
 
 // Firestore collection references
 export const usersCollectionRef = collection(db, "users");

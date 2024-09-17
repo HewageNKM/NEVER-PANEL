@@ -5,33 +5,37 @@ import {useDispatch} from "react-redux";
 import {AppDispatch} from "@/lib/store";
 import {showToast} from "@/lib/toastSlice/toastSlice";
 import Image from "next/image";
-import {shoeSizesList} from "@/constant";
-import {Size} from "@/interfaces";
+import {Item, Size} from "@/interfaces";
+import {accessoriesSizesList, shoeSizesList} from "@/constant";
 
 const ManageVariantsForm = ({
-                            setVariantId,
-                            setImages,
-                            variantId,
-                            setAddVariantForm,
-                            colorCode,
-                            setColorCode,
-                            images,
-                            selectedThumbnail,
-                            setSelectedThumbnail,
-                            setSizes,
-                            sizes
-                        }: {
+                                setVariantId,
+                                setImages,
+                                variantId,
+                                setAddVariantForm,
+                                variantName,
+                                setVariantName,
+                                images,
+                                selectedThumbnail,
+                                setSelectedThumbnail,
+                                setSizes,
+                                sizes,
+                                selectedItem,
+                                onSubmit
+                            }: {
     variantId: string,
-    colorCode: string,
+    variantName: string,
     setVariantId: React.Dispatch<React.SetStateAction<string>>,
-    setColorCode: React.Dispatch<React.SetStateAction<string>>,
+    setVariantName: React.Dispatch<React.SetStateAction<string>>,
     setAddVariantForm: React.Dispatch<React.SetStateAction<boolean>>,
     images: object[],
     setImages: React.Dispatch<React.SetStateAction<object[]>>,
     selectedThumbnail: object,
     setSelectedThumbnail: React.Dispatch<React.SetStateAction<object>>,
     setSizes: React.Dispatch<React.SetStateAction<Size[]>>
-    sizes: Size[]
+    sizes: Size[],
+    selectedItem: Item,
+    onSubmit: any
 }) => {
     const [file, setFile] = React.useState<string | undefined>("");
     const [selectedSize, setSelectedSize] = useState("none")
@@ -66,7 +70,6 @@ const ManageVariantsForm = ({
     }
 
     const addSizeToTable = () => {
-        console.log(selectedSize)
         if (selectedSize === "none") {
             dispatch(showToast({
                 message: "Please select a size",
@@ -93,23 +96,27 @@ const ManageVariantsForm = ({
         }
 
         if (sizes.length > 0) {
-            const index = sizes.findIndex((size: any) => size.size === selectedSize)
+            const index = sizes.findIndex((s: any) => s.size === selectedSize)
             if (index !== -1) {
-                sizes[index] = size
+                sizes[index] = {
+                    ...sizes[index],
+                    stock: sizes[index].stock + stock
+                }
             } else {
                 setSizes(prevState => [...prevState, size])
             }
         } else {
             setSizes(prevState => [...prevState, size])
         }
+
         setSelectedSize("none")
-        setStock( 0)
+        setStock(0)
     }
 
     return (
         <DropShadow>
-            <div className="bg-white z-50 max-w-[90vw] flex h-fit rounded p-4 relative">
-                <form className="flex-col flex gap-5">
+            <div className="bg-white z-50 max-w-[90vw] flex flex-col h-fit rounded p-4 relative">
+                <form onSubmit={onSubmit} className="flex-col flex gap-5">
                     <legend className="text-2xl font-bold">
                         Manage Variants
                     </legend>
@@ -121,9 +128,10 @@ const ManageVariantsForm = ({
                                     <Image onClick={() => {
                                         setSelectedThumbnail(image)
                                     }} width={20} height={20} src={image.url} alt="variant"
-                                           className={`w-20 h-20 rounded object-cover ${selectedThumbnail.url == image.url && "border-primary-100 border-4"}`}/>
+                                           className={`w-36 h-36 rounded object-cover ${selectedThumbnail.url == image.url && "border-primary-100 border-4"}`}/>
                                     <button className="absolute top-0 right-0" onClick={() => {
                                         setImages(prevState => prevState.filter((img, i) => i !== index))
+                                        setSelectedThumbnail({})
                                     }}>
                                         <IoClose size={20}/>
                                     </button>
@@ -139,13 +147,11 @@ const ManageVariantsForm = ({
                                    className={`p-1 border-2 border-slate-300 rounded bg-primary-200`}/>
                         </label>
                         <label className="flex-col flex gap-1">
-                            <span className="font-medium">Color Code </span>
-                            <input onChange={(txt) => setColorCode(txt.target.value)} value={colorCode} required
+                            <span className="font-medium">Variant Name </span>
+                            <input onChange={(txt) => setVariantName(txt.target.value)} value={variantName} required
                                    type="text"
-                                   placeholder="#FFFFF"
+                                   placeholder="Variant 1"
                                    className="p-1 text-center border-2 border-slate-300 rounded"/>
-                            <div className="h-8 mt-3 border-2"
-                                 style={{backgroundColor: colorCode.length == 0 ? "" : "#ffff" + colorCode}}></div>
                         </label>
                         <label className="flex-col flex justify-center items-center gap-1">
                             <div className="flex  relative justify-center items-center flex-col">
@@ -167,7 +173,7 @@ const ManageVariantsForm = ({
                             <label className="flex flex-col gap-1">
                                 <span>Size</span>
                                 <select
-                                    onChange={(txt)=> setSelectedSize(txt.target.value)}
+                                    onChange={(txt) => setSelectedSize(txt.target.value)}
                                     defaultValue={selectedSize}
                                     value={selectedSize}
                                     className="p-1 text-center w-[10vw] border-2 border-slate-300 rounded"
@@ -175,18 +181,19 @@ const ManageVariantsForm = ({
                                     <option value="none">
                                         Select Size
                                     </option>
-                                    {shoeSizesList.map((size, index) => (
-                                        <option key={index} value={size}>{size}</option>
-                                    ))}
-                                </select>
+                                    {selectedItem.type == "shoe" || selectedItem.type == "slipper" ? shoeSizesList.map((size, index) => (
+                                        <option key={index}
+                                                value={size}>{size}</option>)) : accessoriesSizesList.map((size, index) => (
+                                        <option key={index} value={size.value}>{size.name}</option>))}</select>
                             </label>
                             <label className="flex flex-col gap-1">
                                 <span>Stock</span>
-                                <input value={stock} onChange={(txt)=> setStock(Number.parseInt(txt.target.value))} type="number"
+                                <input value={stock} onChange={(txt) => setStock(Number.parseInt(txt.target.value))}
+                                       type="number"
                                        className="p-1 text-center w-[10vw] border-2 border-slate-300 rounded"/>
                             </label>
                             <div className="flex pt-7 items-center justify-center">
-                                <button onClick={()=>addSizeToTable()} type="button"
+                                <button onClick={() => addSizeToTable()} type="button"
                                         className="flex px-2 bg-primary-100 p-1 rounded text-white font-medium flex-row items-center">
                                     Add/Update Size
                                 </button>
@@ -209,7 +216,7 @@ const ManageVariantsForm = ({
                                         <td className="px-2">{size.size}</td>
                                         <td className="px-2">{size.stock}</td>
                                         <td className="px-2 flex flex-row gap-1 justify-end">
-                                            <button onClick={()=> {
+                                            <button onClick={() => {
                                                 setSelectedSize(size.size)
                                                 setStock(size.stock)
                                                 setSizes(prevState => prevState.filter((s, i) => i !== index))
@@ -219,8 +226,8 @@ const ManageVariantsForm = ({
                                             <button
                                                 className="p-1 bg-red-500  rounded-lg"
                                                 onClick={() => {
-                                                setSizes(prevState => prevState.filter((s, i) => i !== index))
-                                            }}>
+                                                    setSizes(prevState => prevState.filter((s, i) => i !== index))
+                                                }}>
                                                 <IoClose size={15}/>
                                             </button>
                                         </td>
@@ -231,35 +238,35 @@ const ManageVariantsForm = ({
                         </div>
                     </div>
                     <div className='w-full mt-5 flex justify-center'>
-                        <button
+                        <button type="submit"
                             className="bg-primary-100 text-white flex flex-row justify-center items-center h-[2.8rem] px-3 py-1 rounded hover:bg-primary-200">
                             <IoAdd size={30}/>
                             Add Variant
                         </button>
                     </div>
-                    <div>
-                        <h2 className="text-2xl font-bold">
-                            Variants
-                        </h2>
-                        <div className="mt-2">
-                            <table className="min-w-full table-auto text-center">
-                                <thead>
-                                <tr className="bg-slate-600 text-white">
-                                    <th className="px-2">Variant ID</th>
-                                    <th className="px-2">Color Code</th>
-                                    <th className="px-2">Action</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
                 </form>
+                <div>
+                    <h2 className="text-2xl font-bold">
+                        Variants
+                    </h2>
+                    <div className="mt-2">
+                        <table className="min-w-full table-auto text-center">
+                            <thead>
+                            <tr className="bg-slate-600 text-white">
+                                <th className="px-2">Variant ID</th>
+                                <th className="px-2">Color Code</th>
+                                <th className="px-2">Action</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
                 <div className="absolute top-1 right-1">
                     <button onClick={() => {
                         setAddVariantForm(false)
-                        setColorCode('')
+                        setVariantName('')
                         setVariantId('')
                         setImages([])
                         setFile("")
