@@ -62,10 +62,12 @@ const ManageVariantsForm = ({
             setTimeout(() => dispatch(showToast({message: "", type: "", showToast: false})), 3000);
             return;
         }
-        setImages(prevState => [...prevState, {
-            file: evt.target.files[0],
-            url: URL.createObjectURL(evt.target.files[0])
-        }])
+        if (evt.target.files[0]) {
+            setImages(prevState => [...prevState, {
+                file: evt.target.files[0],
+                url: URL.createObjectURL(evt.target.files[0])
+            }])
+        }
         setFile("")
     }
 
@@ -116,7 +118,7 @@ const ManageVariantsForm = ({
     return (
         <DropShadow>
             <div className="bg-white z-50 max-w-[90vw] flex flex-col h-fit rounded p-4 relative">
-                <form onSubmit={async (evt)=>{
+                <form onSubmit={async (evt) => {
                     await onSubmit(evt)
                     setUpdateState(false)
                 }} className="flex-col flex gap-5">
@@ -128,8 +130,8 @@ const ManageVariantsForm = ({
                         <div className="gap-5 flex-row w-full flex justify-center items-center flex-wrap">
                             {images.map((image, index) => (
                                 <div key={index} className="relative">
-                                        <Image width={20} height={20} src={image.url} alt="variant"
-                                               className="w-36 h-36 rounded object-cover"/>
+                                    <Image width={20} height={20} src={image.url} alt="variant"
+                                           className="w-36 h-36 rounded object-cover"/>
                                     <button disabled={updateState} className="absolute top-0 right-0" onClick={() => {
                                         setImages(prevState => prevState.filter((img, i) => i !== index))
                                     }}>

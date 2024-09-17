@@ -1,7 +1,7 @@
 'use client';
 import React, {useEffect, useState} from 'react';
 import {brands} from "@/constant";
-import {IoAdd, IoEye, IoPencil, IoSearch, IoTrash} from "react-icons/io5";
+import {IoAdd, IoCloudUpload, IoEye, IoPencil, IoSearch, IoTrash} from "react-icons/io5";
 import {AnimatePresence} from "framer-motion";
 import AddForm from "@/app/adminPanel/inventory/components/AddForm";
 import {AppDispatch} from "@/lib/store";
@@ -38,6 +38,8 @@ const Page = () => {
     const [updateState, setUpdateState] = useState(false)
     const [type, setType] = useState("none")
     const [brand, setBrand] = useState("")
+    const [thumbnail, setThumbnail] = useState<{file:null | File, url:string | null}>({file:null,url:null})
+
 
     // Mange Variant Form
     const [variantId, setVariantId] = useState('')
@@ -60,9 +62,15 @@ const Page = () => {
         }
 
         if (id.trim().length === 0) {
+            if(thumbnail.file === null){
+                showMessage("Please, upload a thumbnail","Warning")
+                return
+            }
             const genId: string = generateId("item", manufacture);
+            const url = await uploadImages([thumbnail],`inventory/${genId}/`);
+
             const item: Item = {
-                thumbnail: "",
+                thumbnail: url[0],
                 variants: [],
                 type: type.toLowerCase(),
                 brand: brand.toLowerCase(),
@@ -228,6 +236,10 @@ const Page = () => {
         setId("")
         setBrand("")
         setType("none")
+        setThumbnail({
+            file:null,
+            url:null
+        })
     }
     const clearAddVariantFormField = () => {
         setVariantId("")
@@ -281,6 +293,9 @@ const Page = () => {
                         </button>
                     </div>
                 </div>
+                {/*
+                    Table for Inventory
+                */}
                 <div className="w-full mt-5 overflow-auto">
                     <table className="min-w-full table-auto text-left">
                         <thead>
@@ -327,6 +342,10 @@ const Page = () => {
                                         setBuyingPrice(item.buyingPrice.toString())
                                         setSellingPrice(item.sellingPrice.toString())
                                         setDiscount(item.discount.toString())
+                                        setThumbnail({
+                                            file:null,
+                                            url:item.thumbnail
+                                        })
                                         setUpdateState(true)
                                         setAddForm(true)
                                     }} className="bg-yellow-300 text-white px-3 py-1 rounded hover:bg-yellow-400">
@@ -360,6 +379,8 @@ const Page = () => {
                              setManufacture={setManufacture}
                              setSellingPrice={setSellingPrice}
                              id={id} setId={setId}
+                             setThumbnail={setThumbnail}
+                             thumbnail={thumbnail}
                              onSubmit={onAddItemFormSubmit} setType={setType} type={type}/>)}
                 {addVariantForm &&
                     <ManageVariantsForm onSubmit={onVariantFormSubmit}

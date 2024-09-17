@@ -1,7 +1,11 @@
 import React from 'react';
 import {brands, types} from "@/constant";
-import {IoClose} from "react-icons/io5";
+import {IoClose, IoCloudUpload} from "react-icons/io5";
 import DropShadow from "@/components/DropShadow";
+import Image from "next/image";
+import {showToast} from "@/lib/toastSlice/toastSlice";
+import {useDispatch} from "react-redux";
+import {AppDispatch} from "@/lib/store";
 
 const AddForm = ({
                      onSubmit,
@@ -24,6 +28,8 @@ const AddForm = ({
                      setType,
                      brand,
                      setBrand,
+                     thumbnail,
+                     setThumbnail
                  }: {
     id: string,
     discount: number,
@@ -45,7 +51,30 @@ const AddForm = ({
     setType: React.Dispatch<React.SetStateAction<string>>,
     brand: string,
     setBrand: React.Dispatch<React.SetStateAction<string>>,
+    setThumbnail: React.Dispatch<React.SetStateAction<object>>,
+    thumbnail: object
 }) => {
+    const dispatch: AppDispatch = useDispatch();
+
+    const handleFile = (evt: any) => {
+        if (evt.target.files[0]?.size >= 10000000) {
+            dispatch(showToast({
+                message: "File size is larger than 10MB",
+                type: "Error",
+                showToast: true
+            }))
+            setTimeout(() => dispatch(showToast({message: "", type: "", showToast: false})), 3000);
+            return;
+        }
+        if(evt.target.files[0]){
+            setThumbnail({
+                file: evt.target.files[0],
+                url: URL.createObjectURL(evt.target.files[0])
+            })
+        }
+    }
+
+    console.log(thumbnail)
     return (
         <DropShadow>
             <div className="bg-white z-50 w-[90vw] flex h-fit rounded p-4 relative">
@@ -53,6 +82,29 @@ const AddForm = ({
                     <legend className="text-2xl font-bold">
                         Add Item
                     </legend>
+
+                    <div className="flex relative justify-center items-center flex-col">
+                        {thumbnail.url &&
+                            <div className="relative">
+                            <Image width={40} height={40} src={thumbnail.url} className="h-[40vh] w-[30vw] border-2 p-1 rounded bg-cover" alt="thumbnail"/>
+                                <button disabled={updateState} className="top-2 absolute right-2" onClick={()=> setThumbnail({file:null,url:null})}>
+                                    <IoClose size={30}/>
+                                </button>
+                            </div>
+                        }
+
+                        <div className="flex mt-2 relative justify-center items-center flex-col">
+                            <IoCloudUpload size={30}/>
+                            <p>
+                                Upload Image
+                            </p>
+                            <input disabled={updateState}
+                                   type="file" multiple
+                                   accept=".jpeg, .jpg, .png"
+                                   onChange={(file)=>handleFile(file)}
+                                   className="absolute w-[10vw] border-2 p-1 h-[10vh] opacity-0 bg-black"/>
+                        </div>
+                    </div>
                     <div className="mt-5 flex w-full flex-row justify-center items-center flex-wrap gap-8">
                         <label className="flex-col hidden gap-1">
                             <span className="font-medium">Product ID</span>
@@ -135,7 +187,7 @@ const AddForm = ({
                         setDiscount("")
                         setType("none")
                         setBrand('')
-
+                        setThumbnail({file:null,url:null})
                         setAddForm(false)
                         setUpdateState(false)
                     }}>

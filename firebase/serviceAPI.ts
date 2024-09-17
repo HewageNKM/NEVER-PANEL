@@ -66,6 +66,7 @@ export const searchInventoryByPhrase = async (name: string) => {
 export const uploadImages = async (images: File[], path: string): Promise<string[]> => {
     const urls: string[] = [];
     const uploadPromises = images.map((file) => {
+        console.log(file)
         return new Promise<void>((resolve, reject) => {
             const storageRef = ref(storage, path+`/${file.file.name}`);
             const uploadTask = uploadBytesResumable(storageRef, file.file);
