@@ -1,12 +1,6 @@
 import {initializeApp} from "firebase/app";
-import {
-    browserLocalPersistence,
-    getAuth,
-    onAuthStateChanged,
-    setPersistence,
-    signInWithEmailAndPassword
-} from "@firebase/auth";
-import {collection, doc, getDoc, getFirestore} from "@firebase/firestore";
+import {getAuth} from "@firebase/auth";
+import {collection, getFirestore} from "@firebase/firestore";
 import {getStorage} from "@firebase/storage";
 
 // Firebase configuration
