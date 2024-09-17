@@ -14,20 +14,19 @@ import {
     filterInventoryByBrands,
     getInventory,
     saveToInventory,
-    searchInventoryByPhrase, uploadImages
+    searchInventoryByPhrase,
+    uploadImages
 } from "@/firebase/serviceAPI";
 import {Item, Size, Variant} from "@/interfaces";
 import Loading from "@/app/adminPanel/components/Loading";
-import {type} from "node:os";
-import {id} from "postcss-selector-parser";
 
 const Page = () => {
+    const [loadItemTable, setLoadItemTable] = useState(true)
     const [addForm, setAddForm] = useState(false)
     const [addVariantForm, setAddVariantForm] = useState(false)
     const dispatch: AppDispatch = useDispatch();
     const [inventoryList, setInventoryList] = useState([] as Item[])
-    const [tableLoading, setTableLoading] = useState(true)
-    const [refreshTable, setRefreshTable] = useState(false)
+    const [refreshItemTable, setRefreshItemTable] = useState(false)
     const [search, setSearch] = useState('')
 
     // Add Item Form
@@ -48,7 +47,6 @@ const Page = () => {
     const [selectedThumbnail, setSelectedThumbnail] = useState({} as File)
     const [sizes, setSizes] = useState([] as Size[])
     const [selectedItem, setSelectedItem] = useState({} as Item)
-
 
     const onAddItemFormSubmit = async (evt: any) => {
         evt.preventDefault();
@@ -115,12 +113,7 @@ const Page = () => {
             showMessage("Please, add the sizes","Warning")
             return;
         }
-        if(selectedThumbnail.file === null || selectedThumbnail.file === undefined){
-            showMessage("Please, select the thumbnail","Warning")
-            return;
-        }
         const genId = generateId("variant",selectedItem.itemId);
-        console.log(genId)
         try {
             const thumbnailUrl = await uploadImages([selectedThumbnail],`inventory/${selectedItem.itemId}/${genId}/thumbnail/`);
             const imagesUrl = await uploadImages(images,`inventory/${selectedItem.itemId}/${genId}/`)
@@ -131,17 +124,26 @@ const Page = () => {
             }
             selectedItem.variants.push(variant)
             selectedItem.thumbnail = thumbnailUrl[0]
+            setSelectedItem(selectedItem)
             await saveItem(selectedItem,"Successfully added variant successfully")
 
         }catch (e:any){
             showMessage(e.message,"Error")
         }
     }
+    const updateVariant = async (variant:Variant) => {
+        if(variant.sizes.length === 0){
+            showMessage("Please, add the sizes","Warning")
+            return;
+        }
+        selectedItem.variants = selectedItem.variants.map((v) => v.variantId === variant.variantId ? variant : v)
+        await saveItem(selectedItem,"Successfully updated variant")
+    }
     const saveItem = async (item:Item, message:string) => {
         try {
             await saveToInventory(item);
             setAddForm(false)
-            setRefreshTable(prevState => !prevState)
+            setRefreshItemTable(prevState => !prevState)
             showMessage(message,"Success")
             clearAddFormField();
             clearAddVariantFormField();
@@ -156,7 +158,7 @@ const Page = () => {
         if (response) {
             try {
                 await deleteInventoryItem(id);
-                setRefreshTable(prevState => !prevState)
+                setRefreshItemTable(prevState => !prevState)
                 showMessage("Item updated successfully","Success")
                 return;
             } catch (e: any) {
@@ -165,8 +167,9 @@ const Page = () => {
         }
     }
 
+    //Filter Inventory by Brands
     const filterInventory = async (brands:string) => {
-        if(brands === "all") {setRefreshTable(prevState => !prevState)}
+        if(brands === "all") {setRefreshItemTable(prevState => !prevState)}
         try {
             const items = await filterInventoryByBrands(brands.toLowerCase())
             setInventoryList(items)
@@ -175,6 +178,7 @@ const Page = () => {
         }
     }
 
+    //Search Inventory by name
     const searchInventory = async () => {
 
         if(search.trim().length === 0) {
@@ -182,25 +186,39 @@ const Page = () => {
             return;
         }
         try {
-            setTableLoading(true)
+            setLoadItemTable(true)
             const searchList = await searchInventoryByPhrase(search.toLowerCase());
             setInventoryList(searchList)
         }catch (e:any){
             showMessage(e.message,"Error")
         }finally {
-            setTableLoading(false)
+            setLoadItemTable(false)
         }
     }
 
     useEffect(() => {
-        setTableLoading(true)
+        setLoadItemTable(true)
         getInventory().then((items) => {
             setInventoryList(items)
         }).catch((e) => {
             showMessage(e.message,"Error")
-        }).finally(() => setTableLoading(false))
-    }, [refreshTable,dispatch])
+        }).finally(() => setLoadItemTable(false))
+    }, [refreshItemTable,dispatch])
 
+
+    //Delete Variant by id
+    const deleteVariant = async (variantId:string) => {
+        const response = confirm(`Are you sure you want to delete this variant with ID ${variantId}?`);
+        if (response) {
+            try {
+                selectedItem.variants = selectedItem.variants.filter(variant => variant.variantId !== variantId);
+                await saveItem(selectedItem,"Successfully deleted variant")
+                setSelectedItem(selectedItem)
+            }catch (e:any){
+                showMessage(e.message,"Error")
+            }
+        }
+    }
     const clearAddFormField = () => {
         setManufacture("none")
         setName("")
@@ -223,6 +241,7 @@ const Page = () => {
         setTimeout(() => dispatch(showToast({message: "", type: "", showToast: false})), 3000);
         return;
     }
+
     return (
         <div className="relative w-full h-screen">
             <div className="md:pt-24 pt-32 px-4 py-4 flex flex-col relative">
@@ -249,7 +268,7 @@ const Page = () => {
                             </select>
                         </label>
                         <div className="w-full mt-5 flex justify-start items-start">
-                            <button onClick={()=> setRefreshTable(prevState => !prevState)} className="bg-primary-100 font-medium text-white rounded p-2">
+                            <button onClick={()=> setRefreshItemTable(prevState => !prevState)} className="bg-primary-100 font-medium text-white rounded p-2">
                                 Refresh
                             </button>
                         </div>
@@ -279,7 +298,7 @@ const Page = () => {
                         </tr>
                         </thead>
                         <tbody>
-                        {!tableLoading && inventoryList.map((item, index) => (
+                        {!loadItemTable && inventoryList.map((item, index) => (
                             <tr key={index}
                                 className={`odd:bg-slate-200 hover:bg-white even:bg-slate-300`}>
                                 <td className="p-1 font-medium uppercase">{item.itemId}</td>
@@ -321,22 +340,42 @@ const Page = () => {
                         ))}
                         </tbody>
                     </table>
-                    {tableLoading && <Loading />}
+                    {loadItemTable && <Loading />}
                 </div>
             </div>
             <AnimatePresence>
                 {addForm && (
-                    <AddForm brand={brand} setBrand={setBrand} updateState={updateState} setUpdateState={setUpdateState} discount={discount} sellingPrice={sellingPrice} buyingPrice={buyingPrice} name={name}
-                             manufacture={manufacture} setAddForm={setAddForm} setDiscount={setDiscount}
-                             setBuyingPrice={setBuyingPrice} setName={setName} setManufacture={setManufacture}
+                    <AddForm brand={brand} setBrand={setBrand}
+                             updateState={updateState}
+                             setUpdateState={setUpdateState}
+                             discount={discount}
+                             sellingPrice={sellingPrice}
+                             buyingPrice={buyingPrice}
+                             name={name}
+                             manufacture={manufacture}
+                             setAddForm={setAddForm}
+                             setDiscount={setDiscount}
+                             setBuyingPrice={setBuyingPrice}
+                             setName={setName}
+                             setManufacture={setManufacture}
                              setSellingPrice={setSellingPrice}
                              id={id} setId={setId}
                              onSubmit={onAddItemFormSubmit} setType={setType} type={type}/>)}
                 {addVariantForm &&
-                    <ManageVariantsForm onSubmit={onVariantFormSubmit} setAddVariantForm={setAddVariantForm} variantName={variantName} variantId={variantId}
-                                        setVariantName={setVariantName} setVariantId={setVariantId} images={images}
-                                        setImages={setImages} selectedThumbnail={selectedThumbnail}
-                                        setSelectedThumbnail={setSelectedThumbnail} setSizes={setSizes} sizes={sizes} selectedItem={selectedItem}/>}
+                    <ManageVariantsForm onSubmit={onVariantFormSubmit}
+                                        setAddVariantForm={setAddVariantForm}
+                                        variantName={variantName}
+                                        variantId={variantId}
+                                        setVariantName={setVariantName}
+                                        setVariantId={setVariantId}
+                                        images={images}
+                                        setImages={setImages}
+                                        selectedThumbnail={selectedThumbnail}
+                                        setSelectedThumbnail={setSelectedThumbnail}
+                                        setSizes={setSizes} sizes={sizes} selectedItem={selectedItem}
+                                        deleteVariant={deleteVariant}
+                                        updateVariant={updateVariant}
+                    />}
             </AnimatePresence>
         </div>
     );

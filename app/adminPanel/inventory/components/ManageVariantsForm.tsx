@@ -21,7 +21,9 @@ const ManageVariantsForm = ({
                                 setSizes,
                                 sizes,
                                 selectedItem,
-                                onSubmit
+                                onSubmit,
+                                deleteVariant,
+                                updateVariant
                             }: {
     variantId: string,
     variantName: string,
@@ -35,11 +37,14 @@ const ManageVariantsForm = ({
     setSizes: React.Dispatch<React.SetStateAction<Size[]>>
     sizes: Size[],
     selectedItem: Item,
-    onSubmit: any
+    onSubmit: any,
+    deleteVariant: any,
+    updateVariant: any
 }) => {
     const [file, setFile] = React.useState<string | undefined>("");
     const [selectedSize, setSelectedSize] = useState("none")
     const [stock, setStock] = useState(0)
+    const [updateState, setUpdateState] = useState(false)
 
     const dispatch: AppDispatch = useDispatch();
     const handleFileSelect = (evt: any) => {
@@ -125,11 +130,13 @@ const ManageVariantsForm = ({
                         <div className="gap-5 flex-row w-full flex justify-center items-center flex-wrap">
                             {images.map((image, index) => (
                                 <div key={index} className="relative">
-                                    <Image onClick={() => {
+                                    <button type="button" disabled={updateState} onClick={() => {
                                         setSelectedThumbnail(image)
-                                    }} width={20} height={20} src={image.url} alt="variant"
-                                           className={`w-36 h-36 rounded object-cover ${selectedThumbnail.url == image.url && "border-primary-100 border-4"}`}/>
-                                    <button className="absolute top-0 right-0" onClick={() => {
+                                    }}>
+                                        <Image width={20} height={20} src={image.url} alt="variant"
+                                               className={`w-36 h-36 rounded object-cover ${selectedThumbnail.url == image.url && "border-primary-100 border-4"}`}/>
+                                    </button>
+                                    <button disabled={updateState} className="absolute top-0 right-0" onClick={() => {
                                         setImages(prevState => prevState.filter((img, i) => i !== index))
                                         setSelectedThumbnail({})
                                     }}>
@@ -156,7 +163,8 @@ const ManageVariantsForm = ({
                         <label className="flex-col flex justify-center items-center gap-1">
                             <div className="flex  relative justify-center items-center flex-col">
                                 <IoCloudUpload size={30}/>
-                                <input value={file} onChange={(file) => handleFileSelect(file)} type="file" multiple
+                                <input disabled={updateState} value={file} onChange={(file) => handleFileSelect(file)}
+                                       type="file" multiple
                                        accept="image/*"
                                        className="absolute w-[5rem] opacity-0 bg-black"/>
                             </div>
@@ -239,7 +247,7 @@ const ManageVariantsForm = ({
                     </div>
                     <div className='w-full mt-5 flex justify-center'>
                         <button type="submit"
-                            className="bg-primary-100 text-white flex flex-row justify-center items-center h-[2.8rem] px-3 py-1 rounded hover:bg-primary-200">
+                                className="bg-primary-100 text-white flex flex-row justify-center items-center h-[2.8rem] px-3 py-1 rounded hover:bg-primary-200">
                             <IoAdd size={30}/>
                             Add Variant
                         </button>
@@ -254,11 +262,40 @@ const ManageVariantsForm = ({
                             <thead>
                             <tr className="bg-slate-600 text-white">
                                 <th className="px-2">Variant ID</th>
-                                <th className="px-2">Color Code</th>
+                                <th className="px-2">Variant Name</th>
                                 <th className="px-2">Action</th>
                             </tr>
                             </thead>
                             <tbody>
+                            {selectedItem.variants.map((variant, index) => (
+                                <tr key={index}
+                                    className="odd:bg-slate-200 hover:bg-white even:bg-slate-300"
+                                >
+                                    <td className="px-2 uppercase">{variant.variantId}</td>
+                                    <td className="px-2 capitalize">{variant.variantName}</td>
+                                    <td className="px-2 flex flex-row gap-1 justify-end">
+                                        <button onClick={() => {
+                                            setVariantId(variant.variantId)
+                                            setVariantName(variant.variantName)
+                                            setImages(variant.images.map((img: any) => ({
+                                                file: "",
+                                                url: img
+                                            })))
+                                            setSizes(variant.sizes)
+                                            setUpdateState(true)
+                                        }} type="button" className="p-1 bg-yellow-300 rounded-lg">
+                                            <IoPencil size={15}/>
+                                        </button>
+                                        <button
+                                            className="p-1 bg-red-500  rounded-lg"
+                                            onClick={() => {
+                                                deleteVariant(variant.variantId)
+                                            }}>
+                                            <IoClose size={15}/>
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
                             </tbody>
                         </table>
                     </div>
@@ -274,6 +311,7 @@ const ManageVariantsForm = ({
                         setSizes([])
                         setSelectedSize("none")
                         setStock(0)
+                        setUpdateState(false)
                     }}>
                         <IoClose size={30}/>
                     </button>
