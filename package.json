@@ -9,7 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@algolia/autocomplete-js": "^1.17.4",
+    "@algolia/autocomplete-theme-classic": "1.17.4",
     "@reduxjs/toolkit": "^2.2.7",
+    "algoliasearch": "^5.4.3",
     "firebase": "^10.13.1",
     "framer-motion": "^11.5.4",
     "lottie-react": "^2.4.0",

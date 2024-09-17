@@ -51,18 +51,6 @@ export const filterInventoryByBrands = async (brand: string) => {
     return items ? items : [];
 }
 
-export const searchInventoryByPhrase = async (name: string) => {
-    console.log(name);
-    const filteredQuery = query(inventoryCollectionRef, where("name", "==", name));
-    const docs = await getDocs(filteredQuery);
-    let items: Item[] = [];
-    docs.forEach(doc => {
-        items.push(doc.data() as Item);
-    })
-    console.log(items);
-    return items ? items : [];
-}
-
 export const uploadImages = async (images: File[], path: string): Promise<string[]> => {
     const urls: string[] = [];
     const uploadPromises = images.map((file) => {

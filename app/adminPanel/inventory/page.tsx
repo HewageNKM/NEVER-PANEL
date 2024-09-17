@@ -1,7 +1,7 @@
 'use client';
 import React, {useEffect, useState} from 'react';
 import {brands} from "@/constant";
-import {IoAdd, IoCloudUpload, IoEye, IoPencil, IoSearch, IoTrash} from "react-icons/io5";
+import {IoAdd, IoEye, IoPencil, IoTrash} from "react-icons/io5";
 import {AnimatePresence} from "framer-motion";
 import AddForm from "@/app/adminPanel/inventory/components/AddForm";
 import {AppDispatch} from "@/lib/store";
@@ -14,10 +14,11 @@ import {
     filterInventoryByBrands,
     getInventory,
     saveToInventory,
-    searchInventoryByPhrase, uploadImages
+    uploadImages
 } from "@/firebase/serviceAPI";
 import {Item, Size, Variant} from "@/interfaces";
 import Loading from "@/app/adminPanel/components/Loading";
+import AlgoliaSearch from "@/components/AlgoliaSearch";
 
 const Page = () => {
     const [loadItemTable, setLoadItemTable] = useState(true)
@@ -26,7 +27,6 @@ const Page = () => {
     const dispatch: AppDispatch = useDispatch();
     const [inventoryList, setInventoryList] = useState([] as Item[])
     const [refreshItemTable, setRefreshItemTable] = useState(false)
-    const [search, setSearch] = useState('')
     const [itemsCount, setItemsCount] = useState(0)
 
     // Add Item Form
@@ -39,7 +39,7 @@ const Page = () => {
     const [updateState, setUpdateState] = useState(false)
     const [type, setType] = useState("none")
     const [brand, setBrand] = useState("")
-    const [thumbnail, setThumbnail] = useState<{file:null | File, url:string | null}>({file:null,url:null})
+    const [thumbnail, setThumbnail] = useState<{ file: null | File, url: string | null }>({file: null, url: null})
 
 
     // Mange Variant Form
@@ -63,12 +63,12 @@ const Page = () => {
         }
 
         if (id.trim().length === 0) {
-            if(thumbnail.file === null){
-                showMessage("Please, upload a thumbnail","Warning")
+            if (thumbnail.file === null) {
+                showMessage("Please, upload a thumbnail", "Warning")
                 return
             }
             const genId: string = generateId("item", manufacture);
-            const url = await uploadImages([thumbnail],`inventory/${genId}/`);
+            const url = await uploadImages([thumbnail], `inventory/${genId}/`);
 
             const item: Item = {
                 thumbnail: url[0],
@@ -97,8 +97,8 @@ const Page = () => {
                 manufacturer: manufacture.toLowerCase(),
                 name: name.toLowerCase(),
                 sellingPrice: Number.parseInt(sellingPrice),
-                thumbnail:i?.thumbnail || "",
-                variants:i?.variants || []
+                thumbnail: i?.thumbnail || "",
+                variants: i?.variants || []
             }
             // Update Item and setUpdateState to false so when add manufacture name can be edited
             await saveItem(item, "Item updated successfully")
@@ -118,19 +118,19 @@ const Page = () => {
             showMessage("Please, add the sizes", "Warning")
             return;
         }
-        if(images.pop().file === ''){
+        if (images.pop().file === '') {
             selectedItem.variants = selectedItem.variants.map((v) => v.variantId === variantId ? {
                 ...v, sizes: sizes, variantName: variantName
             } : v)
 
             setSelectedItem(selectedItem)
-            await saveItem(selectedItem,"Successfully added variant successfully")
-        } else{
-            const genId = generateId("variant",selectedItem.itemId);
+            await saveItem(selectedItem, "Successfully added variant successfully")
+        } else {
+            const genId = generateId("variant", selectedItem.itemId);
             try {
-                const imagesUrl = await uploadImages(images,`inventory/${selectedItem.itemId}/${genId}/`)
+                const imagesUrl = await uploadImages(images, `inventory/${selectedItem.itemId}/${genId}/`)
                 console.log(imagesUrl)
-                const variant:Variant = {
+                const variant: Variant = {
                     images: imagesUrl, sizes: sizes, variantId: genId, variantName: variantName
 
                 }
@@ -138,14 +138,14 @@ const Page = () => {
                 selectedItem.variants.push(variant)
                 selectedItem.thumbnail = imagesUrl.pop() || ""
                 setSelectedItem(selectedItem)
-                await saveItem(selectedItem,"Successfully added variant successfully")
-            }catch (e:any){
+                await saveItem(selectedItem, "Successfully added variant successfully")
+            } catch (e: any) {
                 console.log(e)
-                showMessage(e.message,"Error")
+                showMessage(e.message, "Error")
             }
         }
     }
-    const saveItem = async (item:Item, message:string) => {
+    const saveItem = async (item: Item, message: string) => {
         try {
             await saveToInventory(item);
             setAddForm(false)
@@ -187,24 +187,6 @@ const Page = () => {
         }
     }
 
-    //Search Inventory by name
-    const searchInventory = async () => {
-
-        if (search.trim().length === 0) {
-            showMessage("Please, enter the search query", "Warning")
-            return;
-        }
-        try {
-            setLoadItemTable(true)
-            const searchList = await searchInventoryByPhrase(search.toLowerCase());
-            setInventoryList(searchList)
-        } catch (e: any) {
-            showMessage(e.message, "Error")
-        } finally {
-            setLoadItemTable(false)
-        }
-    }
-
     useEffect(() => {
         setLoadItemTable(true)
         getInventory().then((items) => {
@@ -238,8 +220,8 @@ const Page = () => {
         setBrand("")
         setType("none")
         setThumbnail({
-            file:null,
-            url:null
+            file: null,
+            url: null
         })
     }
     const clearAddVariantFormField = () => {
@@ -262,11 +244,18 @@ const Page = () => {
                     <div className="flex flex-col gap-1">
                         <label className="flex relative flex-col gap-1">
                             <span className="font-bold text-lg">Search</span>
-                            <input value={search} onChange={(txt) => setSearch(txt.target.value)} type="text"
+                            <div className="flex flex-row gap-2">
+                                <AlgoliaSearch setInventory={setInventoryList}/>
+                                <button onClick={() => setRefreshItemTable(prevState => !prevState)}
+                                        className="bg-yellow-400 hover:bg-yellow-500 font-medium text-white rounded p-2">
+                                    Reset Table
+                                </button>
+                            </div>
+                            {/*<input value={search} onChange={(txt) => setSearch(txt.target.value)} type="text"
                                    placeholder="Search"
                                    className="p-1 pr-8 border-2 border-slate-300 rounded w-full md:w-[15rem]"/>
-                            <button onClick={searchInventory} className="absolute top-10 right-2 "><IoSearch size={20}/>
-                            </button>
+                             <button onClick={searchInventory} className="absolute top-10 right-2 "><IoSearch size={20}/>
+                            </button>*/}
                         </label>
                         <label className="flex flex-col mt-2">
                             <span className="font-bold text-lg">Brands</span>
@@ -279,12 +268,6 @@ const Page = () => {
                                 <option key={0} value="all">All</option>
                             </select>
                         </label>
-                        <div className="w-full mt-5 flex justify-start items-start">
-                            <button onClick={() => setRefreshItemTable(prevState => !prevState)}
-                                    className="bg-primary-100 font-medium text-white rounded p-2">
-                                Refresh
-                            </button>
-                        </div>
                     </div>
                     <div className="flex justify-center items-center">
                         <button onClick={() => setAddForm(true)}
@@ -347,8 +330,8 @@ const Page = () => {
                                         setSellingPrice(item.sellingPrice.toString())
                                         setDiscount(item.discount.toString())
                                         setThumbnail({
-                                            file:null,
-                                            url:item.thumbnail
+                                            file: null,
+                                            url: item.thumbnail
                                         })
                                         setUpdateState(true)
                                         setAddForm(true)
