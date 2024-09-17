@@ -23,7 +23,7 @@ const ManageVariantsForm = ({
                                 selectedItem,
                                 onSubmit,
                                 deleteVariant,
-                                updateVariant
+
                             }: {
     variantId: string,
     variantName: string,
@@ -39,7 +39,6 @@ const ManageVariantsForm = ({
     selectedItem: Item,
     onSubmit: any,
     deleteVariant: any,
-    updateVariant: any
 }) => {
     const [file, setFile] = React.useState<string | undefined>("");
     const [selectedSize, setSelectedSize] = useState("none")
@@ -121,7 +120,10 @@ const ManageVariantsForm = ({
     return (
         <DropShadow>
             <div className="bg-white z-50 max-w-[90vw] flex flex-col h-fit rounded p-4 relative">
-                <form onSubmit={onSubmit} className="flex-col flex gap-5">
+                <form onSubmit={async (evt)=>{
+                    await onSubmit(evt)
+                    setUpdateState(false)
+                }} className="flex-col flex gap-5">
                     <legend className="text-2xl font-bold">
                         Manage Variants
                     </legend>

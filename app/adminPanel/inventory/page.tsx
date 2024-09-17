@@ -14,8 +14,7 @@ import {
     filterInventoryByBrands,
     getInventory,
     saveToInventory,
-    searchInventoryByPhrase,
-    uploadImages
+    searchInventoryByPhrase, uploadImages
 } from "@/firebase/serviceAPI";
 import {Item, Size, Variant} from "@/interfaces";
 import Loading from "@/app/adminPanel/components/Loading";
@@ -52,12 +51,12 @@ const Page = () => {
         evt.preventDefault();
 
         if (manufacture === "none") {
-            showMessage("Please, select the manufacture","Warning")
+            showMessage("Please, select the manufacture", "Warning")
             return;
         }
 
         if (type === "none") {
-            showMessage("Please, select the type","Warning")
+            showMessage("Please, select the type", "Warning")
             return;
         }
 
@@ -66,9 +65,9 @@ const Page = () => {
 
             const item: Item = {
                 thumbnail: "",
-                variants:[],
-                type:type.toLowerCase(),
-                brand:brand.toLowerCase(),
+                variants: [],
+                type: type.toLowerCase(),
+                brand: brand.toLowerCase(),
                 buyingPrice: Number.parseInt(buyingPrice),
                 discount: Number.parseInt(discount),
                 itemId: genId.toLowerCase(),
@@ -83,9 +82,9 @@ const Page = () => {
         } else if (id.trim().length > 0) {
             const item: Item = {
                 brand: brand.toLowerCase(),
-                variants:[],
-                type:type.toLowerCase(),
-                thumbnail:"",
+                variants: [],
+                type: type.toLowerCase(),
+                thumbnail: "",
                 buyingPrice: Number.parseInt(buyingPrice),
                 discount: Number.parseInt(discount),
                 itemId: id.toLowerCase(),
@@ -104,51 +103,52 @@ const Page = () => {
     const onVariantFormSubmit = async (evt: any) => {
         evt.preventDefault();
 
-        if(images.length === 0){
-            showMessage("Please, upload at least 5 images","Warning")
+        if (images.length === 0) {
+            showMessage("Please, upload at least 5 images", "Warning")
             return;
         }
 
         if (sizes.length === 0) {
-            showMessage("Please, add the sizes","Warning")
+            showMessage("Please, add the sizes", "Warning")
             return;
         }
-        const genId = generateId("variant",selectedItem.itemId);
-        try {
-            const thumbnailUrl = await uploadImages([selectedThumbnail],`inventory/${selectedItem.itemId}/${genId}/thumbnail/`);
-            const imagesUrl = await uploadImages(images,`inventory/${selectedItem.itemId}/${genId}/`)
-            console.log(imagesUrl)
-            const variant:Variant = {
-                images: imagesUrl, sizes: sizes, variantId: genId, variantName: variantName
+        if(images.pop().file === ''){
+            selectedItem.variants = selectedItem.variants.map((v) => v.variantId === variantId ? {
+                ...v, sizes: sizes, variantName: variantName
+            } : v)
 
-            }
-            selectedItem.variants.push(variant)
-            selectedItem.thumbnail = thumbnailUrl[0]
             setSelectedItem(selectedItem)
             await saveItem(selectedItem,"Successfully added variant successfully")
+        } else{
+            const genId = generateId("variant",selectedItem.itemId);
+            try {
+                const thumbnailUrl = await uploadImages([selectedThumbnail],`inventory/${selectedItem.itemId}/${genId}/thumbnail/`);
+                const imagesUrl = await uploadImages(images,`inventory/${selectedItem.itemId}/${genId}/`)
+                console.log(imagesUrl)
+                const variant:Variant = {
+                    images: imagesUrl, sizes: sizes, variantId: genId, variantName: variantName
 
-        }catch (e:any){
-            showMessage(e.message,"Error")
+                }
+
+                selectedItem.variants.push(variant)
+                selectedItem.thumbnail = thumbnailUrl[0]
+                setSelectedItem(selectedItem)
+                await saveItem(selectedItem,"Successfully added variant successfully")
+            }catch (e:any){
+                showMessage(e.message,"Error")
+            }
         }
-    }
-    const updateVariant = async (variant:Variant) => {
-        if(variant.sizes.length === 0){
-            showMessage("Please, add the sizes","Warning")
-            return;
-        }
-        selectedItem.variants = selectedItem.variants.map((v) => v.variantId === variant.variantId ? variant : v)
-        await saveItem(selectedItem,"Successfully updated variant")
     }
     const saveItem = async (item:Item, message:string) => {
         try {
             await saveToInventory(item);
             setAddForm(false)
             setRefreshItemTable(prevState => !prevState)
-            showMessage(message,"Success")
+            showMessage(message, "Success")
             clearAddFormField();
             clearAddVariantFormField();
         } catch (e: any) {
-            showMessage(e.message,"Error")
+            showMessage(e.message, "Error")
         }
     }
 
@@ -159,39 +159,41 @@ const Page = () => {
             try {
                 await deleteInventoryItem(id);
                 setRefreshItemTable(prevState => !prevState)
-                showMessage("Item updated successfully","Success")
+                showMessage("Item updated successfully", "Success")
                 return;
             } catch (e: any) {
-                showMessage(e.message,"Error")
+                showMessage(e.message, "Error")
             }
         }
     }
 
     //Filter Inventory by Brands
-    const filterInventory = async (brands:string) => {
-        if(brands === "all") {setRefreshItemTable(prevState => !prevState)}
+    const filterInventory = async (brands: string) => {
+        if (brands === "all") {
+            setRefreshItemTable(prevState => !prevState)
+        }
         try {
             const items = await filterInventoryByBrands(brands.toLowerCase())
             setInventoryList(items)
-        }catch (e:any){
-            showMessage(e.message,"Error")
+        } catch (e: any) {
+            showMessage(e.message, "Error")
         }
     }
 
     //Search Inventory by name
     const searchInventory = async () => {
 
-        if(search.trim().length === 0) {
-            showMessage("Please, enter the search query","Warning")
+        if (search.trim().length === 0) {
+            showMessage("Please, enter the search query", "Warning")
             return;
         }
         try {
             setLoadItemTable(true)
             const searchList = await searchInventoryByPhrase(search.toLowerCase());
             setInventoryList(searchList)
-        }catch (e:any){
-            showMessage(e.message,"Error")
-        }finally {
+        } catch (e: any) {
+            showMessage(e.message, "Error")
+        } finally {
             setLoadItemTable(false)
         }
     }
@@ -201,21 +203,21 @@ const Page = () => {
         getInventory().then((items) => {
             setInventoryList(items)
         }).catch((e) => {
-            showMessage(e.message,"Error")
+            showMessage(e.message, "Error")
         }).finally(() => setLoadItemTable(false))
-    }, [refreshItemTable,dispatch])
+    }, [refreshItemTable, dispatch])
 
 
     //Delete Variant by id
-    const deleteVariant = async (variantId:string) => {
+    const deleteVariant = async (variantId: string) => {
         const response = confirm(`Are you sure you want to delete this variant with ID ${variantId}?`);
         if (response) {
             try {
                 selectedItem.variants = selectedItem.variants.filter(variant => variant.variantId !== variantId);
-                await saveItem(selectedItem,"Successfully deleted variant")
+                await saveItem(selectedItem, "Successfully deleted variant")
                 setSelectedItem(selectedItem)
-            }catch (e:any){
-                showMessage(e.message,"Error")
+            } catch (e: any) {
+                showMessage(e.message, "Error")
             }
         }
     }
@@ -236,8 +238,8 @@ const Page = () => {
         setSelectedThumbnail({} as File)
         setSizes([])
     }
-    const showMessage = (message:string,type:string)=>{
-        dispatch(showToast({message: message, type:type, showToast: true}))
+    const showMessage = (message: string, type: string) => {
+        dispatch(showToast({message: message, type: type, showToast: true}))
         setTimeout(() => dispatch(showToast({message: "", type: "", showToast: false})), 3000);
         return;
     }
@@ -268,13 +270,14 @@ const Page = () => {
                             </select>
                         </label>
                         <div className="w-full mt-5 flex justify-start items-start">
-                            <button onClick={()=> setRefreshItemTable(prevState => !prevState)} className="bg-primary-100 font-medium text-white rounded p-2">
+                            <button onClick={() => setRefreshItemTable(prevState => !prevState)}
+                                    className="bg-primary-100 font-medium text-white rounded p-2">
                                 Refresh
                             </button>
                         </div>
                     </div>
                     <div className="flex justify-center items-center">
-                    <button onClick={() => setAddForm(true)}
+                        <button onClick={() => setAddForm(true)}
                                 className="bg-primary-100 text-white flex flex-row justify-center items-center h-[2.8rem] px-3 py-1 rounded hover:bg-primary-200">
                             <IoAdd size={30}/>
                             Add Item
@@ -340,7 +343,7 @@ const Page = () => {
                         ))}
                         </tbody>
                     </table>
-                    {loadItemTable && <Loading />}
+                    {loadItemTable && <Loading/>}
                 </div>
             </div>
             <AnimatePresence>
@@ -374,7 +377,6 @@ const Page = () => {
                                         setSelectedThumbnail={setSelectedThumbnail}
                                         setSizes={setSizes} sizes={sizes} selectedItem={selectedItem}
                                         deleteVariant={deleteVariant}
-                                        updateVariant={updateVariant}
                     />}
             </AnimatePresence>
         </div>
