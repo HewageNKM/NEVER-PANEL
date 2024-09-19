@@ -27,7 +27,6 @@ const Page = () => {
     const dispatch: AppDispatch = useDispatch();
     const [inventoryList, setInventoryList] = useState([] as Item[])
     const [refreshItemTable, setRefreshItemTable] = useState(false)
-    const [itemsCount, setItemsCount] = useState(0)
 
     // Add Item Form
     const [id, setId] = useState('');
@@ -191,7 +190,6 @@ const Page = () => {
         setLoadItemTable(true)
         getInventory().then((items) => {
             setInventoryList(items)
-            setItemsCount(items.length || 0)
         }).catch((e) => {
             showMessage(e.message, "Error")
         }).finally(() => setLoadItemTable(false))
@@ -238,24 +236,19 @@ const Page = () => {
 
     return (
         <div className="relative w-full h-screen">
-            <div className="md:pt-24 pt-32 px-4 py-4 flex flex-col relative">
+            <div className="md:pt-24 pt-32 px-4 py-4 flex flex-col relative justify-center lg:justify-between items-center lg:items-stretch">
                 <h1 className="text-3xl font-bold">Inventory</h1>
-                <div className="mt-2 flex justify-between flex-wrap gap-5 flex-row">
+                <div className="mt-2 flex justify-between flex-wrap gap-5 flex-col lg:flex-row">
                     <div className="flex flex-col gap-1">
                         <label className="flex relative flex-col gap-1">
                             <span className="font-bold text-lg">Search</span>
-                            <div className="flex flex-row gap-2">
+                            <div className="flex flex-row gap-2 flex-wrap">
                                 <AlgoliaSearch setInventory={setInventoryList}/>
                                 <button onClick={() => setRefreshItemTable(prevState => !prevState)}
-                                        className="bg-yellow-400 hover:bg-yellow-500 font-medium text-white rounded p-2">
+                                        className="bg-yellow-400 line-clamp-1  hover:bg-yellow-500 font-medium text-white rounded p-2">
                                     Reset Table
                                 </button>
                             </div>
-                            {/*<input value={search} onChange={(txt) => setSearch(txt.target.value)} type="text"
-                                   placeholder="Search"
-                                   className="p-1 pr-8 border-2 border-slate-300 rounded w-full md:w-[15rem]"/>
-                             <button onClick={searchInventory} className="absolute top-10 right-2 "><IoSearch size={20}/>
-                            </button>*/}
                         </label>
                         <label className="flex flex-col mt-2">
                             <span className="font-bold text-lg">Brands</span>
@@ -281,9 +274,6 @@ const Page = () => {
                     Table for Inventory
                 */}
                 <div className="w-full mt-5 overflow-auto">
-                    <div className="w-full flex mt-1 justify-end items-center">
-                        <h1 className="text-xl font-bold">Total Items: {itemsCount}</h1>
-                    </div>
                     <table className="min-w-full table-auto text-left">
                         <thead>
                         <tr className="bg-slate-600 text-white">
@@ -319,7 +309,7 @@ const Page = () => {
                                 <td className="p-1 font-medium">{item.sellingPrice}</td>
                                 <td className="p-1 font-medium">{item.discount}</td>
                                 <td className="p-1 font-medium">{((item.sellingPrice - item.buyingPrice) / item.buyingPrice * 100).toFixed(2)}</td>
-                                <td className="p-1 font-medium flex justify-center items-center gap-2">
+                                <td className="p-1 font-medium flex flex-row justify-center items-center gap-2">
                                     <button onClick={() => {
                                         setType(item.type)
                                         setBrand(item.brand)

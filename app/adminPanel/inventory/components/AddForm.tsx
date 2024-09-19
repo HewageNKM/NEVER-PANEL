@@ -6,6 +6,7 @@ import Image from "next/image";
 import {showToast} from "@/lib/toastSlice/toastSlice";
 import {useDispatch} from "react-redux";
 import {AppDispatch} from "@/lib/store";
+import Link from "next/link";
 
 const AddForm = ({
                      onSubmit,
@@ -85,15 +86,15 @@ const AddForm = ({
 
                     <div className="flex relative justify-center items-center flex-col">
                         {thumbnail.url &&
-                            <div className="relative">
-                            <Image width={40} height={40} src={thumbnail.url} className="h-[40vh] w-[30vw] border-2 p-1 rounded bg-cover" alt="thumbnail"/>
-                                <button disabled={updateState} className="top-2 absolute right-2" onClick={()=> setThumbnail({file:null,url:null})}>
-                                    <IoClose size={30}/>
+                            <div className="flex flex-row gap-2">
+                                <Link target="_blank" href={thumbnail.url} className="lg:hover:border-b-2 h-6 lg:border-b-black transition-all">thumbnail</Link>
+                                <button disabled={updateState} className="bg-black p-1 rounded-full" onClick={()=> setThumbnail({file:null,url:null})}>
+                                    <IoClose size={17} color="White"/>
                                 </button>
                             </div>
                         }
 
-                        <div className="flex mt-2 relative justify-center items-center flex-col">
+                        <div className="flex mt-5 relative justify-center items-center flex-col">
                             <IoCloudUpload size={30}/>
                             <p>
                                 Upload Image
