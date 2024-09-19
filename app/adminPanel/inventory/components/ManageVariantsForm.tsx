@@ -7,6 +7,7 @@ import {showToast} from "@/lib/toastSlice/toastSlice";
 import Image from "next/image";
 import {Item, Size} from "@/interfaces";
 import {accessoriesSizesList, shoeSizesList} from "@/constant";
+import Link from "next/link";
 
 const ManageVariantsForm = ({
                                 setVariantId,
@@ -114,7 +115,6 @@ const ManageVariantsForm = ({
         setSelectedSize("none")
         setStock(0)
     }
-    console.log(images)
     return (
         <DropShadow>
             <div className="bg-white z-50 max-w-[90vw] flex flex-col h-fit rounded p-4 relative">
@@ -127,15 +127,16 @@ const ManageVariantsForm = ({
                     </legend>
                     <div className="mt-2 flex flex-col justify-center items-start flex-wrap gap-5">
                         {images.length > 0 && <h2 className="text-lg font-bold">Images</h2>}
-                        <div className="gap-5 flex-row w-full flex justify-center items-center flex-wrap">
+                        <div className="gap-5 flex-row w-full flex-wrap flex justify-center items-center">
                             {images.map((image, index) => (
-                                <div key={index} className="relative">
-                                    <Image width={20} height={20} src={image.url} alt="variant"
-                                           className="w-36 h-36 rounded object-cover"/>
-                                    <button disabled={updateState} className="absolute top-0 right-0" onClick={() => {
+                                <div key={index} className="flex gap-2 flex-row justify-center items-center">
+                                    <Link className="lg:hover:border-b-2 h-6 lg:border-b-black transition-all" target="_blank" href={image.url}>
+                                        {`Image ${index+1}`}
+                                    </Link>
+                                    <button className="bg-black rounded-full cursor-pointer" disabled={updateState} onClick={() => {
                                         setImages(prevState => prevState.filter((img, i) => i !== index))
                                     }}>
-                                        <IoClose size={20}/>
+                                        <IoClose size={20} color="white"/>
                                     </button>
                                 </div>
                             ))}
@@ -172,17 +173,17 @@ const ManageVariantsForm = ({
                                 Sizes
                             </h2>
                         </div>
-                        <div className="flex flex-row justify-evenly gap-5 items-center">
+                        <div className="flex flex-row justify-between gap-5 items-center">
                             <label className="flex flex-col gap-1">
                                 <span>Size</span>
                                 <select
                                     onChange={(txt) => setSelectedSize(txt.target.value)}
                                     defaultValue={selectedSize}
                                     value={selectedSize}
-                                    className="p-1 text-center w-[10vw] border-2 border-slate-300 rounded"
+                                    className="p-1 text-center  w-fit lg:w-[10vw] border-2 border-slate-300 rounded"
                                 >
                                     <option value="none">
-                                        Select Size
+                                        Select
                                     </option>
                                     {selectedItem.type == "shoe" || selectedItem.type == "slipper" ? shoeSizesList.map((size, index) => (
                                         <option key={index}
@@ -193,11 +194,11 @@ const ManageVariantsForm = ({
                                 <span>Stock</span>
                                 <input value={stock} onChange={(txt) => setStock(Number.parseInt(txt.target.value))}
                                        type="number"
-                                       className="p-1 text-center w-[10vw] border-2 border-slate-300 rounded"/>
+                                       className="p-1 text-center w-[15vw] lg:w-[10vw] border-2 border-slate-300 rounded"/>
                             </label>
                             <div className="flex pt-7 items-center justify-center">
                                 <button onClick={() => addSizeToTable()} type="button"
-                                        className="flex px-2 bg-primary-100 p-1 rounded text-white font-medium flex-row items-center">
+                                        className="flex px-2 md:text-lg text-[.9rem] bg-primary-100 p-1 rounded text-white font-medium flex-row items-center">
                                     Add/Update Size
                                 </button>
                             </div>
@@ -214,7 +215,7 @@ const ManageVariantsForm = ({
                                 <tbody>
                                 {sizes.map((size, index) => (
                                     <tr key={index}
-                                        className="odd:bg-slate-200 hover:bg-white even:bg-slate-300"
+                                        className="odd:bg-slate-200 md:text-lg text-sm hover:bg-white even:bg-slate-300"
                                     >
                                         <td className="px-2">{size.size}</td>
                                         <td className="px-2">{size.stock}</td>
@@ -242,7 +243,7 @@ const ManageVariantsForm = ({
                     </div>
                     <div className='w-full mt-5 flex justify-center'>
                         <button type="submit"
-                                className="bg-primary-100 text-white flex flex-row justify-center items-center h-[2.8rem] px-3 py-1 rounded hover:bg-primary-200">
+                                className="bg-primary-100 md:text-lg text-[.9rem] text-white flex flex-row justify-center items-center h-[2.8rem] px-3 py-1 rounded hover:bg-primary-200">
                             <IoAdd size={30}/>
                             Add Variant
                         </button>
@@ -264,7 +265,7 @@ const ManageVariantsForm = ({
                             <tbody>
                             {selectedItem.variants.map((variant, index) => (
                                 <tr key={index}
-                                    className="odd:bg-slate-200 hover:bg-white even:bg-slate-300"
+                                    className="odd:bg-slate-200 md:text-lg text-sm hover:bg-white even:bg-slate-300"
                                 >
                                     <td className="px-2 uppercase">{variant.variantId}</td>
                                     <td className="px-2 capitalize">{variant.variantName}</td>
