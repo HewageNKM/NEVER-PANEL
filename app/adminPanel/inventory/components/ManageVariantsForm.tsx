@@ -4,7 +4,6 @@ import {IoAdd, IoClose, IoCloudUpload, IoPencil} from "react-icons/io5";
 import {useDispatch} from "react-redux";
 import {AppDispatch} from "@/lib/store";
 import {showToast} from "@/lib/toastSlice/toastSlice";
-import Image from "next/image";
 import {Item, Size} from "@/interfaces";
 import {accessoriesSizesList, shoeSizesList} from "@/constant";
 import Link from "next/link";
@@ -130,12 +129,14 @@ const ManageVariantsForm = ({
                         <div className="gap-5 flex-row w-full flex-wrap flex justify-center items-center">
                             {images.map((image, index) => (
                                 <div key={index} className="flex gap-2 flex-row justify-center items-center">
-                                    <Link className="lg:hover:border-b-2 h-6 lg:border-b-black transition-all" target="_blank" href={image.url}>
-                                        {`Image ${index+1}`}
+                                    <Link className="lg:hover:border-b-2 h-6 lg:border-b-black transition-all"
+                                          target="_blank" href={image.url}>
+                                        {`Image ${index + 1}`}
                                     </Link>
-                                    <button className="bg-black rounded-full cursor-pointer" disabled={updateState} onClick={() => {
-                                        setImages(prevState => prevState.filter((img, i) => i !== index))
-                                    }}>
+                                    <button className="bg-black rounded-full cursor-pointer" disabled={updateState}
+                                            onClick={() => {
+                                                setImages(prevState => prevState.filter((img, i) => i !== index))
+                                            }}>
                                         <IoClose size={20} color="white"/>
                                     </button>
                                 </div>

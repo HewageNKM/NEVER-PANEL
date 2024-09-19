@@ -6,6 +6,7 @@ import {RootState} from "@/lib/store";
 import {getCurrentUser} from "@/firebase/serviceAPI";
 import Profile from "@/app/adminPanel/components/Profile";
 import NavMenu from "@/app/adminPanel/components/NavMenu";
+import PageLoadingProvider from "@/app/adminPanel/components/PageLoadingProvider";
 
 const Layout = ({children}: { children: ReactNode }) => {
     const {user} = useSelector((state: RootState) => state.authSlice);
@@ -18,9 +19,12 @@ const Layout = ({children}: { children: ReactNode }) => {
 
     return (
         <>
-            <NavMenu/>
-            {children}
-            <Profile/>
+            <PageLoadingProvider>
+                <NavMenu/>
+                {children}
+                <Profile/>
+            </PageLoadingProvider>
+
         </>
     );
 };

@@ -77,10 +77,14 @@ export const uploadImages = async (images: File[], path: string): Promise<string
 }
 export const deleteFilesFromStorage = async (path:string) => {
     const storageRef = ref(storage, path);
-    const {items} = await listAll(storageRef);
+    const {items,prefixes} = await listAll(storageRef);
     console.log(items);
     const deletePromises = items.map((item) => {
         return deleteObject(item);
     });
+    const deletePrefixPromises = prefixes.map((prefix) => {
+        return deleteFilesFromStorage(prefix.fullPath);
+    });
     await Promise.all(deletePromises);
+    await Promise.all(deletePrefixPromises);
 }
