@@ -10,6 +10,7 @@ import {showToast} from "@/lib/toastSlice/toastSlice";
 import ManageVariantsForm from "@/app/adminPanel/inventory/components/ManageVariantsForm";
 import {generateId} from "@/utils/genarateIds";
 import {
+    deleteFilesFromStorage,
     deleteInventoryItem,
     filterInventoryByBrands,
     getInventory,
@@ -67,7 +68,7 @@ const Page = () => {
                 return
             }
             const genId: string = generateId("item", manufacture);
-            const url = await uploadImages([thumbnail], `inventory/${genId}/`);
+            const url = await uploadImages([thumbnail], `inventory/${genId.toLowerCase()}/`);
 
             const item: Item = {
                 thumbnail: url[0],
@@ -119,18 +120,19 @@ const Page = () => {
         }
         if (images.pop().file === '') {
             selectedItem.variants = selectedItem.variants.map((v) => v.variantId === variantId ? {
-                ...v, sizes: sizes, variantName: variantName
+                ...v, sizes: sizes, variantName: variantName.toLowerCase()
             } : v)
 
             setSelectedItem(selectedItem)
             await saveItem(selectedItem, "Successfully added variant successfully")
         } else {
-            const genId = generateId("variant", selectedItem.itemId);
+            const genId = generateId("variant", selectedItem.itemId)
             try {
+                console.log(images)
                 const imagesUrl = await uploadImages(images, `inventory/${selectedItem.itemId}/${genId}/`)
                 console.log(imagesUrl)
                 const variant: Variant = {
-                    images: imagesUrl, sizes: sizes, variantId: genId, variantName: variantName
+                    images: imagesUrl, sizes: sizes, variantId: genId.toLowerCase(), variantName: variantName.toLowerCase()
 
                 }
 
@@ -163,6 +165,7 @@ const Page = () => {
         const response = confirm(`Are you sure you want to delete this item with ID ${id}?`);
         if (response) {
             try {
+                await deleteFilesFromStorage(`inventory/${id}`)
                 await deleteInventoryItem(id);
                 setRefreshItemTable(prevState => !prevState)
                 showMessage("Item updated successfully", "Success")
@@ -202,6 +205,7 @@ const Page = () => {
             try {
                 selectedItem.variants = selectedItem.variants.filter(variant => variant.variantId !== variantId);
                 await saveItem(selectedItem, "Successfully deleted variant")
+                await deleteFilesFromStorage(`inventory/${id}/${variantId}`)
                 setSelectedItem(selectedItem)
             } catch (e: any) {
                 showMessage(e.message, "Error")

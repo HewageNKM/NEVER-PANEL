@@ -2,18 +2,16 @@ import {browserLocalPersistence, onAuthStateChanged, setPersistence, signInWithE
 import {deleteDoc, doc, getDoc, getDocs, query, setDoc, where} from "@firebase/firestore";
 import {auth, inventoryCollectionRef, storage, usersCollectionRef} from "@/firebase/config";
 import {Item} from "@/interfaces";
-import {getDownloadURL, ref, uploadBytesResumable} from "@firebase/storage";
+import {deleteObject, getDownloadURL, listAll, ref, uploadBytesResumable} from "@firebase/storage";
 
 export const logUser = async (email: string, password: string) => {
     await setPersistence(auth, browserLocalPersistence);
     return await signInWithEmailAndPassword(auth, email, password);
 };
-
 export const getUserById = async (id: string) => {
     const document = await getDoc(doc(usersCollectionRef, id));
     return document ? document.data() : null;
 };
-
 export const observeAuthState = (callback: (user: any) => void) => {
     onAuthStateChanged(auth, (user) => {
         callback(user);
@@ -40,7 +38,6 @@ export const getInventory = async () => {
 export const deleteInventoryItem = async (itemId: string) => {
     await deleteDoc(doc(inventoryCollectionRef, itemId));
 }
-
 export const filterInventoryByBrands = async (brand: string) => {
     const filteredQuery = query(inventoryCollectionRef, where("manufacturer", "==", brand));
     const docs = await getDocs(filteredQuery);
@@ -50,7 +47,6 @@ export const filterInventoryByBrands = async (brand: string) => {
     })
     return items ? items : [];
 }
-
 export const uploadImages = async (images: File[], path: string): Promise<string[]> => {
     const urls: string[] = [];
     const uploadPromises = images.map((file) => {
@@ -78,4 +74,13 @@ export const uploadImages = async (images: File[], path: string): Promise<string
 
     await Promise.all(uploadPromises);
     return urls;
+}
+export const deleteFilesFromStorage = async (path:string) => {
+    const storageRef = ref(storage, path);
+    const {items} = await listAll(storageRef);
+    console.log(items);
+    const deletePromises = items.map((item) => {
+        return deleteObject(item);
+    });
+    await Promise.all(deletePromises);
 }
