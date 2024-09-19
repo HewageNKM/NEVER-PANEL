@@ -10,6 +10,7 @@ import {showToast} from "@/lib/toastSlice/toastSlice";
 import ManageVariantsForm from "@/app/adminPanel/inventory/components/ManageVariantsForm";
 import {generateId} from "@/utils/genarateIds";
 import {
+    deleteFilesFromStorage,
     deleteInventoryItem,
     filterInventoryByBrands,
     getInventory,
@@ -19,6 +20,7 @@ import {
 import {Item, Size, Variant} from "@/interfaces";
 import Loading from "@/app/adminPanel/components/Loading";
 import AlgoliaSearch from "@/components/AlgoliaSearch";
+import {hideLoader, showLoader} from "@/lib/pageLoaderSlice/pageLoaderSlice";
 
 const Page = () => {
     const [loadItemTable, setLoadItemTable] = useState(true)
@@ -67,7 +69,7 @@ const Page = () => {
                 return
             }
             const genId: string = generateId("item", manufacture);
-            const url = await uploadImages([thumbnail], `inventory/${genId}/`);
+            const url = await uploadImages([thumbnail], `inventory/${genId.toLowerCase()}/`);
 
             const item: Item = {
                 thumbnail: url[0],
@@ -107,7 +109,6 @@ const Page = () => {
     }
     const onVariantFormSubmit = async (evt: any) => {
         evt.preventDefault();
-
         if (images.length === 0) {
             showMessage("Please, upload at least 5 images", "Warning")
             return;
@@ -117,35 +118,38 @@ const Page = () => {
             showMessage("Please, add the sizes", "Warning")
             return;
         }
-        if (images.pop().file === '') {
+        if (images[0].file === '') {
             selectedItem.variants = selectedItem.variants.map((v) => v.variantId === variantId ? {
-                ...v, sizes: sizes, variantName: variantName
+                ...v, sizes: sizes, variantName: variantName.toLowerCase()
             } : v)
-
+            dispatch(showLoader())
             setSelectedItem(selectedItem)
-            await saveItem(selectedItem, "Successfully added variant successfully")
+            await saveItem(selectedItem, "Successfully updated variant successfully")
         } else {
-            const genId = generateId("variant", selectedItem.itemId);
+            const genId = generateId("variant", selectedItem.itemId)
             try {
-                const imagesUrl = await uploadImages(images, `inventory/${selectedItem.itemId}/${genId}/`)
-                console.log(imagesUrl)
+                dispatch(showLoader())
+                const imagesUrl = await uploadImages(images, `inventory/${selectedItem.itemId}/${genId.toLowerCase()}/`)
                 const variant: Variant = {
-                    images: imagesUrl, sizes: sizes, variantId: genId, variantName: variantName
-
+                    images: imagesUrl,
+                    sizes: sizes,
+                    variantId: genId.toLowerCase(),
+                    variantName: variantName.toLowerCase()
                 }
-
                 selectedItem.variants.push(variant)
-                selectedItem.thumbnail = imagesUrl.pop() || ""
                 setSelectedItem(selectedItem)
                 await saveItem(selectedItem, "Successfully added variant successfully")
             } catch (e: any) {
                 console.log(e)
                 showMessage(e.message, "Error")
+            } finally {
+                dispatch(hideLoader())
             }
         }
     }
     const saveItem = async (item: Item, message: string) => {
         try {
+            dispatch(showLoader())
             await saveToInventory(item);
             setAddForm(false)
             setRefreshItemTable(prevState => !prevState)
@@ -155,6 +159,8 @@ const Page = () => {
         } catch (e: any) {
             console.log(e)
             showMessage(e.message, "Error")
+        } finally {
+            dispatch(hideLoader())
         }
     }
 
@@ -163,6 +169,7 @@ const Page = () => {
         const response = confirm(`Are you sure you want to delete this item with ID ${id}?`);
         if (response) {
             try {
+                await deleteFilesFromStorage(`inventory/${id}`)
                 await deleteInventoryItem(id);
                 setRefreshItemTable(prevState => !prevState)
                 showMessage("Item updated successfully", "Success")
@@ -201,6 +208,7 @@ const Page = () => {
         if (response) {
             try {
                 selectedItem.variants = selectedItem.variants.filter(variant => variant.variantId !== variantId);
+                await deleteFilesFromStorage(`inventory/${id}/${variantId}/`)
                 await saveItem(selectedItem, "Successfully deleted variant")
                 setSelectedItem(selectedItem)
             } catch (e: any) {
@@ -233,10 +241,10 @@ const Page = () => {
         setTimeout(() => dispatch(showToast({message: "", type: "", showToast: false})), 3000);
         return;
     }
-
     return (
         <div className="relative w-full h-screen">
-            <div className="md:pt-24 pt-32 px-4 py-4 flex flex-col relative justify-center lg:justify-between items-center lg:items-stretch">
+            <div
+                className="md:pt-24 pt-32 px-4 py-4 flex flex-col relative justify-center lg:justify-between items-center lg:items-stretch">
                 <h1 className="text-3xl font-bold">Inventory</h1>
                 <div className="mt-2 flex justify-between flex-wrap gap-5 flex-col lg:flex-row">
                     <div className="flex flex-col gap-1">
