@@ -155,7 +155,7 @@ const ManageVariantsForm = ({
                             <input onChange={(txt) => setVariantName(txt.target.value)} value={variantName} required
                                    type="text"
                                    placeholder="Variant 1"
-                                   className="p-1 text-center border-2 border-slate-300 rounded"/>
+                                   className="p-1 text-center capitalize border-2 border-slate-300 rounded"/>
                         </label>
                         <label className="flex-col flex justify-center items-center gap-1">
                             <div className="flex  relative justify-center items-center flex-col">
