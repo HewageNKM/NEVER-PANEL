@@ -188,7 +188,7 @@ const AddForm = ({
                         setDiscount("")
                         setType("none")
                         setBrand('')
-                        setThumbnail({file:null,url:null})
+                        setThumbnail({file: null, url: null})
                         setAddForm(false)
                         setUpdateState(false)
                     }}>

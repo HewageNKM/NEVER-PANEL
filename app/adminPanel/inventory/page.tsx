@@ -21,6 +21,7 @@ import {Item, Size, Variant} from "@/interfaces";
 import Loading from "@/app/adminPanel/components/Loading";
 import AlgoliaSearch from "@/components/AlgoliaSearch";
 import {hideLoader, showLoader} from "@/lib/pageLoaderSlice/pageLoaderSlice";
+import ItemCard from "@/app/adminPanel/inventory/components/ItemCard";
 
 const Page = () => {
     const [loadItemTable, setLoadItemTable] = useState(true)
@@ -254,7 +255,7 @@ const Page = () => {
                                 <AlgoliaSearch setInventory={setInventoryList}/>
                                 <button onClick={() => setRefreshItemTable(prevState => !prevState)}
                                         className="bg-yellow-400 line-clamp-1  hover:bg-yellow-500 font-medium text-white rounded p-2">
-                                    Reset Table
+                                    Reload
                                 </button>
                             </div>
                         </label>
@@ -281,69 +282,25 @@ const Page = () => {
                 {/*
                     Table for Inventory
                 */}
-                <div className="w-full mt-5 overflow-auto">
-                    <table className="min-w-full table-auto text-left">
-                        <thead>
-                        <tr className="bg-slate-600 text-white">
-                            <th className="p-3">Product ID</th>
-                            <th className="p-3">Type</th>
-                            <th className="p-3">Manufacturer</th>
-                            <th className="p-3">Name</th>
-                            <th className="p-3">Variations</th>
-                            <th className="p-3">Buying Price(Rs)</th>
-                            <th className="p-3">Selling Price(Rs)</th>
-                            <th className="p-3">Discount(%)</th>
-                            <th className="p-3">Profit Margin(%)</th>
-                            <th className="p-3">Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody>
+                <div className="w-full mt-10 flex flex-row flex-wrap gap-10 lg:gap-20 justify-center items-center">
                         {!loadItemTable && inventoryList.map((item, index) => (
-                            <tr key={index}
-                                className={`odd:bg-slate-200 hover:bg-white even:bg-slate-300`}>
-                                <td className="p-1 font-medium uppercase">{item.itemId}</td>
-                                <td className="p-1 font-medium uppercase">{item.type}</td>
-                                <td className="p-1 font-medium capitalize">{item.manufacturer}</td>
-                                <td className="p-1 font-medium capitalize">{item.name}</td>
-                                <td className="p-1 font-medium flex flex-row flex-wrap justify-center gap-1 items-end">
-                                    <p>{item.variants.length || 0}</p>
-                                    <button className="text-blue-500 hover:underline"
-                                            onClick={() => {
-                                                setSelectedItem(item)
-                                                setAddVariantForm(true)
-                                            }}><IoEye size={25}/></button>
-                                </td>
-                                <td className="p-1 font-medium">{item.buyingPrice}</td>
-                                <td className="p-1 font-medium">{item.sellingPrice}</td>
-                                <td className="p-1 font-medium">{item.discount}</td>
-                                <td className="p-1 font-medium">{((item.sellingPrice - item.buyingPrice) / item.buyingPrice * 100).toFixed(2)}</td>
-                                <td className="p-1 font-medium flex flex-row justify-center items-center gap-2">
-                                    <button onClick={() => {
-                                        setType(item.type)
-                                        setBrand(item.brand)
-                                        setId(item.itemId)
-                                        setManufacture(item.manufacturer)
-                                        setName(item.name)
-                                        setBuyingPrice(item.buyingPrice.toString())
-                                        setSellingPrice(item.sellingPrice.toString())
-                                        setDiscount(item.discount.toString())
-                                        setThumbnail({
-                                            file: null,
-                                            url: item.thumbnail
-                                        })
-                                        setUpdateState(true)
-                                        setAddForm(true)
-                                    }} className="bg-yellow-300 text-white px-3 py-1 rounded hover:bg-yellow-400">
-                                        <IoPencil size={20}/></button>
-                                    <button onClick={() => deleteItemFromInventory(item.itemId)}
-                                            className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600">
-                                        <IoTrash
-                                            size={20}/></button>
-                                </td>
-                            </tr>
+                            <ItemCard item={item} key={index} onEdit={()=>{
+                                setType(item.type)
+                                setBrand(item.brand)
+                                setId(item.itemId)
+                                setManufacture(item.manufacturer)
+                                setName(item.name)
+                                setBuyingPrice(item.buyingPrice.toString())
+                                setSellingPrice(item.sellingPrice.toString())
+                                setDiscount(item.discount.toString())
+                                setThumbnail({
+                                    file: null,
+                                    url: item.thumbnail
+                                })
+                                setUpdateState(true)
+                                setAddForm(true)
+                            }} onDelete={()=> deleteItemFromInventory(item.itemId)}/>
                         ))}
-                        </tbody>
-                    </table>
                     {loadItemTable && <Loading/>}
                 </div>
             </div>
