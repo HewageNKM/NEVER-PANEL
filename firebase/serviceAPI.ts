@@ -8,6 +8,10 @@ export const logUser = async (email: string, password: string) => {
     await setPersistence(auth, browserLocalPersistence);
     return await signInWithEmailAndPassword(auth, email, password);
 };
+export const getItemById = async (id:string) => {
+    const document = await getDoc(doc(inventoryCollectionRef, id));
+    return document ? document.data() as Item : null;
+};
 export const getUserById = async (id: string) => {
     const document = await getDoc(doc(usersCollectionRef, id));
     return document ? document.data() : null;

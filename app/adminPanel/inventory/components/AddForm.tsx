@@ -79,7 +79,7 @@ const AddForm = ({
     return (
         <DropShadow>
             <div className="bg-white z-50 w-[90vw] flex h-fit rounded p-4 relative">
-                <form onSubmit={onSubmit} className="flex-col w-full  flex gap-5">
+                <form onSubmit={onSubmit} className="flex-col w-full  flex gap-2">
                     <legend className="text-2xl font-bold">
                         Add Item
                     </legend>
@@ -106,7 +106,7 @@ const AddForm = ({
                                    className="absolute w-[10vw] border-2 p-1 h-[10vh] opacity-0 bg-black"/>
                         </div>
                     </div>
-                    <div className="mt-5 flex w-full flex-row justify-center items-center flex-wrap gap-8">
+                    <div className="mt-5 flex w-full flex-row justify-center items-center flex-wrap gap-3 md:gap-8">
                         <label className="flex-col hidden gap-1">
                             <span className="font-medium">Product ID</span>
                             <input type="text"
@@ -119,7 +119,7 @@ const AddForm = ({
                             <span className="font-medium">Type</span>
                             <select disabled={updateState} required value={type}
                                     onChange={(txt) => setType(txt.target.value)}
-                                    defaultValue="none" className="p-1 border-2 border-slate-300 rounded">
+                                    defaultValue="none" className="p-1 border-2 w-[10rem] border-slate-300 rounded">
                                 {types.map((types, index) => (
                                     <option key={index} value={types.value}>{types.name}</option>
                                 ))}
@@ -130,7 +130,7 @@ const AddForm = ({
                             <span className="font-medium">Manufacture</span>
                             <select disabled={updateState} required value={manufacture}
                                     onChange={(txt) => setManufacture(txt.target.value)}
-                                    defaultValue="none" className="p-1 border-2 border-slate-300 rounded">
+                                    defaultValue="none" className="p-1 border-2 w-[10rem] border-slate-300 rounded">
                                 {brands.map((brand, index) => (
                                     <option key={index} value={brand.value}>{brand.name}</option>
                                 ))}
