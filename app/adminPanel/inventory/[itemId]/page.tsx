@@ -100,7 +100,7 @@ const Page = () => {
     }
     return (
         <div className="w-full h-full relative">
-            <div className="px-8 py-4">
+            <div className="px-4 py-4">
                 <h1 className="pt-20 text-4xl md:text-5xl font-bold">Item Details</h1>
                 <div className="mt-1 text-lg flex-row flex gap-1">
                     <a href="/adminPanel/inventory" className="text-blue-500">
@@ -133,7 +133,7 @@ const Page = () => {
                     </button>
                 </div>
             </div>
-            <div className="pt-10 px-8 py-4 font-bold text-4xl md:text-5xl">
+            <div className="pt-10 px-4 py-4 font-bold text-4xl md:text-5xl">
                 <h1>Variants</h1>
                 <div className="w-full mt-10 flex flex-row md:gap-16 gap-10 flex-wrap justify-center items-center">
                     {item?.variants.map((variant, index) => (
