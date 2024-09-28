@@ -116,7 +116,7 @@ const VariantForm = ({
     }
     return (
         <DropShadow>
-            <div className="bg-white z-50 max-w-[90vw] flex flex-col h-fit rounded p-4 relative">
+            <div className="bg-white z-50 w-[95vw] flex h-[95vh] overflow-auto md:h-fit rounded p-4 relative">
                 <form onSubmit={async (evt) => {
                     await onSubmit(evt)
                     setUpdateState(false)

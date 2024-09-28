@@ -4,7 +4,7 @@ import {motion} from "framer-motion";
 
 const DropShadow = ({children}:{children:ReactNode}) => {
     return (
-        <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="w-full fixed overflow-auto h-full top-0 z-50 flex bg-opacity-60 justify-center items-center bg-black">
+        <motion.div initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}} className="w-full min-h-full fixed top-0 z-50 flex bg-opacity-60 justify-center items-center bg-black">
             {children}
         </motion.div>
     );

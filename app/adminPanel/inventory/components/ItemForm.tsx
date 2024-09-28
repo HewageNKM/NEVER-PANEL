@@ -78,7 +78,7 @@ const ItemForm = ({
     console.log(thumbnail)
     return (
         <DropShadow>
-            <div className="bg-white z-50 w-[90vw] flex h-fit rounded p-4 relative">
+            <div className="bg-white z-50 w-[95vw] flex h-[95vh] overflow-auto md:h-fit rounded p-4 relative">
                 <form onSubmit={onSubmit} className="flex-col w-full  flex gap-2">
                     <legend className="text-2xl font-bold">
                         Item
