@@ -6,19 +6,18 @@ import ImagesSlider from "@/components/ImagesSlider";
 const VariantCard = ({item}: { item: Variant }) => {
 
     return (
-        <div
-            className="flex flex-col gap-2 md:w-[20rem] w-[17rem] rounded-lg shadow-primary justify-center items-center">
+        <div className="flex flex-col gap-2 md:w-[20rem] w-[17rem] rounded-lg shadow-primary justify-center items-center">
             <div className="relative">
                 <ImagesSlider images={item.images}/>
             </div>
-            <div className="flex flex-col gap-2 px-4 py-2 text-base md:text-lg font-medium capitalize">
+            <div className="flex flex-col p-5 px-4 py-2 gap-2 text-base md:text-lg font-medium capitalize">
                 <label>
-                    <span className="font-bold text-lg">Variant ID</span>
-                    <input disabled value={item.variantId} className="uppercase p-1 border rounded-lg"/>
+                    <span className="font-bold">Variant ID</span>
+                    <input disabled value={item.variantId} className="uppercase p-1 w-[16rem] border rounded-lg"/>
                 </label>
                 <label className="flex flex-col gap-1">
                     <span className="font-bold text-lg">Variant Name</span>
-                    <input disabled value={item.variantName} className="capitalize p-1 border rounded-lg"/>
+                    <input disabled value={item.variantName} className="capitalize p-1 w-[16rem] border rounded-lg"/>
                 </label>
                 <h2 className="text-2xl font-bold mt-2">Sizes</h2>
                 <div className="overflow-auto h-[7rem]">

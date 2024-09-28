@@ -8,7 +8,7 @@ import {Item, Size} from "@/interfaces";
 import {accessoriesSizesList, shoeSizesList} from "@/constant";
 import Link from "next/link";
 
-const ManageVariantsForm = ({
+const VariantForm = ({
                                 setVariantId,
                                 setImages,
                                 variantId,
@@ -122,7 +122,7 @@ const ManageVariantsForm = ({
                     setUpdateState(false)
                 }} className="flex-col flex gap-5">
                     <legend className="text-2xl font-bold">
-                        Manage Variants
+                        Variant
                     </legend>
                     <div className="mt-2 flex flex-col justify-center items-start flex-wrap gap-5">
                         {images.length > 0 && <h2 className="text-lg font-bold">Images</h2>}
@@ -317,4 +317,4 @@ const ManageVariantsForm = ({
     );
 };
 
-export default ManageVariantsForm;
+export default VariantForm;

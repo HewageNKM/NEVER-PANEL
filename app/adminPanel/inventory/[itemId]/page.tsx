@@ -27,7 +27,12 @@ const Page = () => {
 
     return (
         <div className="w-full h-full px-8 py-8">
-            <h1 className="pt-20 text-4xl md:text-5xl font-bold">Item Details</h1>
+            <div>
+                <h1 className="pt-20 text-4xl md:text-5xl font-bold">Item Details</h1>
+                <div>
+
+                </div>
+            </div>
             <div className="flex pt-10 flex-row gap-16 p-4 md:gap-16 lg:gap-32 justify-center items-center flex-wrap">
                 <div>
                     <Image src={item?.thumbnail} alt={item?.name} width={300} height={300} className="w-fit md:h-[35rem] h-[25rem] rounded-lg shadow-primary"/>
@@ -38,7 +43,8 @@ const Page = () => {
                     <p>Brand: {item?.brand}</p>
                     <p>Name: {item?.name}</p>
                     <p className="text-blue-500">{item?.variants.length} Variants</p>
-                    <button className="mt-5 rounded-full text-white lg:hover:bg-primary-200 transition-all bg-primary-100 p-2 flex-row flex justify-center items-center">
+                    <button
+                        className="mt-5 rounded-full text-white lg:hover:bg-primary-200 transition-all bg-primary-100 p-2 flex-row flex justify-center items-center">
                         <IoAdd color="white" size={30}/>
                         <span>
                             Add Variant

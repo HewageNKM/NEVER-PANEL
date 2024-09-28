@@ -3,11 +3,11 @@ import React, {useEffect, useState} from 'react';
 import {brands} from "@/constant";
 import {IoAdd, IoEye, IoPencil, IoTrash} from "react-icons/io5";
 import {AnimatePresence} from "framer-motion";
-import AddForm from "@/app/adminPanel/inventory/components/AddForm";
+import ItemForm from "@/app/adminPanel/inventory/components/ItemForm";
 import {AppDispatch} from "@/lib/store";
 import {useDispatch} from "react-redux";
 import {showToast} from "@/lib/toastSlice/toastSlice";
-import ManageVariantsForm from "@/app/adminPanel/inventory/components/ManageVariantsForm";
+import VariantForm from "@/app/adminPanel/inventory/components/VariantForm";
 import {generateId} from "@/utils/genarateIds";
 import {
     deleteFilesFromStorage,
@@ -306,35 +306,35 @@ const Page = () => {
             </div>
             <AnimatePresence>
                 {addForm && (
-                    <AddForm brand={brand} setBrand={setBrand}
-                             updateState={updateState}
-                             setUpdateState={setUpdateState}
-                             discount={discount}
-                             sellingPrice={sellingPrice}
-                             buyingPrice={buyingPrice}
-                             name={name}
-                             manufacture={manufacture}
-                             setAddForm={setAddForm}
-                             setDiscount={setDiscount}
-                             setBuyingPrice={setBuyingPrice}
-                             setName={setName}
-                             setManufacture={setManufacture}
-                             setSellingPrice={setSellingPrice}
-                             id={id} setId={setId}
-                             setThumbnail={setThumbnail}
-                             thumbnail={thumbnail}
-                             onSubmit={onAddItemFormSubmit} setType={setType} type={type}/>)}
+                    <ItemForm brand={brand} setBrand={setBrand}
+                              updateState={updateState}
+                              setUpdateState={setUpdateState}
+                              discount={discount}
+                              sellingPrice={sellingPrice}
+                              buyingPrice={buyingPrice}
+                              name={name}
+                              manufacture={manufacture}
+                              setAddForm={setAddForm}
+                              setDiscount={setDiscount}
+                              setBuyingPrice={setBuyingPrice}
+                              setName={setName}
+                              setManufacture={setManufacture}
+                              setSellingPrice={setSellingPrice}
+                              id={id} setId={setId}
+                              setThumbnail={setThumbnail}
+                              thumbnail={thumbnail}
+                              onSubmit={onAddItemFormSubmit} setType={setType} type={type}/>)}
                 {addVariantForm &&
-                    <ManageVariantsForm onSubmit={onVariantFormSubmit}
-                                        setAddVariantForm={setAddVariantForm}
-                                        variantName={variantName}
-                                        variantId={variantId}
-                                        setVariantName={setVariantName}
-                                        setVariantId={setVariantId}
-                                        images={images}
-                                        setImages={setImages}
-                                        setSizes={setSizes} sizes={sizes} selectedItem={selectedItem}
-                                        deleteVariant={deleteVariant}
+                    <VariantForm onSubmit={onVariantFormSubmit}
+                                 setAddVariantForm={setAddVariantForm}
+                                 variantName={variantName}
+                                 variantId={variantId}
+                                 setVariantName={setVariantName}
+                                 setVariantId={setVariantId}
+                                 images={images}
+                                 setImages={setImages}
+                                 setSizes={setSizes} sizes={sizes} selectedItem={selectedItem}
+                                 deleteVariant={deleteVariant}
                     />}
             </AnimatePresence>
         </div>
