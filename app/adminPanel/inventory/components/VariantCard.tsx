@@ -4,16 +4,24 @@ import {IoPencil, IoTrash} from "react-icons/io5";
 import ImagesSlider from "@/components/ImagesSlider";
 
 const VariantCard = ({item}: { item: Variant }) => {
+
     return (
-        <div className="flex flex-col gap-2 rounded-lg shadow-primary justify-center items-center">
+        <div
+            className="flex flex-col gap-2 md:w-[20rem] w-[17rem] rounded-lg shadow-primary justify-center items-center">
             <div className="relative">
                 <ImagesSlider images={item.images}/>
             </div>
-            <div className="flex flex-col gap-2 px-4 py-2 text-lg font-medium capitalize">
-                <h2 className="uppercase">Variant ID: {item.variantId}</h2>
-                <h2>Name: {item.variantName}</h2>
+            <div className="flex flex-col gap-2 px-4 py-2 text-base md:text-lg font-medium capitalize">
+                <label>
+                    <span className="font-bold text-lg">Variant ID</span>
+                    <input disabled value={item.variantId} className="uppercase p-1 border rounded-lg"/>
+                </label>
+                <label className="flex flex-col gap-1">
+                    <span className="font-bold text-lg">Variant Name</span>
+                    <input disabled value={item.variantName} className="capitalize p-1 border rounded-lg"/>
+                </label>
                 <h2 className="text-2xl font-bold mt-2">Sizes</h2>
-                <div className="overflow-auto h-[10rem]">
+                <div className="overflow-auto h-[7rem]">
                     <table className="w-full table-auto border-collapse">
                         <thead>
                         <tr className="bg-gray-100">
