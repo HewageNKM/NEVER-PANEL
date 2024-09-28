@@ -4,42 +4,33 @@ import {IoAdd, IoClose, IoCloudUpload, IoPencil} from "react-icons/io5";
 import {useDispatch} from "react-redux";
 import {AppDispatch} from "@/lib/store";
 import {showToast} from "@/lib/toastSlice/toastSlice";
-import {Item, Size} from "@/interfaces";
+import {Item, Size, Variant} from "@/interfaces";
 import {accessoriesSizesList, shoeSizesList} from "@/constant";
 import Link from "next/link";
 
 const VariantForm = ({
-                                setVariantId,
-                                setImages,
-                                variantId,
-                                setAddVariantForm,
-                                variantName,
-                                setVariantName,
-                                images,
-                                setSizes,
-                                sizes,
-                                selectedItem,
+                            setAddVariantForm,
                                 onSubmit,
                                 deleteVariant,
+    variant,
+    type
 
                             }: {
-    variantId: string,
-    variantName: string,
-    setVariantId: React.Dispatch<React.SetStateAction<string>>,
-    setVariantName: React.Dispatch<React.SetStateAction<string>>,
     setAddVariantForm: React.Dispatch<React.SetStateAction<boolean>>,
-    images: object[],
-    setImages: React.Dispatch<React.SetStateAction<object[]>>,
-    setSizes: React.Dispatch<React.SetStateAction<Size[]>>
-    sizes: Size[],
-    selectedItem: Item,
     onSubmit: any,
     deleteVariant: any,
+    variant: Variant,
+    type: string
 }) => {
     const [file, setFile] = React.useState<string | undefined>("");
     const [selectedSize, setSelectedSize] = useState("none")
     const [stock, setStock] = useState(0)
     const [updateState, setUpdateState] = useState(false)
+
+    const [sizes,setSizes] = useState(variant.sizes || []);
+    const [images,setImages] = useState(variant.images || []);
+    const [variantId,setVariantId] = useState(variant.variantId || "");
+    const [variantName,setVariantName] = useState(variant.variantName || "");
 
     const dispatch: AppDispatch = useDispatch();
     const handleFileSelect = (evt: any) => {
@@ -116,7 +107,7 @@ const VariantForm = ({
     }
     return (
         <DropShadow>
-            <div className="bg-white z-50 w-[95vw] flex h-[95vh] overflow-auto md:h-fit rounded p-4 relative">
+            <div className="bg-white z-50 md:w-fit w-[95vw] flex md:h-fit h-[90vh] justify-center items-center overflow-auto rounded p-4 relative">
                 <form onSubmit={async (evt) => {
                     await onSubmit(evt)
                     setUpdateState(false)
@@ -129,10 +120,9 @@ const VariantForm = ({
                         <div className="gap-5 flex-row w-full flex-wrap flex justify-center items-center">
                             {images.map((image, index) => (
                                 <div key={index} className="flex gap-2 flex-row justify-center items-center">
-                                    <Link className="lg:hover:border-b-2 h-6 lg:border-b-black transition-all"
-                                          target="_blank" href={image.url}>
+                                    <p className="lg:hover:border-b-2 h-6 lg:border-b-black transition-all">
                                         {`Image ${index + 1}`}
-                                    </Link>
+                                    </p>
                                     <button className="bg-black rounded-full cursor-pointer" disabled={updateState}
                                             onClick={() => {
                                                 setImages(prevState => prevState.filter((img, i) => i !== index))
@@ -186,7 +176,7 @@ const VariantForm = ({
                                     <option value="none">
                                         Select
                                     </option>
-                                    {selectedItem.type == "shoe" || selectedItem.type == "slipper" ? shoeSizesList.map((size, index) => (
+                                    {type == "shoe" || type == "slipper" ? shoeSizesList.map((size, index) => (
                                         <option key={index}
                                                 value={size}>{size}</option>)) : accessoriesSizesList.map((size, index) => (
                                         <option key={index} value={size.value}>{size.name}</option>))}</select>
@@ -250,53 +240,6 @@ const VariantForm = ({
                         </button>
                     </div>
                 </form>
-                <div>
-                    <h2 className="text-2xl font-bold">
-                        Variants
-                    </h2>
-                    <div className="mt-2">
-                        <table className="min-w-full table-auto text-center">
-                            <thead>
-                            <tr className="bg-slate-600 text-white">
-                                <th className="px-2">Variant ID</th>
-                                <th className="px-2">Variant Name</th>
-                                <th className="px-2">Action</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {selectedItem.variants.map((variant, index) => (
-                                <tr key={index}
-                                    className="odd:bg-slate-200 md:text-lg text-sm hover:bg-white even:bg-slate-300"
-                                >
-                                    <td className="px-2 uppercase">{variant.variantId}</td>
-                                    <td className="px-2 capitalize">{variant.variantName}</td>
-                                    <td className="px-2 flex flex-row gap-1 justify-end">
-                                        <button onClick={() => {
-                                            setVariantId(variant.variantId)
-                                            setVariantName(variant.variantName)
-                                            setImages(variant.images.map((img: any) => ({
-                                                file: "",
-                                                url: img
-                                            })))
-                                            setSizes(variant.sizes)
-                                            setUpdateState(true)
-                                        }} type="button" className="p-1 bg-yellow-300 rounded-lg">
-                                            <IoPencil size={15}/>
-                                        </button>
-                                        <button
-                                            className="p-1 bg-red-500  rounded-lg"
-                                            onClick={() => {
-                                                deleteVariant(variant.variantId)
-                                            }}>
-                                            <IoClose size={15}/>
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
                 <div className="absolute top-1 right-1">
                     <button onClick={() => {
                         setAddVariantForm(false)

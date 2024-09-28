@@ -26,7 +26,6 @@ import ItemCard from "@/app/adminPanel/inventory/components/ItemCard";
 const Page = () => {
     const [loadItemTable, setLoadItemTable] = useState(true)
     const [addForm, setAddForm] = useState(false)
-    const [addVariantForm, setAddVariantForm] = useState(false)
     const dispatch: AppDispatch = useDispatch();
     const [inventoryList, setInventoryList] = useState([] as Item[])
     const [refreshItemTable, setRefreshItemTable] = useState(false)
@@ -42,14 +41,6 @@ const Page = () => {
     const [type, setType] = useState("none")
     const [brand, setBrand] = useState("")
     const [thumbnail, setThumbnail] = useState<{ file: null | File, url: string | null }>({file: null, url: null})
-
-
-    // Mange Variant Form
-    const [variantId, setVariantId] = useState('')
-    const [variantName, setVariantName] = useState('')
-    const [images, setImages] = useState([] as File[])
-    const [sizes, setSizes] = useState([] as Size[])
-    const [selectedItem, setSelectedItem] = useState({} as Item)
 
     const onAddItemFormSubmit = async (evt: any) => {
         evt.preventDefault();
@@ -108,46 +99,6 @@ const Page = () => {
         }
 
     }
-    const onVariantFormSubmit = async (evt: any) => {
-        evt.preventDefault();
-        if (images.length === 0) {
-            showMessage("Please, upload at least 5 images", "Warning")
-            return;
-        }
-
-        if (sizes.length === 0) {
-            showMessage("Please, add the sizes", "Warning")
-            return;
-        }
-        if (images[0].file === '') {
-            selectedItem.variants = selectedItem.variants.map((v) => v.variantId === variantId ? {
-                ...v, sizes: sizes, variantName: variantName.toLowerCase()
-            } : v)
-            dispatch(showLoader())
-            setSelectedItem(selectedItem)
-            await saveItem(selectedItem, "Successfully updated variant successfully")
-        } else {
-            const genId = generateId("variant", selectedItem.itemId)
-            try {
-                dispatch(showLoader())
-                const imagesUrl = await uploadImages(images, `inventory/${selectedItem.itemId}/${genId.toLowerCase()}/`)
-                const variant: Variant = {
-                    images: imagesUrl,
-                    sizes: sizes,
-                    variantId: genId.toLowerCase(),
-                    variantName: variantName.toLowerCase()
-                }
-                selectedItem.variants.push(variant)
-                setSelectedItem(selectedItem)
-                await saveItem(selectedItem, "Successfully added variant successfully")
-            } catch (e: any) {
-                console.log(e)
-                showMessage(e.message, "Error")
-            } finally {
-                dispatch(hideLoader())
-            }
-        }
-    }
     const saveItem = async (item: Item, message: string) => {
         try {
             dispatch(showLoader())
@@ -156,7 +107,6 @@ const Page = () => {
             setRefreshItemTable(prevState => !prevState)
             showMessage(message, "Success")
             clearAddFormField();
-            clearAddVariantFormField();
         } catch (e: any) {
             console.log(e)
             showMessage(e.message, "Error")
@@ -203,20 +153,6 @@ const Page = () => {
         }).finally(() => setLoadItemTable(false))
     }, [refreshItemTable, dispatch])
 
-    //Delete Variant by id
-    const deleteVariant = async (variantId: string) => {
-        const response = confirm(`Are you sure you want to delete this variant with ID ${variantId}?`);
-        if (response) {
-            try {
-                selectedItem.variants = selectedItem.variants.filter(variant => variant.variantId !== variantId);
-                await deleteFilesFromStorage(`inventory/${id}/${variantId}/`)
-                await saveItem(selectedItem, "Successfully deleted variant")
-                setSelectedItem(selectedItem)
-            } catch (e: any) {
-                showMessage(e.message, "Error")
-            }
-        }
-    }
     const clearAddFormField = () => {
         setManufacture("none")
         setName("")
@@ -231,12 +167,7 @@ const Page = () => {
             url: null
         })
     }
-    const clearAddVariantFormField = () => {
-        setVariantId("")
-        setVariantName("")
-        setImages([])
-        setSizes([])
-    }
+
     const showMessage = (message: string, type: string) => {
         dispatch(showToast({message: message, type: type, showToast: true}))
         setTimeout(() => dispatch(showToast({message: "", type: "", showToast: false})), 3000);
@@ -324,18 +255,6 @@ const Page = () => {
                               setThumbnail={setThumbnail}
                               thumbnail={thumbnail}
                               onSubmit={onAddItemFormSubmit} setType={setType} type={type}/>)}
-                {addVariantForm &&
-                    <VariantForm onSubmit={onVariantFormSubmit}
-                                 setAddVariantForm={setAddVariantForm}
-                                 variantName={variantName}
-                                 variantId={variantId}
-                                 setVariantName={setVariantName}
-                                 setVariantId={setVariantId}
-                                 images={images}
-                                 setImages={setImages}
-                                 setSizes={setSizes} sizes={sizes} selectedItem={selectedItem}
-                                 deleteVariant={deleteVariant}
-                    />}
             </AnimatePresence>
         </div>
     );

@@ -3,7 +3,7 @@ import {Variant} from "@/interfaces";
 import {IoPencil, IoTrash} from "react-icons/io5";
 import ImagesSlider from "@/components/ImagesSlider";
 
-const VariantCard = ({item}: { item: Variant }) => {
+const VariantCard = ({item, onPencil}: { item: Variant, onPencil:any }) => {
 
     return (
         <div className="flex flex-col gap-2 md:w-[20rem] w-[17rem] rounded-lg shadow-primary justify-center items-center">
@@ -40,8 +40,7 @@ const VariantCard = ({item}: { item: Variant }) => {
                 </div>
             </div>
             <div className="flex py-2 flex-row gap-2 w-full justify-end items-center px-2">
-                <button onClick={() => {
-                }} type="button"
+                <button onClick={onPencil} type="button"
                         className="rounded-full bg-yellow-400 p-2 lg:hover:bg-yellow-500">
                     <IoPencil size={20}/>
                 </button>
