@@ -11,7 +11,7 @@ const VariantCard = ({item}: { item: Variant }) => {
                 <ImagesSlider images={item.images}/>
             </div>
             <div className="flex flex-col p-5 px-4 py-2 gap-2 text-base md:text-lg font-medium capitalize">
-                <label>
+                <label className="flex flex-col gap-1">
                     <span className="font-bold">Variant ID</span>
                     <input disabled value={item.variantId} className="uppercase p-1 w-[16rem] border rounded-lg"/>
                 </label>
