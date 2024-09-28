@@ -11,7 +11,6 @@ import {useRouter} from "next/navigation";
 import {logout} from "@/firebase/serviceAPI";
 
 const Profile = () => {
-    const [time, setTime] = useState("");
     const [date, setDate] = useState(new Date());
     const [showMenu, setShowMenu] = useState(false)
     const dispatch:AppDispatch = useDispatch();
@@ -27,12 +26,11 @@ const Profile = () => {
     useEffect(() => {
         const updateClock = () => {
             const d = new Date();
-            setTime(`${d.getHours()}:${d.getMinutes()}`);
             setDate(d);
         };
 
-        updateClock(); // Set initial time immediately
-        const intervalId = setInterval(updateClock, 1000); // Update every minute
+        updateClock();
+        const intervalId = setInterval(updateClock, 1000);
 
         return () => clearInterval(intervalId); // Cleanup on component unmount
     }, []);
@@ -57,7 +55,7 @@ const Profile = () => {
             </div>
             <div className="px-2 flex flex-col">
                 <h3 className="font-medium w-[7rem] text-lg">
-                    {time}
+                    {date.toLocaleTimeString()}
                 </h3>
                 <p className="text-sm font-medium">
                     {date.toDateString()}

@@ -27,18 +27,30 @@ const Page = () => {
 
     return (
         <div className="w-full h-full px-8 py-8">
-            <h1 className="pt-20 text-4xl md:text-5xl font-bold">Item Details</h1>
-            <div className="flex pt-10 flex-row gap-16 p-4 md:gap-16 lg:gap-32 justify-center items-center flex-wrap">
+            <div>
+                <h1 className="pt-20 text-4xl md:text-5xl font-bold">Item Details</h1>
+             <div className="mt-1 text-lg flex-row flex gap-1">
+                 <a href="/adminPanel/inventory" className="text-blue-500">
+                     Inventory
+                 </a>
+                 <p>/</p>
+                 <a href={`/adminPanel/inventory/${item.itemId}`} className="text-blue-500">
+                     {item.itemId}
+                 </a>
+             </div>
+            </div>
+            <div className="flex pt-10 flex-row gap-16 px-2 md:gap-16 lg:gap-32 justify-center items-center flex-wrap">
                 <div>
                     <Image src={item?.thumbnail} alt={item?.name} width={300} height={300} className="w-fit md:h-[35rem] h-[25rem] rounded-lg shadow-primary"/>
                 </div>
-                <div className="capitalize text-2xl font-medium flex flex-col gap-2">
-                    <p className="uppercase">Item ID: {item?.itemId}</p>
+                <div className="capitalize text-lg md:text-2xl font-medium flex flex-col gap-2">
+                    <p className="uppercase line-clamp-1">ID: {item?.itemId}</p>
                     <p>Manufacture: {item?.manufacturer}</p>
                     <p>Brand: {item?.brand}</p>
                     <p>Name: {item?.name}</p>
                     <p className="text-blue-500">{item?.variants.length} Variants</p>
-                    <button className="mt-5 rounded-full text-white lg:hover:bg-primary-200 transition-all bg-primary-100 p-2 flex-row flex justify-center items-center">
+                    <button
+                        className="mt-5 rounded-full text-white lg:hover:bg-primary-200 transition-all bg-primary-100 p-2 flex-row flex justify-center items-center">
                         <IoAdd color="white" size={30}/>
                         <span>
                             Add Variant

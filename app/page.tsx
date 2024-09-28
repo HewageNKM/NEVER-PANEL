@@ -76,9 +76,8 @@ export default function Home() {
                             <input disabled={isLoading} name="password" type={!showPassword ? "password" : "text"}
                                    required
                                    placeholder="Password" className="bg-slate-200 rounded h-[7vh] px-4 py-2 pr-8"/>
-                            <button onClick={() => setShowPassword(prevState => !prevState)} type={"button"}
-                                    className="absolute top-[2.6rem] right-2">
-                                {showPassword ? <FaEye size={20}/> : <FaEyeSlash size={20}/>}
+                            <button onClick={() => setShowPassword(prevState => !prevState)} type={"button"} className="absolute top-[6.3vh] right-[3vw] md:right-[.8vw] md:top-[5.7vh]">
+                                {showPassword ? <FaEye size={25}/> : <FaEyeSlash size={25}/>}
                             </button>
                         </label>
                         {isLoading && <div className="absolute w-full bottom-4  justify-center"><Lottie

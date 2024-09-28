@@ -8,7 +8,7 @@ import {Item, Size} from "@/interfaces";
 import {accessoriesSizesList, shoeSizesList} from "@/constant";
 import Link from "next/link";
 
-const ManageVariantsForm = ({
+const VariantForm = ({
                                 setVariantId,
                                 setImages,
                                 variantId,
@@ -116,13 +116,13 @@ const ManageVariantsForm = ({
     }
     return (
         <DropShadow>
-            <div className="bg-white z-50 max-w-[90vw] flex flex-col h-fit rounded p-4 relative">
+            <div className="bg-white z-50 w-[95vw] flex h-[95vh] overflow-auto md:h-fit rounded p-4 relative">
                 <form onSubmit={async (evt) => {
                     await onSubmit(evt)
                     setUpdateState(false)
                 }} className="flex-col flex gap-5">
                     <legend className="text-2xl font-bold">
-                        Manage Variants
+                        Variant
                     </legend>
                     <div className="mt-2 flex flex-col justify-center items-start flex-wrap gap-5">
                         {images.length > 0 && <h2 className="text-lg font-bold">Images</h2>}
@@ -317,4 +317,4 @@ const ManageVariantsForm = ({
     );
 };
 
-export default ManageVariantsForm;
+export default VariantForm;
