@@ -3,7 +3,7 @@ import {Variant} from "@/interfaces";
 import {IoPencil, IoTrash} from "react-icons/io5";
 import ImagesSlider from "@/components/ImagesSlider";
 
-const VariantCard = ({item, onPencil}: { item: Variant, onPencil:any }) => {
+const VariantCard = ({item, onPencil, onTrash}: { item: Variant, onPencil:any, onTrash:any }) => {
 
     return (
         <div className="flex flex-col gap-2 md:w-[20rem] w-[17rem] rounded-lg shadow-primary justify-center items-center">
@@ -44,8 +44,7 @@ const VariantCard = ({item, onPencil}: { item: Variant, onPencil:any }) => {
                         className="rounded-full bg-yellow-400 p-2 lg:hover:bg-yellow-500">
                     <IoPencil size={20}/>
                 </button>
-                <button onClick={() => {
-                }} type='button' className="rounded-full bg-red-500 lg:hover:bg-red-600 p-2">
+                <button onClick={onTrash} type='button' className="rounded-full bg-red-500 lg:hover:bg-red-600 p-2">
                     <IoTrash size={20}/>
                 </button>
             </div>

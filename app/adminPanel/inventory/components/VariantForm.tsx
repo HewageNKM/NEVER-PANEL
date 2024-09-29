@@ -4,55 +4,51 @@ import {IoAdd, IoClose, IoCloudUpload, IoPencil} from "react-icons/io5";
 import {useDispatch} from "react-redux";
 import {AppDispatch} from "@/lib/store";
 import {showToast} from "@/lib/toastSlice/toastSlice";
-import {Item, Size, Variant} from "@/interfaces";
+import {Item, Variant} from "@/interfaces";
 import {accessoriesSizesList, shoeSizesList} from "@/constant";
-import Link from "next/link";
+import {saveToInventory, uploadImages} from "@/firebase/serviceAPI";
+import {generateId} from "@/utils/genarateIds";
+import {hideLoader, showLoader} from "@/lib/pageLoaderSlice/pageLoaderSlice";
 
 const VariantForm = ({
-                            setAddVariantForm,
-                                onSubmit,
-                                deleteVariant,
-    variant,
-    type
+                         setAddVariantForm,
+                         variant,
+                         type,
+                         setVariant,
+                         item,
+                         setItem
 
-                            }: {
+                     }: {
     setAddVariantForm: React.Dispatch<React.SetStateAction<boolean>>,
-    onSubmit: any,
     deleteVariant: any,
     variant: Variant,
-    type: string
+    setVariant: any
+    type: string,
+    item: Item,
+    setItem: any
 }) => {
     const [file, setFile] = React.useState<string | undefined>("");
     const [selectedSize, setSelectedSize] = useState("none")
     const [stock, setStock] = useState(0)
-    const [updateState, setUpdateState] = useState(false)
 
-    const [sizes,setSizes] = useState(variant.sizes || []);
-    const [images,setImages] = useState(variant.images || []);
-    const [variantId,setVariantId] = useState(variant.variantId || "");
-    const [variantName,setVariantName] = useState(variant.variantName || "");
+    const [sizes, setSizes] = useState(variant?.sizes || []);
+    const [images, setImages] = useState(variant?.images || []);
+    const [variantId, setVariantId] = useState(variant?.variantId || "");
+    const [variantName, setVariantName] = useState(variant?.variantName || "");
 
     const dispatch: AppDispatch = useDispatch();
     const handleFileSelect = (evt: any) => {
         if (evt.target.files[0].size >= 10000000) {
-            dispatch(showToast({
-                message: "File size is larger than 10MB",
-                type: "Error",
-                showToast: true
-            }))
-            setTimeout(() => dispatch(showToast({message: "", type: "", showToast: false})), 3000);
+            showDisplayMessage("Warning", "File size is too large")
             return;
         }
 
         if (images.length >= 5) {
-            dispatch(showToast({
-                message: "You can only upload 5 images",
-                type: "Error",
-                showToast: true
-            }))
+            showDisplayMessage("Warning", "You can only add 5 images")
             setTimeout(() => dispatch(showToast({message: "", type: "", showToast: false})), 3000);
             return;
         }
+
         if (evt.target.files[0]) {
             setImages(prevState => [...prevState, {
                 file: evt.target.files[0],
@@ -61,7 +57,51 @@ const VariantForm = ({
         }
         setFile("")
     }
+    const onVariantFormSubmit = async (evt: any) => {
+        evt.preventDefault();
 
+        if (variantName === "") {
+            showDisplayMessage("Warning", "Please enter a variant name")
+            return;
+        }
+
+        if (images.length === 0) {
+            showDisplayMessage("Warning", "Please add at least one image")
+            return;
+        }
+
+        if (sizes.length === 0) {
+            showDisplayMessage("Warning", "Please add at least one size")
+            return;
+        }
+
+        if (variant == null) {
+            try {
+                dispatch(showLoader())
+                const id = generateId("variant", "").toLowerCase();
+                const uploadedImagesUrls = await uploadImages(images, `inventory/${item.itemId}/${id}`);
+                const newVariant: Variant = {
+                    variantId: id,
+                    variantName: variantName.toLowerCase(),
+                    images: uploadedImagesUrls,
+                    sizes: sizes
+                }
+                item.variants.push(newVariant)
+                setItem(item)
+                await saveToInventory(item)
+                showDisplayMessage("Success", "Variant added successfully")
+            } catch (e: any) {
+                showDisplayMessage("Error", e.message)
+            } finally {
+                dispatch(hideLoader())
+            }
+        } else {
+            alert("Update Variant")
+        }
+
+        setVariant(null)
+        setAddVariantForm(false)
+    }
     const addSizeToTable = () => {
         if (selectedSize === "none") {
             dispatch(showToast({
@@ -93,7 +133,7 @@ const VariantForm = ({
             if (index !== -1) {
                 sizes[index] = {
                     ...sizes[index],
-                    stock: sizes[index].stock + stock
+                    stock: sizes[index].stock = stock
                 }
             } else {
                 setSizes(prevState => [...prevState, size])
@@ -105,13 +145,20 @@ const VariantForm = ({
         setSelectedSize("none")
         setStock(0)
     }
+
+    const showDisplayMessage = (type: string, message: string) => {
+        dispatch(showToast({
+            message: message,
+            type: type,
+            showToast: true
+        }))
+        setTimeout(() => dispatch(showToast({message: "", type: "", showToast: false})), 3000);
+    }
     return (
         <DropShadow>
-            <div className="bg-white z-50 md:w-fit w-[95vw] flex md:h-fit h-[90vh] justify-center items-center overflow-auto rounded p-4 relative">
-                <form onSubmit={async (evt) => {
-                    await onSubmit(evt)
-                    setUpdateState(false)
-                }} className="flex-col flex gap-5">
+            <div
+                className="bg-white z-50 md:w-fit w-[95vw] flex md:h-fit h-[80vh] justify-center items-center overflow-auto rounded p-4 relative">
+                <form onSubmit={onVariantFormSubmit} className="flex-col flex gap-5">
                     <legend className="text-2xl font-bold">
                         Variant
                     </legend>
@@ -123,7 +170,7 @@ const VariantForm = ({
                                     <p className="lg:hover:border-b-2 h-6 lg:border-b-black transition-all">
                                         {`Image ${index + 1}`}
                                     </p>
-                                    <button className="bg-black rounded-full cursor-pointer" disabled={updateState}
+                                    <button className="bg-black rounded-full cursor-pointer" disabled={variant != null}
                                             onClick={() => {
                                                 setImages(prevState => prevState.filter((img, i) => i !== index))
                                             }}>
@@ -150,7 +197,8 @@ const VariantForm = ({
                         <label className="flex-col flex justify-center items-center gap-1">
                             <div className="flex  relative justify-center items-center flex-col">
                                 <IoCloudUpload size={30}/>
-                                <input disabled={updateState} value={file} onChange={(file) => handleFileSelect(file)}
+                                <input disabled={variant != null} value={file}
+                                       onChange={(file) => handleFileSelect(file)}
                                        type="file" multiple
                                        accept="image/*"
                                        className="absolute w-[5rem] opacity-0 bg-black"/>
@@ -214,7 +262,6 @@ const VariantForm = ({
                                             <button onClick={() => {
                                                 setSelectedSize(size.size)
                                                 setStock(size.stock)
-                                                setSizes(prevState => prevState.filter((s, i) => i !== index))
                                             }} type="button" className="p-1 bg-yellow-300 rounded-lg">
                                                 <IoPencil size={15}/>
                                             </button>
@@ -250,7 +297,7 @@ const VariantForm = ({
                         setSizes([])
                         setSelectedSize("none")
                         setStock(0)
-                        setUpdateState(false)
+                        setVariant(null)
                     }}>
                         <IoClose size={30}/>
                     </button>

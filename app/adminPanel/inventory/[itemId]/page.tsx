@@ -1,24 +1,23 @@
 "use client"
 import {useParams} from 'next/navigation';
 import React, {useEffect, useState} from 'react';
-import {getItemById} from "@/firebase/serviceAPI";
+import {deleteFilesFromStorage, getItemById, saveToInventory, uploadImages} from "@/firebase/serviceAPI";
 import {Item, Variant} from "@/interfaces";
 import Image from "next/image";
 import {IoAdd} from "react-icons/io5";
 import VariantCard from "@/app/adminPanel/inventory/components/VariantCard";
 import VariantForm from "@/app/adminPanel/inventory/components/VariantForm";
 import {useDispatch} from "react-redux";
+import {hideLoader, showLoader} from "@/lib/pageLoaderSlice/pageLoaderSlice";
+import {showToast} from "@/lib/toastSlice/toastSlice";
 
 
 const Page = () => {
 
     // Variant Form
     const [addVariantForm, setAddVariantForm] = useState(false)
-    const [variant, setVariant] = useState({} as Variant)
 
-    const dispatch = useDispatch();
-
-
+    const [variant, setVariant] = useState(null)
     const [item, setItem] = useState<Item>({
         buyingPrice: 0,
         discount: 0,
@@ -31,6 +30,9 @@ const Page = () => {
         thumbnail: "",
         variants: []
     })
+
+    const dispatch = useDispatch();
+
     const {itemId} = useParams<{ itemId: string }>()
 
     const fetchItem = async () => {
@@ -46,53 +48,24 @@ const Page = () => {
         }
     }, [itemId])
 
-    const onVariantFormSubmit = async (evt: any) => {
-        evt.preventDefault();
-        /*        if (images.length === 0) {
-            return;
-        }
-
-        if (sizes.length === 0) {
-            return;
-        }
-        if (images[0].file === '') {
-            selectedItem.variants = selectedItem.variants.map((v) => v.variantId === variantId ? {
-                ...v, sizes: sizes, variantName: variantName.toLowerCase()
-            } : v)
-            dispatch(showLoader())
-            setSelectedItem(selectedItem)
-        } else {
-            const genId = generateId("variant", selectedItem.itemId)
+    const deleteVariant = async (variantId:string) => {
+        const response = confirm(`Are you sure you want to delete this variant with ID ${variantId}?`);
+        if (response) {
             try {
                 dispatch(showLoader())
-                const imagesUrl = await uploadImages(variant.images, `inventory/${item.itemId}/${genId.toLowerCase()}/`)
-                const variant: Variant = {
-                    images: imagesUrl,
-                    sizes: sizes,
-                    variantId: genId.toLowerCase(),
-                    variantName: variantName.toLowerCase()
-                }
-                selectedItem.variants.push(variant)
-                setSelectedItem(selectedItem)
-            } catch (e: any) {
-                console.log(e)
-            } finally {
-                dispatch(hideLoader())
-            }
-        }*/
-    }
-
-    const deleteVariant = async (variantId: string) => {
-        const response = confirm(`Are you sure you want to delete this variant with ID ${variantId}?`);
-        /*if (response) {
-            try {
-                selectedItem.variants = selectedItem.variants.filter(variant => variant.variantId !== variantId);
+                console.log(item.variants)
+                const updatedVariants= item.variants.filter(variant => variant.variantId !== variantId);
                 await deleteFilesFromStorage(`inventory/${item.itemId}/${variantId}`)
-                setSelectedItem(selectedItem)
+                item.variants = updatedVariants
+                await saveToInventory(item)
+                setItem(prevState => ({...prevState, variants: updatedVariants}))
+                dispatch(showToast({message: "Variant Deleted Successfully", type: "success"}))
             } catch (e: any) {
                 console.log(e.message)
+            }finally {
+                dispatch(hideLoader())
             }
-        }*/
+        }
     }
     const onEdit = (variant: Variant) => {
         setVariant(variant)
@@ -102,7 +75,7 @@ const Page = () => {
         <div className="w-full h-full relative">
             <div className="px-4 py-4">
                 <h1 className="pt-20 text-4xl md:text-5xl font-bold">Item Details</h1>
-                <div className="mt-1 text-lg flex-row flex gap-1">
+                <div className="mt-1 text-base md:text-lg flex-row flex gap-1">
                     <a href="/adminPanel/inventory" className="text-blue-500">
                         Inventory
                     </a>
@@ -113,7 +86,7 @@ const Page = () => {
                 </div>
             </div>
             <div className="flex pt-10 flex-row gap-16 px-2 md:gap-16 lg:gap-32 justify-center items-center flex-wrap">
-                <div>
+                <div className="w-[90vw]">
                     <Image src={item?.thumbnail} alt={item?.name} width={300} height={300}
                            className="w-fit md:h-[35rem] h-[25rem] rounded-lg shadow-primary"/>
                 </div>
@@ -137,14 +110,16 @@ const Page = () => {
                 <h1>Variants</h1>
                 <div className="w-full mt-10 flex flex-row md:gap-16 gap-10 flex-wrap justify-center items-center">
                     {item?.variants.map((variant, index) => (
-                        <VariantCard item={variant} key={index} onPencil={() => onEdit(variant)}/>
+                        <VariantCard item={variant} key={index} onPencil={() => onEdit(variant)} onTrash={()=>deleteVariant(variant.variantId)}/>
                     ))}
                 </div>
             </div>
             {addVariantForm &&
-                <VariantForm onSubmit={onVariantFormSubmit}
+                <VariantForm setVariant={setVariant}
                              setAddVariantForm={setAddVariantForm}
                              variant={variant}
+                             item={item}
+                             setItem={setItem}
                              deleteVariant={deleteVariant}
                              type={item.type}
                 />}
