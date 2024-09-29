@@ -1,7 +1,7 @@
 "use client"
 import {useParams} from 'next/navigation';
 import React, {useEffect, useState} from 'react';
-import {deleteFilesFromStorage, getItemById, saveToInventory, uploadImages} from "@/firebase/serviceAPI";
+import {deleteFilesFromStorage, getItemById, saveToInventory} from "@/firebase/serviceAPI";
 import {Item, Variant} from "@/interfaces";
 import Image from "next/image";
 import {IoAdd} from "react-icons/io5";
@@ -18,18 +18,7 @@ const Page = () => {
     const [addVariantForm, setAddVariantForm] = useState(false)
 
     const [variant, setVariant] = useState(null)
-    const [item, setItem] = useState<Item>({
-        buyingPrice: 0,
-        discount: 0,
-        sellingPrice: 0,
-        type: "",
-        itemId: "",
-        name: "",
-        manufacturer: "",
-        brand: "",
-        thumbnail: "",
-        variants: []
-    })
+    const [item, setItem] = useState<Item>({buyingPrice: 0, discount: 0, sellingPrice: 0, type: "", itemId: "", name: "", manufacturer: "", brand: "", thumbnail: "", variants: []})
 
     const dispatch = useDispatch();
 
@@ -48,13 +37,13 @@ const Page = () => {
         }
     }, [itemId])
 
-    const deleteVariant = async (variantId:string) => {
+    const deleteVariant = async (variantId: string) => {
         const response = confirm(`Are you sure you want to delete this variant with ID ${variantId}?`);
         if (response) {
             try {
                 dispatch(showLoader())
                 console.log(item.variants)
-                const updatedVariants= item.variants.filter(variant => variant.variantId !== variantId);
+                const updatedVariants = item.variants.filter(variant => variant.variantId !== variantId);
                 await deleteFilesFromStorage(`inventory/${item.itemId}/${variantId}`)
                 item.variants = updatedVariants
                 await saveToInventory(item)
@@ -62,7 +51,7 @@ const Page = () => {
                 dispatch(showToast({message: "Variant Deleted Successfully", type: "success"}))
             } catch (e: any) {
                 console.log(e.message)
-            }finally {
+            } finally {
                 dispatch(hideLoader())
             }
         }
@@ -110,7 +99,8 @@ const Page = () => {
                 <h1>Variants</h1>
                 <div className="w-full mt-10 flex flex-row md:gap-16 gap-10 flex-wrap justify-center items-center">
                     {item?.variants.map((variant, index) => (
-                        <VariantCard item={variant} key={index} onPencil={() => onEdit(variant)} onTrash={()=>deleteVariant(variant.variantId)}/>
+                        <VariantCard item={variant} key={index} onPencil={() => onEdit(variant)}
+                                     onTrash={() => deleteVariant(variant.variantId)}/>
                     ))}
                 </div>
             </div>
