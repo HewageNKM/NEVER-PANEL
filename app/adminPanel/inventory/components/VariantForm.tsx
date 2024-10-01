@@ -20,7 +20,6 @@ const VariantForm = ({
 
                      }: {
     setAddVariantForm: React.Dispatch<React.SetStateAction<boolean>>,
-    deleteVariant: any,
     variant: Variant,
     setVariant: any
     type: string,
@@ -75,9 +74,9 @@ const VariantForm = ({
             return;
         }
 
+        dispatch(showLoader())
         if (variant == null) {
             try {
-                dispatch(showLoader())
                 const id = generateId("variant", "").toLowerCase();
                 const uploadedImagesUrls = await uploadImages(images, `inventory/${item.itemId}/${id}`);
                 const newVariant: Variant = {
@@ -88,20 +87,38 @@ const VariantForm = ({
                 }
                 item.variants.push(newVariant)
                 setItem(item)
-                await saveToInventory(item)
-                showDisplayMessage("Success", "Variant added successfully")
+                await saveItem("Variant added successfully")
             } catch (e: any) {
                 showDisplayMessage("Error", e.message)
             } finally {
                 dispatch(hideLoader())
             }
         } else {
-            alert("Update Variant")
+            try {
+                variant.variantName = variantName.toLowerCase()
+                variant.sizes = sizes
+                setVariant(variant)
+                const filter = item.variants.filter(v => v.variantId !== variant.variantId);
+                filter.push(variant)
+                item.variants = filter
+                setItem(item)
+                await saveItem("Variant updated successfully")
+            } catch (e: any) {
+                showDisplayMessage("Error", e.message)
+            } finally {
+                dispatch(hideLoader())
+            }
         }
 
         setVariant(null)
         setAddVariantForm(false)
     }
+
+    const saveItem = async (msg:string) => {
+        await saveToInventory(item)
+        showDisplayMessage("Success", msg)
+    }
+
     const addSizeToTable = () => {
         if (selectedSize === "none") {
             dispatch(showToast({
