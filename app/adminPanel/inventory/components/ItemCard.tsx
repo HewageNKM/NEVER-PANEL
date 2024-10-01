@@ -6,7 +6,7 @@ import Link from "next/link";
 
 const ItemCard = ({item, onEdit, onDelete}:{item:Item, onEdit:any, onDelete:any}) => {
     return (
-        <div className="flex flex-col gap-2 rounded-lg shadow-primary">
+        <div className="flex flex-col gap-2 max-w-[90vw] rounded-lg shadow-primary">
             <Link href={`/adminPanel/inventory/${item.itemId}`} className='w-full'>
                 <Image src={item.thumbnail} alt={item.name} width={200} height={200} className="h-[20rem] rounded-t-lg w-[20rem]"/>
             </Link>
