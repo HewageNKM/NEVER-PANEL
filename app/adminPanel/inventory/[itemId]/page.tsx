@@ -48,9 +48,9 @@ const Page = () => {
                 item.variants = updatedVariants
                 await saveToInventory(item)
                 setItem(prevState => ({...prevState, variants: updatedVariants}))
-                dispatch(showToast({message: "Variant Deleted Successfully", type: "success"}))
+                showDisplayMessage("Variant deleted successfully","Success")
             } catch (e: any) {
-                console.log(e.message)
+                showDisplayMessage(e.message,"Error")
             } finally {
                 dispatch(hideLoader())
             }
@@ -59,6 +59,9 @@ const Page = () => {
     const onEdit = (variant: Variant) => {
         setVariant(variant)
         setAddVariantForm(true)
+    }
+    const showDisplayMessage = (msg:string,type:string) => {
+        dispatch(showToast({message: msg, type: type}))
     }
     return (
         <div className="w-full h-full relative md:mt-5 mt-10">
@@ -110,7 +113,6 @@ const Page = () => {
                              variant={variant}
                              item={item}
                              setItem={setItem}
-                             deleteVariant={deleteVariant}
                              type={item.type}
                 />}
         </div>
