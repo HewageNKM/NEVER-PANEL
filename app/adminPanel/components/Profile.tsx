@@ -8,7 +8,7 @@ import Link from "next/link";
 import {AnimatePresence, motion} from "framer-motion";
 import {clearUser} from "@/lib/userSlice/userSlice";
 import {useRouter} from "next/navigation";
-import {logout} from "@/firebase/serviceAPI";
+import {logout} from "@/firebase/firebaseClient";
 
 const Profile = () => {
     const [date, setDate] = useState(new Date());
@@ -36,7 +36,7 @@ const Profile = () => {
     }, []);
 
     return (
-        <div className="absolute top-5 z-40 h-[4rem] w-[13rem] flex justify-center items-center right-3 shadow-primary rounded-full">
+        <div className="absolute top-5 z-40 h-[4rem] w-[13rem] flex justify-center items-center right-3">
             <div className="p-2 relative rounded-full flex justify-center items-center">
                 {user?.imageUrl ? (<Image src={user?.imageUrl} className="bg-cover w-10 h-10" alt={user?.username}/>) : (
                     <button onClick={()=>setShowMenu(prevState => !prevState)}><RxAvatar size={40}/></button>)}
