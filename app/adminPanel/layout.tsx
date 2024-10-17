@@ -3,7 +3,7 @@ import React, {ReactNode} from 'react';
 import {redirect} from "next/navigation";
 import {useSelector} from "react-redux";
 import {RootState} from "@/lib/store";
-import {getCurrentUser} from "@/firebase/serviceAPI";
+import {getCurrentUser} from "@/firebase/firebaseClient";
 import Profile from "@/app/adminPanel/components/Profile";
 import NavMenu from "@/app/adminPanel/components/NavMenu";
 import PageLoadingProvider from "@/app/adminPanel/components/PageLoadingProvider";

@@ -10,14 +10,9 @@ export const brands = [
         value: "nike"
     },
     {
-        id: 3,
-        name: "Puma",
-        value: "puma"
-    },
-    {
         id: 4,
         name: "New Balance",
-        value: "new balance"
+        value: "nb"
     },
     {
         id: 5,
@@ -27,7 +22,7 @@ export const brands = [
     {
         id: 6,
         name: "Luvion Vuitton",
-        value: "luvion vuitton"
+        value: "lv"
     },
     {
         id: 7,
@@ -42,12 +37,6 @@ export const brands = [
 
 ]
 export const shoeSizesList = [
-    "30",
-    "31",
-    "32",
-    "33",
-    "34",
-    "35",
     "36",
     "37",
     "38",
@@ -59,48 +48,29 @@ export const shoeSizesList = [
     "44",
     "45",
     "46",
-    "47",
-    "48",
-    "49",
-    "50",
 ]
 export const types = [
     {
         id: 1,
-        name:"Shoe",
-        value: "shoe"
-    },
-    {
-        id: 2,
-        name:"Accessory",
-        value: "accessory"
+        name:"Shoes",
+        value: "shoes"
     },
     {
         id: 3,
-        name:"Slipper",
-        value: "slipper"
-    }
+        name:"Sandals",
+        value: "sandals"
+    },
+    {
+        id: 2,
+        name:"Accessories",
+        value: "accessories"
+    },
 ]
 export const accessoriesSizesList = [
     {
         id: 1,
         name: "200ml",
         value: "200ml"
-    },
-    {
-        id: 2,
-        name: "250ml",
-        value: "250ml"
-    },
-    {
-        id: 3,
-        name: "500ml",
-        value: "500ml"
-    },
-    {
-        id: 4,
-        name: "750ml",
-        value: "750ml"
     },
     {
         id: 5,

@@ -16,7 +16,7 @@ import {
     getInventory,
     saveToInventory,
     uploadImages
-} from "@/firebase/serviceAPI";
+} from "@/firebase/firebaseClient";
 import {Item, Size, Variant} from "@/interfaces";
 import Loading from "@/app/adminPanel/components/Loading";
 import AlgoliaSearch from "@/components/AlgoliaSearch";
@@ -183,7 +183,6 @@ const Page = () => {
                         <label className="flex relative flex-col gap-1">
                             <span className="font-bold text-lg">Search</span>
                             <div className="flex flex-row gap-2 flex-wrap">
-                                <AlgoliaSearch setInventory={setInventoryList}/>
                                 <button onClick={() => setRefreshItemTable(prevState => !prevState)}
                                         className="bg-yellow-400 line-clamp-1  hover:bg-yellow-500 font-medium text-white rounded p-2">
                                     Reload

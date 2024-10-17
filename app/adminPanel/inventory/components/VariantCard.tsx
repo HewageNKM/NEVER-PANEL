@@ -3,21 +3,29 @@ import {Variant} from "@/interfaces";
 import {IoPencil, IoTrash} from "react-icons/io5";
 import ImagesSlider from "@/components/ImagesSlider";
 
-const VariantCard = ({item, onPencil, onTrash}: { item: Variant, onPencil:any, onTrash:any }) => {
+const VariantCard = ({
+                         item,
+                         onPencil,
+                         onTrash
+                     }: {
+    item: Variant,
+    onPencil: () => void,
+    onTrash: () => void
+}) => {
 
     return (
         <div className="flex flex-col gap-2 md:w-[20rem] w-[17rem] rounded-lg shadow-primary justify-center items-center">
             <div className="relative">
-                <ImagesSlider images={item.images}/>
+                <ImagesSlider images={item.images} />
             </div>
             <div className="flex flex-col p-5 px-4 py-2 gap-2 text-base md:text-lg font-medium capitalize">
                 <label className="flex flex-col gap-1">
                     <span className="font-bold">Variant ID</span>
-                    <input disabled value={item.variantId} className="uppercase p-1 w-[16rem] border rounded-lg"/>
+                    <input disabled value={item.variantId} className="uppercase p-1 w-[16rem] border rounded-lg" />
                 </label>
                 <label className="flex flex-col gap-1">
                     <span className="font-bold text-lg">Variant Name</span>
-                    <input disabled value={item.variantName} className="capitalize p-1 w-[16rem] border rounded-lg"/>
+                    <input disabled value={item.variantName} className="capitalize p-1 w-[16rem] border rounded-lg" />
                 </label>
                 <h2 className="text-2xl font-bold mt-2">Sizes</h2>
                 <div className="overflow-auto h-[7rem]">
@@ -40,12 +48,11 @@ const VariantCard = ({item, onPencil, onTrash}: { item: Variant, onPencil:any, o
                 </div>
             </div>
             <div className="flex py-2 flex-row gap-2 w-full justify-end items-center px-2">
-                <button onClick={onPencil} type="button"
-                        className="rounded-full bg-yellow-400 p-2 lg:hover:bg-yellow-500">
-                    <IoPencil size={20}/>
+                <button onClick={onPencil} type="button" className="rounded-full bg-yellow-400 p-2 lg:hover:bg-yellow-500">
+                    <IoPencil size={20} />
                 </button>
                 <button onClick={onTrash} type='button' className="rounded-full bg-red-500 lg:hover:bg-red-600 p-2">
-                    <IoTrash size={20}/>
+                    <IoTrash size={20} />
                 </button>
             </div>
         </div>

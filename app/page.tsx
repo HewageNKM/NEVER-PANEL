@@ -9,7 +9,7 @@ import {redirect, useRouter} from "next/navigation";
 import {setUser} from "@/lib/userSlice/userSlice";
 import Lottie from "lottie-react";
 import {ButtonLoading} from "@/assets/animations";
-import {getCurrentUser, getUserById, logUser} from "@/firebase/serviceAPI";
+import {getCurrentUser, getUserById, logUser} from "@/firebase/firebaseClient";
 
 export default function Home() {
     const router = useRouter();

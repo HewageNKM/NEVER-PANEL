@@ -6,7 +6,7 @@ import {AppDispatch} from "@/lib/store";
 import {showToast} from "@/lib/toastSlice/toastSlice";
 import {Item, Variant} from "@/interfaces";
 import {accessoriesSizesList, shoeSizesList} from "@/constant";
-import {saveToInventory, uploadImages} from "@/firebase/serviceAPI";
+import {saveToInventory, uploadImages} from "@/firebase/firebaseClient";
 import {generateId} from "@/utils/genarateIds";
 import {hideLoader, showLoader} from "@/lib/pageLoaderSlice/pageLoaderSlice";
 

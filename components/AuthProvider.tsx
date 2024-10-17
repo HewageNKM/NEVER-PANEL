@@ -4,7 +4,7 @@ import {setUser} from "@/lib/userSlice/userSlice";
 import {useDispatch} from "react-redux";
 import {AppDispatch} from "@/lib/store";
 import LoadingView from "@/app/components/LoadingView";
-import {getUserById, logout, observeAuthState} from "@/firebase/serviceAPI";
+import {getUserById, logout, observeAuthState} from "@/firebase/firebaseClient";
 
 const AuthProvider = ({children}: { children: ReactNode }) => {
     const [isLoading, setIsLoading] = useState(true)

@@ -4,7 +4,7 @@ import Link from "next/link";
 import {IoLockClosed} from "react-icons/io5";
 import {useSelector} from "react-redux";
 import {RootState} from "@/lib/store";
-import {getCurrentUser} from "@/firebase/serviceAPI";
+import {getCurrentUser} from "@/firebase/firebaseClient";
 import {redirect} from "next/navigation";
 
 const Page = () => {
