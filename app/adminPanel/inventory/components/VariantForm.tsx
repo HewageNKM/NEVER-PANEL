@@ -1,3 +1,4 @@
+"use client";
 import React, {useState} from 'react';
 import DropShadow from "@/components/DropShadow";
 import {IoAdd, IoClose, IoCloudUpload, IoPencil} from "react-icons/io5";
@@ -6,7 +7,7 @@ import {AppDispatch} from "@/lib/store";
 import {showToast} from "@/lib/toastSlice/toastSlice";
 import {Item, Variant} from "@/interfaces";
 import {accessoriesSizesList, shoeSizesList} from "@/constant";
-import {saveToInventory, uploadImages} from "@/firebase/serviceAPI";
+import {saveToInventory, uploadImages} from "@/firebase/firebaseClient";
 import {generateId} from "@/utils/genarateIds";
 import {hideLoader, showLoader} from "@/lib/pageLoaderSlice/pageLoaderSlice";
 
@@ -209,7 +210,7 @@ const VariantForm = ({
                             <input onChange={(txt) => setVariantName(txt.target.value)} value={variantName} required
                                    type="text"
                                    placeholder="Variant 1"
-                                   className="p-1 text-center capitalize border-2 border-slate-300 rounded"/>
+                                   className="p-1 text-center  border-2 border-slate-300 rounded"/>
                         </label>
                         <label className="flex-col flex justify-center items-center gap-1">
                             <div className="flex  relative justify-center items-center flex-col">

@@ -1,8 +1,8 @@
+"use client"
 import React from 'react';
 import {brands, types} from "@/constant";
 import {IoClose, IoCloudUpload} from "react-icons/io5";
 import DropShadow from "@/components/DropShadow";
-import Image from "next/image";
 import {showToast} from "@/lib/toastSlice/toastSlice";
 import {useDispatch} from "react-redux";
 import {AppDispatch} from "@/lib/store";
@@ -75,7 +75,6 @@ const ItemForm = ({
         }
     }
 
-    console.log(thumbnail)
     return (
         <DropShadow>
             <div className="bg-white z-50 w-[95vw] flex h-[95vh] overflow-auto md:h-fit rounded p-4 relative">
@@ -113,7 +112,7 @@ const ItemForm = ({
                                    value={id}
                                    onChange={(txt) => setId(txt.target.value)}
                                    placeholder="Jordan, Campus......"
-                                   className="p-1 border-2 capitalize border-slate-300 rounded"/>
+                                   className="p-1 border-2 border-slate-300 rounded"/>
                         </label>
                         <label className="flex-col flex gap-1">
                             <span className="font-medium">Type</span>
@@ -143,13 +142,13 @@ const ItemForm = ({
                                    value={brand}
                                    onChange={(txt) => setBrand(txt.target.value)}
                                    placeholder="Jordan, Campus......"
-                                   className="p-1 border-2 capitalize border-slate-300 rounded"/>
+                                   className="p-1 border-2  border-slate-300 rounded"/>
                         </label>
                         <label className="flex-col flex gap-1">
                             <span className="font-medium">Name</span>
                             <input required value={name} onChange={(txt) => setName(txt.target.value)} type="text"
                                    placeholder="Nike Air Max 90"
-                                   className="p-1 border-2 capitalize border-slate-300 rounded"/>
+                                   className="p-1 border-2  border-slate-300 rounded"/>
                         </label>
                         <label className="flex-col flex gap-1">
                             <span className="font-medium">Buying Price(Rs)</span>
