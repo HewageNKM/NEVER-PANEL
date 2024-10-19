@@ -72,7 +72,7 @@ const Page = () => {
                 discount: Number.parseInt(discount),
                 itemId: genId.toLowerCase(),
                 manufacturer: manufacture.toLowerCase(),
-                name: name.toLowerCase(),
+                name: name,
                 sellingPrice: Number.parseInt(sellingPrice)
             }
 
@@ -88,7 +88,7 @@ const Page = () => {
                 discount: Number.parseInt(discount),
                 itemId: id.toLowerCase(),
                 manufacturer: manufacture.toLowerCase(),
-                name: name.toLowerCase(),
+                name: name,
                 sellingPrice: Number.parseInt(sellingPrice),
                 thumbnail: i?.thumbnail || "",
                 variants: i?.variants || []
@@ -137,7 +137,7 @@ const Page = () => {
             setRefreshItemTable(prevState => !prevState)
         }
         try {
-            const items = await filterInventoryByBrands(brands.toLowerCase())
+            const items = await filterInventoryByBrands(brands)
             setInventoryList(items)
         } catch (e: any) {
             showMessage(e.message, "Error")

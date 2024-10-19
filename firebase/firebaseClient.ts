@@ -31,7 +31,6 @@ export const storage = getStorage(app);
 // Firestore collection references
 export const usersCollectionRef = collection(db, "users");
 export const inventoryCollectionRef = collection(db, "inventory");
-export const ordersCollectionRef = collection(db, "orders");
 
 
 export const logUser = async (email: string, password: string) => {

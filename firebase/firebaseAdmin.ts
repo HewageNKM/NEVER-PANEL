@@ -12,8 +12,9 @@ if (!admin.apps.length) {
     });
 }
 
-export const adminFirestore = admin.firestore();
-export const adminAuth = admin.auth();
+const adminFirestore = admin.firestore();
+const adminAuth = admin.auth();
+const remoteConfig = admin.remoteConfig();
 
 export const getOrders = async (pageNumber: number = 1, size: number = 20) => {
     const offset = (pageNumber - 1) * size;
@@ -35,4 +36,10 @@ export const getOrders = async (pageNumber: number = 1, size: number = 20) => {
 export const verifyIdToken = async (token: string) => {
     console.log(token);
     return await adminAuth.verifyIdToken(token);
+}
+
+export const getConfigByKey = async (key: string) =>{
+    const config = await remoteConfig.getTemplate();
+    return config.parameters[key].defaultValue;
+
 }
