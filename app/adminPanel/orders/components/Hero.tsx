@@ -1,8 +1,19 @@
-import React from 'react';
-import { IoSearch } from "react-icons/io5";
+"use client"
+import React, {useEffect} from 'react';
+import {IoSearch} from "react-icons/io5";
 import {orderStatus, orderStatusList} from "@/constant";
+import {useDispatch, useSelector} from "react-redux";
+import {AppDispatch, RootState} from "@/lib/store";
+import {setSelectedSort, sortOrders} from "@/lib/orderSlice/orderSlice";
 
 const Hero = () => {
+    const dispatch: AppDispatch = useDispatch();
+    const selectedSortOption = useSelector((state: RootState) => state.orderSlice.selectedSort);
+
+    useEffect(() => {
+        dispatch(sortOrders());
+    }, [dispatch, selectedSortOption])
+
     return (
         <section className="w-full pt-10">
             <div className="px-8 flex flex-col">
@@ -22,7 +33,7 @@ const Hero = () => {
                                     placeholder="Search"
                                 />
                                 <button className="absolute top-1/2 transform -translate-y-1/2 right-3">
-                                    <IoSearch className="text-gray-500 hover:text-blue-500 transition duration-200" />
+                                    <IoSearch className="text-gray-500 hover:text-blue-500 transition duration-200"/>
                                 </button>
                             </div>
                         </label>
@@ -30,7 +41,10 @@ const Hero = () => {
                     <div className="mt-4 lg:mt-0 lg:ml-4">
                         <label className="flex flex-col gap-1">
                             <span className="font-medium text-lg lg:text-xl">Filter</span>
-                            <select defaultValue="" className="px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                            <select defaultValue=""
+                                    onChange={(e) => dispatch(setSelectedSort(e.target.value as orderStatus))}
+                                    value={selectedSortOption}
+                                    className="px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
                                 <option value="">Select</option>
                                 {
                                     orderStatusList.map(status => (

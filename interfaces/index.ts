@@ -1,3 +1,5 @@
+import {orderStatus} from "@/constant";
+
 export interface Profile {
     email: string,
     role: string,
@@ -66,7 +68,7 @@ export interface OrderItem {
 
 export interface Tracking {
     trackingNumber: string;
-    status: string;
+    status: orderStatus;
 
     trackingCompany: string;
     trackingUrl: string;
