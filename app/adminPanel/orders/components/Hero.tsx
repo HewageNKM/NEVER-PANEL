@@ -1,5 +1,6 @@
 import React from 'react';
 import { IoSearch } from "react-icons/io5";
+import {orderStatus, orderStatusList} from "@/constant";
 
 const Hero = () => {
     return (
@@ -29,10 +30,13 @@ const Hero = () => {
                     <div className="mt-4 lg:mt-0 lg:ml-4">
                         <label className="flex flex-col gap-1">
                             <span className="font-medium text-lg lg:text-xl">Filter</span>
-                            <select className="px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                                <option className="">All</option>
-                                <option className="">Processing</option>
-                                <option className="">Delivered</option>
+                            <select defaultValue="" className="px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                                <option value="">Select</option>
+                                {
+                                    orderStatusList.map(status => (
+                                        <option key={status.id} value={status.value}>{status.name}</option>
+                                    ))
+                                }
                             </select>
                         </label>
                     </div>

@@ -118,7 +118,7 @@ const ItemForm = ({
                             <span className="font-medium">Type</span>
                             <select disabled={updateState} required value={type}
                                     onChange={(txt) => setType(txt.target.value)}
-                                    defaultValue="none" className="p-1 border-2 w-[10rem] border-slate-300 rounded">
+                                    defaultValue="none" className="p-1  border-2 w-[10rem] border-slate-300 rounded">
                                 {types.map((types, index) => (
                                     <option key={index} value={types.value}>{types.name}</option>
                                 ))}
@@ -142,7 +142,7 @@ const ItemForm = ({
                                    value={brand}
                                    onChange={(txt) => setBrand(txt.target.value)}
                                    placeholder="Jordan, Campus......"
-                                   className="p-1 border-2  border-slate-300 rounded"/>
+                                   className="p-1 border-2 lowercase  border-slate-300 rounded"/>
                         </label>
                         <label className="flex-col flex gap-1">
                             <span className="font-medium">Name</span>

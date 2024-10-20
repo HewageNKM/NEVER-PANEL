@@ -1,6 +1,6 @@
 "use client"
 import React, {ReactNode} from 'react';
-import {redirect} from "next/navigation";
+import {notFound, redirect} from "next/navigation";
 import {useSelector} from "react-redux";
 import {RootState} from "@/lib/store";
 import {getCurrentUser} from "@/firebase/firebaseClient";
@@ -12,7 +12,7 @@ const Layout = ({children}: { children: ReactNode }) => {
     const {user} = useSelector((state: RootState) => state.authSlice);
 
     if (!user && getCurrentUser()) {
-        redirect("/unauthorized");
+        notFound()
     }else if(!user && !getCurrentUser()){
         redirect("/")
     }

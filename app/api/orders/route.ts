@@ -3,19 +3,8 @@ import {getOrders, verifyIdToken} from "@/firebase/firebaseAdmin";
 
 export const GET = async (req: Request) => {
     try {
-        // Get the token from the request headers
-        const authHeader = req.headers.get("authorization");
-
-        const token = authHeader?.startsWith('Bearer ')
-            ? authHeader.split(' ')[1]
-            : null;
-
-        if (!token) {
-            return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
-        }
-
         // Verify the ID token
-        await verifyIdToken(token);
+        await verifyIdToken(req);
 
         // Get the URL and parse the query parameters
         const url = new URL(req.url);

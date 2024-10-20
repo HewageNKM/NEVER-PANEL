@@ -18,8 +18,8 @@ const ItemCard = ({ item, onEdit, onDelete }: { item: Item, onEdit: any, onDelet
             </Link>
             <div className="p-4 flex flex-col gap-2">
                 <h2 className="text-gray-700 font-bold text-lg uppercase">{"ID: " + item.itemId}</h2>
-                <p className="text-gray-600 text-sm font-medium">{"Manufacturer: " + item.manufacturer}</p>
-                <p className="text-gray-600 text-sm font-medium">{"Brand: " + item.brand}</p>
+                <p className="text-gray-600  text-sm font-medium">{"Manufacturer: " + item.manufacturer.toUpperCase()}</p>
+                <p className="text-gray-600  text-sm font-medium">{"Brand: " + item.brand.toUpperCase()}</p>
                 <p className="text-gray-600 text-sm font-medium">{"Name: " + item.name}</p>
             </div>
             <div className="flex items-center justify-between px-4 pb-4">

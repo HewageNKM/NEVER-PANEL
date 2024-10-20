@@ -1,5 +1,3 @@
-import {Timestamp} from "firebase/firestore";
-
 export interface Profile {
     email: string,
     role: string,
@@ -11,7 +9,7 @@ export interface Item {
     itemId: string,
     type: string,
     brand: string,
-    thumbnail:string,
+    thumbnail: string,
     variants: Variant[],
     manufacturer: string,
     name: string,
@@ -19,16 +17,19 @@ export interface Item {
     sellingPrice: number,
     discount: number,
 }
-export interface Size{
+
+export interface Size {
     size: string,
     stock: number,
 }
+
 export interface Variant {
     variantId: string,
     variantName: string,
     images: string[],
     sizes: Size[],
 }
+
 export interface Order {
     orderId: string,
     paymentId: string,
@@ -38,9 +39,10 @@ export interface Order {
     customer: Customer,
     shippingCost: number,
     tracking: Tracking | null,
-    createdAt: Timestamp,
-    updatedAt: Timestamp,
+    createdAt: string,
+    updatedAt: string,
 }
+
 export interface Customer {
     id: string;
     name: string;
@@ -48,9 +50,10 @@ export interface Customer {
     phone: string;
     address: string;
     city: string;
-    createdAt: Timestamp;
-    updatedAt: Timestamp;
+    createdAt: string;
+    updatedAt: string;
 }
+
 export interface OrderItem {
     itemId: string,
     variantId: string,
@@ -60,13 +63,12 @@ export interface OrderItem {
     quantity: number,
     price: number,
 }
+
 export interface Tracking {
-    id:string
     trackingNumber: string;
     status: string;
 
     trackingCompany: string;
     trackingUrl: string;
-    createdAt: Timestamp;
-    updatedAt: Timestamp;
+    updatedAt: string;
 }

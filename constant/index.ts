@@ -93,3 +93,68 @@ export const accessoriesSizesList = [
         value: "xl",
     }
 ]
+export enum orderStatus {
+    DELIVERED = "Delivered",
+    PROCESSING = "Processing",
+    CANCELLED = "Cancelled",
+    RETURNED = "Returned",
+    SHIPPED = "Shipped",
+}
+
+export enum paymentStatus {
+    PAID = "Success",
+    PENDING = "Pending",
+    REFUNDED = "Refunded",
+}
+
+export enum paymentMethods {
+    CASH = "Cash",
+    CARD = "Card",
+    PAYHERE = "PayHere",
+    COD = "COD",
+}
+export const orderStatusList = [
+    {
+        id: 1,
+        name: "Delivered",
+        value: orderStatus.DELIVERED
+    },
+    {
+        id: 2,
+        name: "Processing",
+        value:orderStatus.PROCESSING
+    },
+    {
+        id: 3,
+        name: "Cancelled",
+        value:orderStatus.CANCELLED
+    },
+    {
+        id: 4,
+        name: "Returned",
+        value: orderStatus.RETURNED
+    },
+    {
+        id: 5,
+        name: "Shipped",
+        value: orderStatus.SHIPPED
+    }
+]
+
+export const paymentStatusList = [
+    {
+        id: 1,
+        name: "Success",
+        value: paymentStatus.PAID
+    },
+    {
+        id: 2,
+        name: "Pending",
+        value: paymentStatus.PENDING
+    },
+    {
+        id: 3,
+        name: "Refunded",
+        value: paymentStatus.REFUNDED
+    }
+]

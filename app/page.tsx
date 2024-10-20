@@ -19,7 +19,7 @@ export default function Home() {
     const {user} = useSelector((state: RootState) => state.authSlice);
 
     if (getCurrentUser() && user) {
-        redirect("/adminPanel/dashboard");
+        redirect("/adminPanel");
     }
 
     const dispatch: AppDispatch = useDispatch();
@@ -37,7 +37,7 @@ export default function Home() {
 
                 if (user) {
                     dispatch(setUser(user));
-                    router.replace("/adminPanel/dashboard");
+                    router.replace("/adminPanel");
                 } else {
                     setToast("User not found, Please contact administrator!");
                 }

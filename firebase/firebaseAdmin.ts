@@ -1,5 +1,6 @@
 import admin, {credential} from 'firebase-admin';
 import {Order} from "@/interfaces";
+import {NextResponse} from "next/server";
 
 if (!admin.apps.length) {
     admin.initializeApp({
@@ -20,25 +21,39 @@ export const getOrders = async (pageNumber: number = 1, size: number = 20) => {
     const offset = (pageNumber - 1) * size;
 
     const ordersSnapshot = await adminFirestore.collection('orders')
-        .orderBy('createdAt') // Replace with the field you want to order by
+        .orderBy('createdAt', 'desc' as any)
         .limit(size)
         .offset(offset)
         .get();
 
-    let orders:Order[] = []
+    let orders: Order[] = []
     ordersSnapshot.forEach(doc => {
         orders.push(doc.data() as Order);
     });
 
     return orders;
 };
+export const updateOrder = async (order: Order) => {
+    return await adminFirestore.collection('orders').doc(order.orderId).set({
+        ...order
+    }, {merge: true});
+}
 
-export const verifyIdToken = async (token: string) => {
-    console.log(token);
+export const verifyIdToken = async (req: any) => {
+    const authHeader = req.headers.get("authorization");
+
+    const token = authHeader?.startsWith('Bearer ')
+        ? authHeader.split(' ')[1]
+        : null;
+
+    if (!token) {
+        return NextResponse.json({message: 'Unauthorized'}, {status: 401});
+    }
+
     return await adminAuth.verifyIdToken(token);
 }
 
-export const getConfigByKey = async (key: string) =>{
+export const getConfigByKey = async (key: string) => {
     const config = await remoteConfig.getTemplate();
     return config.parameters[key].defaultValue;
 

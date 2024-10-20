@@ -1,6 +1,6 @@
 "use client";
 import React, {useEffect, useState} from 'react';
-import {Customer, Order, OrderItem, Tracking} from "@/interfaces";
+import {Customer, Order, OrderItem} from "@/interfaces";
 import {IoArrowBack, IoArrowForward, IoEye, IoPencil} from "react-icons/io5";
 import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch, RootState} from "@/lib/store";
@@ -9,6 +9,7 @@ import {AnimatePresence} from "framer-motion";
 import ItemsView from "@/app/adminPanel/orders/components/ItemsView";
 import CustomerView from "@/app/adminPanel/orders/components/CustomerView";
 import OrderStatusView from "@/app/adminPanel/orders/components/OrderStatusView";
+import {orderStatus} from "@/constant";
 
 const Orders = ({orders}: { orders: Order[] }) => {
     const dispatch: AppDispatch = useDispatch();
@@ -17,7 +18,7 @@ const Orders = ({orders}: { orders: Order[] }) => {
 
     const [items, setItems] = useState([] as OrderItem[]);
     const [customer, setCustomer] = useState({} as Customer)
-    const [tracking, setTracking] = useState<Tracking | null>({} as Tracking)
+    const [selectedOrder, setSelectedOrder] = useState<Order>({} as Order)
 
     const [showItems, setShowItems] = useState(false)
     const [showCustomer, setShowCustomer] = useState(false)
@@ -64,6 +65,9 @@ const Orders = ({orders}: { orders: Order[] }) => {
                             Method
                         </th>
                         <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase tracking-wider">Payment
+                            ID
+                        </th>
+                        <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase tracking-wider">Payment
                             Status
                         </th>
                     </tr>
@@ -73,19 +77,11 @@ const Orders = ({orders}: { orders: Order[] }) => {
                     {orderList.map((order, index) => (
                         <tr key={order.orderId} className="font-bold text-lg">
                             <td className="px-6 py-4 whitespace-nowrap text-gray-900">#{order.orderId}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-gray-900">{typeof order.createdAt === "string" ? new Date(order.createdAt).toLocaleString('en-US', {
-                                year: 'numeric',
-                                month: '2-digit',
-                                day: '2-digit',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                                second: '2-digit',
-                                hour12: true
-                            }) : new Date(order.createdAt._seconds * 1000 + Math.floor(order.createdAt._nanoseconds / 1000000)).toLocaleString()}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-gray-900">{order.createdAt.toString()}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-gray-900">
                                 <div className="flex flex-row gap-2">
                                     <p>{order.customer.name}</p>
-                                    <button onClick={()=>{
+                                    <button onClick={() => {
                                         setCustomer(order.customer)
                                         setShowCustomer(true)
                                     }} className="text-indigo-600 hover:text-indigo-900">
@@ -96,9 +92,10 @@ const Orders = ({orders}: { orders: Order[] }) => {
                             <td className="px-6 py-4 whitespace-nowrap text-gray-900">
                                 <div className="flex flex-row gap-2">
                                     <p>{order.items.length}</p>
-                                    <button onClick={()=>{
+                                    <button onClick={() => {
                                         setItems(order.items)
-                                        setShowItems(true)}
+                                        setShowItems(true)
+                                    }
                                     } className="text-indigo-600 hover:text-indigo-900">
                                         <IoEye size={20} color={"blue"}/>
                                     </button>
@@ -106,21 +103,22 @@ const Orders = ({orders}: { orders: Order[] }) => {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                 <div className="flex flex-row gap-2">
-                                    <p className={`px-2 py-1  inline-flex text-sm leading-5 font-semibold rounded-full ${order.tracking?.status == "Shipped" ? "bg-yellow-100 text-yellow-800" : order.tracking?.status == "Delivered" ? "bg-green-100 text-green-800" : "bg-blue-100 text-blue-800"}`}>
-                                        {order.tracking?.status == "Shipped" ? "Shipped" : order.tracking?.status == "Delivered" ? "Delivered" : "Processing"}
+                                    <p className={`px-2 py-1  inline-flex text-sm leading-5 font-semibold rounded-full ${order.tracking?.status == orderStatus.SHIPPED ? "bg-yellow-100 text-yellow-800" : order.tracking?.status == orderStatus.DELIVERED ? "bg-green-100 text-green-800" : "bg-blue-100 text-blue-800"}`}>
+                                        {order.tracking?.status == orderStatus.SHIPPED ? orderStatus.SHIPPED : order.tracking?.status == orderStatus.DELIVERED ? orderStatus.DELIVERED : orderStatus.PROCESSING}
                                     </p>
                                     <button
-                                        onClick={()=> {
-                                            setTracking(order.tracking)
+                                        onClick={() => {
+                                            setSelectedOrder(order)
                                             setShowOrderStatus(true)
                                         }}
                                         className="text-indigo-600 text-lg hover:text-indigo-900"><IoPencil
                                         size={20} color={"blue"}/></button>
                                 </div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap  text-gray-900">Rs.{order.items.reduce((acc, item) => acc + item.price, 0)}</td>
+                            <td className="px-6 py-4 whitespace-nowrap  text-gray-900">Rs.{order.items.reduce((total, item) => total + item.price * item.quantity, 0)}</td>
                             <td className="px-6 py-4 whitespace-nowrap  text-gray-900">Rs.{order.shippingCost}</td>
                             <td className="px-6 py-4 whitespace-nowrap  text-gray-900">{order.paymentMethod}</td>
+                            <td className="px-6 py-4 whitespace-nowrap  text-gray-900">{order.paymentId || "None"}</td>
                             <td className="px-6 py-4 whitespace-nowrap  text-gray-900">
                                 <div className="flex flex-row gap-2">
                                     <p className={`px-2 py-1 inline-flex text-sm leading-5 font-semibold rounded-full ${order.paymentStatus == "Paid" ? "bg-green-100 text-green-800" : order.paymentStatus == "Pending" ? "bg-blue-100 text-blue-800" : "bg-red-100 text-red-800"}`}>
@@ -160,10 +158,12 @@ const Orders = ({orders}: { orders: Order[] }) => {
             </div>
             <AnimatePresence>
                 {showItems && (
-                    <ItemsView  items={items} setShowItems={setShowItems}/>
+                    <ItemsView items={items} setShowItems={setShowItems}/>
                 )}
-                {showCustomer && (<CustomerView customer={customer} setShowCustomer={setShowCustomer} />)}
-                {showOrderStatus && (<OrderStatusView  setShowOrderStatusView={setShowOrderStatus} tracking={tracking}/>)}
+                {showCustomer && (<CustomerView customer={customer} setShowCustomer={setShowCustomer}/>)}
+                {showOrderStatus && (
+                    <OrderStatusView setShowOrderStatusView={setShowOrderStatus} order={selectedOrder}
+                                     setOrder={setSelectedOrder}/>)}
             </AnimatePresence>
         </section>
     );
