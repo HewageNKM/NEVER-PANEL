@@ -9,7 +9,7 @@ import {
 import {
   BATCH_LIMIT,
   Item,
-  Order,
+  Order, orderStatus,
   PaymentMethod,
   PaymentStatus,
 } from "./constant";
@@ -248,60 +248,74 @@ exports.onOrderPaymentStateChanges = functions.firestore
     return null;
   });
 
-
-// Triggered function to handle order updates, specifically tracking changes
+// Tracking Updates
 exports.onOrderTrackingUpdate = functions.firestore
-  .document("orders/{orderId}")
-  .onUpdate(async (change, context) => {
-    const orderId = context.params.orderId;
-    const newOrderData = change.after.data() as Order;
-    const previousOrderData = change.before.data() as Order;
+    .document("orders/{orderId}")
+    .onUpdate(async (change, context) => {
+      const orderId = context.params.orderId;
+      const newOrderData = change.after.data() as Order;
+      const previousOrderData = change.before.data() as Order;
 
-    // If the new order doesn't have tracking or
-    // the previous order didn't have tracking, exit
-    if (!newOrderData.tracking ||
-        !previousOrderData.tracking) {
-      console.log(`No tracking data found for order ${orderId}.`);
-      return null;
-    }
+      const newTracking = newOrderData.tracking;
+      const previousTracking = previousOrderData.tracking;
 
-    const newTrackingStatus = newOrderData.tracking.status;
-    const previousTrackingStatus = previousOrderData.tracking.status;
-
-    // Check if the tracking status changed to "Shipped"
-    if (newTrackingStatus === "Shipped" &&
-        previousTrackingStatus !== "Shipped") {
-      const customerEmail = newOrderData.customer.email.trim();
-      const {tracking} = newOrderData;
-
-      // Prepare email template data
-      const templateData = {
-        name: newOrderData.customer.name,
-        orderId,
-        status: tracking?.status,
-        trackingCompany: tracking?.trackingCompany,
-        trackingNumber: tracking?.trackingNumber,
-        trackingUrl: tracking.trackingUrl,
-      };
-
-      try {
-        // Send shipping status update email
-        await sendEmail(customerEmail, "trackingUpdate", templateData);
-        await sendSMS(newOrderData.customer.phone.trim(), orderStatusUpdate(
-          newOrderData.customer.name,
-          orderId, tracking.status,
-          tracking.trackingNumber, tracking.trackingUrl,));
-        console.log(`Shipping status update email sent for order ${orderId}`);
-      } catch (error) {
-        console.error(`Error sending shipping
-         status update for order ${orderId}:`, error);
+      if (!newTracking || !newTracking.status) {
+        console.log(`No tracking data found for order ${orderId}.`);
+        return null;
       }
-    } else {
-      console.log(`No change in tracking status 
-      for order ${orderId}. No email sent.`);
-    }
 
-    return null;
-  });
+      if (!previousTracking || newTracking.status !== previousTracking.status) {
+        const customerEmail = newOrderData.customer.email.trim();
+        const customerPhone = newOrderData.customer.phone.trim();
+
+        const templateData = {
+          name: newOrderData.customer.name,
+          orderId: orderId,
+          status: newTracking.status,
+          trackingCompany: newTracking.trackingCompany,
+          trackingNumber: newTracking.trackingNumber,
+          trackingUrl: newTracking.trackingUrl,
+        };
+
+
+        try {
+          // Function to send notifications
+          const sendNotifications = async (status: string) => {
+            await sendEmail(customerEmail, "trackingUpdate", templateData);
+            await sendSMS(
+                customerPhone,
+                orderStatusUpdate(
+                    newOrderData.customer.name,
+                    orderId,
+                    status,
+                    newTracking.trackingNumber,
+                    newTracking.trackingUrl
+                )
+            );
+            console.log(`Notifications sent for order ${orderId} with status ${status}.`);
+          };
+
+          // Handle different tracking status cases
+          switch (newTracking.status) {
+            case orderStatus.SHIPPED:
+            case orderStatus.DELIVERED:
+            case orderStatus.CANCELLED:
+            case orderStatus.RETURNED:
+              await sendNotifications(newTracking.status);
+              break;
+            default:
+              console.log(`Unhandled tracking status for order ${orderId}: ${newTracking.status}`);
+          }
+        } catch (error) {
+          console.error(`Error handling order ${orderId} status update:`, error);
+        }
+      } else {
+        console.log(`No significant change in tracking status for order ${orderId}.`);
+      }
+
+      return null;
+    });
+
+
 
 

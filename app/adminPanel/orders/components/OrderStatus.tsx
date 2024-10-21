@@ -2,13 +2,13 @@
 import React, {useState} from 'react';
 import {Tracking} from "@/interfaces";
 import Link from "next/link";
-import {orderStatusList} from "@/constant";
+import {orderStatus, orderStatusList} from "@/constant";
 
 const OrderStatus = ({tracking,updateTracking}: { tracking: Tracking | null ,updateTracking:any}) => {
     const [selectedStatus, setSelectedStatus] = useState(tracking?.status);
     return (
         <section>
-            <div className="p-8 bg-white shadow-md rounded-lg">
+            <div className="p-8 bg-white rounded-lg">
                 <h2 className="text-xl font-semibold mb-4 text-gray-800">
                     Order Status
                 </h2>
@@ -43,19 +43,41 @@ const OrderStatus = ({tracking,updateTracking}: { tracking: Tracking | null ,upd
                             <select
                                 defaultValue={selectedStatus}
                                 onChange={(e) => setSelectedStatus(e.target.value)}
-                                className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                                {orderStatusList.map(status => (
-                                    <option key={status.id} value={status.value} disabled={
-                                        tracking?.status === status.value
-                                    }>
-                                        {status.name}
-                                    </option>
-                                ))}
+                                className="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            >
+                                {orderStatusList.map((status) => {
+                                    const isDisabled = (() => {
+                                        if (tracking?.status === orderStatus.SHIPPED) {
+                                            // Shipped orders can only be changed to Shipped, Delivered, or Returned
+                                            return ![orderStatus.SHIPPED, orderStatus.DELIVERED, orderStatus.RETURNED].includes(status.value);
+                                        }
+                                        if (tracking?.status === orderStatus.DELIVERED) {
+                                            // Delivered orders can only be changed to Returned
+                                            return status.value !== orderStatus.RETURNED;
+                                        }
+                                        if (tracking?.status === orderStatus.RETURNED) {
+                                            // Returned orders can only be changed to Cancelled
+                                            return status.value !== orderStatus.CANCELLED;
+                                        }
+                                        if (tracking?.status === orderStatus.PROCESSING) {
+                                            // Process orders can only select Shipped or Cancelled
+                                            return ![orderStatus.SHIPPED, orderStatus.CANCELLED].includes(status.value);
+                                        }
+                                        return false; // No restrictions for other statuses
+                                    })();
+
+                                    return (
+                                        <option key={status.id} value={status.value} disabled={isDisabled}>
+                                            {status.name}
+                                        </option>
+                                    );
+                                })}
                             </select>
                         </label>
                         <button
+                            disabled={selectedStatus === tracking?.status}
                             onClick={() => updateTracking(selectedStatus)}
-                            className="px-4 py-2 bg-indigo-600 text-white rounded-md shadow hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            className="px-4 py-2 bg-indigo-600 text-white rounded-md shadow disabled:bg-opacity-60 disabled:cursor-not-allowed hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                             Update
                         </button>
                     </div>

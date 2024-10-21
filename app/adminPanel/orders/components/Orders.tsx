@@ -4,7 +4,7 @@ import {Customer, Order, OrderItem} from "@/interfaces";
 import {IoArrowBack, IoArrowForward, IoEye, IoPencil} from "react-icons/io5";
 import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch, RootState} from "@/lib/store";
-import {fetchOrders, setOrders} from "@/lib/orderSlice/orderSlice";
+import {fetchOrders, setOrders, setPage} from "@/lib/orderSlice/orderSlice";
 import {AnimatePresence} from "framer-motion";
 import ItemsView from "@/app/adminPanel/orders/components/ItemsView";
 import CustomerView from "@/app/adminPanel/orders/components/CustomerView";
@@ -14,7 +14,7 @@ import {orderStatus} from "@/constant";
 const Orders = ({orders}: { orders: Order[] }) => {
     const dispatch: AppDispatch = useDispatch();
     const orderList = useSelector((state: RootState) => state.orderSlice.orders);
-    const [pageNumber, setPageNumber] = useState(1);
+    const pageNumber = useSelector((state: RootState) => state.orderSlice.page);
 
     const [items, setItems] = useState([] as OrderItem[]);
     const [customer, setCustomer] = useState({} as Customer)
@@ -36,7 +36,8 @@ const Orders = ({orders}: { orders: Order[] }) => {
     console.log(orderList.map(order => order.createdAt));
     return (
         <section className="mt-8">
-            <div className="overflow-auto h-[80vh] w-full flex px-8 flex-col justify-between items-center">
+            <div
+                className="overflow-x-auto lg:overflow-x-clip h-[80vh] w-full flex px-8 flex-col justify-between items-center">
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                     <tr className="text-sm">
@@ -103,9 +104,19 @@ const Orders = ({orders}: { orders: Order[] }) => {
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                 <div className="flex flex-row gap-2">
-                                    <p className={`px-2 py-1  inline-flex text-sm leading-5 font-semibold rounded-full ${order.tracking?.status == orderStatus.SHIPPED ? "bg-yellow-100 text-yellow-800" : order.tracking?.status == orderStatus.DELIVERED ? "bg-green-100 text-green-800" : "bg-blue-100 text-blue-800"}`}>
-                                        {order.tracking?.status == orderStatus.SHIPPED ? orderStatus.SHIPPED : order.tracking?.status == orderStatus.DELIVERED ? orderStatus.DELIVERED : orderStatus.PROCESSING}
+                                    <p className={`px-2 py-1 inline-flex text-sm leading-5 font-semibold rounded-full 
+                                         ${order.tracking?.status === orderStatus.SHIPPED ? "bg-yellow-100 text-yellow-800" :
+                                            order.tracking?.status === orderStatus.DELIVERED ? "bg-green-100 text-green-800" :
+                                            order.tracking?.status === orderStatus.PROCESSING ? "bg-blue-100 text-blue-800" : 
+                                                order.tracking?.status === orderStatus.CANCELLED ? "bg-red-100 text-red-800" :
+                                                    order.tracking?.status === orderStatus.RETURNED ? "bg-purple-100 text-purple-800" : "bg-gray-100 text-gray-800"}`}>
+                                        {order.tracking?.status === orderStatus.SHIPPED ? orderStatus.SHIPPED :
+                                            order.tracking?.status === orderStatus.DELIVERED ? orderStatus.DELIVERED :
+                                                order.tracking?.status === orderStatus.PROCESSING ? orderStatus.PROCESSING :
+                                                    order.tracking?.status === orderStatus.CANCELLED ? orderStatus.CANCELLED :
+                                                        order.tracking?.status === orderStatus.RETURNED ? orderStatus.RETURNED : orderStatus.PROCESSING}
                                     </p>
+
                                     <button
                                         onClick={() => {
                                             setSelectedOrder(order)
@@ -140,16 +151,16 @@ const Orders = ({orders}: { orders: Order[] }) => {
                     <div className="flex flex-row gap-5 justify-center">
                         <button onClick={() => {
                             if (pageNumber > 1) {
-                                setPageNumber(pageNumber - 1);
+                                dispatch(setPage(pageNumber - 1));
                             } else {
-                                setPageNumber(1);
+                                dispatch(setPage(1));
                             }
                         }}>
                             <IoArrowBack size={23}/>
                         </button>
                         <p className="text-2xl font-bold">{pageNumber}</p>
                         <button onClick={() => {
-                            setPageNumber(pageNumber + 1);
+                            dispatch(setPage(pageNumber + 1));
                         }}>
                             <IoArrowForward size={23}/>
                         </button>

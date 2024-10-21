@@ -64,14 +64,15 @@ const OrderStatusView = ({order, setShowOrderStatusView, setOrder}: {
             return response.data;
         } catch (error) {
             console.log(error);
+        }finally {
+            setLoading(false);
         }
     }
     const updateTracking = async (status: string) => {
-        console.log(status);
-
+        setLoading(true);
         const tracking: Tracking = {
             ...order.tracking,
-            status: status,
+            status: status as orderStatus,
             updatedAt: Date.now().toLocaleString(),
         }
         const newOrder = {
@@ -96,6 +97,8 @@ const OrderStatusView = ({order, setShowOrderStatusView, setOrder}: {
             }
         } catch (error) {
             console.log(error);
+        }finally {
+            setLoading(false);
         }
     }
     return (

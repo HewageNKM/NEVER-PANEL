@@ -6,12 +6,16 @@ import {orderStatus} from "@/constant";
 
 interface OrderSlice {
     orders: Order[]
-    selectedSort: orderStatus
+    selectedSort: orderStatus,
+    page: number,
+    size: number
 }
 
 const initialState: OrderSlice = {
-    selectedSort: orderStatus.PROCESSING,
-    orders: []
+    selectedSort: "",
+    orders: [],
+    page: 1,
+    size: 20
 }
 
 const orderSlice = createSlice({
@@ -25,15 +29,22 @@ const orderSlice = createSlice({
             console.log(action.payload);
             state.selectedSort = action.payload;
         },
+        setPage: (state, action: PayloadAction<number>) => {
+            state.page = action.payload;
+        },
+        setSize: (state, action: PayloadAction<number>) => {
+            state.size = action.payload;
+        }
     },
     extraReducers: builder => {
         builder.addCase(fetchOrders.fulfilled, (state, action) => {
             state.orders = action.payload;
 
         }).addCase(sortOrders.fulfilled, (state, action) => {
-            const originals:Order[] = action.payload;
+            const originals: Order[] = action.payload;
             if (state.selectedSort === orderStatus.PROCESSING) {
-                state.orders = originals.filter(order => order.tracking === null);
+                console.log('Processing');
+                state.orders = originals.filter(order => order.tracking === undefined);
             } else if (state.selectedSort === orderStatus.SHIPPED) {
                 state.orders = originals.filter(order => order.tracking?.status === orderStatus.SHIPPED);
             } else if (state.selectedSort === orderStatus.DELIVERED) {
@@ -71,12 +82,16 @@ export const fetchOrders = createAsyncThunk('order/fetchOrders', async ({pageNum
         return thunkAPI.rejectWithValue({message: 'Error fetching orders', error});
     }
 });
-export const sortOrders = createAsyncThunk('order/sortOrders', async (payload, thunkAPI) => {
+export const sortOrders = createAsyncThunk('order/sortOrders', async ({page,size}:{page:number,size:number}, thunkAPI) => {
     try {
         const token = await getToken();
         const response = await axios({
             method: 'GET',
             url: `/api/orders`,
+            params: {
+                pageNumber:page,
+                size
+            },
             headers: {
                 "Authorization": `Bearer ${token}`
             }
@@ -86,5 +101,5 @@ export const sortOrders = createAsyncThunk('order/sortOrders', async (payload, t
         return thunkAPI.rejectWithValue({message: 'Error fetching orders', error});
     }
 });
-export const {setOrders, setSelectedSort} = orderSlice.actions;
+export const {setOrders, setSelectedSort,setPage,setSize} = orderSlice.actions;
 export default orderSlice.reducer;

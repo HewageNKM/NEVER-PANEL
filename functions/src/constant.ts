@@ -21,6 +21,12 @@ export interface Order {
     updatedAt: Timestamp,
 }
 
+export enum orderStatus {
+    DELIVERED = "Delivered",
+    CANCELLED = "Cancelled",
+    RETURNED = "Returned",
+    SHIPPED = "Shipped",
+}
 export interface Tracking {
     id:string
     trackingNumber: string;

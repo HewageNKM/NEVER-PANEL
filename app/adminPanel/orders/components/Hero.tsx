@@ -9,9 +9,10 @@ import {setSelectedSort, sortOrders} from "@/lib/orderSlice/orderSlice";
 const Hero = () => {
     const dispatch: AppDispatch = useDispatch();
     const selectedSortOption = useSelector((state: RootState) => state.orderSlice.selectedSort);
+    const {page, size} = useSelector((state: RootState) => state.orderSlice);
 
     useEffect(() => {
-        dispatch(sortOrders());
+        dispatch(sortOrders({page, size}));
     }, [dispatch, selectedSortOption])
 
     return (
@@ -45,7 +46,7 @@ const Hero = () => {
                                     onChange={(e) => dispatch(setSelectedSort(e.target.value as orderStatus))}
                                     value={selectedSortOption}
                                     className="px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                                <option value="">Select</option>
+                                <option value="">All</option>
                                 {
                                     orderStatusList.map(status => (
                                         <option key={status.id} value={status.value}>{status.name}</option>
