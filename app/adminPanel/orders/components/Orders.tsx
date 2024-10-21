@@ -117,7 +117,7 @@ const Orders = () => {
                                     </p>
 
                                     <button
-                                        disabled={order.paymentStatus === paymentStatus.PENDING && order.paymentMethod === "PayHere"}
+                                        disabled={(order.paymentStatus === paymentStatus.PENDING || order.paymentStatus == paymentStatus.FAILED) && order.paymentMethod === "PayHere"}
                                         onClick={() => {
                                             setSelectedOrder(order)
                                             setShowOrderStatus(true)
