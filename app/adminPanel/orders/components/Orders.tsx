@@ -4,14 +4,14 @@ import {Customer, Order, OrderItem} from "@/interfaces";
 import {IoArrowBack, IoArrowForward, IoEye, IoPencil} from "react-icons/io5";
 import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch, RootState} from "@/lib/store";
-import {fetchOrders, setOrders, setPage} from "@/lib/orderSlice/orderSlice";
+import {fetchOrders, setPage} from "@/lib/orderSlice/orderSlice";
 import {AnimatePresence} from "framer-motion";
 import ItemsView from "@/app/adminPanel/orders/components/ItemsView";
 import CustomerView from "@/app/adminPanel/orders/components/CustomerView";
 import OrderStatusView from "@/app/adminPanel/orders/components/OrderStatusView";
-import {orderStatus} from "@/constant";
+import {orderStatus, paymentStatus} from "@/constant";
 
-const Orders = ({orders}: { orders: Order[] }) => {
+const Orders = () => {
     const dispatch: AppDispatch = useDispatch();
     const orderList = useSelector((state: RootState) => state.orderSlice.orders);
     const pageNumber = useSelector((state: RootState) => state.orderSlice.page);
@@ -26,14 +26,13 @@ const Orders = ({orders}: { orders: Order[] }) => {
     const [showPaymentStatus, setShowPaymentStatus] = useState(false)
 
     useEffect(() => {
-        dispatch(setOrders(orders));
-    }, [dispatch, orders]);
+        dispatch(fetchOrders({pageNumber: 1, size: 20}));
+    }, [dispatch]);
 
     useEffect(() => {
         dispatch(fetchOrders({pageNumber: pageNumber, size: 20}));
     }, [pageNumber, dispatch]);
 
-    console.log(orderList.map(order => order.createdAt));
     return (
         <section className="mt-8">
             <div
@@ -78,7 +77,7 @@ const Orders = ({orders}: { orders: Order[] }) => {
                     {orderList.map((order, index) => (
                         <tr key={order.orderId} className="font-bold text-lg">
                             <td className="px-6 py-4 whitespace-nowrap text-gray-900">#{order.orderId}</td>
-                            <td className="px-6 py-4 whitespace-nowrap text-gray-900">{order.createdAt.toString()}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-gray-900">{new Date(order.createdAt._seconds * 1000 + order.createdAt._nanoseconds / 1000000).toLocaleString()}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-gray-900">
                                 <div className="flex flex-row gap-2">
                                     <p>{order.customer.name}</p>
@@ -106,8 +105,8 @@ const Orders = ({orders}: { orders: Order[] }) => {
                                 <div className="flex flex-row gap-2">
                                     <p className={`px-2 py-1 inline-flex text-sm leading-5 font-semibold rounded-full 
                                          ${order.tracking?.status === orderStatus.SHIPPED ? "bg-yellow-100 text-yellow-800" :
-                                            order.tracking?.status === orderStatus.DELIVERED ? "bg-green-100 text-green-800" :
-                                            order.tracking?.status === orderStatus.PROCESSING ? "bg-blue-100 text-blue-800" : 
+                                        order.tracking?.status === orderStatus.DELIVERED ? "bg-green-100 text-green-800" :
+                                            order.tracking?.status === orderStatus.PROCESSING ? "bg-blue-100 text-blue-800" :
                                                 order.tracking?.status === orderStatus.CANCELLED ? "bg-red-100 text-red-800" :
                                                     order.tracking?.status === orderStatus.RETURNED ? "bg-purple-100 text-purple-800" : "bg-gray-100 text-gray-800"}`}>
                                         {order.tracking?.status === orderStatus.SHIPPED ? orderStatus.SHIPPED :
@@ -118,11 +117,12 @@ const Orders = ({orders}: { orders: Order[] }) => {
                                     </p>
 
                                     <button
+                                        disabled={order.paymentStatus === paymentStatus.PENDING && order.paymentMethod === "PayHere"}
                                         onClick={() => {
                                             setSelectedOrder(order)
                                             setShowOrderStatus(true)
                                         }}
-                                        className="text-indigo-600 text-lg hover:text-indigo-900"><IoPencil
+                                        className="text-indigo-600 text-lg hover:text-indigo-900 disabled:opacity-60 disabled:cursor-not-allowed"><IoPencil
                                         size={20} color={"blue"}/></button>
                                 </div>
                             </td>

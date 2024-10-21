@@ -31,7 +31,7 @@ const OrderStatus = ({tracking,updateTracking}: { tracking: Tracking | null ,upd
                     </p>
                     <p className="text-gray-600">
                         <span
-                            className="font-semibold">Last Updated:</span> {tracking?.updatedAt.toString()}
+                            className="font-semibold">Last Updated:</span> {new Date(tracking?.updatedAt._seconds * 1000 + tracking?.updatedAt._nanoseconds / 1000000).toLocaleString()}
                     </p>
                 </div>
                 <div className="flex flex-col gap-1">

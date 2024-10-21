@@ -15,7 +15,6 @@ if (!admin.apps.length) {
 
 const adminFirestore = admin.firestore();
 const adminAuth = admin.auth();
-const remoteConfig = admin.remoteConfig();
 
 export const getOrders = async (pageNumber: number = 1, size: number = 20) => {
     const offset = (pageNumber - 1) * size;
@@ -35,7 +34,13 @@ export const getOrders = async (pageNumber: number = 1, size: number = 20) => {
 };
 export const updateOrder = async (order: Order) => {
     return await adminFirestore.collection('orders').doc(order.orderId).set({
-        ...order
+        ...order,
+        tracking:{
+            ...order.tracking,
+            updatedAt: admin.firestore.Timestamp.now(),
+        },
+        updatedAt: admin.firestore.Timestamp.now(),
+        createdAt: admin.firestore.Timestamp.fromDate(new Date(order.createdAt._seconds * 1000 + order.createdAt._nanoseconds / 1000000)),
     }, {merge: true});
 }
 
@@ -51,10 +56,4 @@ export const verifyIdToken = async (req: any) => {
     }
 
     return await adminAuth.verifyIdToken(token);
-}
-
-export const getConfigByKey = async (key: string) => {
-    const config = await remoteConfig.getTemplate();
-    return config.parameters[key].defaultValue;
-
 }

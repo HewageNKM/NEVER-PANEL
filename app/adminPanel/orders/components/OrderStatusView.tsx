@@ -29,7 +29,10 @@ const OrderStatusView = ({order, setShowOrderStatusView, setOrder}: {
             status: orderStatus.SHIPPED,
             trackingCompany: evt.target.courier.value,
             trackingUrl: evt.target.trackingUrl.value,
-            updatedAt: Date.now().toLocaleString()
+            updatedAt: {
+                _seconds: Math.floor(Date.now() / 1000),
+                _nanoseconds: 0,
+            },
         }
 
         setTracking(tracking);
@@ -64,7 +67,7 @@ const OrderStatusView = ({order, setShowOrderStatusView, setOrder}: {
             return response.data;
         } catch (error) {
             console.log(error);
-        }finally {
+        } finally {
             setLoading(false);
         }
     }
@@ -73,8 +76,12 @@ const OrderStatusView = ({order, setShowOrderStatusView, setOrder}: {
         const tracking: Tracking = {
             ...order.tracking,
             status: status as orderStatus,
-            updatedAt: Date.now().toLocaleString(),
+            updatedAt: {
+                _seconds: Math.floor(Date.now() / 1000),
+                _nanoseconds: 0,
+            },
         }
+        setTracking(tracking);
         const newOrder = {
             ...order,
             tracking: tracking
@@ -97,7 +104,7 @@ const OrderStatusView = ({order, setShowOrderStatusView, setOrder}: {
             }
         } catch (error) {
             console.log(error);
-        }finally {
+        } finally {
             setLoading(false);
         }
     }

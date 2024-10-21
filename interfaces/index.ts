@@ -1,11 +1,6 @@
 import {orderStatus} from "@/constant";
-
-export interface Profile {
-    email: string,
-    role: string,
-    username: string
-    imageUrl: string
-}
+import {firestore} from "firebase-admin";
+import Timestamp = firestore.Timestamp;
 
 export interface Item {
     itemId: string,
@@ -41,8 +36,8 @@ export interface Order {
     customer: Customer,
     shippingCost: number,
     tracking: Tracking | null,
-    createdAt: string,
-    updatedAt: string,
+    createdAt: Timestamp,
+    updatedAt: Timestamp,
 }
 
 export interface Customer {
@@ -52,8 +47,6 @@ export interface Customer {
     phone: string;
     address: string;
     city: string;
-    createdAt: string;
-    updatedAt: string;
 }
 
 export interface OrderItem {
@@ -72,5 +65,5 @@ export interface Tracking {
 
     trackingCompany: string;
     trackingUrl: string;
-    updatedAt: string;
+    updatedAt: Timestamp;
 }
