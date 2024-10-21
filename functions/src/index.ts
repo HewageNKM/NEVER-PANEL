@@ -3,9 +3,10 @@ import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
 import {
   adminNotify,
-  getOrderFailed,
+  getOrderFailed, getOrderRefunded,
   getOrderSuccess,
-  orderStatusUpdate} from "./templates";
+  orderStatusUpdate
+} from "./templates";
 import {
   BATCH_LIMIT,
   Item,
@@ -142,111 +143,112 @@ exports.scheduledOrdersCleanup = functions.pubsub
  * Triggered function to handle order payment state changes.
  */
 exports.onOrderPaymentStateChanges = functions.firestore
-  .document("orders/{orderId}")
-  .onWrite(async (change, context) => {
-    const orderId = context.params.orderId;
-    const orderData = change.after.exists ?
-      (change.after.data() as Order) : null;
-    const previousOrderData = change.before.exists ?
-      (change.before.data() as Order) : null;
+    .document("orders/{orderId}")
+    .onWrite(async (change, context) => {
+      const orderId = context.params.orderId;
+      const orderData = change.after.exists ? (change.after.data() as Order) : null;
+      const previousOrderData = change.before.exists ? (change.before.data() as Order) : null;
 
-    if (!orderData) {
-      return null; // Exit if order is deleted or no new data
-    }
-
-    const {paymentMethod, paymentStatus,
-      items, customer, shippingCost} = orderData;
-    const customerEmail = customer.email.trim();
-    const total = calculateTotal(items, shippingCost);
-
-    const templateData = {
-      name: customer.name,
-      orderId,
-      items,
-      shippingCost,
-      total,
-      paymentMethod,
-    };
-
-    try {
-      // New COD order with Pending status
-      if (!previousOrderData && paymentMethod ===
-                PaymentMethod.COD && paymentStatus === PaymentStatus.Pending) {
-        await Promise.all([
-          sendEmail(customerEmail, "orderConfirmed", templateData),
-          sendSMS(customer.phone, getOrderSuccess(orderId, total,
-            customer.address, paymentMethod)),
-          sendAdminSMS(adminNotify(orderId, paymentMethod, total)),
-          sendAdminEmail("adminOrderNotify", templateData),
-        ]);
-        console.log(`Order confirmation sent for COD order ${orderId}`);
+      if (!orderData) {
+        return null; // Exit if order is deleted or no new data
       }
 
-      // Check if paymentStatus has changed from Pending to Failed
-      if (
-        previousOrderData &&
-                paymentMethod === PaymentMethod.COD &&
-                previousOrderData.paymentStatus === PaymentStatus.Pending &&
-                paymentStatus === PaymentStatus.Failed
-      ) {
-        await Promise.all([
-          sendEmail(customerEmail, "orderFailed", templateData),
-          sendSMS(customer.phone,
-            getOrderFailed(orderId, total, paymentMethod)),
-        ]);
-        console.log(`Order failed notification sent for COD order ${orderId}`);
-      }
+      const { paymentMethod, paymentStatus, items, customer, shippingCost } = orderData;
+      const customerEmail = customer.email.trim();
+      const total = calculateTotal(items, shippingCost);
 
-      // PayHere order updated to Paid
-      if (
-        previousOrderData &&
-                paymentMethod === PaymentMethod.PayHere &&
-                previousOrderData.paymentStatus === PaymentStatus.Pending &&
-                paymentStatus === PaymentStatus.Paid
-      ) {
-        await Promise.all([
-          sendEmail(customerEmail, "orderConfirmed", templateData),
-          sendSMS(customer.phone,
-            getOrderSuccess(orderId, total, customer.address, paymentMethod)),
-          sendAdminSMS(adminNotify(orderId, paymentMethod, total)),
-          sendAdminEmail("adminOrderNotify", templateData),
-        ]);
-        console.log(`Order confirmation sent for PayHere order ${orderId}`);
-      }
+      const templateData = {
+        name: customer.name,
+        orderId,
+        items,
+        shippingCost,
+        total,
+        paymentMethod,
+      };
 
-      // PayHere order updated to Failed,
-      // only if the status was previously Pending
-      if (
-        previousOrderData &&
-                paymentMethod === PaymentMethod.PayHere &&
-                previousOrderData.paymentStatus === PaymentStatus.Pending &&
-                paymentStatus === PaymentStatus.Failed
-      ) {
-        await Promise.all([
-          sendEmail(customerEmail, "orderFailed", templateData),
-          sendSMS(customer.phone,
-            getOrderFailed(orderId, total, paymentMethod)),
-        ]);
-        console.log(`Order failed notification
-         sent for PayHere order ${orderId}`);
-      }
-
-      // Avoid sending duplicate notifications
-      // if the payment status remains unchanged (e.g., already failed)
-      if (
-        previousOrderData &&
-                paymentStatus === previousOrderData.paymentStatus
-      ) {
-        console.log(`No change in payment status for order ${orderId}. 
-        No notification sent.`);
+      // Skip notifications if the payment method is Card or Cash
+      if (paymentMethod === PaymentMethod.Card || paymentMethod === PaymentMethod.Cash) {
+        console.log(`No notifications sent for Card or Cash payment method for order ${orderId}`);
         return null;
       }
-    } catch (error) {
-      console.error(`Error processing order ${orderId}:`, error);
-    }
 
-    return null;
-  });
+      try {
+        // New COD order with Pending status
+        if (!previousOrderData && paymentMethod === PaymentMethod.COD && paymentStatus === PaymentStatus.Pending) {
+          await Promise.all([
+            sendEmail(customerEmail, "orderConfirmed", templateData),
+            sendSMS(customer.phone, getOrderSuccess(orderId, total, customer.address, paymentMethod)),
+            sendAdminSMS(adminNotify(orderId, paymentMethod, total)),
+            sendAdminEmail("adminOrderNotify", templateData),
+          ]);
+          console.log(`Order confirmation sent for COD order ${orderId}`);
+        }
+
+        // Check if paymentStatus has changed from Pending to Failed
+        if (
+            previousOrderData &&
+            paymentMethod === PaymentMethod.COD &&
+            previousOrderData.paymentStatus === PaymentStatus.Pending &&
+            paymentStatus === PaymentStatus.Failed
+        ) {
+          await Promise.all([
+            sendEmail(customerEmail, "orderFailed", templateData),
+            sendSMS(customer.phone, getOrderFailed(orderId, total, paymentMethod)),
+          ]);
+          console.log(`Order failed notification sent for COD order ${orderId}`);
+        }
+
+        // PayHere order updated to Paid
+        if (
+            previousOrderData &&
+            paymentMethod === PaymentMethod.PayHere &&
+            previousOrderData.paymentStatus === PaymentStatus.Pending &&
+            paymentStatus === PaymentStatus.Paid
+        ) {
+          await Promise.all([
+            sendEmail(customerEmail, "orderConfirmed", templateData),
+            sendSMS(customer.phone, getOrderSuccess(orderId, total, customer.address, paymentMethod)),
+            sendAdminSMS(adminNotify(orderId, paymentMethod, total)),
+            sendAdminEmail("adminOrderNotify", templateData),
+          ]);
+          console.log(`Order confirmation sent for PayHere order ${orderId}`);
+        }
+
+        // PayHere order updated to Failed, only if the status was previously Pending
+        if (
+            previousOrderData &&
+            paymentMethod === PaymentMethod.PayHere &&
+            previousOrderData.paymentStatus === PaymentStatus.Pending &&
+            paymentStatus === PaymentStatus.Failed
+        ) {
+          await Promise.all([
+            sendEmail(customerEmail, "orderFailed", templateData),
+            sendSMS(customer.phone, getOrderFailed(orderId, total, paymentMethod)),
+          ]);
+          console.log(`Order failed notification sent for PayHere order ${orderId}`);
+        }
+
+        // Always send notification if the payment status is updated to Refunded
+        if (paymentStatus === PaymentStatus.Refunded) {
+          await Promise.all([
+            sendEmail(customerEmail, "orderRefunded", templateData),
+            sendSMS(customer.phone, getOrderRefunded(orderId, total, paymentMethod)),
+          ]);
+          console.log(`Order refund notification sent for order ${orderId}`);
+        }
+
+        // Avoid sending duplicate notifications if the payment status remains unchanged
+        if (previousOrderData && paymentStatus === previousOrderData.paymentStatus) {
+          console.log(`No change in payment status for order ${orderId}. No notification sent.`);
+          return null;
+        }
+      } catch (error) {
+        console.error(`Error processing order ${orderId}:`, error);
+      }
+
+      return null;
+    });
+
 
 // Tracking Updates
 exports.onOrderTrackingUpdate = functions.firestore

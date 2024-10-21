@@ -86,4 +86,25 @@ const adminNotify = (
   `;
 };
 
-export {getOrderSuccess, getOrderFailed, adminNotify, orderStatusUpdate};
+const getOrderRefunded = (orderId:string, total:number, paymentMethod:string)=>{
+    return `
+    Dear Customer,
+    
+    Order ID: ${orderId}
+    Amount: LKR ${total}
+    Payment Method: ${paymentMethod}
+    
+    Your order has been refunded.
+    
+    if you paid by card, 
+    it will take 5-7 working days 
+    to reflect in your account.
+    
+    Thank you for shopping 
+    with us!
+    
+    NEVERBE Team
+    `;
+}
+
+export {getOrderSuccess, getOrderFailed, adminNotify, orderStatusUpdate,getOrderRefunded};
