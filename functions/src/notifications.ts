@@ -6,24 +6,15 @@ import {TEXTIT_API_URL, TEXTIT_AUTH} from "./constant";
 import {db} from "./index";
 
 export const sendEmail = async (
-    to: string, templateName: string, templateData: object, from?: string
+    to: string, templateName: string, templateData: object
 ) => {
-    from ?
-        await db.collection("mail").add({
-            to,
-            from,
-            template: {
-                name: templateName,
-                data: templateData,
-            },
-        }) :
-        await db.collection("mail").add({
-            to,
-            template: {
-                name: templateName,
-                data: templateData,
-            },
-        });
+    await db.collection("mail").add({
+        to,
+        template: {
+            name: templateName,
+            data: templateData,
+        },
+    });
 };
 
 /*

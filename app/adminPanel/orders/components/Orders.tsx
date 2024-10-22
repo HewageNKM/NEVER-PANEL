@@ -10,6 +10,7 @@ import ItemsView from "@/app/adminPanel/orders/components/ItemsView";
 import CustomerView from "@/app/adminPanel/orders/components/CustomerView";
 import OrderStatusView from "@/app/adminPanel/orders/components/OrderStatusView";
 import {orderStatus, paymentStatus} from "@/constant";
+import EmptyState from "@/components/EmptyState";
 
 const Orders = () => {
     const dispatch: AppDispatch = useDispatch();
@@ -36,7 +37,7 @@ const Orders = () => {
     return (
         <section className="mt-8">
             <div
-                className="overflow-x-auto lg:overflow-x-clip h-[80vh] w-full flex px-8 flex-col justify-between items-center">
+                className="overflow-x-auto relative lg:overflow-x-clip h-[65vh] w-full flex px-8 flex-col justify-between items-center">
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                     <tr className="text-sm">
@@ -122,8 +123,9 @@ const Orders = () => {
                                             setSelectedOrder(order)
                                             setShowOrderStatus(true)
                                         }}
-                                        className="text-indigo-600 text-lg hover:text-indigo-900 disabled:opacity-60 disabled:cursor-not-allowed"><IoPencil
-                                        size={20} color={"blue"}/></button>
+                                        className="text-indigo-600 text-lg hover:text-indigo-900 disabled:opacity-60 disabled:cursor-not-allowed">
+                                        <IoPencil
+                                            size={20} color={"blue"}/></button>
                                 </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap  text-gray-900">Rs.{order.items.reduce((total, item) => total + item.price * item.quantity, 0)}</td>
@@ -166,6 +168,9 @@ const Orders = () => {
                         </button>
                     </div>
                 </div>
+                {orderList.length == 0 && <div className="absolute top-1/2">
+                    <EmptyState title={"No Orders Found!"} subtitle={"Please check back later"}/>
+                </div>}
             </div>
             <AnimatePresence>
                 {showItems && (
