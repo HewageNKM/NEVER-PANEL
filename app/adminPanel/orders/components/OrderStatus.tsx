@@ -47,6 +47,12 @@ const OrderStatus = ({tracking,updateTracking}: { tracking: Tracking | null ,upd
                             >
                                 {orderStatusList.map((status) => {
                                     const isDisabled = (() => {
+                                        // Check if the order is canceled
+                                        if (tracking?.status === orderStatus.CANCELLED) {
+                                            return true; // Disable all options for canceled orders
+                                        }
+
+                                        // Conditions for other statuses
                                         if (tracking?.status === orderStatus.SHIPPED) {
                                             // Shipped orders can only be changed to Shipped, Delivered, or Returned
                                             return ![orderStatus.SHIPPED, orderStatus.DELIVERED, orderStatus.RETURNED].includes(status.value);
@@ -60,7 +66,7 @@ const OrderStatus = ({tracking,updateTracking}: { tracking: Tracking | null ,upd
                                             return status.value !== orderStatus.CANCELLED;
                                         }
                                         if (tracking?.status === orderStatus.PROCESSING) {
-                                            // Process orders can only select Shipped or Cancelled
+                                            // Processing orders can only select Shipped or Cancelled
                                             return ![orderStatus.SHIPPED, orderStatus.CANCELLED].includes(status.value);
                                         }
                                         return false; // No restrictions for other statuses

@@ -1,7 +1,7 @@
 // src/index.ts
 import * as functions from "firebase-functions";
 import * as admin from "firebase-admin";
-import {adminNotify, getOrderStatusSMS, orderStatusUpdate} from "./templates";
+import {adminNotifySMS, getOrderStatusSMS, orderStatusUpdateSMS} from "./templates";
 import {BATCH_LIMIT, Item, Order, orderStatus, PaymentMethod, PaymentStatus} from "./constant";
 import {sendEmail, sendSMS} from "./notifications";
 import {calculateTotal, commitBatch, sendAdminEmail, sendAdminSMS} from "./util";
@@ -160,7 +160,7 @@ exports.onOrderPaymentStateChanges = functions.firestore
             // Handle different payment statuses
             if (!previousOrderData && paymentMethod === PaymentMethod.COD && paymentStatus === PaymentStatus.Pending) {
                 await sendNotifications();
-                await sendAdminSMS(adminNotify(orderId, paymentMethod, total))
+                await sendAdminSMS(adminNotifySMS(orderId, paymentMethod, total))
                 await sendAdminEmail("adminOrderNotify", templateData)
                 console.log(`Order confirmation sent for COD order ${orderId}`);
             }
@@ -182,7 +182,7 @@ exports.onOrderPaymentStateChanges = functions.firestore
                 if (paymentMethod === PaymentMethod.PayHere) {
                     if (previousOrderData.paymentStatus === PaymentStatus.Pending && paymentStatus === PaymentStatus.Paid) {
                         await sendNotifications();
-                        await sendAdminSMS(adminNotify(orderId, paymentMethod, total))
+                        await sendAdminSMS(adminNotifySMS(orderId, paymentMethod, total))
                         await sendAdminEmail("adminOrderNotify", templateData)
                         console.log(`Order confirmation sent for PayHere order ${orderId}`);
                     } else if (previousOrderData.paymentStatus === PaymentStatus.Pending && paymentStatus === PaymentStatus.Failed) {
@@ -246,7 +246,7 @@ exports.onOrderTrackingUpdate = functions.firestore
                         await sendEmail(customerEmail, "trackingUpdate", templateData),
                         await sendSMS(
                             customerPhone,
-                            orderStatusUpdate(
+                            orderStatusUpdateSMS(
                                 newOrderData.customer.name,
                                 orderId,
                                 status,

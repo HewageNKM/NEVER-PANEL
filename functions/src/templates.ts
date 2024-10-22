@@ -67,7 +67,7 @@ const getOrderStatusSMS = (
 };
 
 
-const adminNotify = (
+const adminNotifySMS = (
     orderId: string,
     paymentMethod: string,
     total: number
@@ -87,7 +87,7 @@ const adminNotify = (
 };
 
 
-const orderStatusUpdate = (
+const orderStatusUpdateSMS = (
     name: string,
     orderId: string,
     status: string,
@@ -134,4 +134,4 @@ const orderStatusUpdate = (
     return message;
 };
 
-export {adminNotify, orderStatusUpdate,getOrderStatusSMS};
+export {adminNotifySMS, orderStatusUpdateSMS,getOrderStatusSMS};
