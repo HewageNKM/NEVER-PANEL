@@ -1,5 +1,6 @@
 import admin, {credential} from 'firebase-admin';
-import {Order} from "@/interfaces";
+import {Item, Order} from "@/interfaces";
+import {NextResponse} from "next/server";
 
 if (!admin.apps.length) {
     admin.initializeApp({
@@ -14,32 +15,56 @@ if (!admin.apps.length) {
 
 const adminFirestore = admin.firestore();
 const adminAuth = admin.auth();
-const remoteConfig = admin.remoteConfig();
 
 export const getOrders = async (pageNumber: number = 1, size: number = 20) => {
     const offset = (pageNumber - 1) * size;
 
     const ordersSnapshot = await adminFirestore.collection('orders')
-        .orderBy('createdAt') // Replace with the field you want to order by
+        .orderBy('createdAt', 'desc' as any)
         .limit(size)
         .offset(offset)
         .get();
 
-    let orders:Order[] = []
+    let orders: Order[] = []
     ordersSnapshot.forEach(doc => {
         orders.push(doc.data() as Order);
     });
 
     return orders;
 };
-
-export const verifyIdToken = async (token: string) => {
-    console.log(token);
-    return await adminAuth.verifyIdToken(token);
+export const getItemById = async (itemId: string) => {
+    const itemDoc = await adminFirestore.collection('inventory').doc(itemId).get();
+    if(!itemDoc.exists){
+        return null;
+    }
+    return {
+        ...itemDoc.data(),
+        createdAt: itemDoc.data()?.createdAt.toDate().toLocaleString(),
+        updatedAt: itemDoc.data()?.updatedAt.toDate().toLocaleString(),
+    } as Item;
+}
+export const updateOrder = async (order: Order) => {
+    return await adminFirestore.collection('orders').doc(order.orderId).set({
+        ...order,
+        tracking:{
+            ...order.tracking,
+            updatedAt: admin.firestore.Timestamp.now(),
+        },
+        updatedAt: admin.firestore.Timestamp.now(),
+        createdAt: admin.firestore.Timestamp.fromDate(new Date(order.createdAt._seconds * 1000 + order.createdAt._nanoseconds / 1000000)),
+    }, {merge: true});
 }
 
-export const getConfigByKey = async (key: string) =>{
-    const config = await remoteConfig.getTemplate();
-    return config.parameters[key].defaultValue;
+export const verifyIdToken = async (req: any) => {
+    const authHeader = req.headers.get("authorization");
 
+    const token = authHeader?.startsWith('Bearer ')
+        ? authHeader.split(' ')[1]
+        : null;
+
+    if (!token) {
+        return NextResponse.json({message: 'Unauthorized'}, {status: 401});
+    }
+
+    return await adminAuth.verifyIdToken(token);
 }

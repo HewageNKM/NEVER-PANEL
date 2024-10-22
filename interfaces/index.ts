@@ -1,34 +1,39 @@
-import {Timestamp} from "firebase/firestore";
-
+import {orderStatus} from "@/constant";
+import {firestore} from "firebase-admin";
+import Timestamp = firestore.Timestamp;
 export interface Profile {
+    id: string,
+    username: string,
     email: string,
-    role: string,
-    username: string
-    imageUrl: string
+    imageUrl: string,
 }
-
 export interface Item {
     itemId: string,
     type: string,
     brand: string,
-    thumbnail:string,
+    thumbnail: string,
     variants: Variant[],
     manufacturer: string,
     name: string,
     buyingPrice: number,
     sellingPrice: number,
     discount: number,
+    createdAt: Timestamp,
+    updatedAt: Timestamp,
 }
-export interface Size{
+
+export interface Size {
     size: string,
     stock: number,
 }
+
 export interface Variant {
     variantId: string,
     variantName: string,
     images: string[],
     sizes: Size[],
 }
+
 export interface Order {
     orderId: string,
     paymentId: string,
@@ -41,6 +46,7 @@ export interface Order {
     createdAt: Timestamp,
     updatedAt: Timestamp,
 }
+
 export interface Customer {
     id: string;
     name: string;
@@ -48,9 +54,8 @@ export interface Customer {
     phone: string;
     address: string;
     city: string;
-    createdAt: Timestamp;
-    updatedAt: Timestamp;
 }
+
 export interface OrderItem {
     itemId: string,
     variantId: string,
@@ -60,13 +65,12 @@ export interface OrderItem {
     quantity: number,
     price: number,
 }
+
 export interface Tracking {
-    id:string
     trackingNumber: string;
-    status: string;
+    status: orderStatus;
 
     trackingCompany: string;
     trackingUrl: string;
-    createdAt: Timestamp;
     updatedAt: Timestamp;
 }

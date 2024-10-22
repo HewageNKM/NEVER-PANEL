@@ -1,4 +1,5 @@
 import {createSlice} from "@reduxjs/toolkit";
+import {Profile} from "@/interfaces";
 
 interface UserSlice {
     user: Profile | null

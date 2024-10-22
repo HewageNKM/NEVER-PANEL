@@ -1,98 +1,21 @@
-"use client";
-import {useDispatch, useSelector} from "react-redux";
-import {AppDispatch, RootState} from "@/lib/store";
-import {showToast} from "@/lib/toastSlice/toastSlice";
-import {FaEye} from "react-icons/fa";
-import {FaEyeSlash} from "react-icons/fa6";
-import React, {useState} from "react";
-import {redirect, useRouter} from "next/navigation";
-import {setUser} from "@/lib/userSlice/userSlice";
-import Lottie from "lottie-react";
-import {ButtonLoading} from "@/assets/animations";
-import {getCurrentUser, getUserById, logUser} from "@/firebase/firebaseClient";
+import React from "react";
+import LoginForm from "@/app/components/LoginForm";
 
+export const metadata = {
+    title: "Login"
+}
 export default function Home() {
-    const router = useRouter();
 
-    const [isLoading, setIsLoading] = useState(false);
-    const [showPassword, setShowPassword] = useState(false)
-    const {user} = useSelector((state: RootState) => state.authSlice);
-
-    if (getCurrentUser() && user) {
-        redirect("/adminPanel/dashboard");
-    }
-
-    const dispatch: AppDispatch = useDispatch();
-
-    const onFormSubmit = async (evt: any) => {
-        setIsLoading(true);
-        evt.preventDefault();
-        const {email, password} = evt.target;
-        try {
-            const credential = await logUser(email.value, password.value);
-
-            // Set user if exists or show error
-            if (credential.user) {
-                const user = await getUserById(credential.user.uid);
-
-                if (user) {
-                    dispatch(setUser(user));
-                    router.replace("/adminPanel/dashboard");
-                } else {
-                    setToast("User not found, Please contact administrator!");
-                }
-            }
-        } catch (e: any) {
-            setToast(e.message);
-            console.error(e);
-        } finally {
-            setIsLoading(false);
-        }
-    }
-
-    const setToast = (message: string) => {
-        dispatch(showToast({
-            message: message,
-            type: "Error",
-            showToast: true
-        }));
-        setTimeout(() => dispatch(showToast({message: "", type: "", showToast: false})), 5000);
-    }
     return (
-
-        <main className="relative overflow-clip flex min-w-full min-h-screen flex-col items-center justify-center">
-            <div className="px-12 py-8">
-                <h1 className="text-4xl font-bold">NEVER PANEL</h1>
-                <p className="text-sm capitalize text-slate-500 ">Login to your account using provided credentials</p>
-                <div className="mt-4 w-full flex-row flex relative">
-                    <form onSubmit={(evt) => onFormSubmit(evt)} className="flex flex-col gap-5 w-full">
-                        <label className="flex-col flex gap-1">
-                            <span className="font-medium text-lg">Email</span>
-                            <input disabled={isLoading} name="email" type="email" required placeholder="Email"
-                                   className="bg-slate-200 rounded h-[7vh] px-4 py-2"/>
-                        </label>
-                        <label className="flex-col relative flex gap-1">
-                            <span className="font-medium text-lg">Password</span>
-                            <input disabled={isLoading} name="password" type={!showPassword ? "password" : "text"}
-                                   required
-                                   placeholder="Password" className="bg-slate-200 rounded h-[7vh] px-4 py-2 pr-8"/>
-                            <button onClick={() => setShowPassword(prevState => !prevState)} type={"button"} className="absolute top-[6.3vh] right-[3vw] md:right-[.8vw] md:top-[5.7vh]">
-                                {showPassword ? <FaEye size={25}/> : <FaEyeSlash size={25}/>}
-                            </button>
-                        </label>
-                        {isLoading && <div className="absolute w-full bottom-4  justify-center"><Lottie
-                            animationData={ButtonLoading} className="h-20"/></div>}
-                        <button disabled={isLoading} type="submit"
-                                className="bg-black rounded-lg text-white mt-5 px-4 py-2 font-bold lg:hover:opacity-80 lg:hover:shadow-primary transition-all duration-300">
-                            Login
-                        </button>
-                    </form>
-                </div>
+        <main className="flex min-h-screen flex-col items-center justify-center bg-gray-100 px-6">
+            <div className="bg-white shadow-lg rounded-lg p-8 w-full max-w-md">
+                <h1 className="text-3xl font-semibold text-gray-800 text-center">NEVER PANEL</h1>
+                <p className="mt-2 text-sm text-gray-500 text-center">Log in to your account</p>
+                <LoginForm/>
             </div>
-            <footer>
-                <p className="text-sm text-slate-500">© {new Date().getFullYear().toString()} NEVERBE. All Rights
-                    Reserved.</p>
+            <footer className="mt-8 text-sm text-gray-500 text-center">
+                © {new Date().getFullYear()} NEVERBE. All Rights Reserved.
             </footer>
         </main>
-    )
+    );
 }
