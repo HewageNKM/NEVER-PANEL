@@ -1,5 +1,5 @@
 import admin, {credential} from 'firebase-admin';
-import {Order} from "@/interfaces";
+import {Item, Order} from "@/interfaces";
 import {NextResponse} from "next/server";
 
 if (!admin.apps.length) {
@@ -32,6 +32,17 @@ export const getOrders = async (pageNumber: number = 1, size: number = 20) => {
 
     return orders;
 };
+export const getItemById = async (itemId: string) => {
+    const itemDoc = await adminFirestore.collection('inventory').doc(itemId).get();
+    if(!itemDoc.exists){
+        return null;
+    }
+    return {
+        ...itemDoc.data(),
+        createdAt: itemDoc.data()?.createdAt.toDate().toLocaleString(),
+        updatedAt: itemDoc.data()?.updatedAt.toDate().toLocaleString(),
+    } as Item;
+}
 export const updateOrder = async (order: Order) => {
     return await adminFirestore.collection('orders').doc(order.orderId).set({
         ...order,

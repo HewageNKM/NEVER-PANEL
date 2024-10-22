@@ -8,7 +8,10 @@ import ToastProvider from "@/components/ToastProvider";
 const inter = Inter({subsets: ["latin"]});
 
 export const metadata: Metadata = {
-    title: "NEVER PANEL",
+    title: {
+        default: "NEVER PANEL",
+        template: "%s | NEVER PANEL",
+    },
     description: "NEVER ADMIN PANEL FOR MANGING NEVERBE WEBSITE.",
 };
 

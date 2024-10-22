@@ -88,7 +88,7 @@ const VariantForm = ({
                 }
                 item.variants.push(newVariant)
                 setItem(item)
-                await saveItem("Variant added successfully")
+                await saveItem("VariantManage added successfully")
             } catch (e: any) {
                 showDisplayMessage("Error", e.message)
             } finally {
@@ -103,7 +103,7 @@ const VariantForm = ({
                 filter.push(variant)
                 item.variants = filter
                 setItem(item)
-                await saveItem("Variant updated successfully")
+                await saveItem("VariantManage updated successfully")
             } catch (e: any) {
                 showDisplayMessage("Error", e.message)
             } finally {
@@ -178,7 +178,7 @@ const VariantForm = ({
                 className="bg-white z-50 md:w-fit w-[95vw] flex md:h-fit h-[80vh] justify-center items-center overflow-auto rounded p-4 relative">
                 <form onSubmit={onVariantFormSubmit} className="flex-col flex gap-5">
                     <legend className="text-2xl font-bold">
-                        Variant
+                        VariantManage
                     </legend>
                     <div className="mt-2 flex flex-col justify-center items-start flex-wrap gap-5">
                         {images.length > 0 && <h2 className="text-lg font-bold">Images</h2>}
@@ -200,16 +200,16 @@ const VariantForm = ({
                     </div>
                     <div className="mt-5 flex flex-row justify-center items-center flex-wrap gap-5">
                         <label className="flex-col hidden gap-1">
-                            <span className="font-medium">Variant ID</span>
+                            <span className="font-medium">VariantManage ID</span>
                             <input onChange={(txt) => setVariantId(txt.target.value)} value={variantId} type="text"
                                    placeholder="XXXXXXXXXX"
                                    className={`p-1 border-2 border-slate-300 rounded bg-primary-200`}/>
                         </label>
                         <label className="flex-col flex gap-1">
-                            <span className="font-medium">Variant Name </span>
+                            <span className="font-medium">VariantManage Name </span>
                             <input onChange={(txt) => setVariantName(txt.target.value)} value={variantName} required
                                    type="text"
-                                   placeholder="Variant 1"
+                                   placeholder="VariantManage 1"
                                    className="p-1 text-center  border-2 border-slate-300 rounded"/>
                         </label>
                         <label className="flex-col flex justify-center items-center gap-1">
@@ -242,7 +242,7 @@ const VariantForm = ({
                                     <option value="none">
                                         Select
                                     </option>
-                                    {type == "shoe" || type == "slipper" ? shoeSizesList.map((size, index) => (
+                                    {type == "shoes" || type == "sandals" ? shoeSizesList.map((size, index) => (
                                         <option key={index}
                                                 value={size}>{size}</option>)) : accessoriesSizesList.map((size, index) => (
                                         <option key={index} value={size.value}>{size.name}</option>))}</select>
@@ -301,7 +301,7 @@ const VariantForm = ({
                         <button type="submit"
                                 className="bg-primary-100 md:text-lg text-[.9rem] text-white flex flex-row justify-center items-center h-[2.8rem] px-3 py-1 rounded hover:bg-primary-200">
                             <IoAdd size={30}/>
-                            Add Variant
+                            Add VariantManage
                         </button>
                     </div>
                 </form>

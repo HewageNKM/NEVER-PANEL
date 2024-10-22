@@ -1,5 +1,8 @@
 import React from 'react';
 
+export const metadata = {
+    title:"Dashboard"
+}
 const Page = () => {
     return (
         <div className="relative">

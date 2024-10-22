@@ -11,9 +11,9 @@ export const GET = async (req: Request) => {
         const pageNumber = parseInt(url.searchParams.get('pageNumber') as string) || 1;
         const size = parseInt(url.searchParams.get('size') as string) || 20;
 
-        console.log(pageNumber, size);
+        console.log(`Page number: ${pageNumber}, Size: ${size}`);
         const orders = await getOrders(pageNumber, size);
-        console.log(orders);
+        console.log(`Orders: ${orders.length}`);
         // Return a response with the orders
         return NextResponse.json(orders);
     } catch (error: any) {

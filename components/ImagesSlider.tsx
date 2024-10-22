@@ -10,8 +10,7 @@ import 'swiper/css/pagination';
 const ImagesSlider = ({images}: { images: string[] }) => {
     return (
         <>
-            <Swiper pagination={{type: "fraction"}} modules={[Pagination]}
-                    className="md:w-[20rem] text-lg text-white md:h-[20rem] h-[17rem] w-[17rem] relative">
+            <Swiper pagination={{type: "fraction"}} modules={[Pagination]}>
                 {images.map((image, index) => (
                     <SwiperSlide key={index}>
                         <Image width={300} height={300} src={image} alt={"image"}
