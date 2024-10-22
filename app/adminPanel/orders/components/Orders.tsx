@@ -44,38 +44,35 @@ const Orders = () => {
                         <th className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Order
                             ID
                         </th>
-                        <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase tracking-wider">Order
+                        <th className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Order
                             Date/Time
                         </th>
-                        <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase tracking-wider">Customer
+                        <th className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Customer
                             Details
                         </th>
-                        <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase tracking-wider">
-                            Items
-                        </th>
-                        <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase tracking-wider">Order
+                        <th className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Items</th>
+                        <th className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Order
                             Status
                         </th>
-                        <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase tracking-wider">Order
+                        <th className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Order
                             Total
                         </th>
-                        <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase tracking-wider">Shipping
+                        <th className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Shipping
                             Cost
                         </th>
-                        <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase tracking-wider">Payment
+                        <th className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Payment
                             Method
                         </th>
-                        <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase tracking-wider">Payment
+                        <th className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Payment
                             ID
                         </th>
-                        <th className="px-6 py-3 text-left  font-medium text-gray-500 uppercase tracking-wider">Payment
+                        <th className="px-6 py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Payment
                             Status
                         </th>
                     </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                    {/* Table rows will go here */}
-                    {orderList.map((order, index) => (
+                    {orderList.map((order) => (
                         <tr key={order.orderId} className="font-bold text-lg">
                             <td className="px-6 py-4 whitespace-nowrap text-gray-900">#{order.orderId}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-gray-900">{new Date(order.createdAt._seconds * 1000 + order.createdAt._nanoseconds / 1000000).toLocaleString()}</td>
@@ -83,8 +80,8 @@ const Orders = () => {
                                 <div className="flex flex-row gap-2">
                                     <p>{order.customer.name}</p>
                                     <button onClick={() => {
-                                        setCustomer(order.customer)
-                                        setShowCustomer(true)
+                                        setCustomer(order.customer);
+                                        setShowCustomer(true);
                                     }} className="text-indigo-600 hover:text-indigo-900">
                                         <IoEye size={20} color={"blue"}/>
                                     </button>
@@ -94,10 +91,9 @@ const Orders = () => {
                                 <div className="flex flex-row gap-2">
                                     <p>{order.items.length}</p>
                                     <button onClick={() => {
-                                        setItems(order.items)
-                                        setShowItems(true)
-                                    }
-                                    } className="text-indigo-600 hover:text-indigo-900">
+                                        setItems(order.items);
+                                        setShowItems(true);
+                                    }} className="text-indigo-600 hover:text-indigo-900">
                                         <IoEye size={20} color={"blue"}/>
                                     </button>
                                 </div>
@@ -105,7 +101,7 @@ const Orders = () => {
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                                 <div className="flex flex-row gap-2">
                                     <p className={`px-2 py-1 inline-flex text-sm leading-5 font-semibold rounded-full 
-                                         ${order.tracking?.status === orderStatus.SHIPPED ? "bg-yellow-100 text-yellow-800" :
+                                             ${order.tracking?.status === orderStatus.SHIPPED ? "bg-yellow-100 text-yellow-800" :
                                         order.tracking?.status === orderStatus.DELIVERED ? "bg-green-100 text-green-800" :
                                             order.tracking?.status === orderStatus.PROCESSING ? "bg-blue-100 text-blue-800" :
                                                 order.tracking?.status === orderStatus.CANCELLED ? "bg-red-100 text-red-800" :
@@ -120,19 +116,19 @@ const Orders = () => {
                                     <button
                                         disabled={(order.paymentStatus === paymentStatus.PENDING || order.paymentStatus == paymentStatus.FAILED) && order.paymentMethod === "PayHere"}
                                         onClick={() => {
-                                            setSelectedOrder(order)
-                                            setShowOrderStatus(true)
+                                            setSelectedOrder(order);
+                                            setShowOrderStatus(true);
                                         }}
                                         className="text-indigo-600 text-lg hover:text-indigo-900 disabled:opacity-60 disabled:cursor-not-allowed">
-                                        <IoPencil
-                                            size={20} color={"blue"}/></button>
+                                        <IoPencil size={20} color={"blue"}/>
+                                    </button>
                                 </div>
                             </td>
-                            <td className="px-6 py-4 whitespace-nowrap  text-gray-900">Rs.{order.items.reduce((total, item) => total + item.price * item.quantity, 0)}</td>
-                            <td className="px-6 py-4 whitespace-nowrap  text-gray-900">Rs.{order.shippingCost}</td>
-                            <td className="px-6 py-4 whitespace-nowrap  text-gray-900">{order.paymentMethod}</td>
-                            <td className="px-6 py-4 whitespace-nowrap  text-gray-900">{order.paymentId || "None"}</td>
-                            <td className="px-6 py-4 whitespace-nowrap  text-gray-900">
+                            <td className="px-6 py-4 whitespace-nowrap text-gray-900">Rs.{order.items.reduce((total, item) => total + item.price * item.quantity, 0)}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-gray-900">Rs.{order.shippingCost}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-gray-900">{order.paymentMethod}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-gray-900">{order.paymentId || "None"}</td>
+                            <td className="px-6 py-4 whitespace-nowrap text-gray-900">
                                 <div className="flex flex-row gap-2">
                                     <p className={`px-2 py-1 inline-flex text-sm leading-5 font-semibold rounded-full ${order.paymentStatus == "Paid" ? "bg-green-100 text-green-800" : order.paymentStatus == "Pending" ? "bg-blue-100 text-blue-800" : "bg-red-100 text-red-800"}`}>
                                         {order.paymentStatus}
@@ -146,7 +142,6 @@ const Orders = () => {
                             </td>
                         </tr>
                     ))}
-                    {/* Repeat <tr> blocks for more rows */}
                     </tbody>
                 </table>
                 <div className="w-full justify-center items-center">
@@ -168,9 +163,11 @@ const Orders = () => {
                         </button>
                     </div>
                 </div>
-                {orderList.length == 0 && <div className="absolute top-1/2">
-                    <EmptyState title={"No Orders Found!"} subtitle={"Please check back later"}/>
-                </div>}
+                {orderList.length === 0 && (
+                    <div className="absolute top-1/2">
+                        <EmptyState title={"No Orders Found!"} subtitle={"Please check back later"}/>
+                    </div>
+                )}
             </div>
             <AnimatePresence>
                 {showItems && (
@@ -179,7 +176,8 @@ const Orders = () => {
                 {showCustomer && (<CustomerView customer={customer} setShowCustomer={setShowCustomer}/>)}
                 {showOrderStatus && (
                     <OrderStatusView setShowOrderStatusView={setShowOrderStatus} order={selectedOrder}
-                                     setOrder={setSelectedOrder}/>)}
+                                     setOrder={setSelectedOrder}/>
+                )}
             </AnimatePresence>
         </section>
     );
