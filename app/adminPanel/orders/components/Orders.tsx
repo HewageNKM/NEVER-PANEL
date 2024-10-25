@@ -1,5 +1,5 @@
 "use client";
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Customer, Order, OrderItem} from "@/interfaces";
 import {IoArrowBack, IoArrowForward, IoEye, IoPencil} from "react-icons/io5";
 import {useDispatch, useSelector} from "react-redux";
@@ -98,13 +98,8 @@ const Orders = () => {
                                              ${order.tracking?.status === orderStatus.SHIPPED ? "bg-yellow-100 text-yellow-800" :
                                         order.tracking?.status === orderStatus.DELIVERED ? "bg-green-100 text-green-800" :
                                             order.tracking?.status === orderStatus.PROCESSING ? "bg-blue-100 text-blue-800" :
-                                                order.tracking?.status === orderStatus.CANCELLED ? "bg-red-100 text-red-800" :
-                                                    order.tracking?.status === orderStatus.RETURNED ? "bg-purple-100 text-purple-800" : "bg-gray-100 text-gray-800"}`}>
-                                        {order.tracking?.status === orderStatus.SHIPPED ? orderStatus.SHIPPED :
-                                            order.tracking?.status === orderStatus.DELIVERED ? orderStatus.DELIVERED :
-                                                order.tracking?.status === orderStatus.PROCESSING ? orderStatus.PROCESSING :
-                                                    order.tracking?.status === orderStatus.CANCELLED ? orderStatus.CANCELLED :
-                                                        order.tracking?.status === orderStatus.RETURNED ? orderStatus.RETURNED : orderStatus.PROCESSING}
+                                                order.tracking?.status === orderStatus.CANCELLED ? "bg-red-100 text-red-800" : "bg-gray-100 text-gray-800"}`}>
+                                        {order.tracking?.status || "Processing"}
                                     </p>
 
                                     <button
@@ -145,13 +140,14 @@ const Orders = () => {
                 </table>
                 <div className="w-full justify-center items-center">
                     <div className="flex flex-row gap-5 justify-center">
-                        <button className="disabled:cursor-not-allowed disabled:opacity-60" disabled={page <= 1} onClick={() => {
-                            if (page > 1) {
-                                dispatch(setPage(page - 1));
-                            } else {
-                                dispatch(setPage(1));
-                            }
-                        }}>
+                        <button className="disabled:cursor-not-allowed disabled:opacity-60" disabled={page <= 1}
+                                onClick={() => {
+                                    if (page > 1) {
+                                        dispatch(setPage(page - 1));
+                                    } else {
+                                        dispatch(setPage(1));
+                                    }
+                                }}>
                             <IoArrowBack size={23}/>
                         </button>
                         <p className="text-2xl font-bold">{page}</p>
@@ -169,7 +165,8 @@ const Orders = () => {
                 )}
                 {loading && (
                     <DropShadow>
-                        <EmptyState title={"Loading Orders"} subtitle={"Please wait while we fetch the orders"} containerStyles="animate-pulse"/>
+                        <EmptyState title={"Loading Orders"} subtitle={"Please wait while we fetch the orders"}
+                                    containerStyles="animate-pulse"/>
                     </DropShadow>
                 )}
             </div>
@@ -183,7 +180,8 @@ const Orders = () => {
                                      setOrder={setSelectedOrder}/>
                 )}
                 {showPaymentStatus && (
-                    <PaymentStatusView order={selectedOrder} setShowPaymentView={setShowPaymentStatus} setSelectedOrder={setSelectedOrder}/>
+                    <PaymentStatusView order={selectedOrder} setShowPaymentView={setShowPaymentStatus}
+                                       setSelectedOrder={setSelectedOrder}/>
                 )}
             </AnimatePresence>
         </section>

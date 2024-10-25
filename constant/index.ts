@@ -97,7 +97,6 @@ export enum orderStatus {
     DELIVERED = "Delivered",
     PROCESSING = "Processing",
     CANCELLED = "Cancelled",
-    RETURNED = "Returned",
     SHIPPED = "Shipped",
 }
 
@@ -132,11 +131,6 @@ export const orderStatusList = [
     },
     {
         id: 4,
-        name: "Returned",
-        value: orderStatus.RETURNED
-    },
-    {
-        id: 5,
         name: "Shipped",
         value: orderStatus.SHIPPED
     }

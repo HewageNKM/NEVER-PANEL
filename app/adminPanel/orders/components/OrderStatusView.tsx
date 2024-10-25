@@ -1,16 +1,16 @@
 'use client'
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import DropShadow from "@/components/DropShadow";
 import {Order, Tracking} from "@/interfaces";
 import {IoClose} from "react-icons/io5";
 import TrackingForm from "@/app/adminPanel/orders/components/TrackingForm";
 import OrderStatus from "@/app/adminPanel/orders/components/OrderStatus";
-import {useDispatch} from "react-redux";
-import {AppDispatch} from "@/lib/store";
+import {useDispatch, useSelector} from "react-redux";
+import {AppDispatch, RootState} from "@/lib/store";
 import {getToken} from "@/firebase/firebaseClient";
 import axios from "axios";
-import {fetchOrders} from "@/lib/orderSlice/orderSlice";
 import {orderStatus} from "@/constant";
+import {sortOrders} from "@/lib/orderSlice/orderSlice";
 
 const OrderStatusView = ({order, setShowOrderStatusView, setOrder}: {
     order: Order,
@@ -20,6 +20,11 @@ const OrderStatusView = ({order, setShowOrderStatusView, setOrder}: {
     const [tracking, setTracking] = useState<Tracking | null>(order?.tracking);
     const [loading, setLoading] = useState(false)
     const dispatch: AppDispatch = useDispatch();
+    const {page,size} = useSelector((state:RootState) => state.orderSlice);
+
+    useEffect(() => {
+        dispatch(sortOrders({page: page, size: size}));
+    }, [dispatch, tracking]);
 
     const onTrackingFormSubmit = (evt) => {
         evt.preventDefault();
@@ -47,7 +52,7 @@ const OrderStatusView = ({order, setShowOrderStatusView, setOrder}: {
             saveOrder(newOrder).then(() => {
                 setLoading(false);
                 setShowOrderStatusView(false);
-                dispatch(fetchOrders({pageNumber: 1, size: 20}));
+                dispatch(sortOrders({page: page, size: size}));
             });
         }
     }

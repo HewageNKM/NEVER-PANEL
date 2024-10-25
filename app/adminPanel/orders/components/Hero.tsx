@@ -1,6 +1,6 @@
 "use client"
 import React, {useEffect} from 'react';
-import {IoSearch} from "react-icons/io5";
+import {IoReload, IoReloadSharp, IoSearch} from "react-icons/io5";
 import {orderStatus, orderStatusList, recordsSizes} from "@/constant";
 import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch, RootState} from "@/lib/store";
@@ -12,10 +12,13 @@ const Hero = () => {
     const selectedSortOption = useSelector((state: RootState) => state.orderSlice.selectedSort);
     const {page, size} = useSelector((state: RootState) => state.orderSlice);
 
-    // Fetch orders and sort them based on the selected sort option
-    useEffect(() => {
+    const fetch = () => {
         dispatch(setLoading(true));
         dispatch(sortOrders({page, size}));
+    }
+    // Fetch orders and sort them based on the selected sort option
+    useEffect(() => {
+        fetch()
     }, [dispatch, page, selectedSortOption, size])
 
     return (
@@ -37,20 +40,27 @@ const Hero = () => {
                         </label>
                         <label className="flex flex-col gap-1">
                             <span className="font-medium text-lg lg:text-xl">Records</span>
-                            <select defaultValue=""
-                                    onChange={(e) => dispatch(setSize(Number(e.target.value)))}
-                                    value={size}
-                                    className="px-3 py-2 bg-white lg:w-fit w-[12rem] border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
-                                {
-                                    recordsSizes.map(status => (
-                                        <option key={status.id} value={status.value}>{status.name}</option>
-                                    ))
-                                }
-                            </select>
+                            <div className="flex flex-row items-center gap-2 ">
+                                <select defaultValue=""
+                                        onChange={(e) => dispatch(setSize(Number(e.target.value)))}
+                                        value={size}
+                                        className="px-3 py-2 bg-white lg:w-fit w-[12rem] border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                                    {
+                                        recordsSizes.map(status => (
+                                            <option key={status.id} value={status.value}>{status.name}</option>
+                                        ))
+                                    }
+                                </select>
+                                <button
+                                    onClick={() => fetch()}
+                                    className="text-black hover:bg-primary-50 p-1 rounded transition-all duration-300">
+                                    <IoReloadSharp size={35}/>
+                                </button>
+                            </div>
                         </label>
-                    </div>
+                </div>
                     <div>
-                        <label className="flex flex-col gap-1">
+                    <label className="flex flex-col gap-1">
                             <span className="font-medium text-lg lg:text-xl">Filter</span>
                             <select defaultValue=""
                                     onChange={(e) => dispatch(setSelectedSort(e.target.value as orderStatus))}

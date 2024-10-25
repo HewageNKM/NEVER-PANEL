@@ -54,15 +54,11 @@ const OrderStatus = ({tracking,updateTracking}: { tracking: Tracking | null ,upd
 
                                         // Conditions for other statuses
                                         if (tracking?.status === orderStatus.SHIPPED) {
-                                            // Shipped orders can only be changed to Shipped, Delivered, or Returned
-                                            return ![orderStatus.SHIPPED, orderStatus.DELIVERED, orderStatus.RETURNED].includes(status.value);
+                                            // Shipped orders can only be changed to Shipped or Delivered
+                                            return ![orderStatus.SHIPPED, orderStatus.DELIVERED].includes(status.value);
                                         }
                                         if (tracking?.status === orderStatus.DELIVERED) {
-                                            // Delivered orders can only be changed to Returned
-                                            return status.value !== orderStatus.RETURNED;
-                                        }
-                                        if (tracking?.status === orderStatus.RETURNED) {
-                                            // Returned orders can only be changed to Cancelled
+                                            // Delivered orders can only be changed to Cancelled
                                             return status.value !== orderStatus.CANCELLED;
                                         }
                                         if (tracking?.status === orderStatus.PROCESSING) {
@@ -71,6 +67,7 @@ const OrderStatus = ({tracking,updateTracking}: { tracking: Tracking | null ,upd
                                         }
                                         return false; // No restrictions for other statuses
                                     })();
+
 
                                     return (
                                         <option key={status.id} value={status.value} disabled={isDisabled}>
