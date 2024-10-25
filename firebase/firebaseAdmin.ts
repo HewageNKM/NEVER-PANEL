@@ -32,6 +32,15 @@ export const getOrders = async (pageNumber: number = 1, size: number = 20) => {
 
     return orders;
 };
+export const getOrder = async (orderId: string) => {
+    const orderDoc = await adminFirestore.collection('orders').doc(orderId).get();
+    if(!orderDoc.exists){
+        return null;
+    }
+    return {
+        ...orderDoc.data(),
+    } as Order;
+}
 export const getItemById = async (itemId: string) => {
     const itemDoc = await adminFirestore.collection('inventory').doc(itemId).get();
     if(!itemDoc.exists){

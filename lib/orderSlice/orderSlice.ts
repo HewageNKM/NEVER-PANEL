@@ -55,6 +55,9 @@ const orderSlice = createSlice({
                 state.orders = originals
             }
             state.loading = false;
+        }).addCase(getOrder.fulfilled, (state, action) => {
+            state.loading = false;
+            state.orders = [action.payload];
         });
     }
 })
@@ -78,6 +81,21 @@ export const sortOrders = createAsyncThunk('order/sortOrders', async ({page, siz
         return response.data;
     } catch (error) {
         return thunkAPI.rejectWithValue({message: 'Error fetching orders', error});
+    }
+});
+export const getOrder = createAsyncThunk('order/getOrder', async ({orderId}:{orderId:string}, thunkAPI) => {
+    try {
+        const token = await getToken();
+        const response = await axios({
+            method: 'GET',
+            url: `/api/orders/${orderId}`,
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        return thunkAPI.rejectWithValue({message: 'Error fetching order', error});
     }
 });
 export const {setLoading, setSelectedSort, setPage,setSize} = orderSlice.actions;

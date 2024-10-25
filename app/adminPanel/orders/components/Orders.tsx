@@ -139,7 +139,7 @@ const Orders = () => {
                 </table>
                 <div className="w-full justify-center items-center">
                     <div className="flex flex-row gap-5 justify-center">
-                        <button onClick={() => {
+                        <button className="disabled:cursor-not-allowed disabled:opacity-60" disabled={page <= 1} onClick={() => {
                             if (page > 1) {
                                 dispatch(setPage(page - 1));
                             } else {
@@ -163,7 +163,7 @@ const Orders = () => {
                 )}
                 {loading && (
                     <DropShadow>
-                        <EmptyState title={"Loading Orders"} subtitle={"Please wait while we fetch the orders"}/>
+                        <EmptyState title={"Loading Orders"} subtitle={"Please wait while we fetch the orders"} containerStyles="animate-pulse"/>
                     </DropShadow>
                 )}
             </div>

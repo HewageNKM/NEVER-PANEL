@@ -1,4 +1,4 @@
-import {updateOrder, verifyIdToken} from "@/firebase/firebaseAdmin";
+import {getOrder, updateOrder, verifyIdToken} from "@/firebase/firebaseAdmin";
 import {NextResponse} from "next/server";
 
 export const PUT = async (req: Request) => {
@@ -22,3 +22,24 @@ export const PUT = async (req: Request) => {
         return NextResponse.json({message: 'Error fetching orders', error: error.message}, {status: 500});
     }
 };
+export const GET = async (req: Request) => {
+    try {
+        // Verify the ID token
+        await verifyIdToken(req);
+        // Get the URL and parse the query parameters
+        const url = new URL(req.url);
+        const orderId = url.pathname.split('/')[3];
+
+        const order = await getOrder(orderId);
+
+        if (!order) {
+            return NextResponse.json({message: 'Order not found'}, {status: 404});
+        }
+
+        return NextResponse.json(order);
+    } catch (error: any) {
+        console.error(error);
+        // Return a response with error message
+        return NextResponse.json({message: 'Error fetching orders', error: error.message}, {status: 500});
+    }
+}
