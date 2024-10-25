@@ -124,7 +124,16 @@ export const onPaymentStatusUpdates = functions.firestore
         const { paymentMethod, paymentStatus, items, customer, shippingCost } = orderData;
         const customerEmail = customer.email.trim();
         const total = calculateTotal(items, shippingCost);
-        const templateData = { name: customer.name, orderId, items, shippingCost, total, paymentMethod, paymentStatus };
+
+        const templateData = { name: customer.name,
+            orderId,
+            items,
+            shippingCost,
+            total,
+            paymentMethod,
+            isRefunded: paymentStatus === PaymentStatus.Refunded,
+            isConfirmed: paymentMethod === PaymentMethod.PayHere && paymentStatus === PaymentStatus.Paid || paymentMethod === PaymentMethod.COD && paymentStatus === PaymentStatus.Pending,
+        };
 
         if (paymentMethod === PaymentMethod.Card || paymentMethod === PaymentMethod.Cash) {
             console.log(`No notifications sent for Card or Cash payment method for order ${orderId}`);
@@ -219,6 +228,9 @@ export const onTrackingUpdates = functions.firestore
                 trackingCompany: newTracking.trackingCompany,
                 trackingNumber: newTracking.trackingNumber,
                 trackingUrl: newTracking.trackingUrl,
+                isShipped: newOrderData.tracking?.status === orderStatus.SHIPPED,
+                isDelivered: newOrderData.tracking?.status === orderStatus.DELIVERED,
+                isCancelled: newOrderData.tracking?.status === orderStatus.CANCELLED,
             };
 
             try {

@@ -1,5 +1,5 @@
 "use client";
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {Customer, Order, OrderItem} from "@/interfaces";
 import {IoArrowBack, IoArrowForward, IoEye, IoPencil} from "react-icons/io5";
 import {useDispatch, useSelector} from "react-redux";
@@ -16,7 +16,7 @@ import PaymentStatusView from "@/app/adminPanel/orders/components/PaymentStatusV
 
 const Orders = () => {
     const dispatch: AppDispatch = useDispatch();
-    const {orders, loading, page, size} = useSelector((state: RootState) => state.orderSlice);
+    const {orders, loading, page} = useSelector((state: RootState) => state.orderSlice);
 
     const [items, setItems] = useState([] as OrderItem[]);
     const [customer, setCustomer] = useState({} as Customer)
@@ -124,7 +124,7 @@ const Orders = () => {
                                     </p>
                                     <button
                                         className="text-indigo-600 hover:text-indigo-900 text-lg disabled:opacity-60 disabled:cursor-not-allowed"
-                                        disabled={order.paymentMethod == "PayHere"}>
+                                        disabled={order.tracking?.status != orderStatus.CANCELLED}>
                                         <IoPencil size={20} color={"blue"}
                                                   onClick={() => {
                                                       setSelectedOrder(order);
