@@ -178,6 +178,12 @@ exports.onOrderPaymentStateChanges = functions.firestore
                     console.log(`Order failed notification sent for COD order ${orderId}`);
                 }
 
+                // when COD paymentStatus updates to Paid
+                if (paymentMethod === PaymentMethod.COD && previousOrderData.paymentStatus === PaymentStatus.Pending && paymentStatus === PaymentStatus.Paid) {
+                    await sendNotifications();
+                    console.log(`Payment confirmation SMS sent for COD order ${orderId}`);
+                }
+
                 // PayHere order updates
                 if (paymentMethod === PaymentMethod.PayHere) {
                     if (previousOrderData.paymentStatus === PaymentStatus.Pending && paymentStatus === PaymentStatus.Paid) {
@@ -206,6 +212,7 @@ exports.onOrderPaymentStateChanges = functions.firestore
 
         return null;
     });
+
 
 
 

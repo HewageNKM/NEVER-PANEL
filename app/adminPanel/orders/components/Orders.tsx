@@ -183,7 +183,7 @@ const Orders = () => {
                                      setOrder={setSelectedOrder}/>
                 )}
                 {showPaymentStatus && (
-                    <PaymentStatusView order={selectedOrder} setShowPaymentView={setShowPaymentStatus}/>
+                    <PaymentStatusView order={selectedOrder} setShowPaymentView={setShowPaymentStatus} setSelectedOrder={setSelectedOrder}/>
                 )}
             </AnimatePresence>
         </section>
