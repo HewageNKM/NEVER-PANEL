@@ -102,7 +102,7 @@ export enum orderStatus {
 }
 
 export enum paymentStatus {
-    PAID = "Success",
+    PAID = "Paid",
     PENDING = "Pending",
     REFUNDED = "Refunded",
     FAILED = "Failed",

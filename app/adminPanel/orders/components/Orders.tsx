@@ -12,6 +12,7 @@ import OrderStatusView from "@/app/adminPanel/orders/components/OrderStatusView"
 import {orderStatus, paymentStatus} from "@/constant";
 import EmptyState from "@/components/EmptyState";
 import DropShadow from "@/components/DropShadow";
+import PaymentStatusView from "@/app/adminPanel/orders/components/PaymentStatusView";
 
 const Orders = () => {
     const dispatch: AppDispatch = useDispatch();
@@ -129,7 +130,12 @@ const Orders = () => {
                                     <button
                                         className="text-indigo-600 hover:text-indigo-900 text-lg disabled:opacity-60 disabled:cursor-not-allowed"
                                         disabled={order.paymentMethod == "PayHere"}>
-                                        <IoPencil size={20} color={"blue"}/>
+                                        <IoPencil size={20} color={"blue"}
+                                                  onClick={() => {
+                                                      setSelectedOrder(order);
+                                                      setShowPaymentStatus(true);
+                                                  }}
+                                        />
                                     </button>
                                 </div>
                             </td>
@@ -175,6 +181,9 @@ const Orders = () => {
                 {showOrderStatus && (
                     <OrderStatusView setShowOrderStatusView={setShowOrderStatus} order={selectedOrder}
                                      setOrder={setSelectedOrder}/>
+                )}
+                {showPaymentStatus && (
+                    <PaymentStatusView order={selectedOrder} setShowPaymentView={setShowPaymentStatus}/>
                 )}
             </AnimatePresence>
         </section>
