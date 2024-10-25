@@ -124,7 +124,7 @@ const Orders = () => {
                                     </p>
                                     <button
                                         className="text-indigo-600 hover:text-indigo-900 text-lg disabled:opacity-60 disabled:cursor-not-allowed"
-                                        disabled={order.tracking?.status != orderStatus.CANCELLED}>
+                                        disabled={order.tracking?.status == orderStatus.CANCELLED}>
                                         <IoPencil size={20} color={"blue"}
                                                   onClick={() => {
                                                       setSelectedOrder(order);

@@ -224,8 +224,8 @@ export const onTrackingUpdates = functions.firestore
             const templateData = {
                 name: newOrderData.customer.name,
                 orderId,
+                address:newOrderData.customer.address,
                 status: newTracking.status,
-                trackingCompany: newTracking.trackingCompany,
                 trackingNumber: newTracking.trackingNumber,
                 trackingUrl: newTracking.trackingUrl,
                 isShipped: newOrderData.tracking?.status === orderStatus.SHIPPED,
