@@ -8,7 +8,7 @@ const OrderStatus = ({tracking,updateTracking}: { tracking: Tracking | null ,upd
     const [selectedStatus, setSelectedStatus] = useState(tracking?.status);
     return (
         <section>
-            <div className="p-8 bg-white rounded-lg">
+            <div className="p-8 bg-white">
                 <h2 className="text-xl font-semibold mb-4 text-gray-800">
                     Order Status
                 </h2>

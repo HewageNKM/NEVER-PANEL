@@ -5,7 +5,8 @@ import {getToken} from "@/firebase/firebaseClient";
 import {orderStatus} from "@/constant";
 
 interface OrderSlice {
-    orders: Order[]
+    orders: Order[],
+    loading: boolean,
     selectedSort: orderStatus,
     page: number,
     size: number,
@@ -13,6 +14,7 @@ interface OrderSlice {
 
 const initialState: OrderSlice = {
     selectedSort: "",
+    loading: false,
     orders: [],
     page: 1,
     size: 20
@@ -37,9 +39,7 @@ const orderSlice = createSlice({
         }
     },
     extraReducers: builder => {
-        builder.addCase(fetchOrders.fulfilled, (state, action) => {
-            state.orders = action.payload;
-        }).addCase(sortOrders.fulfilled, (state, action) => {
+        builder.addCase(sortOrders.fulfilled, (state, action) => {
             const originals: Order[] = action.payload;
             if (state.selectedSort === orderStatus.PROCESSING) {
                 state.orders = originals.filter(order => order.tracking === undefined);
@@ -54,32 +54,10 @@ const orderSlice = createSlice({
             } else {
                 state.orders = originals
             }
+            state.loading = false;
         });
     }
 })
-
-export const fetchOrders = createAsyncThunk('order/fetchOrders', async ({pageNumber, size}: {
-    pageNumber: number,
-    size: number
-}, thunkAPI) => {
-    try {
-        const token = await getToken();
-        const response = await axios({
-            method: 'GET',
-            url: `/api/orders`,
-            params: {
-                pageNumber,
-                size
-            },
-            headers: {
-                "Authorization": `Bearer ${token}`
-            }
-        });
-        return response.data;
-    } catch (error) {
-        return thunkAPI.rejectWithValue({message: 'Error fetching orders', error});
-    }
-});
 export const sortOrders = createAsyncThunk('order/sortOrders', async ({page, size}: {
     page: number,
     size: number
@@ -102,5 +80,5 @@ export const sortOrders = createAsyncThunk('order/sortOrders', async ({page, siz
         return thunkAPI.rejectWithValue({message: 'Error fetching orders', error});
     }
 });
-export const {setLoading, setSelectedSort, setPage} = orderSlice.actions;
+export const {setLoading, setSelectedSort, setPage,setSize} = orderSlice.actions;
 export default orderSlice.reducer;

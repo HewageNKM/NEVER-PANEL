@@ -1,21 +1,21 @@
 "use client";
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {Customer, Order, OrderItem} from "@/interfaces";
 import {IoArrowBack, IoArrowForward, IoEye, IoPencil} from "react-icons/io5";
 import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch, RootState} from "@/lib/store";
-import {fetchOrders, setPage} from "@/lib/orderSlice/orderSlice";
+import {setPage} from "@/lib/orderSlice/orderSlice";
 import {AnimatePresence} from "framer-motion";
 import ItemsView from "@/app/adminPanel/orders/components/ItemsView";
 import CustomerView from "@/app/adminPanel/orders/components/CustomerView";
 import OrderStatusView from "@/app/adminPanel/orders/components/OrderStatusView";
 import {orderStatus, paymentStatus} from "@/constant";
 import EmptyState from "@/components/EmptyState";
+import DropShadow from "@/components/DropShadow";
 
 const Orders = () => {
     const dispatch: AppDispatch = useDispatch();
-    const orderList = useSelector((state: RootState) => state.orderSlice.orders);
-    const pageNumber = useSelector((state: RootState) => state.orderSlice.page);
+    const {orders, loading, page, size} = useSelector((state: RootState) => state.orderSlice);
 
     const [items, setItems] = useState([] as OrderItem[]);
     const [customer, setCustomer] = useState({} as Customer)
@@ -26,13 +26,6 @@ const Orders = () => {
     const [showOrderStatus, setShowOrderStatus] = useState(false)
     const [showPaymentStatus, setShowPaymentStatus] = useState(false)
 
-    useEffect(() => {
-        dispatch(fetchOrders({pageNumber: 1, size: 20}));
-    }, [dispatch]);
-
-    useEffect(() => {
-        dispatch(fetchOrders({pageNumber: pageNumber, size: 20}));
-    }, [pageNumber, dispatch]);
 
     return (
         <section className="mt-8">
@@ -72,7 +65,7 @@ const Orders = () => {
                     </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                    {orderList.map((order) => (
+                    {orders.map((order) => (
                         <tr key={order.orderId} className="font-bold text-lg">
                             <td className="px-6 py-4 whitespace-nowrap text-gray-900">#{order.orderId}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-gray-900">{new Date(order.createdAt._seconds * 1000 + order.createdAt._nanoseconds / 1000000).toLocaleString()}</td>
@@ -147,26 +140,31 @@ const Orders = () => {
                 <div className="w-full justify-center items-center">
                     <div className="flex flex-row gap-5 justify-center">
                         <button onClick={() => {
-                            if (pageNumber > 1) {
-                                dispatch(setPage(pageNumber - 1));
+                            if (page > 1) {
+                                dispatch(setPage(page - 1));
                             } else {
                                 dispatch(setPage(1));
                             }
                         }}>
                             <IoArrowBack size={23}/>
                         </button>
-                        <p className="text-2xl font-bold">{pageNumber}</p>
+                        <p className="text-2xl font-bold">{page}</p>
                         <button onClick={() => {
-                            dispatch(setPage(pageNumber + 1));
+                            dispatch(setPage(page + 1));
                         }}>
                             <IoArrowForward size={23}/>
                         </button>
                     </div>
                 </div>
-                {orderList.length === 0 && (
+                {(orders.length === 0 && !loading) && (
                     <div className="absolute top-1/2">
                         <EmptyState title={"No Orders Found!"} subtitle={"Please check back later"}/>
                     </div>
+                )}
+                {loading && (
+                    <DropShadow>
+                        <EmptyState title={"Loading Orders"} subtitle={"Please wait while we fetch the orders"}/>
+                    </DropShadow>
                 )}
             </div>
             <AnimatePresence>

@@ -1,19 +1,21 @@
 "use client"
 import React, {useEffect} from 'react';
 import {IoSearch} from "react-icons/io5";
-import {orderStatus, orderStatusList} from "@/constant";
+import {orderStatus, orderStatusList, recordsSizes} from "@/constant";
 import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch, RootState} from "@/lib/store";
-import {setSelectedSort, sortOrders} from "@/lib/orderSlice/orderSlice";
+import {setLoading, setSelectedSort, setSize, sortOrders} from "@/lib/orderSlice/orderSlice";
 
 const Hero = () => {
     const dispatch: AppDispatch = useDispatch();
     const selectedSortOption = useSelector((state: RootState) => state.orderSlice.selectedSort);
     const {page, size} = useSelector((state: RootState) => state.orderSlice);
 
+    // Fetch orders and sort them based on the selected sort option
     useEffect(() => {
+        dispatch(setLoading(true));
         dispatch(sortOrders({page, size}));
-    }, [dispatch, selectedSortOption])
+    }, [dispatch, page, selectedSortOption, size])
 
     return (
         <section className="w-full pt-10">
@@ -23,8 +25,9 @@ const Hero = () => {
                         Todo: Cards for the hero section
                     */}
                 </div>
-                <div className="relative w-full flex flex-wrap lg:gap-0 gap-5 flex-row justify-between items-center mt-6">
-                    <div className="relative">
+                <div
+                    className="relative w-full flex flex-wrap lg:gap-0 gap-5 flex-row justify-between items-center mt-6">
+                    <div className="relative flex flex-col gap-2">
                         <label className="flex flex-col gap-1 mb-2">
                             <span className="font-medium text-lg lg:text-xl">Search</span>
                             <div className="relative">
@@ -37,6 +40,19 @@ const Hero = () => {
                                     <IoSearch className="text-gray-500 hover:text-blue-500 transition duration-200"/>
                                 </button>
                             </div>
+                        </label>
+                        <label className="flex flex-col gap-1">
+                            <span className="font-medium text-lg lg:text-xl">Records</span>
+                            <select defaultValue=""
+                                    onChange={(e) => dispatch(setSize(Number(e.target.value)))}
+                                    value={size}
+                                    className="px-3 py-2 bg-white lg:w-fit w-[12rem] border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200">
+                                {
+                                    recordsSizes.map(status => (
+                                        <option key={status.id} value={status.value}>{status.name}</option>
+                                    ))
+                                }
+                            </select>
                         </label>
                     </div>
                     <div>
