@@ -6,7 +6,6 @@ import {IoClose} from "react-icons/io5";
 import {paymentStatus} from "@/constant";
 import axios from "axios";
 import {useDispatch, useSelector} from "react-redux";
-import {showToast} from "@/lib/toastSlice/toastSlice";
 import {getToken} from "@/firebase/firebaseClient";
 import {sortOrders} from "@/lib/orderSlice/orderSlice";
 import {AppDispatch, RootState} from "@/lib/store";
@@ -18,31 +17,37 @@ const PaymentStatusView = ({order, setShowPaymentView, setSelectedOrder}: {
 }) => {
     const [status, setStatus] = useState(order.paymentStatus);
     const [loading, setLoading] = useState(false)
-    const dispatch:AppDispatch = useDispatch();
-    const {page,size} = useSelector((state:RootState) => state.orderSlice);
+    const dispatch: AppDispatch = useDispatch();
+    const {page, size} = useSelector((state: RootState) => state.orderSlice);
 
     const updatePaymentStatus = async () => {
-        setLoading(true);
-        const newOrder: Order = {
-            ...order,
-            paymentStatus: status
+        try {
+            setLoading(true);
+            const newOrder: Order = {
+                ...order,
+                paymentStatus: status
+            }
+            const token = await getToken();
+            const res = await axios({
+                method: 'PUT',
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
+                url: `/api/orders/${order.orderId}`,
+                data: newOrder
+            });
+            if (res.status === 200) {
+                dispatch(sortOrders({page: page, size: size}));
+                setSelectedOrder(newOrder);
+            } else {
+                new Error('Failed to update payment status');
+            }
+            setLoading(false);
+        } catch (e: any) {
+            console.error(e);
+        } finally {
+            setLoading(false);
         }
-        const token = await getToken();
-        const res = await axios({
-            method: 'PUT',
-            headers:{
-                Authorization: `Bearer ${token}`
-            },
-            url: `/api/orders/${order.orderId}`,
-            data: newOrder
-        });
-        if (res.status === 200) {
-            dispatch(sortOrders({page: page, size: size}));
-            setSelectedOrder(newOrder);
-        } else {
-            dispatch(showToast({message: res.data, type: 'error'}));
-        }
-        setLoading(false);
     }
     return (
         <DropShadow>
@@ -54,7 +59,7 @@ const PaymentStatusView = ({order, setShowPaymentView, setSelectedOrder}: {
                     <div className='h-8 w-8 bg-white rounded-full animate-bounce [animation-delay:-0.15s]'></div>
                     <div className='h-8 w-8 bg-white rounded-full animate-bounce'></div>
                 </div>
-            </div>): (<div
+            </div>) : (<div
                     className="relative bg-white max-w-[90vw] flex flex-col gap-5 p-6 rounded-lg shadow-lg border border-gray-200">
                     <h1 className="text-lg font-semibold mb-4">Payment Status</h1>
 

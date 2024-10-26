@@ -1,6 +1,6 @@
 import * as functions from "firebase-functions/v1";  // Updated import for v6
 import * as admin from "firebase-admin";
-import { adminNotifySMS, getOrderStatusSMS, orderStatusUpdateSMS } from "./templates";
+import { adminNotifySMS, getOrderStatusSMS, orderTrackingUpdateSMS } from "./templates";
 import { BATCH_LIMIT, Item, Order, orderStatus, PaymentMethod, PaymentStatus } from "./constant";
 import { sendEmail, sendSMS } from "./notifications";
 import { calculateTotal, commitBatch, sendAdminEmail, sendAdminSMS } from "./util";
@@ -168,7 +168,8 @@ export const onPaymentStatusUpdates = functions.firestore
                 }
 
                 if (paymentMethod === PaymentMethod.COD && previousOrderData.paymentStatus === PaymentStatus.Pending && paymentStatus === PaymentStatus.Paid) {
-                    await sendNotifications();
+                    await sendSMS(customer.phone, getOrderStatusSMS(customer.name,orderId,total,paymentMethod,paymentStatus
+                    ))
                     console.log(`Payment confirmation SMS sent for COD order ${orderId}`);
                 }
 
@@ -239,7 +240,7 @@ export const onTrackingUpdates = functions.firestore
                         sendEmail(customerEmail, "trackingUpdate", templateData),
                         sendSMS(
                             customerPhone,
-                            orderStatusUpdateSMS(
+                            orderTrackingUpdateSMS(
                                 newOrderData.customer.name,
                                 orderId,
                                 status,

@@ -10,7 +10,7 @@ const getOrderStatusSMS = (
     switch (paymentStatus) {
         case "Pending":
             if (paymentMethod === "COD") {
-                message = `Dear ${name},\n\n Your COD order (ID: ${orderId}) is confirmed.\nAmount: LKR ${totalAmount}\nPlease wait for confirmation.\n\nNEVERBE Team`;
+                message = `Dear ${name},\n\n Your COD order (ID: ${orderId}) is confirmed.\nAmount: LKR ${totalAmount}\n\nNEVERBE Team`;
             }
             break;
 
@@ -50,7 +50,7 @@ const adminNotifySMS = (
 };
 
 
-const orderStatusUpdateSMS = (
+const orderTrackingUpdateSMS = (
     name: string,
     orderId: string,
     status: string,
@@ -78,4 +78,4 @@ const orderStatusUpdateSMS = (
     return message;
 };
 
-export {adminNotifySMS, orderStatusUpdateSMS,getOrderStatusSMS};
+export {adminNotifySMS, orderTrackingUpdateSMS,getOrderStatusSMS};

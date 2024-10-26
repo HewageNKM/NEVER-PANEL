@@ -20,13 +20,13 @@ const OrderStatusView = ({order, setShowOrderStatusView, setOrder}: {
     const [tracking, setTracking] = useState<Tracking | null>(order?.tracking);
     const [loading, setLoading] = useState(false)
     const dispatch: AppDispatch = useDispatch();
-    const {page,size} = useSelector((state:RootState) => state.orderSlice);
+    const {page, size} = useSelector((state: RootState) => state.orderSlice);
 
     useEffect(() => {
         dispatch(sortOrders({page: page, size: size}));
     }, [dispatch, tracking]);
 
-    const onTrackingFormSubmit = (evt) => {
+    const onTrackingFormSubmit = async (evt) => {
         evt.preventDefault();
 
         const tracking: Tracking = {
@@ -48,12 +48,12 @@ const OrderStatusView = ({order, setShowOrderStatusView, setOrder}: {
                 ...order,
                 tracking: tracking
             }
-            setOrder(newOrder);
             saveOrder(newOrder).then(() => {
                 setLoading(false);
                 setShowOrderStatusView(false);
                 dispatch(sortOrders({page: page, size: size}));
             });
+            setOrder(newOrder);
         }
     }
 
@@ -69,8 +69,12 @@ const OrderStatusView = ({order, setShowOrderStatusView, setOrder}: {
                     "Authorization": `Bearer ${token}`
                 }
             });
-            return response.data;
-        } catch (error) {
+            if (response.status === 200) {
+                dispatch(sortOrders({page: page, size: size}));
+            } else {
+                new Error(response.data);
+            }
+        } catch (error: any) {
             console.log(error);
         } finally {
             setLoading(false);
@@ -102,12 +106,12 @@ const OrderStatusView = ({order, setShowOrderStatusView, setOrder}: {
                 }
             });
             setOrder(newOrder);
-            if (response.data) {
-                dispatch(fetchOrders({pageNumber: 1, size: 20}));
+            if (response.status === 200) {
+                dispatch(sortOrders({page: page, size: size}));
             } else {
-                console.log(response.data);
+                new Error(response.data);
             }
-        } catch (error) {
+        } catch (error: any) {
             console.log(error);
         } finally {
             setLoading(false);
