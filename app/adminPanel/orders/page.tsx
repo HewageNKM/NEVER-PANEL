@@ -2,6 +2,7 @@ import React from 'react';
 import Hero from "@/app/adminPanel/orders/components/Hero";
 import Orders from "@/app/adminPanel/orders/components/Orders";
 import {Metadata} from "next";
+import {algoliasearch} from "algoliasearch";
 
 export const metadata:Metadata = {
     title:"Orders",

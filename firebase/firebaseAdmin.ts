@@ -1,6 +1,7 @@
 import admin, {credential} from 'firebase-admin';
 import {Item, Order} from "@/interfaces";
 import {NextResponse} from "next/server";
+import {paymentMethods, paymentStatus} from "@/constant";
 
 if (!admin.apps.length) {
     admin.initializeApp({
@@ -25,13 +26,27 @@ export const getOrders = async (pageNumber: number = 1, size: number = 20) => {
         .offset(offset)
         .get();
 
-    let orders: Order[] = []
+    let orders: Order[] = [];
     ordersSnapshot.forEach(doc => {
-        orders.push(doc.data() as Order);
+        const order = doc.data() as Order;
+        // Check if PaymentStatus is not 'Pending' or PaymentMethod is not 'PayHere'
+        if (!(order.paymentStatus === paymentStatus.PENDING && order.paymentMethod === paymentMethods.PAYHERE)) {
+            orders.push(order);
+        }
     });
 
     return orders;
+
 };
+export const getOrder = async (orderId: string) => {
+    const orderDoc = await adminFirestore.collection('orders').doc(orderId).get();
+    if(!orderDoc.exists){
+        return null;
+    }
+    return {
+        ...orderDoc.data(),
+    } as Order;
+}
 export const getItemById = async (itemId: string) => {
     const itemDoc = await adminFirestore.collection('inventory').doc(itemId).get();
     if(!itemDoc.exists){

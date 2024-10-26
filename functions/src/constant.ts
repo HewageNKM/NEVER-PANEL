@@ -8,9 +8,6 @@ export const ADMIN_PHONE = "94705208999";
 export const ADMIN_EMAIL = "orders@neverbe.lk";
 export const BATCH_LIMIT = 450;
 
-export enum SendingMails {
-    Payment = "noreplypayments@neverbe.lk"
-}
 export interface Order {
     orderId: string,
     paymentId: string,
@@ -27,7 +24,6 @@ export interface Order {
 export enum orderStatus {
     DELIVERED = "Delivered",
     CANCELLED = "Cancelled",
-    RETURNED = "Returned",
     SHIPPED = "Shipped",
 }
 export interface Tracking {

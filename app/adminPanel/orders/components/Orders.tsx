@@ -1,21 +1,22 @@
 "use client";
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {Customer, Order, OrderItem} from "@/interfaces";
 import {IoArrowBack, IoArrowForward, IoEye, IoPencil} from "react-icons/io5";
 import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch, RootState} from "@/lib/store";
-import {fetchOrders, setPage} from "@/lib/orderSlice/orderSlice";
+import {setPage} from "@/lib/orderSlice/orderSlice";
 import {AnimatePresence} from "framer-motion";
 import ItemsView from "@/app/adminPanel/orders/components/ItemsView";
 import CustomerView from "@/app/adminPanel/orders/components/CustomerView";
 import OrderStatusView from "@/app/adminPanel/orders/components/OrderStatusView";
 import {orderStatus, paymentStatus} from "@/constant";
 import EmptyState from "@/components/EmptyState";
+import DropShadow from "@/components/DropShadow";
+import PaymentStatusView from "@/app/adminPanel/orders/components/PaymentStatusView";
 
 const Orders = () => {
     const dispatch: AppDispatch = useDispatch();
-    const orderList = useSelector((state: RootState) => state.orderSlice.orders);
-    const pageNumber = useSelector((state: RootState) => state.orderSlice.page);
+    const {orders, loading, page} = useSelector((state: RootState) => state.orderSlice);
 
     const [items, setItems] = useState([] as OrderItem[]);
     const [customer, setCustomer] = useState({} as Customer)
@@ -26,13 +27,6 @@ const Orders = () => {
     const [showOrderStatus, setShowOrderStatus] = useState(false)
     const [showPaymentStatus, setShowPaymentStatus] = useState(false)
 
-    useEffect(() => {
-        dispatch(fetchOrders({pageNumber: 1, size: 20}));
-    }, [dispatch]);
-
-    useEffect(() => {
-        dispatch(fetchOrders({pageNumber: pageNumber, size: 20}));
-    }, [pageNumber, dispatch]);
 
     return (
         <section className="mt-8">
@@ -72,7 +66,7 @@ const Orders = () => {
                     </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                    {orderList.map((order) => (
+                    {orders.map((order) => (
                         <tr key={order.orderId} className="font-bold text-lg">
                             <td className="px-6 py-4 whitespace-nowrap text-gray-900">#{order.orderId}</td>
                             <td className="px-6 py-4 whitespace-nowrap text-gray-900">{new Date(order.createdAt._seconds * 1000 + order.createdAt._nanoseconds / 1000000).toLocaleString()}</td>
@@ -104,13 +98,8 @@ const Orders = () => {
                                              ${order.tracking?.status === orderStatus.SHIPPED ? "bg-yellow-100 text-yellow-800" :
                                         order.tracking?.status === orderStatus.DELIVERED ? "bg-green-100 text-green-800" :
                                             order.tracking?.status === orderStatus.PROCESSING ? "bg-blue-100 text-blue-800" :
-                                                order.tracking?.status === orderStatus.CANCELLED ? "bg-red-100 text-red-800" :
-                                                    order.tracking?.status === orderStatus.RETURNED ? "bg-purple-100 text-purple-800" : "bg-gray-100 text-gray-800"}`}>
-                                        {order.tracking?.status === orderStatus.SHIPPED ? orderStatus.SHIPPED :
-                                            order.tracking?.status === orderStatus.DELIVERED ? orderStatus.DELIVERED :
-                                                order.tracking?.status === orderStatus.PROCESSING ? orderStatus.PROCESSING :
-                                                    order.tracking?.status === orderStatus.CANCELLED ? orderStatus.CANCELLED :
-                                                        order.tracking?.status === orderStatus.RETURNED ? orderStatus.RETURNED : orderStatus.PROCESSING}
+                                                order.tracking?.status === orderStatus.CANCELLED ? "bg-red-100 text-red-800" : "bg-gray-100 text-gray-800"}`}>
+                                        {order.tracking?.status || "Processing"}
                                     </p>
 
                                     <button
@@ -135,8 +124,13 @@ const Orders = () => {
                                     </p>
                                     <button
                                         className="text-indigo-600 hover:text-indigo-900 text-lg disabled:opacity-60 disabled:cursor-not-allowed"
-                                        disabled={order.paymentMethod == "PayHere"}>
-                                        <IoPencil size={20} color={"blue"}/>
+                                        disabled={order.tracking?.status == orderStatus.CANCELLED}>
+                                        <IoPencil size={20} color={"blue"}
+                                                  onClick={() => {
+                                                      setSelectedOrder(order);
+                                                      setShowPaymentStatus(true);
+                                                  }}
+                                        />
                                     </button>
                                 </div>
                             </td>
@@ -146,27 +140,34 @@ const Orders = () => {
                 </table>
                 <div className="w-full justify-center items-center">
                     <div className="flex flex-row gap-5 justify-center">
-                        <button onClick={() => {
-                            if (pageNumber > 1) {
-                                dispatch(setPage(pageNumber - 1));
-                            } else {
-                                dispatch(setPage(1));
-                            }
-                        }}>
+                        <button className="disabled:cursor-not-allowed disabled:opacity-60" disabled={page <= 1}
+                                onClick={() => {
+                                    if (page > 1) {
+                                        dispatch(setPage(page - 1));
+                                    } else {
+                                        dispatch(setPage(1));
+                                    }
+                                }}>
                             <IoArrowBack size={23}/>
                         </button>
-                        <p className="text-2xl font-bold">{pageNumber}</p>
+                        <p className="text-2xl font-bold">{page}</p>
                         <button onClick={() => {
-                            dispatch(setPage(pageNumber + 1));
+                            dispatch(setPage(page + 1));
                         }}>
                             <IoArrowForward size={23}/>
                         </button>
                     </div>
                 </div>
-                {orderList.length === 0 && (
+                {(orders.length === 0 && !loading) && (
                     <div className="absolute top-1/2">
                         <EmptyState title={"No Orders Found!"} subtitle={"Please check back later"}/>
                     </div>
+                )}
+                {loading && (
+                    <DropShadow>
+                        <EmptyState title={"Loading Orders"} subtitle={"Please wait while we fetch the orders"}
+                                    containerStyles="animate-pulse"/>
+                    </DropShadow>
                 )}
             </div>
             <AnimatePresence>
@@ -177,6 +178,10 @@ const Orders = () => {
                 {showOrderStatus && (
                     <OrderStatusView setShowOrderStatusView={setShowOrderStatus} order={selectedOrder}
                                      setOrder={setSelectedOrder}/>
+                )}
+                {showPaymentStatus && (
+                    <PaymentStatusView order={selectedOrder} setShowPaymentView={setShowPaymentStatus}
+                                       setSelectedOrder={setSelectedOrder}/>
                 )}
             </AnimatePresence>
         </section>

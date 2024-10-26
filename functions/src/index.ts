@@ -1,22 +1,19 @@
-// src/index.ts
-import * as functions from "firebase-functions";
+import * as functions from "firebase-functions/v1";  // Updated import for v6
 import * as admin from "firebase-admin";
-import {adminNotifySMS, getOrderStatusSMS, orderStatusUpdateSMS} from "./templates";
-import {BATCH_LIMIT, Item, Order, orderStatus, PaymentMethod, PaymentStatus} from "./constant";
-import {sendEmail, sendSMS} from "./notifications";
-import {calculateTotal, commitBatch, sendAdminEmail, sendAdminSMS} from "./util";
+import { adminNotifySMS, getOrderStatusSMS, orderTrackingUpdateSMS } from "./templates";
+import { BATCH_LIMIT, Item, Order, orderStatus, PaymentMethod, PaymentStatus } from "./constant";
+import { sendEmail, sendSMS } from "./notifications";
+import { calculateTotal, commitBatch, sendAdminEmail, sendAdminSMS } from "./util";
 
-// Initialize Firebase Admin
 admin.initializeApp();
 export const db = admin.firestore();
-
 
 // Cloud Functions
 
 /**
  * Scheduled function to clean up failed orders and restock inventory.
  */
-exports.scheduledOrdersCleanup = functions.pubsub
+export const scheduledOrdersCleanup = functions.pubsub
     .schedule("every 30 minutes")
     .onRun(async () => {
         try {
@@ -26,13 +23,11 @@ exports.scheduledOrdersCleanup = functions.pubsub
             const halfHourAgo = admin.firestore.Timestamp
                 .fromDate(new Date(Date.now() - 30 * 60 * 1000));
 
-
             // Fetch failed and pending PayHere orders
             const payhereFailedOrders = await orderCollection
                 .where("paymentMethod", "==", PaymentMethod.PayHere)
                 .where("createdAt", "<=", halfHourAgo)
-                .where("paymentStatus", "in",
-                    [PaymentStatus.Failed, PaymentStatus.Pending])
+                .where("paymentStatus", "in", [PaymentStatus.Failed, PaymentStatus.Pending])
                 .get();
 
             // Fetch failed COD orders
@@ -42,16 +37,14 @@ exports.scheduledOrdersCleanup = functions.pubsub
                 .where("paymentStatus", "==", PaymentStatus.Failed)
                 .get();
 
-            const allFailedOrders =
-                [...payhereFailedOrders.docs, ...codFailedOrders.docs];
+            const allFailedOrders = [...payhereFailedOrders.docs, ...codFailedOrders.docs];
 
             if (allFailedOrders.length === 0) {
                 console.log("No failed orders to restock.");
                 return null;
             }
 
-            console.log(`Found ${allFailedOrders.length} failed orders to 
-      restock and delete.`);
+            console.log(`Found ${allFailedOrders.length} failed orders to restock and delete.`);
 
             let batch = db.batch();
             let opCounts = 0;
@@ -82,20 +75,13 @@ exports.scheduledOrdersCleanup = functions.pubsub
                                     opCounts = 0;
                                 }
                             } else {
-                                console.warn(
-                                    `Size not found for itemId: ${orderItem.itemId},
-                   variantId: ${orderItem.variantId}, size: ${orderItem.size}`
-                                );
+                                console.warn(`Size not found for itemId: ${orderItem.itemId}, variantId: ${orderItem.variantId}, size: ${orderItem.size}`);
                             }
                         } else {
-                            console.warn(
-                                `Variant not found for itemId: ${orderItem.itemId},
-                 variantId: ${orderItem.variantId}`
-                            );
+                            console.warn(`Variant not found for itemId: ${orderItem.itemId}, variantId: ${orderItem.variantId}`);
                         }
                     } else {
-                        console.warn(`Inventory document not found for itemId:
-             ${orderItem.itemId}`);
+                        console.warn(`Inventory document not found for itemId: ${orderItem.itemId}`);
                     }
                 }
 
@@ -115,8 +101,7 @@ exports.scheduledOrdersCleanup = functions.pubsub
                 console.log(`Committed the final batch of ${opCounts} operations.`);
             }
 
-            console.log("Scheduled Firestore cleanup and" +
-                " deletion completed successfully.");
+            console.log("Scheduled Firestore cleanup and deletion completed successfully.");
             return null;
         } catch (error) {
             console.error("Error during scheduledOrdersCleanup:", error);
@@ -127,23 +112,29 @@ exports.scheduledOrdersCleanup = functions.pubsub
 /**
  * Triggered function to handle order payment state changes.
  */
-exports.onOrderPaymentStateChanges = functions.firestore
+export const onPaymentStatusUpdates = functions.firestore
     .document("orders/{orderId}")
     .onWrite(async (change, context) => {
         const orderId = context.params.orderId;
         const orderData = change.after.exists ? (change.after.data() as Order) : null;
         const previousOrderData = change.before.exists ? (change.before.data() as Order) : null;
 
-        if (!orderData) {
-            return null; // Exit if order is deleted or no new data
-        }
+        if (!orderData) return null;
 
         const { paymentMethod, paymentStatus, items, customer, shippingCost } = orderData;
         const customerEmail = customer.email.trim();
         const total = calculateTotal(items, shippingCost);
-        const templateData = { name: customer.name, orderId, items, shippingCost, total, paymentMethod, paymentStatus };
 
-        // Skip notifications for Card or Cash payment methods
+        const templateData = { name: customer.name,
+            orderId,
+            items,
+            shippingCost,
+            total,
+            paymentMethod,
+            isRefunded: paymentStatus === PaymentStatus.Refunded,
+            isConfirmed: paymentMethod === PaymentMethod.PayHere && paymentStatus === PaymentStatus.Paid || paymentMethod === PaymentMethod.COD && paymentStatus === PaymentStatus.Pending,
+        };
+
         if (paymentMethod === PaymentMethod.Card || paymentMethod === PaymentMethod.Cash) {
             console.log(`No notifications sent for Card or Cash payment method for order ${orderId}`);
             return null;
@@ -160,30 +151,33 @@ exports.onOrderPaymentStateChanges = functions.firestore
             // Handle different payment statuses
             if (!previousOrderData && paymentMethod === PaymentMethod.COD && paymentStatus === PaymentStatus.Pending) {
                 await sendNotifications();
-                await sendAdminSMS(adminNotifySMS(orderId, paymentMethod, total))
-                await sendAdminEmail("adminOrderNotify", templateData)
+                await sendAdminSMS(adminNotifySMS(orderId, paymentMethod, total));
+                await sendAdminEmail("adminOrderNotify", templateData);
                 console.log(`Order confirmation sent for COD order ${orderId}`);
             }
 
             if (previousOrderData) {
-                // Check for the same payment status update and skip notifications
                 if (paymentStatus === previousOrderData.paymentStatus) {
                     console.log(`No change in payment status for order ${orderId}. No notification sent.`);
                     return null;
                 }
 
-                // Failed status for COD
                 if (paymentMethod === PaymentMethod.COD && previousOrderData.paymentStatus === PaymentStatus.Pending && paymentStatus === PaymentStatus.Failed) {
                     await sendNotifications();
                     console.log(`Order failed notification sent for COD order ${orderId}`);
                 }
 
-                // PayHere order updates
+                if (paymentMethod === PaymentMethod.COD && previousOrderData.paymentStatus === PaymentStatus.Pending && paymentStatus === PaymentStatus.Paid) {
+                    await sendSMS(customer.phone, getOrderStatusSMS(customer.name,orderId,total,paymentMethod,paymentStatus
+                    ))
+                    console.log(`Payment confirmation SMS sent for COD order ${orderId}`);
+                }
+
                 if (paymentMethod === PaymentMethod.PayHere) {
                     if (previousOrderData.paymentStatus === PaymentStatus.Pending && paymentStatus === PaymentStatus.Paid) {
                         await sendNotifications();
-                        await sendAdminSMS(adminNotifySMS(orderId, paymentMethod, total))
-                        await sendAdminEmail("adminOrderNotify", templateData)
+                        await sendAdminSMS(adminNotifySMS(orderId, paymentMethod, total));
+                        await sendAdminEmail("adminOrderNotify", templateData);
                         console.log(`Order confirmation sent for PayHere order ${orderId}`);
                     } else if (previousOrderData.paymentStatus === PaymentStatus.Pending && paymentStatus === PaymentStatus.Failed) {
                         await sendNotifications();
@@ -191,7 +185,6 @@ exports.onOrderPaymentStateChanges = functions.firestore
                     }
                 }
 
-                // Always send notification if the payment status is updated to Refunded
                 if (paymentStatus === PaymentStatus.Refunded) {
                     await Promise.all([
                         sendEmail(customerEmail, "orderUpdate", templateData),
@@ -207,10 +200,10 @@ exports.onOrderPaymentStateChanges = functions.firestore
         return null;
     });
 
-
-
-// Tracking Updates
-exports.onOrderTrackingUpdate = functions.firestore
+/**
+ * Tracking Updates
+ */
+export const onTrackingUpdates = functions.firestore
     .document("orders/{orderId}")
     .onUpdate(async (change, context) => {
         const orderId = context.params.orderId;
@@ -231,22 +224,23 @@ exports.onOrderTrackingUpdate = functions.firestore
 
             const templateData = {
                 name: newOrderData.customer.name,
-                orderId: orderId,
+                orderId,
+                address:newOrderData.customer.address,
                 status: newTracking.status,
-                trackingCompany: newTracking.trackingCompany,
                 trackingNumber: newTracking.trackingNumber,
                 trackingUrl: newTracking.trackingUrl,
+                isShipped: newOrderData.tracking?.status === orderStatus.SHIPPED,
+                isDelivered: newOrderData.tracking?.status === orderStatus.DELIVERED,
+                isCancelled: newOrderData.tracking?.status === orderStatus.CANCELLED,
             };
 
-
             try {
-                // Function to send notifications
                 const sendNotifications = async (status: string) => {
                     await Promise.all([
-                        await sendEmail(customerEmail, "trackingUpdate", templateData),
-                        await sendSMS(
+                        sendEmail(customerEmail, "trackingUpdate", templateData),
+                        sendSMS(
                             customerPhone,
-                            orderStatusUpdateSMS(
+                            orderTrackingUpdateSMS(
                                 newOrderData.customer.name,
                                 orderId,
                                 status,
@@ -254,31 +248,24 @@ exports.onOrderTrackingUpdate = functions.firestore
                                 newTracking.trackingUrl
                             )
                         )
-                    ])
+                    ]);
                     console.log(`Notifications sent for order ${orderId} with status ${status}.`);
                 };
 
-                // Handle different tracking status cases
                 switch (newTracking.status) {
                     case orderStatus.SHIPPED:
                     case orderStatus.DELIVERED:
                     case orderStatus.CANCELLED:
-                    case orderStatus.RETURNED:
                         await sendNotifications(newTracking.status);
                         break;
                     default:
-                        console.log(`Unhandled tracking status for order ${orderId}: ${newTracking.status}`);
+                        console.log(`No matching status for notifications in order ${orderId}`);
+                        break;
                 }
             } catch (error) {
-                console.error(`Error handling order ${orderId} status update:`, error);
+                console.error(`Error processing tracking update for order ${orderId}:`, error);
             }
-        } else {
-            console.log(`No significant change in tracking status for order ${orderId}.`);
         }
 
         return null;
     });
-
-
-
-
