@@ -53,9 +53,7 @@ export const getItemById = async (itemId: string) => {
         return null;
     }
     return {
-        ...itemDoc.data(),
-        createdAt: itemDoc.data()?.createdAt.toDate().toLocaleString(),
-        updatedAt: itemDoc.data()?.updatedAt.toDate().toLocaleString(),
+        ...itemDoc.data()
     } as Item;
 }
 export const updateOrder = async (order: Order) => {

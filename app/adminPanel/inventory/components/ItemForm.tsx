@@ -9,29 +9,29 @@ import {AppDispatch} from "@/lib/store";
 import Link from "next/link";
 
 const ItemForm = ({
-                     onSubmit,
-                     setAddForm,
-                     id,
-                     setId,
-                     manufacture,
-                     setManufacture,
-                     setName,
-                     name,
-                     setBuyingPrice,
-                     buyingPrice,
-                     setSellingPrice,
-                     sellingPrice,
-                     setDiscount,
-                     discount,
-                     setUpdateState,
-                     updateState,
-                     type,
-                     setType,
-                     brand,
-                     setBrand,
-                     thumbnail,
-                     setThumbnail
-                 }: {
+                      onSubmit,
+                      setAddForm,
+                      id,
+                      setId,
+                      manufacture,
+                      setManufacture,
+                      setName,
+                      name,
+                      setBuyingPrice,
+                      buyingPrice,
+                      setSellingPrice,
+                      sellingPrice,
+                      setDiscount,
+                      discount,
+                      setUpdateState,
+                      updateState,
+                      type,
+                      setType,
+                      brand,
+                      setBrand,
+                      thumbnail,
+                      setThumbnail
+                  }: {
     id: string,
     discount: number,
     sellingPrice: number,
@@ -77,48 +77,46 @@ const ItemForm = ({
 
     return (
         <DropShadow>
-            <div className="bg-white z-50 w-[95vw] flex h-[95vh] overflow-auto md:h-fit rounded p-4 relative">
-                <form onSubmit={onSubmit} className="flex-col w-full  flex gap-2">
-                    <legend className="text-2xl font-bold">
+            <div className="bg-white z-50 lg:w-[50vw] max-w-[95vw] flex max-h-[95vh] overflow-auto md:h-fit rounded-lg shadow-lg p-6 relative">
+                <form onSubmit={onSubmit} className="flex-col w-full flex gap-4">
+                    <legend className="text-3xl font-bold mb-4 text-gray-700">
                         Item
                     </legend>
 
                     <div className="flex relative justify-center items-center flex-col">
                         {thumbnail.url &&
-                            <div className="flex flex-row gap-2">
-                                <Link target="_blank" href={thumbnail.url} className="lg:hover:border-b-2 h-6 lg:border-b-black transition-all">thumbnail</Link>
-                                <button disabled={updateState} className="bg-black p-1 rounded-full" onClick={()=> setThumbnail({file:null,url:null})}>
-                                    <IoClose size={17} color="White"/>
+                            <div className="flex flex-row gap-2 items-center">
+                                <Link target="_blank" href={thumbnail.url} className="text-blue-500 hover:underline">Thumbnail</Link>
+                                <button disabled={updateState} className="p-2 rounded-full hover:bg-gray-200" onClick={() => setThumbnail({file: null, url: null})}>
+                                    <IoClose size={20} color="gray"/>
                                 </button>
                             </div>
                         }
 
                         <div className="flex mt-5 relative justify-center items-center flex-col">
-                            <IoCloudUpload size={30}/>
-                            <p>
-                                Upload Image
-                            </p>
+                            <IoCloudUpload size={40} color="gray" />
+                            <p className="text-gray-500 mt-2">Upload Image</p>
                             <input disabled={updateState}
                                    type="file" multiple
                                    accept=".jpeg, .jpg, .png"
-                                   onChange={(file)=>handleFile(file)}
-                                   className="absolute w-[10vw] border-2 p-1 h-[10vh] opacity-0 bg-black"/>
+                                   onChange={(file) => handleFile(file)}
+                                   className="absolute w-full h-full opacity-0 cursor-pointer"/>
                         </div>
                     </div>
-                    <div className="mt-5 flex w-full flex-row justify-center items-center flex-wrap gap-3 md:gap-8">
+                    <div className="mt-5 flex w-full flex-row justify-center items-center flex-wrap gap-4">
                         <label className="flex-col hidden gap-1">
-                            <span className="font-medium">Product ID</span>
+                            <span className="font-medium text-gray-700">Product ID</span>
                             <input type="text"
                                    value={id}
                                    onChange={(txt) => setId(txt.target.value)}
-                                   placeholder="Jordan, Campus......"
-                                   className="p-1 border-2 border-slate-300 rounded"/>
+                                   placeholder="e.g., Jordan, Campus"
+                                   className="p-2 border border-gray-300 rounded-lg focus:border-blue-400"/>
                         </label>
                         <label className="flex-col flex gap-1">
-                            <span className="font-medium">Type</span>
+                            <span className="font-medium text-gray-700">Type</span>
                             <select disabled={updateState} required value={type}
                                     onChange={(txt) => setType(txt.target.value)}
-                                    defaultValue="none" className="p-1  border-2 w-[10rem] border-slate-300 rounded">
+                                    className="p-2 border border-gray-300 rounded-lg focus:border-blue-400 w-[10rem]">
                                 {types.map((types, index) => (
                                     <option key={index} value={types.value}>{types.name}</option>
                                 ))}
@@ -126,10 +124,10 @@ const ItemForm = ({
                             </select>
                         </label>
                         <label className="flex-col flex gap-1">
-                            <span className="font-medium">Manufacture</span>
+                            <span className="font-medium text-gray-700">Manufacture</span>
                             <select disabled={updateState} required value={manufacture}
                                     onChange={(txt) => setManufacture(txt.target.value)}
-                                    defaultValue="none" className="p-1 border-2 w-[10rem] border-slate-300 rounded">
+                                    className="p-2 border border-gray-300 rounded-lg focus:border-blue-400 w-[10rem]">
                                 {brands.map((brand, index) => (
                                     <option key={index} value={brand.value}>{brand.name}</option>
                                 ))}
@@ -137,47 +135,47 @@ const ItemForm = ({
                             </select>
                         </label>
                         <label className="flex-col flex gap-1">
-                            <span className="font-medium">Brand</span>
+                            <span className="font-medium text-gray-700">Brand</span>
                             <input required type="text"
                                    value={brand}
                                    onChange={(txt) => setBrand(txt.target.value)}
-                                   placeholder="Jordan, Campus......"
-                                   className="p-1 border-2 lowercase  border-slate-300 rounded"/>
+                                   placeholder="e.g., Jordan, Campus"
+                                   className="p-2 border border-gray-300 rounded-lg focus:border-blue-400"/>
                         </label>
                         <label className="flex-col flex gap-1">
-                            <span className="font-medium">Name</span>
+                            <span className="font-medium text-gray-700">Name</span>
                             <input required value={name} onChange={(txt) => setName(txt.target.value)} type="text"
                                    placeholder="Nike Air Max 90"
-                                   className="p-1 border-2  border-slate-300 rounded"/>
+                                   className="p-2 border border-gray-300 rounded-lg focus:border-blue-400"/>
                         </label>
                         <label className="flex-col flex gap-1">
-                            <span className="font-medium">Buying Price(Rs)</span>
+                            <span className="font-medium text-gray-700">Buying Price (Rs)</span>
                             <input required value={buyingPrice} onChange={(txt) => setBuyingPrice(txt.target.value)}
                                    type="number" placeholder="3000"
-                                   className="p-1 border-2 border-slate-300 rounded"/>
+                                   className="p-2 border border-gray-300 rounded-lg focus:border-blue-400"/>
                         </label>
                         <label className="flex-col flex gap-1">
-                            <span className="font-medium">Selling Price(Rs)</span>
+                            <span className="font-medium text-gray-700">Selling Price (Rs)</span>
                             <input required value={sellingPrice} onChange={(txt) => setSellingPrice(txt.target.value)}
                                    type="number" placeholder="8000"
-                                   className="p-1 border-2 border-slate-300 rounded"/>
+                                   className="p-2 border border-gray-300 rounded-lg focus:border-blue-400"/>
                         </label>
                         <label className="flex-col flex gap-1">
-                            <span className="font-medium">Discount(%)</span>
+                            <span className="font-medium text-gray-700">Discount (%)</span>
                             <input required value={discount} onChange={(txt) => setDiscount(txt.target.value)}
                                    type="number"
                                    placeholder="20"
-                                   className="p-1 border-2 border-slate-300 rounded"/>
+                                   className="p-2 border border-gray-300 rounded-lg focus:border-blue-400"/>
                         </label>
                     </div>
-                    <div className='w-full flex justify-center'>
+                    <div className="w-full flex justify-center mt-4">
                         <button
-                            className="bg-primary-100 text-white flex font-medium flex-row justify-center items-center h-[2.8rem] px-3 py-1 rounded hover:bg-primary-200">
+                            className="bg-primary-100 text-white font-medium rounded-lg px-6 py-2 transition hover:bg-primary-200 focus:outline-none">
                             {updateState ? "Update" : "Save"}
                         </button>
                     </div>
                 </form>
-                <div className="absolute top-1 right-1">
+                <div className="absolute top-4 right-4">
                     <button onClick={() => {
                         setId('')
                         setManufacture('none')
@@ -190,8 +188,8 @@ const ItemForm = ({
                         setThumbnail({file: null, url: null})
                         setAddForm(false)
                         setUpdateState(false)
-                    }}>
-                        <IoClose size={30}/>
+                    }} className="p-1 rounded-full hover:bg-gray-100">
+                        <IoClose size={24} color="gray"/>
                     </button>
                 </div>
             </div>
