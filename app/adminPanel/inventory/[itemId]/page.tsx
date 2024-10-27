@@ -28,9 +28,9 @@ const Page = async ({ params }: { params: { itemId: string } }) => {
     }
     return (
         <div className="w-full h-full relative md:mt-5 mt-10">
-            <div className="px-4 py-4">
-                <h1 className="pt-20 text-4xl md:text-5xl font-bold">Item Details</h1>
-                <div className="mt-1 text-base md:text-lg flex gap-1">
+            <div>
+                <h1 className="pt-20 text-4xl md:text-5xl px-4 py-4 font-bold">Item Details</h1>
+                <div className="mt-1 text-base md:text-lg px-4 py-4 flex gap-1">
                     <Link href="/adminPanel/inventory" className="text-blue-500">Inventory</Link>
                     <span>/</span>
                     <Link href={`/adminPanel/inventory/${item.itemId}`} className="text-blue-500">{item.itemId}</Link>

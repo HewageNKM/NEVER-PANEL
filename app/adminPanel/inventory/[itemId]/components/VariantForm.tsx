@@ -175,10 +175,10 @@ const VariantForm = ({
     return (
         <DropShadow>
             <div
-                className="bg-white z-50 md:w-fit w-[95vw] flex md:h-fit h-[80vh] justify-center items-center overflow-auto rounded p-4 relative">
+                className="bg-white z-50 md:w-fit max-w-[95vw] flex h-fit justify-center items-center overflow-auto rounded p-4 relative">
                 <form onSubmit={onVariantFormSubmit} className="flex-col flex gap-5">
                     <legend className="text-2xl font-bold">
-                        VariantManage
+                        Variant
                     </legend>
                     <div className="mt-2 flex flex-col justify-center items-start flex-wrap gap-5">
                         {images.length > 0 && <h2 className="text-lg font-bold">Images</h2>}
@@ -206,10 +206,10 @@ const VariantForm = ({
                                    className={`p-1 border-2 border-slate-300 rounded bg-primary-200`}/>
                         </label>
                         <label className="flex-col flex gap-1">
-                            <span className="font-medium">VariantManage Name </span>
+                            <span className="font-medium">Variant Name </span>
                             <input onChange={(txt) => setVariantName(txt.target.value)} value={variantName} required
                                    type="text"
-                                   placeholder="VariantManage 1"
+                                   placeholder="Variant Name"
                                    className="p-1 text-center  border-2 border-slate-300 rounded"/>
                         </label>
                         <label className="flex-col flex justify-center items-center gap-1">
@@ -256,7 +256,7 @@ const VariantForm = ({
                             <div className="flex pt-7 items-center justify-center">
                                 <button onClick={() => addSizeToTable()} type="button"
                                         className="flex px-2 md:text-lg text-[.9rem] bg-primary-100 p-1 rounded text-white font-medium flex-row items-center">
-                                    Add/Update Size
+                                    Add/Update
                                 </button>
                             </div>
                         </div>
