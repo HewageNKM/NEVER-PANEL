@@ -7,9 +7,10 @@ import {AppDispatch} from "@/lib/store";
 import {showToast} from "@/lib/toastSlice/toastSlice";
 import {Item, Variant} from "@/interfaces";
 import {accessoriesSizesList, shoeSizesList} from "@/constant";
-import {saveToInventory, uploadImages} from "@/firebase/firebaseClient";
+import {getToken, uploadImages} from "@/firebase/firebaseClient";
 import {generateId} from "@/utils/genarateIds";
 import {hideLoader, showLoader} from "@/lib/pageLoaderSlice/pageLoaderSlice";
+import axios from "axios";
 
 const VariantForm = ({
                          setAddVariantForm,
@@ -88,7 +89,7 @@ const VariantForm = ({
                 }
                 item.variants.push(newVariant)
                 setItem(item)
-                await saveItem("VariantManage added successfully")
+                await saveItem("VariantManage added successfully","save")
             } catch (e: any) {
                 showDisplayMessage("Error", e.message)
             } finally {
@@ -103,7 +104,7 @@ const VariantForm = ({
                 filter.push(variant)
                 item.variants = filter
                 setItem(item)
-                await saveItem("VariantManage updated successfully")
+                await saveItem("VariantManage updated successfully","update")
             } catch (e: any) {
                 showDisplayMessage("Error", e.message)
             } finally {
@@ -115,9 +116,37 @@ const VariantForm = ({
         setAddVariantForm(false)
     }
 
-    const saveItem = async (msg:string) => {
-        await saveToInventory(item)
-        showDisplayMessage("Success", msg)
+    const saveItem = async (msg: string, type:string) => {
+        const token = await getToken()
+        if(type == "save"){
+            const res = await axios({
+                method: 'POST',
+                url: '/api/inventory',
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
+                data: JSON.stringify(item)
+            });
+            if (res.status !== 200) {
+                showDisplayMessage("Error", "An error occurred while saving the item")
+                return;
+            }
+            showDisplayMessage("Success", msg)
+        }else if(type == "update"){
+            const res = await axios({
+                method: 'PUT',
+                url: '/api/inventory/'+item.itemId,
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
+                data: JSON.stringify(item)
+            });
+            if (res.status !== 200) {
+                showDisplayMessage("Error", res.statusText)
+                return;
+            }
+            showDisplayMessage("Success", msg)
+        }
     }
 
     const addSizeToTable = () => {

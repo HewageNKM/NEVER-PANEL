@@ -11,8 +11,9 @@ import {generateId} from "@/utils/genarateIds";
 import {
     deleteFilesFromStorage,
     deleteInventoryItem,
-    filterInventoryByBrands, getInventory,
-    saveToInventory,
+    filterInventoryByBrands,
+    getInventory,
+    getToken,
     uploadImages
 } from "@/firebase/firebaseClient";
 import {hideLoader, showLoader} from "@/lib/pageLoaderSlice/pageLoaderSlice";
@@ -20,6 +21,8 @@ import {showToast} from "@/lib/toastSlice/toastSlice";
 import {brands} from "@/constant";
 import {IoAdd, IoSearch} from "react-icons/io5";
 import EmptyState from "@/components/EmptyState";
+import axios from "axios";
+import {Timestamp} from "@firebase/firestore";
 
 const InventoryManage = () => {
     const [loadItemTable, setLoadItemTable] = useState(true)
@@ -39,6 +42,8 @@ const InventoryManage = () => {
     const [type, setType] = useState("none")
     const [brand, setBrand] = useState("")
     const [thumbnail, setThumbnail] = useState<{ file: null | File, url: string | null }>({file: null, url: null})
+    const [createdAt, setCreatedAt] = useState<Timestamp>(Timestamp.now)
+    const [updatedAt, setUpdatedAt] = useState<Timestamp>(Timestamp.now)
 
     const onAddItemFormSubmit = async (evt: any) => {
         evt.preventDefault();
@@ -71,10 +76,10 @@ const InventoryManage = () => {
                 itemId: genId.toLowerCase(),
                 manufacturer: manufacture.toLowerCase(),
                 name: name,
-                sellingPrice: Number.parseInt(sellingPrice)
+                sellingPrice: Number.parseInt(sellingPrice),
             }
 
-            await saveItem(item, "Item added successfully")
+            await saveItem(item, "Item added successfully","save")
 
         } else if (id.trim().length > 0) {
             const i = inventoryList.find((item) => item.itemId === id);
@@ -89,22 +94,58 @@ const InventoryManage = () => {
                 name: name,
                 sellingPrice: Number.parseInt(sellingPrice),
                 thumbnail: i?.thumbnail || "",
-                variants: i?.variants || []
+                variants: i?.variants || [],
+                createdAt: createdAt,
+                updatedAt: updatedAt
             }
             // Update Item and setUpdateState to false so when add manufacture name can be edited
-            await saveItem(item, "Item updated successfully")
+            await saveItem(item, "Item updated successfully","update")
             setUpdateState(false)
         }
 
     }
-    const saveItem = async (item: Item, message: string) => {
+    const saveItem = async (item: Item, message: string,type:string) => {
         try {
             dispatch(showLoader())
-            await saveToInventory(item);
-            setAddForm(false)
-            setRefreshItemTable(prevState => !prevState)
-            showMessage(message, "Success")
-            clearAddFormField();
+            const token = await getToken()
+            if(type === "update"){
+                const res = await axios({
+                    method: "PUT",
+                    url: "/api/inventory/"+item.itemId,
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                    data: JSON.stringify(item)
+                });
+                if(res.status != 200){
+                    showMessage("Error updating item", "Error")
+                    return;
+                }
+
+                setAddForm(false)
+                setRefreshItemTable(prevState => !prevState)
+                showMessage(message, "Success")
+                clearAddFormField();
+            }else if(type === "save"){
+                const res = await axios({
+                    method: "POST",
+                    url: "/api/inventory",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                    data: JSON.stringify(item)
+                });
+
+                if(res.status != 200){
+                    showMessage("Error saving item", "Error")
+                    return;
+                }
+
+                setAddForm(false)
+                setRefreshItemTable(prevState => !prevState)
+                showMessage(message, "Success")
+                clearAddFormField();
+            }
         } catch (e: any) {
             console.log(e)
             showMessage(e.message, "Error")
@@ -223,6 +264,8 @@ const InventoryManage = () => {
                             file: null,
                             url: item.thumbnail
                         })
+                        setCreatedAt(item.createdAt)
+                        setUpdatedAt(item.updatedAt)
                         setUpdateState(true)
                         setAddForm(true)
                     }} onDelete={() => deleteItemFromInventory(item.itemId)}/>

@@ -53,16 +53,13 @@ export const getCurrentUser = () => {
 export const logout = async () => {
     await auth.signOut();
 }
-export const saveToInventory = async (item: Item) => {
-    await setDoc(doc(inventoryCollectionRef, item.itemId), item, {merge: true});
-}
+
 export const getInventory = async () => {
     let docs = await getDocs(inventoryCollectionRef);
     let items: Item[] = [];
     docs.forEach(doc => {
         items.push(doc.data() as Item);
     })
-
     return items;
 }
 export const deleteInventoryItem = async (itemId: string) => {

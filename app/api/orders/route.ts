@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import {getOrders, verifyIdToken} from "@/firebase/firebaseAdmin";
+import {getOrders, saveToInventory, verifyIdToken} from "@/firebase/firebaseAdmin";
 
 export const GET = async (req: Request) => {
     try {
@@ -22,3 +22,4 @@ export const GET = async (req: Request) => {
         return NextResponse.json({ message: 'Error fetching orders', error: error.message }, { status: 500 });
     }
 };
+

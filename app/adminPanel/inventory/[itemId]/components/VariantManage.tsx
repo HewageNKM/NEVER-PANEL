@@ -6,12 +6,13 @@ import VariantCard from "@/app/adminPanel/inventory/[itemId]/components/VariantC
 import VariantForm from "@/app/adminPanel/inventory/[itemId]/components/VariantForm";
 import {Item, Variant} from "@/interfaces";
 import {useDispatch} from "react-redux";
-import {deleteFilesFromStorage, saveToInventory} from "@/firebase/firebaseClient";
+import {deleteFilesFromStorage, getToken} from "@/firebase/firebaseClient";
 import {hideLoader, showLoader} from "@/lib/pageLoaderSlice/pageLoaderSlice";
 import {showToast} from "@/lib/toastSlice/toastSlice";
 import EmptyState from "@/components/EmptyState";
+import axios from "axios";
 
-const VariantManage = ({it}:{it:Item}) => {
+const VariantManage = ({it}: { it: Item }) => {
     const [addVariantForm, setAddVariantForm] = useState(false);
     const [variant, setVariant] = useState<Variant | null>(null);
     const [item, setItem] = useState<Item>(it);
@@ -24,10 +25,26 @@ const VariantManage = ({it}:{it:Item}) => {
             try {
                 dispatch(showLoader());
                 const updatedVariants = item.variants.filter(variant => variant.variantId !== variantId);
-                await deleteFilesFromStorage(`inventory/${item.itemId}/${variantId}`);
-                await saveToInventory({...item, variants: updatedVariants});
-                setItem(prevState => ({...prevState, variants: updatedVariants}));
-                showDisplayMessage("VariantManage deleted successfully", "Success");
+                await deleteFilesFromStorage(`inventory/${item.itemId}/${variantId}`)
+                const token = await getToken()
+
+                const newItem: Item = {
+                    ...item,
+                    variants: updatedVariants,
+                }
+
+                const res = await axios({
+                    method: "PUT",
+                    url: `/api/inventory/${item.itemId}`,
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                    data: JSON.stringify(newItem)
+                });
+                if (res.status == 200) {
+                    setItem(prevState => ({...prevState, variants: updatedVariants}));
+                    showDisplayMessage("VariantManage deleted successfully", "Success");
+                }
             } catch (e: any) {
                 showDisplayMessage(e.message, "Error");
             } finally {

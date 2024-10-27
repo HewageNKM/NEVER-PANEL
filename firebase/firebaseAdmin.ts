@@ -2,6 +2,8 @@ import admin, {credential} from 'firebase-admin';
 import {Item, Order} from "@/interfaces";
 import {NextResponse} from "next/server";
 import {paymentMethods, paymentStatus} from "@/constant";
+import {doc, setDoc, Timestamp} from "@firebase/firestore";
+import {inventoryCollectionRef} from "@/firebase/firebaseClient";
 
 if (!admin.apps.length) {
     admin.initializeApp({
@@ -52,8 +54,11 @@ export const getItemById = async (itemId: string) => {
     if(!itemDoc.exists){
         return null;
     }
+    const itemDate = itemDoc.data();
     return {
-        ...itemDoc.data()
+        ...itemDate,
+        createdAt: itemDate?.createdAt.toDate(),
+        updatedAt: itemDate?.updatedAt.toDate(),
     } as Item;
 }
 export const updateOrder = async (order: Order) => {
@@ -64,10 +69,31 @@ export const updateOrder = async (order: Order) => {
             updatedAt: admin.firestore.Timestamp.now(),
         },
         updatedAt: admin.firestore.Timestamp.now(),
-        createdAt: admin.firestore.Timestamp.fromDate(new Date(order.createdAt._seconds * 1000 + order.createdAt._nanoseconds / 1000000)),
+        createdAt: new Timestamp(order.createdAt.seconds, order.createdAt.nanoseconds)
     }, {merge: true});
 }
-
+export const saveToInventory = async (item: Item) => {
+    await adminFirestore.collection("inventory").doc(item.itemId).set({
+        ...item,
+        updatedAt: admin.firestore.Timestamp.now(),
+        createdAt: admin.firestore.Timestamp.now()
+    }, {merge: true});
+}
+export const updateItem = async (item: Item) => {
+    await adminFirestore.collection("inventory").doc(item.itemId).set({
+        manufacturer: item.manufacturer,
+        name: item.name,
+        sellingPrice: item.sellingPrice,
+        buyingPrice:item.buyingPrice,
+        itemId:item.itemId,
+        brand: item.brand,
+        thumbnail: item.thumbnail,
+        type: item.type,
+        discount: item.discount,
+        variants:item.variants,
+        updatedAt: admin.firestore.Timestamp.now(),
+    }, {merge: true});
+}
 export const verifyIdToken = async (req: any) => {
     const authHeader = req.headers.get("authorization");
 

@@ -6,7 +6,7 @@ import Link from "next/link";
 
 const ItemCard = ({ item, onEdit, onDelete }: { item: Item, onEdit: any, onDelete: any }) => {
     return (
-        <div className="flex flex-col bg-white border border-gray-200 rounded-2xl shadow-lg hover:shadow-xl transition-shadow duration-300 max-w-[90vw] sm:max-w-[48vw] md:max-w-[30vw] lg:max-w-xs overflow-hidden">
+        <div className="flex flex-col bg-white border border-gray-200 rounded-2xl shadow-lg hover:shadow-xl transition-shadow min-w-[18rem] duration-300 max-w-[90vw] sm:max-w-[48vw] md:max-w-[30vw] lg:max-w-xs overflow-hidden">
             <Link href={`/adminPanel/inventory/${item.itemId}`} className="w-full block group">
                 <div className="relative w-full h-64 overflow-hidden">
                     <Image
