@@ -12,7 +12,7 @@ export const brands = [
     {
         id: 4,
         name: "New Balance",
-        value: "new-balance"
+        value: "new balance"
     },
     {
         id: 5,
@@ -22,7 +22,7 @@ export const brands = [
     {
         id: 6,
         name: "Luvion Vuitton",
-        value: "luvion-vuitton"
+        value: "luvion vuitton"
     },
     {
         id: 7,
