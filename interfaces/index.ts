@@ -11,15 +11,18 @@ export interface Item {
     itemId: string,
     type: string,
     brand: string,
-    thumbnail: string,
+    thumbnail: {
+        file: File | string,
+        url: string,
+    },
     variants: Variant[],
     manufacturer: string,
     name: string,
     buyingPrice: number,
     sellingPrice: number,
     discount: number,
-    createdAt: Timestamp,
-    updatedAt: Timestamp,
+    createdAt: Timestamp | null,
+    updatedAt: Timestamp | null,
 }
 
 export interface Size {

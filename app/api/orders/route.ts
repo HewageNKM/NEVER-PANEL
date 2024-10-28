@@ -4,7 +4,15 @@ import {getOrders, saveToInventory, verifyIdToken} from "@/firebase/firebaseAdmi
 export const GET = async (req: Request) => {
     try {
         // Verify the ID token
-        await verifyIdToken(req);
+        const res = await verifyIdToken(req);
+        if (res.status == 401) {
+            return NextResponse.json({message: 'Unauthorized'}, {status: 401})
+        }
+        const uid = new URL(req.url).searchParams.get("uid");
+
+        if(!uid){
+            return NextResponse.json("UID Not Provided", {status:401})
+        }
 
         // Get the URL and parse the query parameters
         const url = new URL(req.url);

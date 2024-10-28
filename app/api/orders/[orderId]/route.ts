@@ -4,29 +4,39 @@ import {NextResponse} from "next/server";
 export const PUT = async (req: Request) => {
     try {
         // Verify the ID token
-        await verifyIdToken(req);
+        const res = await verifyIdToken(req);
+        if (res.status == 401) {
+            return NextResponse.json({message: 'Unauthorized'}, {status: 401})
+        }
+        const uid = new URL(req.url).searchParams.get("uid");
+
+        if(!uid){
+            return NextResponse.json("UID Not Provided", {status:401})
+        }
 
         const body = await req.json();
-        const result = await updateOrder(body);
-        console.log(result);
-
-        // Return a response with the
-        if (!result) {
-            return NextResponse.json({message: 'Error updating order'}, {status: 500});
-        }
+        await updateOrder(body);
 
         return NextResponse.json({message: 'Order updated successfully'});
     } catch (error: any) {
         console.error(error);
         // Return a response with error message
-        return NextResponse.json({message: 'Error fetching orders', error: error.message}, {status: 500});
+        return NextResponse.json({message:error.message}, {status: 500});
     }
 };
 export const GET = async (req: Request) => {
     try {
-        // Verify the ID token
-        await verifyIdToken(req);
-        // Get the URL and parse the query parameters
+
+        const res = await verifyIdToken(req);
+        if (res.status == 401) {
+            return NextResponse.json({message: 'Unauthorized'}, {status: 401})
+        }
+        const uid = new URL(req.url).searchParams.get("uid");
+
+        if(!uid){
+            return NextResponse.json("UID Not Provided", {status:401})
+        }
+
         const url = new URL(req.url);
         const orderId = url.pathname.split('/')[3];
 
@@ -40,6 +50,6 @@ export const GET = async (req: Request) => {
     } catch (error: any) {
         console.error(error);
         // Return a response with error message
-        return NextResponse.json({message: 'Error fetching orders', error: error.message}, {status: 500});
+        return NextResponse.json({message:error.message}, {status: 500});
     }
 }

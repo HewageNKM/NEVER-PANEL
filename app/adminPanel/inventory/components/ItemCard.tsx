@@ -10,7 +10,7 @@ const ItemCard = ({ item, onEdit, onDelete }: { item: Item, onEdit: any, onDelet
             <Link href={`/adminPanel/inventory/${item.itemId}`} className="w-full block group">
                 <div className="relative w-full h-64 overflow-hidden">
                     <Image
-                        src={item.thumbnail}
+                        src={item.thumbnail.url}
                         alt={item.name}
                         layout="fill"
                         objectFit="cover"
@@ -23,6 +23,14 @@ const ItemCard = ({ item, onEdit, onDelete }: { item: Item, onEdit: any, onDelet
                 <p className="text-gray-600 text-sm font-medium truncate">Manufacturer: {item.manufacturer.toUpperCase()}</p>
                 <p className="text-gray-600 text-sm font-medium truncate">Brand: {item.brand.toUpperCase()}</p>
                 <p className="text-gray-700 text-sm font-medium truncate">Name: {item.name}</p>
+                <p className="text-yellow-500 font-semibold text-sm">Buying Price: LKR {item.buyingPrice}</p>
+                <p className="text-green-600 font-semibold text-sm">Selling Price: LKR {item.sellingPrice}</p>
+                <p className="text-gray-500 text-xs">
+                    Created At: {item.createdAt ? item.createdAt : "N/A"}
+                </p>
+                <p className="text-gray-500 text-xs">
+                    Updated At: {item.updatedAt ? item.updatedAt : "N/A"}
+                </p>
             </div>
             <div className="flex items-center justify-between px-4 pb-4">
                 <p className="text-blue-500 font-semibold text-sm">{item.variants.length} Colors</p>
