@@ -29,11 +29,15 @@ const ItemForm = ({selectedItem, setSelectedItem, setShowForm}: {
             const manufacturer: string = evt.target.manufacturer.value;
             const brand: string = evt.target.brand.value;
             const name: string = evt.target.name.value;
-            const buyingPrice: number = evt.currentTarget.buyingPrice.value;
-            const sellingPrice: number = evt.target.sellingPrice.value;
-            const discount: number = evt.target.discount.value;
+            const buyingPrice: number = Number.parseInt(evt.currentTarget.buyingPrice.value);
+            const sellingPrice: number = Number.parseInt(evt.target.sellingPrice.value);
+            const discount: number = Number.parseInt(evt.target.discount.value);
             const itemId = selectedItem.itemId || generateId("item", manufacturer.toString().substring(0, 3)).toLowerCase()
 
+            if(!selectedThumbnail){
+                setToast("Please select a thumbnail", "Error")
+                return;
+            }
             const response = await uploadThumbnail(itemId);
             if (response.status != 200) {
                 return;
