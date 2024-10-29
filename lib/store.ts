@@ -3,6 +3,7 @@ import toastSlice from "@/lib/toastSlice/toastSlice";
 import authSlice from "@/lib/userSlice/userSlice";
 import pageLoaderSlice from "@/lib/pageLoaderSlice/pageLoaderSlice";
 import orderSlice from "@/lib/orderSlice/orderSlice";
+import inventorySlice from "@/lib/inventorySlice/inventorySlice";
 
 export const makeStore = () => {
     return configureStore({
@@ -10,7 +11,8 @@ export const makeStore = () => {
             toastSlice,
             authSlice,
             pageLoaderSlice,
-            orderSlice
+            orderSlice,
+            inventorySlice
         },
     })
 }

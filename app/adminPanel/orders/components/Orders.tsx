@@ -140,21 +140,14 @@ const Orders = () => {
                 </table>
                 <div className="w-full justify-center items-center">
                     <div className="flex flex-row gap-5 justify-center">
-                        <button className="disabled:cursor-not-allowed disabled:opacity-60" disabled={page <= 1}
-                                onClick={() => {
-                                    if (page > 1) {
-                                        dispatch(setPage(page - 1));
-                                    } else {
-                                        dispatch(setPage(1));
-                                    }
-                                }}>
-                            <IoArrowBack size={23}/>
+                        <button onClick={() => dispatch(setPage(page - 1))} disabled={page === 1}
+                                className="bg-primary-100 text-white px-4 py-2 rounded-lg">
+                            <IoArrowBack size={20}/>
                         </button>
-                        <p className="text-2xl font-bold">{page}</p>
-                        <button onClick={() => {
-                            dispatch(setPage(page + 1));
-                        }}>
-                            <IoArrowForward size={23}/>
+                        <span className="text-lg font-semibold">{page}</span>
+                        <button onClick={() => dispatch(setPage(page + 1))}
+                                className="bg-primary-100 text-white px-4 py-2 rounded-lg">
+                            <IoArrowForward size={20}/>
                         </button>
                     </div>
                 </div>
