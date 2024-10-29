@@ -29,10 +29,10 @@ const inventorySlice = createSlice({
             state.inventory = action.payload;
         },
         setLoading: (state, action) => {
-            state.loading = action.payload.loading;
+            state.loading = action.payload;
         },
         setPage: (state, action) => {
-            state.page = action.payload.page;
+            state.page = action.payload;
         },
         setSize: (state, action) => {
             state.size = action.payload;
