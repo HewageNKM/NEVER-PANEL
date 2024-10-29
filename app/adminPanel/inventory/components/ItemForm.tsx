@@ -11,6 +11,7 @@ import {getCurrentUser} from "@/firebase/firebaseClient";
 import {useDispatch} from "react-redux";
 import {AppDispatch} from "@/lib/store";
 import {showToast} from "@/lib/toastSlice/toastSlice";
+import Loading from "@/components/Loading";
 
 const ItemForm = ({selectedItem, setSelectedItem, setShowForm}: {
     selectedItem: Item,
@@ -27,7 +28,7 @@ const ItemForm = ({selectedItem, setSelectedItem, setShowForm}: {
             setLoading(true)
             const type: string = evt.target.type.value;
             const manufacturer: string = evt.target.manufacturer.value;
-            const brand: string = evt.target.brand.value;
+            const brand: string = evt.target.brand.value.toLowerCase();
             const name: string = evt.target.name.value;
             const buyingPrice: number = Number.parseInt(evt.currentTarget.buyingPrice.value);
             const sellingPrice: number = Number.parseInt(evt.target.sellingPrice.value);
@@ -289,15 +290,8 @@ const ItemForm = ({selectedItem, setSelectedItem, setShowForm}: {
                         <IoClose size={24} color="gray"/>
                     </button>
                 </div>
-                {loading && (
-                    <div
-                        className="absolute top-0 left-0 w-full h-full bg-black bg-opacity-50 z-50 flex justify-center items-center">
-                        <div className="bg-white p-4 rounded-lg shadow-lg">
-                            <h1 className="text-xl animate-pulse font-bold">Loading...</h1>
-                        </div>
-                    </div>
-                )}
             </div>
+            {loading && (<Loading />)}
         </DropShadow>
     );
 };

@@ -6,7 +6,7 @@ import {IoClose} from "react-icons/io5";
 import {paymentStatus} from "@/constant";
 import axios from "axios";
 import {useDispatch, useSelector} from "react-redux";
-import {getToken} from "@/firebase/firebaseClient";
+import {getCurrentUser, getToken} from "@/firebase/firebaseClient";
 import {sortOrders} from "@/lib/orderSlice/orderSlice";
 import {AppDispatch, RootState} from "@/lib/store";
 
@@ -28,12 +28,13 @@ const PaymentStatusView = ({order, setShowPaymentView, setSelectedOrder}: {
                 paymentStatus: status
             }
             const token = await getToken();
+            const uid = getCurrentUser()?.uid;
             const res = await axios({
                 method: 'PUT',
                 headers: {
                     Authorization: `Bearer ${token}`
                 },
-                url: `/api/orders/${order.orderId}`,
+                url: `/api/orders/${order.orderId}?uid=${uid}`,
                 data: newOrder
             });
             if (res.status === 200) {

@@ -238,3 +238,20 @@ export const deleteFiles = async (path: string) => {
         throw new Error(error.message);
     }
 };
+
+export const deleteItemById = async (itemId: string) => {
+    try {
+        // Delete all files in the directory and subdirectories
+        const [files] = await adminStorageBucket.getFiles({ prefix: `inventory/${itemId}/` });
+
+        const deletePromises = files.map(file => file.delete());
+        await Promise.all(deletePromises);
+
+        // Delete Firestore document
+        await adminFirestore.collection('inventory').doc(itemId).delete();
+        console.log(`Item with ID ${itemId} and associated files deleted successfully`);
+    } catch (error: any) {
+        console.error(`Error deleting item with ID ${itemId}:`, error);
+        throw new Error(error.message);
+    }
+};

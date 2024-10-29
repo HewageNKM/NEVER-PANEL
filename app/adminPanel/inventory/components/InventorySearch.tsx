@@ -5,24 +5,23 @@ import {useEffect} from "react";
 import {algoliasearch} from "algoliasearch";
 import {useDispatch} from "react-redux";
 import {AppDispatch} from "@/lib/store";
-import {setOrders} from "@/lib/orderSlice/orderSlice";
-import {Order} from "@/interfaces";
+import {Item} from "@/interfaces";
+import {setItems, setLoading} from "@/lib/inventorySlice/inventorySlice";
 
 function OrderSearch() {
     // Initialize Algolia
-    const ordersSearchClient = algoliasearch(process.env.NEXT_PUBLIC_ALGOLIA_APP_ID, process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY);
-    const dispatch: AppDispatch = useDispatch();
-
-    // Dispatch action to get order details
-    const setOrder = (order:Order) => {
-        dispatch(setOrders([order]));
-    };
-
+    // @ts-ignore
+    const dispatch:AppDispatch = useDispatch();
+    const inventorySearch = algoliasearch(process.env.NEXT_PUBLIC_ALGOLIA_APP_ID, process.env.NEXT_PUBLIC_ALGOLIA_SEARCH_API_KEY);
+    const setItem = (item:Item) => {
+        dispatch(setLoading(true))
+        dispatch(setItems([item]));
+    }
     useEffect(() => {
         // Create the autocomplete instance
         const searchInstance = autocomplete({
             container: '#autocomplete',
-            placeholder: 'Search for orders...',
+            placeholder: 'Search for items...',
             openOnFocus: true,
             insights: true,
             getSources({query}) {
@@ -31,13 +30,13 @@ function OrderSearch() {
                 }
                 return [
                     {
-                        sourceId: 'orders',
+                        sourceId: 'inventory',
                         getItems() {
                             return getAlgoliaResults({
-                                searchClient: ordersSearchClient,
+                                searchClient: inventorySearch,
                                 queries: [
                                     {
-                                        indexName: 'orders_index',
+                                        indexName: "inventory_index",
                                         query,
                                         params: {
                                             hitsPerPage: 5,
@@ -50,23 +49,18 @@ function OrderSearch() {
                             item({item, html, components}) {
                                 return html`
                                     <div class="p-4 border-b border-gray-200 flex flex-col space-y-2 cursor-pointer"
-                                         onclick="${() => setOrder(item)}">
-                                        <p class="text-sm font-semibold text-gray-800">
-                                            Order ID: ${components.Highlight({hit: item, attribute: 'orderId'})}
+                                         onclick="${() =>setItem(item)}">
+                                        <p class="text-sm font-semibold uppercase text-gray-800">
+                                            Item ID: ${components.Highlight({ hit: item, attribute: 'itemId' })}
+                                        </p>
+                                        <p class="text-sm text-gray-600 capitalize">
+                                            Manufacturer: ${components.Highlight({hit: item, attribute: 'manufacturer'})}
+                                        </p>
+                                        <p class="text-sm capitalize text-gray-600">
+                                            Brand: ${item.brand}
                                         </p>
                                         <p class="text-sm text-gray-600">
-                                            Customer Name: ${item.customer.name}
-                                        </p>
-                                        <p class="text-sm text-gray-600">
-                                            Address: ${item.customer.address}
-                                        </p>
-                                        <p class="text-sm text-gray-600">
-                                            Payment Method:
-                                            ${components.Highlight({hit: item, attribute: 'paymentMethod'})}
-                                        </p>
-                                        <p class="text-sm text-gray-600">
-                                            Payment Status:
-                                            ${components.Highlight({hit: item, attribute: 'paymentStatus'})}
+                                            Name: ${components.Highlight({hit: item, attribute: 'name'})}
                                         </p>
                                     </div>
                                 `;
@@ -87,7 +81,7 @@ function OrderSearch() {
         return () => {
             searchInstance.destroy();
         };
-    }, [ordersSearchClient, dispatch]); // Added dependencies for useEffect
+    }, [inventorySearch]); // Added dependencies for useEffect
 
     return <div id="autocomplete"></div>;
 }

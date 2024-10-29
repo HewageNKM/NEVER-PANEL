@@ -7,7 +7,7 @@ import TrackingForm from "@/app/adminPanel/orders/components/TrackingForm";
 import OrderStatus from "@/app/adminPanel/orders/components/OrderStatus";
 import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch, RootState} from "@/lib/store";
-import {getToken} from "@/firebase/firebaseClient";
+import {getCurrentUser, getToken} from "@/firebase/firebaseClient";
 import axios from "axios";
 import {orderStatus} from "@/constant";
 import {sortOrders} from "@/lib/orderSlice/orderSlice";
@@ -61,9 +61,10 @@ const OrderStatusView = ({order, setShowOrderStatusView, setOrder}: {
         setLoading(true);
         try {
             const token = await getToken();
+            const uid = getCurrentUser()?.uid;
             const response = await axios({
                 method: 'PUT',
-                url: `/api/orders/${newOrder.orderId}`,
+                url: `/api/orders/${newOrder.orderId}?uid=${uid}`,
                 data: JSON.stringify(newOrder),
                 headers: {
                     "Authorization": `Bearer ${token}`
@@ -97,9 +98,10 @@ const OrderStatusView = ({order, setShowOrderStatusView, setOrder}: {
         }
         try {
             const token = await getToken();
+            const uid = getCurrentUser()?.uid;
             const response = await axios({
                 method: 'PUT',
-                url: `/api/orders/${newOrder.orderId}`,
+                url: `/api/orders/${newOrder.orderId}?uid=${uid}`,
                 data: JSON.stringify(newOrder),
                 headers: {
                     "Authorization": `Bearer ${token}`
