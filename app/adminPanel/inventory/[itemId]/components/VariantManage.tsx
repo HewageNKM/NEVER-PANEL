@@ -6,7 +6,7 @@ import VariantCard from "@/app/adminPanel/inventory/[itemId]/components/VariantC
 import VariantForm from "@/app/adminPanel/inventory/[itemId]/components/VariantForm";
 import {Item, Variant} from "@/interfaces";
 import {useDispatch} from "react-redux";
-import {deleteFilesFromStorage, getToken} from "@/firebase/firebaseClient";
+import {getToken} from "@/firebase/firebaseClient";
 import {hideLoader, showLoader} from "@/lib/pageLoaderSlice/pageLoaderSlice";
 import {showToast} from "@/lib/toastSlice/toastSlice";
 import EmptyState from "@/components/EmptyState";
@@ -25,7 +25,7 @@ const VariantManage = ({it}: { it: Item }) => {
             try {
                 dispatch(showLoader());
                 const updatedVariants = item.variants.filter(variant => variant.variantId !== variantId);
-                await deleteFilesFromStorage(`inventory/${item.itemId}/${variantId}`)
+                // ToDO delete variant images
                 const token = await getToken()
 
                 const newItem: Item = {
@@ -66,7 +66,7 @@ const VariantManage = ({it}: { it: Item }) => {
             <div className="flex pt-10 flex-row gap-16 px-2 md:gap-16 lg:gap-32 justify-center items-center flex-wrap">
                 <div className="w-full md:w-[25rem] h-[25rem]">
                     <Image
-                        src={item?.thumbnail}
+                        src={item?.thumbnail.url}
                         alt={item?.name}
                         width={300}
                         height={300}
@@ -78,6 +78,10 @@ const VariantManage = ({it}: { it: Item }) => {
                     <p>Manufacture: {item?.manufacturer}</p>
                     <p>Brand: {item?.brand}</p>
                     <p>Name: {item?.name}</p>
+                    <p className="text-yellow-400">Buying Price: LKR {item.buyingPrice}</p>
+                    <p className="text-green-400">Selling Price: LKR {item.sellingPrice}</p>
+                    <p >CreatedAt: {new Date(item.createdAt).toLocaleString()}</p>
+                    <p >UpdatedAt: {new Date(item.updatedAt).toLocaleString()}</p>
                     <p className="text-blue-500">{item?.variants.length} Variants</p>
                     <button
                         onClick={() => setAddVariantForm(true)}
