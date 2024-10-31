@@ -7,7 +7,7 @@ import {AppDispatch} from "@/lib/store";
 import {showToast} from "@/lib/toastSlice/toastSlice";
 import {Item, Variant} from "@/interfaces";
 import {accessoriesSizesList, shoeSizesList} from "@/constant";
-import {getToken, uploadImages} from "@/firebase/firebaseClient";
+import {getCurrentUser, getToken, uploadImages} from "@/firebase/firebaseClient";
 import {generateId} from "@/utils/genarateIds";
 import {hideLoader, showLoader} from "@/lib/pageLoaderSlice/pageLoaderSlice";
 import axios from "axios";
@@ -78,9 +78,31 @@ const VariantForm = ({
 
         dispatch(showLoader())
         if (variant == null) {
+            let uploadedImagesUrls = []
             try {
                 const id = generateId("variant", "").toLowerCase();
-                const uploadedImagesUrls = await uploadImages(images, `inventory/${item.itemId}/${id}`);
+                const token = await getCurrentUser()?.getIdToken();
+                const uid = getCurrentUser()?.uid;
+                const path = `inventory/${item.itemId}/${id}`
+                for (let image of images) {
+                    const formData = new FormData();
+                    formData.set('file', image.file);
+                    formData.set('path', path)
+                    const response = await axios({
+                        method: 'POST',
+                        url: '/api/storage?uid=' + uid,
+                        headers:{
+                            Authorization: `Bearer ${token}`,
+                            "Content-Type": "multipart/form-data"
+                        },
+                        data: formData
+                    });
+
+                    if(response.status !== 200){
+                        throw new Error("An error occurred while uploading images")
+                    }
+                    uploadedImagesUrls.push(response.data)
+                }
                 const newVariant: Variant = {
                     variantId: id,
                     variantName: variantName.toLowerCase(),
@@ -89,7 +111,7 @@ const VariantForm = ({
                 }
                 item.variants.push(newVariant)
                 setItem(item)
-                await saveItem("VariantManage added successfully","save")
+                await saveItem("VariantManage added successfully", "save")
             } catch (e: any) {
                 showDisplayMessage("Error", e.message)
             } finally {
@@ -104,7 +126,7 @@ const VariantForm = ({
                 filter.push(variant)
                 item.variants = filter
                 setItem(item)
-                await saveItem("VariantManage updated successfully","update")
+                await saveItem("VariantManage updated successfully", "update")
             } catch (e: any) {
                 showDisplayMessage("Error", e.message)
             } finally {
@@ -116,12 +138,13 @@ const VariantForm = ({
         setAddVariantForm(false)
     }
 
-    const saveItem = async (msg: string, type:string) => {
-        const token = await getToken()
-        if(type == "save"){
+    const saveItem = async (msg: string, type: string) => {
+        const token = await getCurrentUser()?.getIdToken();
+        const uid = getCurrentUser()?.uid;
+        if (type == "save") {
             const res = await axios({
                 method: 'POST',
-                url: '/api/inventory',
+                url: '/api/inventory?uid=' + uid,
                 headers: {
                     Authorization: `Bearer ${token}`
                 },
@@ -132,10 +155,10 @@ const VariantForm = ({
                 return;
             }
             showDisplayMessage("Success", msg)
-        }else if(type == "update"){
+        } else if (type == "update") {
             const res = await axios({
                 method: 'PUT',
-                url: '/api/inventory/'+item.itemId,
+                url: '/api/inventory/' + item.itemId+"?uid="+uid,
                 headers: {
                     Authorization: `Bearer ${token}`
                 },
@@ -330,7 +353,7 @@ const VariantForm = ({
                         <button type="submit"
                                 className="bg-primary-100 md:text-lg text-[.9rem] text-white flex flex-row justify-center items-center h-[2.8rem] px-3 py-1 rounded hover:bg-primary-200">
                             <IoAdd size={30}/>
-                            Add VariantManage
+                            Add Variant
                         </button>
                     </div>
                 </form>

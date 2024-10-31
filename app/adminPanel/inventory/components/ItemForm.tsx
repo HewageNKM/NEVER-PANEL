@@ -55,7 +55,7 @@ const ItemForm = ({selectedItem, setSelectedItem, setShowForm}: {
                 sellingPrice,
                 thumbnail: response.data,
                 type,
-                variants: [],
+                variants: selectedItem.variants || [],
                 createdAt: null,
                 updatedAt: null
             }
