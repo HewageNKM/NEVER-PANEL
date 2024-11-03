@@ -1,9 +1,8 @@
-import admin, { credential } from 'firebase-admin';
-import { Item, Order } from "@/interfaces";
-import { NextResponse } from "next/server";
-import { paymentMethods, paymentStatus } from "@/constant";
-import { Timestamp } from "@firebase/firestore";
-import { uuidv4 } from "@firebase/util";
+import admin, {credential} from 'firebase-admin';
+import {Item, Order} from "@/interfaces";
+import {NextResponse} from "next/server";
+import {paymentMethods, paymentStatus} from "@/constant";
+import {uuidv4} from "@firebase/util";
 
 // Initialize Firebase Admin if not already initialized
 if (!admin.apps.length) {
@@ -13,8 +12,6 @@ if (!admin.apps.length) {
             privateKey: process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(/\\n/g, '\n'),
             clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
         }),
-        databaseURL: process.env.FIREBASE_DATABASE_URL,
-        storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
     });
 }
 
@@ -46,7 +43,7 @@ export const getOrders = async (pageNumber: number = 1, size: number = 20) => {
         console.log(`Fetched ${orders.length} orders on page ${pageNumber}`);
         return orders;
 
-    } catch (error:any) {
+    } catch (error: any) {
         console.error(error);
         throw new Error(error.message);
     }
@@ -76,7 +73,7 @@ export const getInventoryItems = async (pageNumber: number = 1, size: number = 2
         console.log(`Fetched ${items.length} inventory items on page ${pageNumber}`);
         return items;
 
-    } catch (error:any) {
+    } catch (error: any) {
         console.error(error);
         throw new Error(error.message);
     }
@@ -92,7 +89,7 @@ export const getOrder = async (orderId: string) => {
         }
         return orderDoc.data() as Order;
 
-    } catch (error:any) {
+    } catch (error: any) {
         console.error(error);
         throw new Error(error.message);
     }
@@ -114,7 +111,7 @@ export const getItemById = async (itemId: string) => {
             updatedAt: itemData?.updatedAt.toDate(),
         } as Item;
 
-    } catch (error:any) {
+    } catch (error: any) {
         console.error(error);
         throw new Error(error.message);
     }
@@ -122,19 +119,28 @@ export const getItemById = async (itemId: string) => {
 
 // Update an order, updating timestamps and nested tracking info
 export const updateOrder = async (order: Order) => {
+    const updatedOrder: Order = {
+        customer: order.customer,
+        items: order.items,
+        orderId: order.orderId,
+        paymentId: order.paymentId,
+        paymentMethod: order.paymentMethod,
+        paymentStatus: order.paymentStatus,
+        shippingCost: order.shippingCost,
+        tracking: {
+            ...order.tracking,
+            updatedAt: admin.firestore.Timestamp.now(),
+        },
+        updatedAt: admin.firestore.Timestamp.now(),
+    }
+
     try {
         await adminFirestore.collection('orders').doc(order.orderId).set({
-            ...order,
-            tracking: {
-                ...order.tracking,
-                updatedAt: admin.firestore.Timestamp.now(),
-            },
-            updatedAt: admin.firestore.Timestamp.now(),
-            createdAt: new Timestamp(order.createdAt.seconds, order.createdAt.nanoseconds)
-        }, { merge: true });
+            ...updatedOrder,
+        }, {merge: true});
 
         console.log(`Order with ID ${order.orderId} updated successfully`);
-    } catch (error:any) {
+    } catch (error: any) {
         console.error(`Error updating order with ID ${order.orderId}:`, error);
         throw new Error(error.message);
     }
@@ -147,10 +153,10 @@ export const saveToInventory = async (item: Item) => {
             ...item,
             updatedAt: admin.firestore.Timestamp.now(),
             createdAt: admin.firestore.Timestamp.now(),
-        }, { merge: true });
+        }, {merge: true});
 
         console.log(`Item with ID ${item.itemId} saved to inventory`);
-    } catch (error:any) {
+    } catch (error: any) {
         console.error(error);
         throw new Error(error.message);
     }
@@ -171,10 +177,10 @@ export const updateItem = async (item: Item) => {
             discount: item.discount,
             variants: item.variants,
             updatedAt: admin.firestore.Timestamp.now(),
-        }, { merge: true });
+        }, {merge: true});
 
         console.log(`Item with ID ${item.itemId} updated in inventory`);
-    } catch (error:any) {
+    } catch (error: any) {
         console.error(error);
         throw new Error(error.message);
     }
@@ -188,12 +194,12 @@ export const verifyIdToken = async (req: any) => {
 
         if (!token) {
             console.warn("Authorization token missing");
-            return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+            return NextResponse.json({message: 'Unauthorized'}, {status: 401});
         }
 
         return await adminAuth.verifyIdToken(token);
 
-    } catch (error:any) {
+    } catch (error: any) {
         console.error(error);
         throw new Error(error.message);
     }
@@ -222,7 +228,7 @@ export const uploadFile = async (file: File, path: string) => {
             url: `https://storage.googleapis.com/${adminStorageBucket.name}/${fileRef.name}`,
         };
 
-    } catch (error:any) {
+    } catch (error: any) {
         console.error(error);
         throw new Error(error.message);
     }
@@ -233,7 +239,7 @@ export const deleteFiles = async (path: string) => {
     try {
         await adminStorageBucket.file(path).delete();
         console.log(`File at ${path} deleted successfully`);
-    } catch (error:any) {
+    } catch (error: any) {
         console.error(error);
         throw new Error(error.message);
     }
@@ -242,7 +248,7 @@ export const deleteFiles = async (path: string) => {
 export const deleteItemById = async (itemId: string) => {
     try {
         // Delete all files in the directory and subdirectories
-        const [files] = await adminStorageBucket.getFiles({ prefix: `inventory/${itemId}/` });
+        const [files] = await adminStorageBucket.getFiles({prefix: `inventory/${itemId}/`});
 
         const deletePromises = files.map(file => file.delete());
         await Promise.all(deletePromises);

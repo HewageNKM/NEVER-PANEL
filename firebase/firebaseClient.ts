@@ -26,11 +26,9 @@ const config = {
 const app = initializeApp(config);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
-export const storage = getStorage(app);
 
 // Firestore collection references
 export const usersCollectionRef = collection(db, "users");
-export const inventoryCollectionRef = collection(db, "inventory");
 
 
 export const logUser = async (email: string, password: string) => {

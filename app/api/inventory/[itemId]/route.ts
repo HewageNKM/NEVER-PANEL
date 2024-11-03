@@ -15,6 +15,7 @@ export const PUT = async (req: Request) => {
         }
 
         const body = await req.json();
+        console.log(body)
         await updateItem(body);
         return NextResponse.json({message: 'Item saved successfully'}, {status: 200});
     } catch (error: any) {
