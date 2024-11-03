@@ -129,5 +129,5 @@ const InventoryManage = ({it}: { it: Item[] }) => {
         </>
     );
 };
-
+export const dynamic = 'force-dynamic'
 export default InventoryManage;

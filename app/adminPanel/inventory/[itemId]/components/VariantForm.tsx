@@ -7,7 +7,7 @@ import {AppDispatch} from "@/lib/store";
 import {showToast} from "@/lib/toastSlice/toastSlice";
 import {Item, Variant} from "@/interfaces";
 import {accessoriesSizesList, shoeSizesList} from "@/constant";
-import {getCurrentUser, getToken, uploadImages} from "@/firebase/firebaseClient";
+import {getCurrentUser} from "@/firebase/firebaseClient";
 import {generateId} from "@/utils/genarateIds";
 import {hideLoader, showLoader} from "@/lib/pageLoaderSlice/pageLoaderSlice";
 import axios from "axios";
@@ -91,14 +91,14 @@ const VariantForm = ({
                     const response = await axios({
                         method: 'POST',
                         url: '/api/storage?uid=' + uid,
-                        headers:{
+                        headers: {
                             Authorization: `Bearer ${token}`,
                             "Content-Type": "multipart/form-data"
                         },
                         data: formData
                     });
 
-                    if(response.status !== 200){
+                    if (response.status !== 200) {
                         throw new Error("An error occurred while uploading images")
                     }
                     uploadedImagesUrls.push(response.data)
@@ -158,7 +158,7 @@ const VariantForm = ({
         } else if (type == "update") {
             const res = await axios({
                 method: 'PUT',
-                url: '/api/inventory/' + item.itemId+"?uid="+uid,
+                url: '/api/inventory/' + item.itemId + "?uid=" + uid,
                 headers: {
                     Authorization: `Bearer ${token}`
                 },
