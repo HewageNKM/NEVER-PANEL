@@ -1,17 +1,13 @@
 import { NextResponse } from "next/server";
 import {getOrders, saveToInventory, verifyIdToken} from "@/firebase/firebaseAdmin";
+import {authorizeRequest} from "@/lib/middleware";
 
 export const GET = async (req: Request) => {
     try {
         // Verify the ID token
-        const res = await verifyIdToken(req);
-        if (res.status == 401) {
-            return NextResponse.json({message: 'Unauthorized'}, {status: 401})
-        }
-        const uid = new URL(req.url).searchParams.get("uid");
-
-        if(!uid){
-            return NextResponse.json("UID Not Provided", {status:401})
+        const response = authorizeRequest(req);
+        if (!response) {
+            return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
         }
 
         // Get the URL and parse the query parameters
@@ -30,4 +26,4 @@ export const GET = async (req: Request) => {
         return NextResponse.json({ message: 'Error fetching orders', error: error.message }, { status: 500 });
     }
 };
-
+export const dynamic = 'force-dynamic';

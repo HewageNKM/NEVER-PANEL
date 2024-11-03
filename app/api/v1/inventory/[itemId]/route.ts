@@ -1,17 +1,13 @@
-import {deleteItemById, updateItem, verifyIdToken} from "@/firebase/firebaseAdmin";
+import {deleteItemById, updateItem} from "@/firebase/firebaseAdmin";
 import {NextResponse} from "next/server";
+import {authorizeRequest} from "@/lib/middleware";
 
 export const PUT = async (req: Request) => {
     try {
         // Verify the ID token
-        const res = await verifyIdToken(req);
-        if (res.status == 401) {
-            return NextResponse.json({message: 'Unauthorized'}, {status: 401})
-        }
-        const uid = new URL(req.url).searchParams.get("uid");
-
-        if(!uid){
-            return NextResponse.json("UID Not Provided", {status:401})
+        const response = authorizeRequest(req);
+        if (!response) {
+            return NextResponse.json({message: 'Unauthorized'}, {status: 401});
         }
 
         const body = await req.json();
@@ -20,27 +16,22 @@ export const PUT = async (req: Request) => {
         return NextResponse.json({message: 'Item saved successfully'}, {status: 200});
     } catch (error: any) {
         console.error(error);
-        return NextResponse.json({message:error.message}, {status: 500});
+        return NextResponse.json({message: error.message}, {status: 500});
     }
 };
 
 export const DELETE = async (req: Request) => {
     try {
         // Verify the ID token
-        const res = await verifyIdToken(req);
-        if (res.status == 401) {
-            return NextResponse.json({message: 'Unauthorized'}, {status: 401})
-        }
-
-        const uid = new URL(req.url).searchParams.get("uid");
-        if(!uid){
-            return NextResponse.json("UID Not Provided", {status:401})
+        const response = authorizeRequest(req);
+        if (!response) {
+            return NextResponse.json({message: 'Unauthorized'}, {status: 401});
         }
 
         await deleteItemById(new URL(req.url).pathname.split("/")[3])
         return NextResponse.json({message: 'Item deleted successfully'}, {status: 200});
     } catch (error: any) {
         console.error(error);
-        return NextResponse.json({message:error.message}, {status: 500});
+        return NextResponse.json({message: error.message}, {status: 500});
     }
 };

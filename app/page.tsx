@@ -1,8 +1,8 @@
 "use client";
 import {Box, Card, Grid, Stack, Typography,} from "@mui/material";
 // components
-import PageContainer from "./(DashboardLayout)/components/container/PageContainer";
-import Logo from "./(DashboardLayout)/layout/shared/logo/Logo";
+import PageContainer from "@/app/dashboard/components/container/PageContainer";
+import Logo from "@/app/dashboard/layout/shared/logo/Logo";
 import AuthLogin from "./components/AuthLogin";
 import {authenticateUser} from "@/actions/authAction";
 import {useAppDispatch} from "@/lib/hooks";
