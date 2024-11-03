@@ -261,3 +261,17 @@ export const deleteItemById = async (itemId: string) => {
         throw new Error(error.message);
     }
 };
+
+export const getUserById = async (userId: string) => {
+    try {
+        const user = await adminFirestore.collection('users').doc(userId).get();
+        if (!user.exists) {
+            console.warn(`User with ID ${userId} not found`);
+            return null;
+        }
+        return user.data();
+    } catch (error: any) {
+        console.error(error);
+        throw new Error(error.message);
+    }
+}

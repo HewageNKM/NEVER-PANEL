@@ -1,18 +1,10 @@
 import {configureStore} from '@reduxjs/toolkit'
-import toastSlice from "@/lib/toastSlice/toastSlice";
-import authSlice from "@/lib/userSlice/userSlice";
-import pageLoaderSlice from "@/lib/pageLoaderSlice/pageLoaderSlice";
-import orderSlice from "@/lib/orderSlice/orderSlice";
-import inventorySlice from "@/lib/inventorySlice/inventorySlice";
+import loadSlice from './loadSlice/loadSlice'
 
 export const makeStore = () => {
     return configureStore({
         reducer: {
-            toastSlice,
-            authSlice,
-            pageLoaderSlice,
-            orderSlice,
-            inventorySlice
+            loadSlice
         },
     })
 }
