@@ -1,7 +1,7 @@
 "use client";
 import React, {useState} from 'react';
 import {Customer, Order, OrderItem} from "@/interfaces";
-import {IoArrowBack, IoArrowForward, IoEye, IoPencil} from "react-icons/io5";
+import {IoEye, IoPencil} from "react-icons/io5";
 import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch, RootState} from "@/lib/store";
 import {setPage} from "@/lib/orderSlice/orderSlice";
