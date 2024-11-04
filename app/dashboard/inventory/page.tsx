@@ -5,9 +5,9 @@ import DashboardCard from '../components/shared/DashboardCard';
 
 const Icons = () => {
   return (
-    <PageContainer title="Icons" description="this is Icons">
+    <PageContainer title="Inventoary" description="Products Management">
 
-      <DashboardCard title="Icons">
+      <DashboardCard title="Inventoary Page">
       <iframe src="https://tabler-icons.io/"  title="Inline Frame Example" frameBorder={0}
     width="100%"
     height="650"></iframe>

@@ -7,9 +7,11 @@ import AuthLogin from "./components/AuthLogin";
 import {authenticateUser} from "@/actions/authAction";
 import {useAppDispatch} from "@/lib/hooks";
 import {setError, setLoading} from "@/lib/loadSlice/loadSlice";
+import {useRouter} from "next/navigation";
 
 const Login = () => {
     const dispatch = useAppDispatch();
+    const router = useRouter();
 
     const onFormSubmit = async (evt: any) => {
         evt.preventDefault();
@@ -20,6 +22,7 @@ const Login = () => {
             const credential = await authenticateUser(email, password);
 
             console.log(credential);
+            router.replace("/dashboard");
         } catch (e: any) {
             dispatch(setError({
                 id: new Date().getTime(),

@@ -18,7 +18,7 @@ const lightTheme = createTheme({ palette: { mode: 'light' } });
 
 const Shadow = () => {
   return (
-    <PageContainer title="Shadow" description="this is Shadow">
+    <PageContainer title="Users" description="Users Management">
 
       <DashboardCard title="Shadow">
         <Grid container spacing={2}>
