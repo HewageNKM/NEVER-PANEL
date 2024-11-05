@@ -17,4 +17,19 @@ export const authenticateUser = async (email: string, password: string) => {
     return response.data;
 }
 
+export const checkUser = async () => {
+    const token = await auth.currentUser?.getIdToken();
+    const uid = auth.currentUser?.uid;
+
+    const response = await axios({
+        method: 'GET',
+        url: `/api/v1/users/${uid}?uid=${uid}`,
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    });
+
+    return response.data;
+}
+
 

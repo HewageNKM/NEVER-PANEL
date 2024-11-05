@@ -5,13 +5,17 @@ import PageContainer from "@/app/dashboard/components/container/PageContainer";
 import Logo from "@/app/dashboard/layout/shared/logo/Logo";
 import AuthLogin from "./components/AuthLogin";
 import {authenticateUser} from "@/actions/authAction";
-import {useAppDispatch} from "@/lib/hooks";
+import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import {setError, setLoading} from "@/lib/loadSlice/loadSlice";
 import {useRouter} from "next/navigation";
+import {useEffect} from "react";
+import ComponentsLoader from "@/app/components/ComponentsLoader";
 
 const Login = () => {
     const dispatch = useAppDispatch();
     const router = useRouter();
+
+    const {currentUser, loading} = useAppSelector(state => state.authSlice);
 
     const onFormSubmit = async (evt: any) => {
         evt.preventDefault();
@@ -35,6 +39,11 @@ const Login = () => {
         }
     };
 
+    useEffect(() => {
+        if (!loading && currentUser) {
+            router.replace("/dashboard");
+        }
+    }, [currentUser, loading, router]);
 
     return (
         <PageContainer title="Login" description="this is Login page">
@@ -100,6 +109,7 @@ const Login = () => {
                         </Card>
                     </Grid>
                 </Grid>
+                {loading && <ComponentsLoader title="Loading User"/>}
             </Box>
         </PageContainer>
     );

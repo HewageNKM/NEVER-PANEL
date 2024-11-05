@@ -123,7 +123,14 @@ const MSidebar = ({
                     {/* ------------------------------------------- */}
                     {/* Logo */}
                     {/* ------------------------------------------- */}
-                    <Logo img="/images/logos/dark-logo.svg"/>
+                    <Box  sx={{
+                        mb:3,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                    }}>
+                        <Logo/>
+                    </Box>
                     {/* ------------------------------------------- */}
                     {/* Sidebar Items */}
                     {/* ------------------------------------------- */}
