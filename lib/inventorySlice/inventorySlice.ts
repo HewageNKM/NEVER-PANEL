@@ -7,7 +7,6 @@ interface InventorySlice {
     selectedItem: Item | null;
     selectedSort: string;
     selectedType: string;
-    selectedStock: string;
 }
 
 const initialState: InventorySlice = {
@@ -16,7 +15,6 @@ const initialState: InventorySlice = {
     selectedItem: null,
     selectedSort: "none",
     selectedType: "all",
-    selectedStock: "all"
 }
 
 const inventorySlice = createSlice({
@@ -29,10 +27,6 @@ const inventorySlice = createSlice({
             // Filter by selectedType if it's not set to "all"
             if (state.selectedType !== "all") {
                 items = items.filter(item => item.type === state.selectedType);
-            }
-
-            // Filter by selectedStock if it's not set to "all"
-            if (state.selectedStock !== "all") {
             }
 
             // Sort items if a sort option is selected

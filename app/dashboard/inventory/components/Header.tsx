@@ -1,9 +1,9 @@
 import React from 'react';
 import {Box, Button, MenuItem, Select, TextField, Typography} from "@mui/material";
 import {IoSearch} from "react-icons/io5";
-import {filterInventoryOptions, sortInventoryOptions, types} from "@/constant";
+import {sortInventoryOptions, types} from "@/constant";
 import {useAppDispatch} from "@/lib/hooks";
-import {setSelectedSort, setSelectedStock, setSelectedType} from "@/lib/inventorySlice/inventorySlice";
+import {setSelectedSort, setSelectedType} from "@/lib/inventorySlice/inventorySlice";
 
 const Header = () => {
     const dispatch = useAppDispatch();
@@ -24,7 +24,8 @@ const Header = () => {
                      alignItems="start">
                     <Box display="flex" flexDirection="column" alignItems="start" gap={1}>
                         <Typography variant="body1" color="textSecondary">Type:</Typography>
-                        <Select variant="outlined" size="small" defaultValue="all" onChange={(evt)=>dispatch(setSelectedType(evt.target.value))}>
+                        <Select variant="outlined" size="small" defaultValue="all"
+                                onChange={(evt) => dispatch(setSelectedType(evt.target.value))}>
                             <MenuItem value={"all"} key="all">All</MenuItem>
                             {types.map((option) => (
                                 <MenuItem value={option.value} key={option.value}>{option.name}</MenuItem>
@@ -32,16 +33,9 @@ const Header = () => {
                         </Select>
                     </Box>
                     <Box display="flex" flexDirection="column" alignItems="start" gap={1}>
-                        <Typography variant="body1" color="textSecondary">Stock:</Typography>
-                        <Select variant="outlined" size="small" defaultValue="all" onChange={(evt)=>dispatch(setSelectedStock(evt.target.value))}>
-                            {filterInventoryOptions.map((option) => (
-                                <MenuItem value={option.value} key={option.value}>{option.name}</MenuItem>
-                            ))}
-                        </Select>
-                    </Box>
-                    <Box display="flex" flexDirection="column" alignItems="start" gap={1}>
                         <Typography variant="body1" color="textSecondary">Sort by:</Typography>
-                        <Select variant="outlined" size="small" defaultValue="none" onChange={(evt)=>dispatch(setSelectedSort(evt.target.value))}>
+                        <Select variant="outlined" size="small" defaultValue="none"
+                                onChange={(evt) => dispatch(setSelectedSort(evt.target.value))}>
                             {sortInventoryOptions.map((option) => (
                                 <MenuItem value={option.value} key={option.value}>{option.name}</MenuItem>
                             ))}

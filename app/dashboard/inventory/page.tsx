@@ -17,7 +17,7 @@ import {setItems, setLoading} from '@/lib/inventorySlice/inventorySlice';
 
 const Page = () => {
     const dispatch = useAppDispatch();
-    const {items,loading, selectedType, selectedSort, selectedStock} = useAppSelector(state => state.inventorySlice);
+    const {items,loading, selectedType, selectedSort} = useAppSelector(state => state.inventorySlice);
     const {currentUser,loading:authLoading} = useAppSelector(state => state.authSlice);
 
     const [size, setSize] = useState(20)
@@ -45,7 +45,7 @@ const Page = () => {
         if(!authLoading && currentUser){
             fetchData()
         }
-    }, [size, page, currentUser, selectedType, selectedSort, selectedStock, authLoading, dispatch])
+    }, [size, page, currentUser, selectedType, selectedSort, authLoading, dispatch])
 
     return (
         <PageContainer title="Inventory" description="Products Management">
