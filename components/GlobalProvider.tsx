@@ -22,12 +22,11 @@ const GlobalProvider = ({children}: { children: ReactNode }) => {
             const unsubscribe = onAuthStateChanged(auth, async user => {
                 if (user) {
                     const tableUser = await checkUser();
-                    dispatch(tableUser ? setUser(user) : clearUser());
+                    dispatch(tableUser ? setUser(tableUser) : clearUser());
                 } else {
                     dispatch(clearUser());
                 }
             });
-
             return () => unsubscribe();
         }, [dispatch]);
 

@@ -13,10 +13,8 @@ const EmptyState = ({title, subtitle}: { title: string, subtitle: string }) => {
                 minHeight: 200,
                 textAlign: 'center',
                 color: 'text.secondary',
-                bgcolor: 'background.paper',
                 borderRadius: 2,
                 p: 4,
-                boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)'
             }}
         >
             <Box sx={{fontSize: 50, color: 'text.disabled'}}>
