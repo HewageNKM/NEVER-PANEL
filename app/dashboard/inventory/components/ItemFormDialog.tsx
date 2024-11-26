@@ -8,9 +8,8 @@ import TextField from '@mui/material/TextField';
 import {Box, Grid, MenuItem, Select, styled, Typography} from "@mui/material";
 import {brands, types} from "@/constant";
 import {IoCloudUpload} from "react-icons/io5";
-import {useAppSelector} from "@/lib/hooks";
-import {useDispatch} from "react-redux";
-import {setSelectedItem, setShowEditingForm} from "@/lib/inventorySlice/inventorySlice";
+import {useAppDispatch, useAppSelector} from "@/lib/hooks";
+import {getInventoryItems, setSelectedItem, setShowEditingForm} from "@/lib/inventorySlice/inventorySlice";
 import {Item} from "@/interfaces";
 import {Timestamp} from "@firebase/firestore";
 import {generateId} from "@/utils/genarateIds";
@@ -19,9 +18,9 @@ import {addAItem, deleteAFile, updateAItem, uploadAFile} from '@/actions/invento
 import {setError} from "@/lib/loadSlice/loadSlice";
 
 const ItemFormDialog = () => {
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
     const [isLoading, setIsLoading] = useState(false)
-    const {showEditingForm, selectedItem: item} = useAppSelector(state => state.inventorySlice);
+    const {showEditingForm, selectedItem: item, page, size} = useAppSelector(state => state.inventorySlice);
 
 
     const VisuallyHiddenInput = styled('input')({
@@ -79,21 +78,22 @@ const ItemFormDialog = () => {
 
             if (item) {
                 await updateAItem(newItem);
-                setIsLoading(false)
+                closeForm()
             } else {
                 await addAItem(newItem)
-                setIsLoading(false)
+                closeForm()
             }
+            evt.target.reset()
         } catch (e: any) {
             console.log(e)
-        } finally {
-            setIsLoading(false)
         }
     }
 
     const closeForm = () => {
         dispatch(setShowEditingForm(false))
         dispatch(setSelectedItem(null))
+        setIsLoading(false)
+        dispatch(getInventoryItems({size: size, page: page}))
     }
     return (
         <Dialog

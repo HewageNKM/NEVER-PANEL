@@ -2,7 +2,7 @@
 import PageContainer from '../components/container/PageContainer';
 import DashboardCard from '../components/shared/DashboardCard';
 import {Box, Button, Grid, MenuItem, Pagination, Select, Stack} from "@mui/material";
-import React, {useEffect, useState} from "react";
+import React, {useEffect} from "react";
 import {Error, Item} from "@/interfaces";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import {setError} from "@/lib/loadSlice/loadSlice";
@@ -11,7 +11,13 @@ import ComponentsLoader from "@/app/components/ComponentsLoader";
 import {IoRefresh} from "react-icons/io5";
 import EmptyState from "@/app/components/EmptyState";
 import Header from "@/app/dashboard/inventory/components/Header";
-import {getInventoryItems, setSelectedItem, setShowEditingForm} from '@/lib/inventorySlice/inventorySlice';
+import {
+    getInventoryItems,
+    setPage,
+    setSelectedItem,
+    setShowEditingForm,
+    setSize
+} from '@/lib/inventorySlice/inventorySlice';
 import ItemFormDialog from "@/app/dashboard/inventory/components/ItemFormDialog";
 
 
@@ -22,11 +28,10 @@ const Page = () => {
         loading,
         selectedType,
         selectedSort,
+        size,
+        page
     } = useAppSelector(state => state.inventorySlice);
     const {currentUser, loading: authLoading} = useAppSelector(state => state.authSlice);
-
-    const [size, setSize] = useState(20)
-    const [page, setPage] = useState(1)
 
 
     const fetchData = async () => {
@@ -89,13 +94,13 @@ const Page = () => {
                         alignItems="center"
                     >
                         <Select variant="outlined" size="small" defaultValue={size}
-                                onChange={(event) => setSize(event.target.value)}>
+                                onChange={(event) => dispatch(setSize(Number.parseInt(event.target.value)))}>
                             <MenuItem value={10}>10</MenuItem>
                             <MenuItem value={20}>20</MenuItem>
                             <MenuItem value={50}>50</MenuItem>
                         </Select>
                         <Pagination count={10} variant="outlined" shape="rounded"
-                                    onChange={(event, page) => setPage(page)}/>
+                                    onChange={(event, page) => dispatch(setPage(page))}/>
                     </Box>
                     <ItemFormDialog/>
                 </Stack>

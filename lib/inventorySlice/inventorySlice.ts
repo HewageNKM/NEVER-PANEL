@@ -6,6 +6,8 @@ interface InventorySlice {
     items: Item[];
     loading: boolean;
     selectedItem: Item | null;
+    size: number,
+    page: number,
     selectedSort: string;
     selectedType: string;
     showEditingForm: boolean;
@@ -13,6 +15,8 @@ interface InventorySlice {
 
 const initialState: InventorySlice = {
     items: [] as Item[],
+    page: 1,
+    size: 20,
     loading: false,
     selectedItem: null,
     selectedSort: "none",
@@ -26,6 +30,12 @@ const inventorySlice = createSlice({
     reducers: {
         setLoading: (state, action: PayloadAction<boolean>) => {
             state.loading = action.payload;
+        },
+        setSize: (state, action: PayloadAction<number>) => {
+            state.size = action.payload;
+        },
+        setPage: (state, action: PayloadAction<number>) => {
+            state.page = action.payload;
         },
         setSelectedItem: (state, action: PayloadAction<Item>) => {
             state.selectedItem = action.payload;
@@ -94,6 +104,8 @@ export const {
     setShowEditingForm,
     setSelectedSort,
     setSelectedType,
+    setSize,
+    setPage
 } = inventorySlice.actions;
 export default inventorySlice.reducer;
 
