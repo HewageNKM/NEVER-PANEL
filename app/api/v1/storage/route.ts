@@ -10,7 +10,6 @@ export const POST = async (req: Request) => {
             return NextResponse.json({message: 'Unauthorized'}, {status: 401});
         }
 
-
         const formData = await req.formData()
 
         const res = await uploadFile(formData.get('file') as File, <string>formData.get("path"));
@@ -36,12 +35,9 @@ export const DELETE = async (req: Request) => {
         const url = new URL(req.url);
         // Get the path from the query
         const path = url.searchParams.get('path');
-        const uid = url.searchParams.get('uid');
 
         if (!path) {
             return NextResponse.json({message: 'Path not provided'}, {status: 400});
-        } else if (!uid) {
-            return NextResponse.json({message: 'UID not provided'}, {status: 400});
         }
 
         await deleteFiles(path);

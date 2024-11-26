@@ -16,7 +16,6 @@ const GlobalProvider = ({children}: { children: ReactNode }) => {
     const errors = useAppSelector(state => state.loadSlice.errors)
 
     const AuthListener = () => {
-        const dispatch = useAppDispatch();
 
         useEffect(() => {
             const unsubscribe = onAuthStateChanged(auth, async user => {
@@ -64,7 +63,7 @@ const GlobalProvider = ({children}: { children: ReactNode }) => {
                     direction: "column",
                     gap: 2,
                     right: 12,
-                    zIndex: 1300,
+                    zIndex: 9999,
                 }}>
                     {errors.map((error: Error) => (
                         <Alert severity={error.severity} key={error.id} onClose={() => {

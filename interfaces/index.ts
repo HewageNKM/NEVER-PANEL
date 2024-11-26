@@ -1,12 +1,6 @@
 import {orderStatus} from "@/constant";
 import {firestore} from "firebase-admin";
 import Timestamp = firestore.Timestamp;
-export interface Profile {
-    id: string,
-    username: string,
-    email: string,
-    imageUrl: string,
-}
 export interface Item {
     itemId: string,
     type: string,

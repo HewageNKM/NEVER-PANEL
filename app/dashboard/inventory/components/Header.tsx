@@ -3,10 +3,20 @@ import {Box, Button, MenuItem, Select, TextField, Typography} from "@mui/materia
 import {IoSearch} from "react-icons/io5";
 import {sortInventoryOptions, types} from "@/constant";
 import {useAppDispatch} from "@/lib/hooks";
-import {setSelectedSort, setSelectedType} from "@/lib/inventorySlice/inventorySlice";
+import {
+    setSelectedItem,
+    setSelectedSort,
+    setSelectedType,
+    setShowEditingForm
+} from "@/lib/inventorySlice/inventorySlice";
 
 const Header = () => {
     const dispatch = useAppDispatch();
+
+    const showAddForm = () => {
+        dispatch(setSelectedItem(null))
+        dispatch(setShowEditingForm(true))
+    }
     return (
         <Box display="flex" flexDirection="column" flexWrap={"wrap"} gap={2} padding={1} mt={2}>
             <Box
@@ -40,6 +50,9 @@ const Header = () => {
                                 <MenuItem value={option.value} key={option.value}>{option.name}</MenuItem>
                             ))}
                         </Select>
+                    </Box>
+                    <Box display="flex" justifyContent={"center"} mt={3.6}>
+                        <Button onClick={showAddForm} variant="contained" color="primary">Add Item</Button>
                     </Box>
                 </Box>
             </Box>

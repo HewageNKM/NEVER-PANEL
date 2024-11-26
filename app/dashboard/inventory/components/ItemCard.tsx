@@ -10,16 +10,13 @@ import { IoPencil, IoTrashBin } from "react-icons/io5";
 import Box from '@mui/material/Box';
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 
-const ItemCard = ({ item }: { item: Item }) => {
-    const [showDialog, setShowDialog] = useState(false);
+const ItemCard = ({ item, onEdit }: { item: Item, onEdit:any }) => {
+    const [showConfirmedDialog, setShowConfirmedDialog] = useState(false);
 
     const deleteItem = () => {
         console.log("Deleting item");
     };
 
-    const editItem = () => {
-        console.log("Editing item");
-    };
 
     return (
         <Card
@@ -47,7 +44,7 @@ const ItemCard = ({ item }: { item: Item }) => {
                         Buying: LKR {item.buyingPrice.toFixed(2)}
                     </Typography>
                     <Typography variant="subtitle2" sx={{ color: "red", fontWeight: 600 }}>
-                        Selling: LKR {item.sellingPrice.toFixed(2)}
+                        Selling: LKR {(item.sellingPrice - (item.sellingPrice * item.discount / 100)).toFixed(2)}
                     </Typography>
                 </Box>
                 <Box sx={{ display: 'flex',flexDirection:"column",justifyContent: 'start', mt: 1 ,}}>
@@ -103,10 +100,10 @@ const ItemCard = ({ item }: { item: Item }) => {
                 </Typography>
             </Box>
             <CardActions sx={{ justifyContent: "space-between", px: 2, pb: 2 }}>
-                <Button variant="text" color="primary" size="small" startIcon={<IoPencil size={18} />} onClick={editItem}>
+                <Button variant="text" color="primary" size="small" startIcon={<IoPencil size={18} />} onClick={onEdit}>
                     Edit
                 </Button>
-                <Button onClick={() => setShowDialog(true)} variant="text" color="error" size="small" startIcon={<IoTrashBin size={18} />}>
+                <Button onClick={() => setShowConfirmedDialog(true)} variant="text" color="error" size="small" startIcon={<IoTrashBin size={18} />}>
                     Delete
                 </Button>
             </CardActions>
@@ -114,8 +111,9 @@ const ItemCard = ({ item }: { item: Item }) => {
                 title={"Delete Item"}
                 body={"Are you sure you want to delete this item? This action cannot be undone and will also delete all associated variants and files."}
                 onConfirm={deleteItem}
-                onCancel={() => setShowDialog(false)} open={showDialog}
+                onCancel={() => setShowConfirmedDialog(false)} open={showConfirmedDialog}
             />
+
         </Card>
     );
 };

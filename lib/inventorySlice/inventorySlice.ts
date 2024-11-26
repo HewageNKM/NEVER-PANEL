@@ -1,5 +1,6 @@
 import {Item} from "@/interfaces";
-import {createSlice, PayloadAction} from "@reduxjs/toolkit";
+import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
+import {fetchInventory} from "@/actions/inventoryActions";
 
 interface InventorySlice {
     items: Item[];
@@ -7,6 +8,7 @@ interface InventorySlice {
     selectedItem: Item | null;
     selectedSort: string;
     selectedType: string;
+    showEditingForm: boolean;
 }
 
 const initialState: InventorySlice = {
@@ -15,13 +17,32 @@ const initialState: InventorySlice = {
     selectedItem: null,
     selectedSort: "none",
     selectedType: "all",
+    showEditingForm: false,
 }
 
 const inventorySlice = createSlice({
     name: "inventory",
     initialState,
     reducers: {
-        setItems: (state, action: PayloadAction<Item[]>) => {
+        setLoading: (state, action: PayloadAction<boolean>) => {
+            state.loading = action.payload;
+        },
+        setSelectedItem: (state, action: PayloadAction<Item>) => {
+            state.selectedItem = action.payload;
+        },
+        setSelectedSort: (state, action: PayloadAction<string>) => {
+            state.selectedSort = action.payload;
+        },
+        setSelectedType: (state, action: PayloadAction<string>) => {
+            state.selectedType = action.payload;
+        },
+        setShowEditingForm: (state, action: PayloadAction<boolean>) => {
+            state.showEditingForm = action.payload;
+        },
+    },
+    extraReducers: (builder) => {
+        builder.addCase(getInventoryItems.fulfilled, (state, action) => {
+            state.items = action.payload;
             let items = action.payload;
 
             // Filter by selectedType if it's not set to "all"
@@ -48,32 +69,31 @@ const inventorySlice = createSlice({
 
             // Update state with the filtered and sorted items
             state.items = items;
-        },
-        setLoading: (state, action: PayloadAction<boolean>) => {
-            state.loading = action.payload;
-        },
-        setSelectedItem: (state, action: PayloadAction<Item>) => {
-            state.selectedItem = action.payload;
-        },
-        setSelectedSort: (state, action: PayloadAction<string>) => {
-            state.selectedSort = action.payload;
-        },
-        setSelectedType: (state, action: PayloadAction<string>) => {
-            state.selectedType = action.payload;
-        },
-        setSelectedStock: (state, action: PayloadAction<string>) => {
-            state.selectedStock = action.payload;
-        },
-    },
+            state.loading = false;
+        });
+        builder.addCase(getInventoryItems.pending, (state) => {
+            state.loading = true;
+        });
+        builder.addCase(getInventoryItems.rejected, (state) => {
+            state.loading = false;
+        });
+    }
 })
-
+export const getInventoryItems = createAsyncThunk("inventory/fetchInventory", async ({size, page}: {
+    size: number;
+    page: number;
+}, thunkAPI) => {
+    try {
+        return await fetchInventory(size, page);
+    } catch (error: any) {
+        return thunkAPI.rejectWithValue(error.message);
+    }
+});
 export const {
-    setItems,
-    setLoading,
     setSelectedItem,
+    setShowEditingForm,
     setSelectedSort,
     setSelectedType,
-    setSelectedStock
 } = inventorySlice.actions;
 export default inventorySlice.reducer;
 
