@@ -76,6 +76,20 @@ export const uploadAFile = async (file: File, path: string) => {
         throw new Error(e.response.data.message)
     }
 }
+export const deleteAItem = async (itemId:string) => {
+    try {
+        const token = auth.currentUser?.getIdToken();
+        const response = await axios({
+            method: 'DELETE',
+            url: `/api/v1/inventory/${itemId}`,
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+    } catch (e) {
+        throw new Error(e.response.data.message)
+    }
+}
 export const deleteAFile = async (path:string) => {
     try {
         const token = await auth.currentUser?.getIdToken();

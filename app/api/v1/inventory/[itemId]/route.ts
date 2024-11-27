@@ -27,8 +27,8 @@ export const DELETE = async (req: Request) => {
         if (!response) {
             return NextResponse.json({message: 'Unauthorized'}, {status: 401});
         }
-
-        await deleteItemById(new URL(req.url).pathname.split("/")[3])
+        const itemId = new URL(req.url).pathname.split("/").pop();
+        await deleteItemById(itemId || "None")
         return NextResponse.json({message: 'Item deleted successfully'}, {status: 200});
     } catch (error: any) {
         console.error(error);

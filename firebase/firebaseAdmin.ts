@@ -246,21 +246,39 @@ export const deleteFiles = async (path: string) => {
 };
 
 export const deleteItemById = async (itemId: string) => {
+    console.log(`[START] Deleting item with ID: ${itemId}`);
     try {
-        // Delete all files in the directory and subdirectories
-        const [files] = await adminStorageBucket.getFiles({prefix: `inventory/${itemId}/`});
+        // Step 1: Log the start of file deletion
+        console.log(`[INFO] Retrieving files from storage for item ID: ${itemId}`);
+        const [files] = await adminStorageBucket.getFiles({ prefix: `inventory/${itemId}/` });
 
-        const deletePromises = files.map(file => file.delete());
+        if (files.length === 0) {
+            console.log(`[INFO] No files found for item ID: ${itemId}`);
+        } else {
+            console.log(`[INFO] Found ${files.length} files for item ID: ${itemId}. Starting deletion.`);
+        }
+
+        // Step 2: Log each file being deleted
+        const deletePromises = files.map(async (file) => {
+            console.log(`[INFO] Deleting file: ${file.name}`);
+            await file.delete();
+        });
+
         await Promise.all(deletePromises);
+        console.log(`[SUCCESS] All files for item ID: ${itemId} deleted successfully`);
 
-        // Delete Firestore document
+        // Step 3: Log Firestore document deletion
+        console.log(`[INFO] Deleting Firestore document for item ID: ${itemId}`);
         await adminFirestore.collection('inventory').doc(itemId).delete();
-        console.log(`Item with ID ${itemId} and associated files deleted successfully`);
+        console.log(`[SUCCESS] Firestore document for item ID: ${itemId} deleted successfully`);
+
+        console.log(`[END] Successfully deleted item with ID: ${itemId} and associated files`);
     } catch (error: any) {
-        console.error(`Error deleting item with ID ${itemId}:`, error);
+        console.error(`[ERROR] Error deleting item with ID ${itemId}:`, error);
         throw new Error(error.message);
     }
 };
+
 
 export const getUserById = async (userId: string) => {
     try {

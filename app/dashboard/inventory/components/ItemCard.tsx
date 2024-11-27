@@ -1,20 +1,44 @@
-import React, { useState } from 'react';
-import { Item } from "@/interfaces";
+"use client"
+import React, {useState} from 'react';
+import {Item} from "@/interfaces";
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
-import { IoPencil, IoTrashBin } from "react-icons/io5";
+import {IoPencil, IoTrashBin} from "react-icons/io5";
 import Box from '@mui/material/Box';
 import ConfirmationDialog from "@/components/ConfirmationDialog";
+import {useAppDispatch, useAppSelector} from "@/lib/hooks";
+import {deleteAItem} from "@/actions/inventoryActions";
+import {setError} from "@/lib/loadSlice/loadSlice";
+import {getInventoryItems} from "@/lib/inventorySlice/inventorySlice";
 
-const ItemCard = ({ item, onEdit }: { item: Item, onEdit:any }) => {
+const ItemCard = ({item, onEdit}: { item: Item, onEdit: any }) => {
     const [showConfirmedDialog, setShowConfirmedDialog] = useState(false);
+    const {page, size} = useAppSelector(state => state.inventorySlice);
+    const dispatch = useAppDispatch();
 
-    const deleteItem = () => {
-        console.log("Deleting item");
+    const deleteItem = async () => {
+        try {
+            setShowConfirmedDialog(false);
+            await deleteAItem(item.itemId);
+            dispatch(setError({
+                id: new Date().getTime(),
+                message: "Item deleted successfully",
+                severity: "success"
+            }))
+        } catch (e: any) {
+            console.error(e)
+            dispatch(setError({
+                id: new Date().getTime(),
+                message: e.message,
+                severity: "error"
+            }))
+        } finally {
+            dispatch(getInventoryItems({size: size, page: page}))
+        }
     };
 
 
@@ -26,40 +50,40 @@ const ItemCard = ({ item, onEdit }: { item: Item, onEdit:any }) => {
                 borderRadius: 2,
                 boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.1)",
                 transition: "transform 0.2s ease",
-                '&:hover': { transform: "scale(1.02)" },
+                '&:hover': {transform: "scale(1.02)"},
                 bgcolor: "background.default",
             }}
         >
             <CardMedia
-                sx={{ height: 160, borderTopLeftRadius: 8, borderTopRightRadius: 8 }}
+                sx={{height: 160, borderTopLeftRadius: 8, borderTopRightRadius: 8}}
                 image={item.thumbnail.url}
                 title={item.name}
             />
-            <CardContent sx={{ p: 1 }}>
-                <Typography variant="h5" sx={{ fontWeight: 500, textTransform: "capitalize" }}>
+            <CardContent sx={{p: 1}}>
+                <Typography variant="h5" sx={{fontWeight: 500, textTransform: "capitalize"}}>
                     {item.name}
                 </Typography>
-                <Box sx={{ display: 'flex',flexDirection:"column",justifyContent: 'start', mt: 1 }}>
-                    <Typography variant="subtitle2" sx={{ color: "green", fontWeight: 600 }}>
+                <Box sx={{display: 'flex', flexDirection: "column", justifyContent: 'start', mt: 1}}>
+                    <Typography variant="subtitle2" sx={{color: "green", fontWeight: 600}}>
                         Buying: LKR {item.buyingPrice.toFixed(2)}
                     </Typography>
-                    <Typography variant="subtitle2" sx={{ color: "red", fontWeight: 600 }}>
+                    <Typography variant="subtitle2" sx={{color: "red", fontWeight: 600}}>
                         Selling: LKR {(item.sellingPrice - (item.sellingPrice * item.discount / 100)).toFixed(2)}
                     </Typography>
                 </Box>
-                <Box sx={{ display: 'flex',flexDirection:"column",justifyContent: 'start', mt: 1 ,}}>
-                    <Typography variant="caption" sx={{ color: "secondary", fontWeight: 600 }}>
+                <Box sx={{display: 'flex', flexDirection: "column", justifyContent: 'start', mt: 1,}}>
+                    <Typography variant="caption" sx={{color: "secondary", fontWeight: 600}}>
                         Created:{item?.createdAt}
                     </Typography>
-                    <Typography variant="caption" sx={{ color: "secondary", fontWeight: 600 }}>
+                    <Typography variant="caption" sx={{color: "secondary", fontWeight: 600}}>
                         Updated:{item?.updatedAt}
                     </Typography>
                 </Box>
-                <Typography variant="h6" sx={{ mt: 2, color: "text.secondary" }}>
+                <Typography variant="h6" sx={{mt: 2, color: "text.secondary"}}>
                     Variants: {item.variants.length}
                 </Typography>
             </CardContent>
-            <Box sx={{ position: "absolute", top: 0, right: 0 }}>
+            <Box sx={{position: "absolute", top: 0, right: 0}}>
                 <Typography
                     variant="caption"
                     sx={{
@@ -73,7 +97,7 @@ const ItemCard = ({ item, onEdit }: { item: Item, onEdit:any }) => {
                     {item.type}
                 </Typography>
             </Box>
-            <Box sx={{ position: "absolute", top: 0, left: 0, display: "flex", gap: 0.5, flexDirection: "column" }}>
+            <Box sx={{position: "absolute", top: 0, left: 0, display: "flex", gap: 0.5, flexDirection: "column"}}>
                 <Typography
                     variant="caption"
                     sx={{
@@ -99,11 +123,12 @@ const ItemCard = ({ item, onEdit }: { item: Item, onEdit:any }) => {
                     {item.brand}
                 </Typography>
             </Box>
-            <CardActions sx={{ justifyContent: "space-between", px: 2, pb: 2 }}>
-                <Button variant="text" color="primary" size="small" startIcon={<IoPencil size={18} />} onClick={onEdit}>
+            <CardActions sx={{justifyContent: "space-between", px: 2, pb: 2}}>
+                <Button variant="text" color="primary" size="small" startIcon={<IoPencil size={18}/>} onClick={onEdit}>
                     Edit
                 </Button>
-                <Button onClick={() => setShowConfirmedDialog(true)} variant="text" color="error" size="small" startIcon={<IoTrashBin size={18} />}>
+                <Button onClick={() => setShowConfirmedDialog(true)} variant="text" color="error" size="small"
+                        startIcon={<IoTrashBin size={18}/>}>
                     Delete
                 </Button>
             </CardActions>
@@ -117,5 +142,6 @@ const ItemCard = ({ item, onEdit }: { item: Item, onEdit:any }) => {
         </Card>
     );
 };
+
 
 export default ItemCard;
