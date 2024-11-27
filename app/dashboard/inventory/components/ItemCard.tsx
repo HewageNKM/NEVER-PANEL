@@ -14,11 +14,13 @@ import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import {deleteAItem} from "@/actions/inventoryActions";
 import {setError} from "@/lib/loadSlice/loadSlice";
 import {getInventoryItems} from "@/lib/inventorySlice/inventorySlice";
+import {useRouter} from "next/navigation";
 
 const ItemCard = ({item, onEdit}: { item: Item, onEdit: any }) => {
     const [showConfirmedDialog, setShowConfirmedDialog] = useState(false);
     const {page, size} = useAppSelector(state => state.inventorySlice);
     const dispatch = useAppDispatch();
+    const router = useRouter();
 
     const deleteItem = async () => {
         try {
@@ -55,32 +57,29 @@ const ItemCard = ({item, onEdit}: { item: Item, onEdit: any }) => {
             }}
         >
             <CardMedia
+                onClick={() => router.push(`/dashboard/inventory/${item.itemId}`)}
                 sx={{height: 160, borderTopLeftRadius: 8, borderTopRightRadius: 8}}
                 image={item.thumbnail.url}
                 title={item.name}
             />
             <CardContent sx={{p: 1}}>
+                <Typography variant="body2" sx={{color: "text.secondary", textTransform: "uppercase"}}>
+                    {item.itemId}
+                </Typography>
                 <Typography variant="h5" sx={{fontWeight: 500, textTransform: "capitalize"}}>
                     {item.name}
                 </Typography>
-                <Box sx={{display: 'flex', flexDirection: "column", justifyContent: 'start', mt: 1}}>
-                    <Typography variant="subtitle2" sx={{color: "green", fontWeight: 600}}>
-                        Buying: LKR {item.buyingPrice.toFixed(2)}
-                    </Typography>
-                    <Typography variant="subtitle2" sx={{color: "red", fontWeight: 600}}>
-                        Selling: LKR {(item.sellingPrice - (item.sellingPrice * item.discount / 100)).toFixed(2)}
-                    </Typography>
-                </Box>
-                <Box sx={{display: 'flex', flexDirection: "column", justifyContent: 'start', mt: 1,}}>
-                    <Typography variant="caption" sx={{color: "secondary", fontWeight: 600}}>
-                        Created:{item?.createdAt}
-                    </Typography>
-                    <Typography variant="caption" sx={{color: "secondary", fontWeight: 600}}>
-                        Updated:{item?.updatedAt}
-                    </Typography>
-                </Box>
-                <Typography variant="h6" sx={{mt: 2, color: "text.secondary"}}>
-                    Variants: {item.variants.length}
+                <Typography
+                    variant="h6"
+                    sx={{
+                        mt: 1,
+                        color: "text.secondary",
+                        display: "flex",
+                        justifyContent: "flex-end", // Aligns to the right
+                        alignItems: "center",      // Center alignment vertically if needed
+                    }}
+                >
+                    {item.variants.length}
                 </Typography>
             </CardContent>
             <Box sx={{position: "absolute", top: 0, right: 0}}>

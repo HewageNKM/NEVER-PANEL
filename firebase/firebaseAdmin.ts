@@ -107,8 +107,8 @@ export const getItemById = async (itemId: string) => {
         const itemData = itemDoc.data();
         return {
             ...itemData,
-            createdAt: itemData?.createdAt.toDate(),
-            updatedAt: itemData?.updatedAt.toDate(),
+            createdAt: itemData?.createdAt.toDate().toLocaleString(),
+            updatedAt: itemData?.updatedAt.toDate().toLocaleString(),
         } as Item;
 
     } catch (error: any) {

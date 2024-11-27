@@ -21,7 +21,21 @@ export const fetchInventory = async (size: number, page: number) => {
         throw new Error(e.response.data.message)
     }
 }
-
+export const fetchAItem = async (itemId: string) => {
+    try {
+        const token = await auth.currentUser?.getIdToken();
+        const response = await axios({
+            method: 'GET',
+            url: `/api/v1/inventory/${itemId}`,
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (e) {
+        throw new Error(e.response.data.message)
+    }
+}
 export const updateAItem = async (item: Item) => {
     try {
         const token = await auth.currentUser?.getIdToken();
