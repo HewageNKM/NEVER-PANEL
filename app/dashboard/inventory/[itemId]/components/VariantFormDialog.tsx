@@ -22,7 +22,7 @@ import {setItem, setSelectedVariant, setShowEditingForm} from "@/lib/itemDetails
 import DeleteIcon from "@mui/icons-material/Delete";
 import {Img, Item, Size, Variant} from "@/interfaces";
 import Image from "next/image";
-import {IoCloudUpload, IoPencil} from "react-icons/io5";
+import {IoCloudUpload, IoPencil, IoTrashBin} from "react-icons/io5";
 import {setError} from "@/lib/loadSlice/loadSlice";
 import {generateId} from "@/utils/genarateIds";
 import {updateAItem, uploadAFile} from "@/actions/inventoryActions";
@@ -186,28 +186,41 @@ const VariantFormDialog = () => {
                             </Typography>
                             <Box
                                 sx={{
-                                    maxHeight: 300, // Adjust the max height as needed
-                                    overflowY: 'auto', // Enables vertical scrolling
+                                    maxWidth: '100%', // Ensure it adapts to the parent container width
+                                    overflowX: 'auto', // Enables horizontal scrolling
+                                    display: 'flex', // Use flex layout for horizontal alignment
+                                    flexWrap: 'nowrap', // Prevent wrapping of children
                                     mt: 0.5,
                                     p: 1,
                                 }}
                             >
-                                <Grid container spacing={2}>
-                                    {images.map((image, index) => (
-                                        <Grid item xs={12} key={index}>
-                                            <Stack direction="row" spacing={2} alignItems="center">
-                                                <Image src={image.url} alt={image.file} width={100} height={100}/>
-                                            </Stack>
-                                        </Grid>
-                                    ))}
-                                    {newImages?.map((image, index) => (
-                                        <Grid item xs={12} key={index}>
-                                            <Stack direction="row" spacing={2} alignItems="center">
-                                                <Image src={URL.createObjectURL(image)} alt={image.name} width={100} height={100}/>
-                                            </Stack>
-                                        </Grid>
-                                    ))}
-                                </Grid>
+                                {images.map((image, index) => (
+                                    <Stack
+                                        key={`image-${index}`}
+                                        direction="column"
+                                        spacing={2}
+                                        alignItems="center"
+                                        sx={{ minWidth: 120, mr: 2 }} // Ensure a consistent width for each item
+                                    >
+                                        <Image src={image.url} alt={image.file} width={100} height={100} />
+                                    </Stack>
+                                ))}
+                                {newImages?.map((image, index) => (
+                                    <Stack
+                                        key={`newImage-${index}`}
+                                        direction="column"
+                                        spacing={2}
+                                        alignItems="center"
+                                        sx={{ minWidth: 120, mr: 2 }}
+                                    >
+                                        <Image src={URL.createObjectURL(image)} alt={image.name} width={100} height={100} />
+                                        <Button color={"error"} onClick={()=>{
+                                            setNewImages(prevState => prevState.filter((_, i) => i !== index))
+                                        }}>
+                                            <IoTrashBin />
+                                        </Button>
+                                    </Stack>
+                                ))}
                             </Box>
                         </Stack>
 

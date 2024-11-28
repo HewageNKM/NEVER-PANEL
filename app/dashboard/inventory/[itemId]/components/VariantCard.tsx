@@ -1,3 +1,4 @@
+"use client"
 import React, {useState} from "react";
 import {Box, Button, Card, CardActions, CardContent, Stack, Typography} from "@mui/material";
 import {Variant} from "@/interfaces";
@@ -5,12 +6,18 @@ import "swiper/css";
 import ImageSlider from "@/app/dashboard/inventory/[itemId]/components/ImageSlider";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import {useDispatch} from "react-redux";
-import {setSelectedVariant, setShowEditingForm} from "@/lib/itemDetailsSlice/itemDetailsSlice";
+import {setItem, setSelectedVariant, setShowEditingForm} from "@/lib/itemDetailsSlice/itemDetailsSlice";
+import {useAppSelector} from "@/lib/hooks";
+import {setError} from "@/lib/loadSlice/loadSlice";
+import ComponentsLoader from "@/app/components/ComponentsLoader";
+import {deleteAFile, updateAItem} from "@/actions/inventoryActions";
 
 const VariantCard = ({variant}: { variant: Variant }) => {
+    const {item} = useAppSelector(state => state.itemDetailsSlice);
     const [isExpanded, setIsExpanded] = useState(false);
     const [showConfirmedDialog, setShowConfirmedDialog] = useState(false)
     const dispatch = useDispatch();
+    const [isLoading, setIsLoading] = useState(false)
 
     const toggleExpand = () => {
         setIsExpanded((prev) => !prev);
@@ -22,9 +29,42 @@ const VariantCard = ({variant}: { variant: Variant }) => {
     };
 
 
-    const deleteVariant = () => {
+    const deleteVariant = async () => {
+        try {
+            if (!item) {
+                new Error("Item not found")
+            }
 
-    }
+            setShowConfirmedDialog(false)
+            setIsLoading(true)
+            const updatedItem = {
+                ...item,
+                variants: item.variants.filter(v => v.variantId !== variant.variantId)
+            }
+
+            for (const image of variant.images) {
+                await deleteAFile(`inventory/${item.itemId}/${variant.variantId}/${image.file}`);
+            }
+
+            await updateAItem(updatedItem)
+            dispatch(setItem(updatedItem))
+            dispatch(setError({
+                id: new Date().getTime(),
+                message: "Variant deleted successfully",
+                severity: "success"
+            }))
+        } catch (e: any) {
+            console.error(e)
+            dispatch(setError({
+                id: new Date().getTime(),
+                message: e.message,
+                severity: "error"
+            }))
+        } finally {
+            setIsLoading(false)
+        }
+    };
+
 
     return (
         <Card
@@ -144,7 +184,7 @@ const VariantCard = ({variant}: { variant: Variant }) => {
                     size="small"
                     color="error"
                     variant={"contained"}
-                    onClick={()=>setShowConfirmedDialog(true)}
+                    onClick={() => setShowConfirmedDialog(true)}
                     sx={{textTransform: "capitalize"}}
                 >
                     Delete
@@ -156,8 +196,10 @@ const VariantCard = ({variant}: { variant: Variant }) => {
                 onConfirm={deleteVariant}
                 onCancel={() => setShowConfirmedDialog(false)} open={showConfirmedDialog}
             />
+            {isLoading && <ComponentsLoader title={"Working"}/>}
         </Card>
     );
-};
+}
+
 
 export default VariantCard;
