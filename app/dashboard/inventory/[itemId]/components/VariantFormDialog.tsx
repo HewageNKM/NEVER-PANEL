@@ -121,7 +121,7 @@ const VariantFormDialog = () => {
             } else {
 
                 if (newImages?.length === 0 || !newImages) {
-                    new Error("Please add at least one  image")
+                    throw new Error("Please add at least one  image")
                 }
 
                 const id = generateId("variant", "");
@@ -176,7 +176,7 @@ const VariantFormDialog = () => {
     }
     return (
         <Dialog open={showEditingForm} onClose={() => dispatch(setShowEditingForm(false))}>
-            <DialogTitle>Edit Variant</DialogTitle>
+            <DialogTitle>Add/Edit Variant</DialogTitle>
             <form onSubmit={onSubmit}>
                 <DialogContent>
                     <Stack spacing={3} mt={2}>

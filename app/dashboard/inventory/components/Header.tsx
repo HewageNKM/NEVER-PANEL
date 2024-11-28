@@ -1,6 +1,6 @@
 import React from 'react';
 import {Box, Button, MenuItem, Select, TextField, Typography} from "@mui/material";
-import {IoSearch} from "react-icons/io5";
+import {IoAdd, IoSearch} from "react-icons/io5";
 import {sortInventoryOptions, types} from "@/constant";
 import {useAppDispatch} from "@/lib/hooks";
 import {
@@ -9,6 +9,7 @@ import {
     setSelectedType,
     setShowEditingForm
 } from "@/lib/inventorySlice/inventorySlice";
+import AddIcon from "@mui/icons-material/Add";
 
 const Header = () => {
     const dispatch = useAppDispatch();
@@ -52,7 +53,14 @@ const Header = () => {
                         </Select>
                     </Box>
                     <Box display="flex" justifyContent={"center"} mt={3.6}>
-                        <Button onClick={showAddForm} variant="contained" color="primary">Add Item</Button>
+                        <Button
+                            onClick={() => showAddForm()}
+                            type={"button"}
+                            variant="contained"
+                            startIcon={<AddIcon/>} // Add the icon here
+                        >
+                            Add
+                        </Button>
                     </Box>
                 </Box>
             </Box>

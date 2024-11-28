@@ -15,8 +15,8 @@ import {Timestamp} from "@firebase/firestore";
 import {generateId} from "@/utils/genarateIds";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
 import {addAItem, deleteAFile, updateAItem, uploadAFile} from '@/actions/inventoryActions';
-import {setError} from "@/lib/loadSlice/loadSlice";
 import Image from "next/image";
+import {setError} from "@/lib/loadSlice/loadSlice";
 
 const ItemFormDialog = () => {
     const dispatch = useAppDispatch();
@@ -48,7 +48,6 @@ const ItemFormDialog = () => {
             const buyingPrice = evt.target.buyingPrice.value;
             const sellingPrice = evt.target.sellingPrice.value;
             const discount = evt.target.discount.value;
-            const file = evt.target.file.files[0];
             const itemId = evt.target.itemId.value == "" ? generateId("item", manufacturer) : evt.target.itemId.value;
 
             const newItem: Item = {
@@ -65,17 +64,22 @@ const ItemFormDialog = () => {
                 updatedAt: Timestamp.now(),
                 variants: item?.variants ? item.variants : []
             }
-
-            if (file != undefined && item != null) {
-                await deleteAFile(`inventory/${item?.itemId}/${item?.thumbnail.file}`)
-                newItem.thumbnail = await uploadAFile(file, `inventory/${itemId}`)
-            } else if (item == null && file != undefined) {
-                newItem.thumbnail = await uploadAFile(file, `inventory/${itemId}`)
-            } else if (item == null && file == undefined) {
-                dispatch(setError({id: new Date().getTime(), message: "Please upload a thumbnail", severity: "error"}))
-                return
+            if (newImage) {
+                if (item) {
+                    await deleteAFile(`inventory/${item.itemId}/${item.thumbnail.file}`);
+                    newItem.thumbnail = await uploadAFile(newImage, `inventory/${itemId}`)
+                } else {
+                    newItem.thumbnail = await uploadAFile(newImage, `inventory/${itemId}`)
+                }
             } else {
-                newItem.thumbnail = item?.thumbnail
+                if (item) {
+                    newItem.thumbnail = item.thumbnail
+                } else {
+                    throw new Error("Thumbnail is required")
+                }
+            }
+            if (!newImage && !item) {
+                throw new Error("Thumbnail is required")
             }
 
             if (item) {
@@ -88,6 +92,13 @@ const ItemFormDialog = () => {
             evt.target.reset()
         } catch (e: any) {
             console.log(e)
+            dispatch(setError({
+                id: new Date().getTime(),
+                message: e.message,
+                severity: "error"
+            }))
+        } finally {
+            setIsLoading(false)
         }
     }
 

@@ -1,5 +1,5 @@
 "use client"
-import React, {useEffect, useState} from 'react';
+import React, {useEffect} from 'react';
 import DashboardCard from "@/app/dashboard/components/shared/DashboardCard";
 import PageContainer from "@/app/dashboard/components/container/PageContainer";
 import {Stack} from "@mui/material";
@@ -13,10 +13,7 @@ import {setItem} from "@/lib/itemDetailsSlice/itemDetailsSlice";
 
 const Page = () => {
     const {currentUser, loading: authLoading} = useAppSelector(state => state.authSlice);
-    const {item} = useAppSelector(state => state.itemDetailsSlice);
     const dispatch = useAppDispatch();
-    const [showEditingForm, setShowEditingForm] = useState(true)
-    const [selectedVariant, setSelectedVariant] = useState(null)
 
     const params = useParams();
     const {itemId} = params;
@@ -35,16 +32,17 @@ const Page = () => {
 
     return (
         <PageContainer title="Inventory" description="Products Management">
-            <DashboardCard title={`Item Details Page - ${itemId.toUpperCase()}`}>
+            <DashboardCard title={`Item Details - ${itemId.toUpperCase()}`}>
                 <Stack sx={{
                     display: "flex",
                     flexDirection: "column",
                     gap: 3
                 }}>
-                    <Hero />
+                    <Hero/>
                     <Variants/>
                     <VariantFormDialog
-                        onClose={() => {}}
+                        onClose={() => {
+                        }}
                         onSave={() => {
                         }}/>
                 </Stack>
