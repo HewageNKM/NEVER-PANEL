@@ -1,14 +1,19 @@
 'use client';
-import { Typography } from '@mui/material';
+import {Stack, Typography} from '@mui/material';
 import PageContainer from '../components/container/PageContainer';
 import DashboardCard from '../components/shared/DashboardCard';
+import Header from "@/app/dashboard/orders/components/Header";
+import Orders from "@/app/dashboard/orders/components/Orders";
 
 
 const SamplePage = () => {
   return (
     <PageContainer title="Orders" description="Orders Management">
       <DashboardCard title="Order Page">
-        <Typography>This is a sample page</Typography>
+          <Stack>
+              <Header />
+              <Orders />
+          </Stack>
       </DashboardCard>
     </PageContainer>
   );

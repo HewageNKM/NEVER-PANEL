@@ -32,9 +32,14 @@ export const getOrders = async (pageNumber: number = 1, size: number = 20) => {
             .offset(offset)
             .get();
 
-        let orders: Order[] = [];
+        const orders: Order[] = [];
         ordersSnapshot.forEach(doc => {
-            const order = doc.data() as Order;
+            let order: Order = doc.data() as Order;
+            order = {
+                ...order,
+                createdAt: order.createdAt.toDate().toLocaleString(),
+                updatedAt: order.updatedAt.toDate().toLocaleString
+            }
             if (!(order.paymentStatus === paymentStatus.PENDING && order.paymentMethod === paymentMethods.PAYHERE)) {
                 orders.push(order);
             }
@@ -250,7 +255,7 @@ export const deleteItemById = async (itemId: string) => {
     try {
         // Step 1: Log the start of file deletion
         console.log(`[INFO] Retrieving files from storage for item ID: ${itemId}`);
-        const [files] = await adminStorageBucket.getFiles({ prefix: `inventory/${itemId}/` });
+        const [files] = await adminStorageBucket.getFiles({prefix: `inventory/${itemId}/`});
 
         if (files.length === 0) {
             console.log(`[INFO] No files found for item ID: ${itemId}`);
