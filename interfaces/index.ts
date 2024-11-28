@@ -24,7 +24,7 @@ export interface Size {
 export interface Variant {
     variantId: string,
     variantName: string,
-    images: img[],
+    images: Img[],
     sizes: Size[],
 }
 
@@ -41,7 +41,8 @@ export interface Order {
     paymentMethod: string,
     customer: Customer,
     shippingCost: number,
-    tracking: Tracking | null,
+    from:string,
+
     createdAt: Timestamp,
     updatedAt: Timestamp,
 }

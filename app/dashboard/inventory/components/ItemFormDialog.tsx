@@ -16,11 +16,13 @@ import {generateId} from "@/utils/genarateIds";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
 import {addAItem, deleteAFile, updateAItem, uploadAFile} from '@/actions/inventoryActions';
 import {setError} from "@/lib/loadSlice/loadSlice";
+import Image from "next/image";
 
 const ItemFormDialog = () => {
     const dispatch = useAppDispatch();
     const [isLoading, setIsLoading] = useState(false)
     const {showEditingForm, selectedItem: item, page, size} = useAppSelector(state => state.inventorySlice);
+    const [newImage, setNewImage] = useState(null)
 
 
     const VisuallyHiddenInput = styled('input')({
@@ -94,6 +96,7 @@ const ItemFormDialog = () => {
         dispatch(setSelectedItem(null))
         setIsLoading(false)
         dispatch(getInventoryItems({size: size, page: page}))
+        setNewImage(null)
     }
     return (
         <Dialog
@@ -117,6 +120,18 @@ const ItemFormDialog = () => {
                             />
                         </Box>
 
+                        {(newImage || item?.thumbnail) && (<Box mt={2} mb={2}>
+                            <Typography variant="subtitle1" gutterBottom>
+                                Thumbnail
+                            </Typography>
+                            <Box display="flex" justifyContent="center">
+                                <Image src={
+                                    newImage?.name ? URL.createObjectURL(newImage) : item?.thumbnail.url
+                                } alt={item?.name || "thumbnail"} width={200}
+                                       height={200}/>
+                            </Box>
+                        </Box>)
+                        }
                         <Box mb={2} display="flex" justifyContent="center">
                             <Button
                                 component="label"
@@ -129,7 +144,8 @@ const ItemFormDialog = () => {
                                 <VisuallyHiddenInput
                                     name={"file"}
                                     type="file"
-                                    onChange={(event) => console.log(event.target.files)}
+                                    accept={"image/*"}
+                                    onChange={(event) => setNewImage(event.target.files[0])}
                                     multiple={false}
                                 />
                             </Button>
