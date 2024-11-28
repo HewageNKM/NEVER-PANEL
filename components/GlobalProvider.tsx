@@ -69,7 +69,7 @@ const GlobalProvider = ({children}: { children: ReactNode }) => {
                         <Alert severity={error.severity} key={error.id} onClose={() => {
                             dispatch(hideError(error.id))
                         }}>
-                            <AlertTitle>Error</AlertTitle>
+                            <AlertTitle className={"capitalize"}>{error.severity}</AlertTitle>
                             {error.message}
                         </Alert>
                     ))}

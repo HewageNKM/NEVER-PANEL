@@ -1,12 +1,13 @@
 "use client"
 import React from 'react';
 import {Box, Breadcrumbs, Link, Skeleton, Stack} from "@mui/material";
-import {Item} from "@/interfaces";
 import Image from "next/image";
 import Typography from "@mui/material/Typography";
 import {useRouter} from "next/navigation";
+import {useAppSelector} from "@/lib/hooks";
 
-const Hero = ({item}: { item: Item }) => {
+const Hero = () => {
+    const {item} = useAppSelector(state => state.itemDetailsSlice);
     const isLoading = !item; // Determine if data is loading
     const router = useRouter();
 

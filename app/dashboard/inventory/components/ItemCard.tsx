@@ -137,7 +137,6 @@ const ItemCard = ({item, onEdit}: { item: Item, onEdit: any }) => {
                 onConfirm={deleteItem}
                 onCancel={() => setShowConfirmedDialog(false)} open={showConfirmedDialog}
             />
-
         </Card>
     );
 };

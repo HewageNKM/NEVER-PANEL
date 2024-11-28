@@ -5,10 +5,7 @@ export interface Item {
     itemId: string,
     type: string,
     brand: string,
-    thumbnail: {
-        file: File | string,
-        url: string,
-    },
+    thumbnail: Img,
     variants: Variant[],
     manufacturer: string,
     name: string,
@@ -27,8 +24,13 @@ export interface Size {
 export interface Variant {
     variantId: string,
     variantName: string,
-    images: string[],
+    images: img[],
     sizes: Size[],
+}
+
+export interface Img{
+    url: string,
+    file: string,
 }
 
 export interface Order {

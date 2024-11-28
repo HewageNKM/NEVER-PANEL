@@ -1,28 +1,30 @@
-import React, { useState } from "react";
-import { Box, Stack, Typography, Card, CardContent, Button, CardActions } from "@mui/material";
-import { Variant } from "@/interfaces";
-import { Swiper, SwiperSlide } from "swiper/react";
+import React, {useState} from "react";
+import {Box, Button, Card, CardActions, CardContent, Stack, Typography} from "@mui/material";
+import {Variant} from "@/interfaces";
 import "swiper/css";
-import Image from "next/image";
 import ImageSlider from "@/app/dashboard/inventory/[itemId]/components/ImageSlider";
-import imageSlider from "@/app/dashboard/inventory/[itemId]/components/ImageSlider";
+import ConfirmationDialog from "@/components/ConfirmationDialog";
+import {useDispatch} from "react-redux";
+import {setSelectedVariant, setShowEditingForm} from "@/lib/itemDetailsSlice/itemDetailsSlice";
 
-const VariantCard = ({ variant }: { variant: Variant }) => {
+const VariantCard = ({variant}: { variant: Variant }) => {
     const [isExpanded, setIsExpanded] = useState(false);
+    const [showConfirmedDialog, setShowConfirmedDialog] = useState(false)
+    const dispatch = useDispatch();
 
     const toggleExpand = () => {
         setIsExpanded((prev) => !prev);
     };
 
     const handleEdit = () => {
-        console.log("Edit clicked for", variant.variantId);
-        // Add your edit logic here
+        dispatch(setSelectedVariant(variant))
+        dispatch(setShowEditingForm(true))
     };
 
-    const handleDelete = () => {
-        console.log("Delete clicked for", variant.variantId);
-        // Add your delete logic here
-    };
+
+    const deleteVariant = () => {
+
+    }
 
     return (
         <Card
@@ -47,7 +49,7 @@ const VariantCard = ({ variant }: { variant: Variant }) => {
                     backgroundColor: "#f9f9f9",
                 }}
             >
-                <ImageSlider images={variant?.images} />
+                <ImageSlider images={variant?.images}/>
             </Box>
             <CardContent>
                 <Typography
@@ -75,7 +77,7 @@ const VariantCard = ({ variant }: { variant: Variant }) => {
                 <Stack
                     direction="column"
                     spacing={1}
-                    sx={{ borderTop: "1px solid #e0e0e0", pt: 2 }}
+                    sx={{borderTop: "1px solid #e0e0e0", pt: 2}}
                 >
                     <Typography variant={"h6"}>Sizes</Typography>
                     {isExpanded ? (
@@ -113,7 +115,7 @@ const VariantCard = ({ variant }: { variant: Variant }) => {
                         <Button
                             onClick={toggleExpand}
                             size="small"
-                            sx={{ textTransform: "capitalize", mt: 1 }}
+                            sx={{textTransform: "capitalize", mt: 1}}
                         >
                             {isExpanded ? "Show Less" : "Show More"}
                         </Button>
@@ -134,7 +136,7 @@ const VariantCard = ({ variant }: { variant: Variant }) => {
                     color="primary"
                     variant={"outlined"}
                     onClick={handleEdit}
-                    sx={{ textTransform: "capitalize" }}
+                    sx={{textTransform: "capitalize"}}
                 >
                     Edit
                 </Button>
@@ -142,12 +144,18 @@ const VariantCard = ({ variant }: { variant: Variant }) => {
                     size="small"
                     color="error"
                     variant={"contained"}
-                    onClick={handleDelete}
-                    sx={{ textTransform: "capitalize" }}
+                    onClick={()=>setShowConfirmedDialog(true)}
+                    sx={{textTransform: "capitalize"}}
                 >
                     Delete
                 </Button>
             </CardActions>
+            <ConfirmationDialog
+                title={"Delete Variant"}
+                body={"Are you sure you want to delete this variant? This action cannot be undone and will also delete all associated files."}
+                onConfirm={deleteVariant}
+                onCancel={() => setShowConfirmedDialog(false)} open={showConfirmedDialog}
+            />
         </Card>
     );
 };

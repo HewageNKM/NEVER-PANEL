@@ -6,12 +6,18 @@ import {Stack} from "@mui/material";
 import Hero from "@/app/dashboard/inventory/[itemId]/components/Hero";
 import Variants from "@/app/dashboard/inventory/[itemId]/components/Variants";
 import {useParams} from "next/navigation";
-import {useAppSelector} from "@/lib/hooks";
+import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import {fetchAItem} from "@/actions/inventoryActions";
+import VariantFormDialog from "@/app/dashboard/inventory/[itemId]/components/VariantFormDialog";
+import {setItem} from "@/lib/itemDetailsSlice/itemDetailsSlice";
 
 const Page = () => {
     const {currentUser, loading: authLoading} = useAppSelector(state => state.authSlice);
-    const [item, setItem] = useState(null)
+    const {item} = useAppSelector(state => state.itemDetailsSlice);
+    const dispatch = useAppDispatch();
+    const [showEditingForm, setShowEditingForm] = useState(true)
+    const [selectedVariant, setSelectedVariant] = useState(null)
+
     const params = useParams();
     const {itemId} = params;
 
@@ -19,21 +25,28 @@ const Page = () => {
         if (currentUser && !authLoading) {
             fetchAItem(itemId).then((item) => {
                 setItem(item)
+                dispatch(setItem(item))
             }).catch((e) => {
                 console.error(e)
             })
         }
     }, [itemId, currentUser]);
+
+
     return (
         <PageContainer title="Inventory" description="Products Management">
             <DashboardCard title={`Item Details Page - ${itemId.toUpperCase()}`}>
                 <Stack sx={{
-                    display:"flex",
-                    flexDirection:"column",
-                    gap:3
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 3
                 }}>
-                    <Hero item={item}/>
-                    <Variants item={item}/>
+                    <Hero />
+                    <Variants/>
+                    <VariantFormDialog
+                        onClose={() => {}}
+                        onSave={() => {
+                        }}/>
                 </Stack>
             </DashboardCard>
         </PageContainer>
