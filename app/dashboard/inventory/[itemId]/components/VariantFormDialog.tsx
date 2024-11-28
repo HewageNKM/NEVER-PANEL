@@ -25,7 +25,7 @@ import Image from "next/image";
 import {IoCloudUpload, IoPencil} from "react-icons/io5";
 import {setError} from "@/lib/loadSlice/loadSlice";
 import {generateId} from "@/utils/genarateIds";
-import {updateAItem} from "@/actions/inventoryActions";
+import {updateAItem, uploadAFile} from "@/actions/inventoryActions";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
 
 const VisuallyHiddenInput = styled('input')({
@@ -51,7 +51,7 @@ const VariantFormDialog = () => {
     const [selectedSize, setSelectedSize] = useState<string>("none");
     const [stock, setStock] = useState(0)
 
-    const [newImages, setNewImages] = useState<FileList[] | null>([] as FileList[]);
+    const [newImages, setNewImages] = useState<File[] | null>([] as File[]);
 
     const handleAddSize = () => {
         if (selectedSize === "none") {
@@ -89,6 +89,10 @@ const VariantFormDialog = () => {
 
     const onSubmit = async (evt) => {
         try {
+            if (!item) {
+                new Error("Item not found")
+            }
+
             setIsLoading(true)
             evt.preventDefault();
 
@@ -96,8 +100,8 @@ const VariantFormDialog = () => {
 
             if (selectedVariant) {
                 const updatedVariant: Variant = {
-                    variantId: selectedVariant?.variantId || generateId("variant", ""),
-                    variantName: name,
+                    variantId: selectedVariant?.variantId,
+                    variantName: name.toLowerCase(),
                     images: selectedVariant?.images,
                     sizes: sizes
                 }
@@ -113,10 +117,43 @@ const VariantFormDialog = () => {
                     severity: "success"
                 }))
                 evt.target.reset();
-
                 clear();
             } else {
 
+                if (newImages?.length === 0 || !newImages) {
+                    new Error("Please add at least one  image")
+                }
+
+                const id = generateId("variant", "");
+                const uploadedImages = [] as Img[];
+
+                for (const image of newImages) {
+                    const uploadedImage = await uploadAFile(image, `inventory/${item.itemId}/${id}`);
+                    uploadedImages.push(uploadedImage);
+                }
+
+                const newVariant: Variant = {
+                    variantId: id,
+                    variantName: name.toLowerCase(),
+                    images: uploadedImages,
+                    sizes: sizes
+                }
+                const updatedItem: Item = {
+                    ...item,
+                    variants: [
+                        ...item.variants, newVariant]
+                }
+
+                console.log(updatedItem)
+                await updateAItem(updatedItem)
+                dispatch(setItem(updatedItem));
+                dispatch(setError({
+                    id: new Date().getTime(),
+                    message: "Variant added successfully",
+                    severity: "success"
+                }))
+                evt.target.reset();
+                clear();
             }
         } catch (e) {
             dispatch(setError({
@@ -133,6 +170,7 @@ const VariantFormDialog = () => {
         dispatch(setSelectedVariant(null));
         setSizes([] as Size[]);
         setImages([] as Img[]);
+        setNewImages([] as File[]);
         setSelectedSize("none");
         setStock(0);
     }
@@ -162,6 +200,13 @@ const VariantFormDialog = () => {
                                             </Stack>
                                         </Grid>
                                     ))}
+                                    {newImages?.map((image, index) => (
+                                        <Grid item xs={12} key={index}>
+                                            <Stack direction="row" spacing={2} alignItems="center">
+                                                <Image src={URL.createObjectURL(image)} alt={image.name} width={100} height={100}/>
+                                            </Stack>
+                                        </Grid>
+                                    ))}
                                 </Grid>
                             </Box>
                         </Stack>
@@ -180,8 +225,8 @@ const VariantFormDialog = () => {
                                     name={"images"}
                                     accept={"image/*"}
                                     type="file"
+                                    onChange={(e) => setNewImages(prevState => [...prevState, e.target.files[0]])}
                                     disabled={selectedVariant}
-                                    multiple={false}
                                 />
                             </Button>
                         </Box>
