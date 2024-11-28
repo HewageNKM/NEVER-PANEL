@@ -34,6 +34,9 @@ const inventorySlice = createSlice({
         setSize: (state, action: PayloadAction<number>) => {
             state.size = action.payload;
         },
+        setItems: (state, action: PayloadAction<Item[]>) => {
+            state.items = action.payload;
+        },
         setPage: (state, action: PayloadAction<number>) => {
             state.page = action.payload;
         },
@@ -105,7 +108,8 @@ export const {
     setSelectedSort,
     setSelectedType,
     setSize,
-    setPage
+    setPage,
+    setItems,
 } = inventorySlice.actions;
 export default inventorySlice.reducer;
 

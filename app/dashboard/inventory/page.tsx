@@ -56,7 +56,7 @@ const Page = () => {
 
     return (
         <PageContainer title="Inventory" description="Products Management">
-            <DashboardCard title="Inventoary Page">
+            <DashboardCard title="Inventory Page">
                 <Stack sx={{
                     position: "relative",
                     padding: 1,

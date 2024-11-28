@@ -16,7 +16,7 @@ const ComponentsLoader = ({ title }: { title?: string }) => {
                 alignItems: "center",
                 backgroundColor: "rgba(255, 255, 255, 0.8)", // Slightly more opaque
                 backdropFilter: "blur(10px)", // More blur for a softer background
-                zIndex: 1200,
+                zIndex: 99999,
                 padding: 2, // Add padding around the content
                 boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)", // Optional shadow for depth
                 borderRadius: 2, // Rounded corners
