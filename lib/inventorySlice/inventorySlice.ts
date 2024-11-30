@@ -1,129 +1,115 @@
-import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
-import axios from "axios";
-import {getCurrentUser} from "@/firebase/firebaseClient";
 import {Item} from "@/interfaces";
+import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
+import {fetchInventory} from "@/actions/inventoryActions";
 
 interface InventorySlice {
-    inventory: any[],
-    loading: boolean,
-    selectedBrand: string,
-    page: number,
+    items: Item[];
+    loading: boolean;
+    selectedItem: Item | null;
     size: number,
-    error:string | null
+    page: number,
+    selectedSort: string;
+    selectedType: string;
+    showEditingForm: boolean;
 }
 
 const initialState: InventorySlice = {
-    inventory: [],
-    selectedBrand:"all",
-    loading: false,
+    items: [] as Item[],
     page: 1,
     size: 20,
-    error:null
+    loading: false,
+    selectedItem: null,
+    selectedSort: "none",
+    selectedType: "all",
+    showEditingForm: false,
 }
 
 const inventorySlice = createSlice({
     name: "inventory",
     initialState,
     reducers: {
-        setItems: (state, action) => {
-            state.inventory = action.payload;
-        },
-        setLoading: (state, action) => {
+        setLoading: (state, action: PayloadAction<boolean>) => {
             state.loading = action.payload;
         },
-        setPage: (state, action) => {
-            state.page = action.payload;
-        },
-        setSize: (state, action) => {
+        setSize: (state, action: PayloadAction<number>) => {
             state.size = action.payload;
         },
-        setSelectedBrand: (state, action) => {
-            state.selectedBrand = action.payload;
+        setItems: (state, action: PayloadAction<Item[]>) => {
+            state.items = action.payload;
         },
-        setError: (state, action) => {
-            state.error = action.payload;
-        }
+        setPage: (state, action: PayloadAction<number>) => {
+            state.page = action.payload;
+        },
+        setSelectedItem: (state, action: PayloadAction<Item>) => {
+            state.selectedItem = action.payload;
+        },
+        setSelectedSort: (state, action: PayloadAction<string>) => {
+            state.selectedSort = action.payload;
+        },
+        setSelectedType: (state, action: PayloadAction<string>) => {
+            state.selectedType = action.payload;
+        },
+        setShowEditingForm: (state, action: PayloadAction<boolean>) => {
+            state.showEditingForm = action.payload;
+        },
     },
     extraReducers: (builder) => {
-        builder.addCase(fetchInventory.fulfilled, (state, action) => {
-            if(state.selectedBrand !== "all"){
-                state.inventory = action.payload.filter((item:Item) => item.manufacturer === state.selectedBrand);
-            }else {
-                state.inventory = action.payload;
+        builder.addCase(getInventoryItems.fulfilled, (state, action) => {
+            state.items = action.payload;
+            let items = action.payload;
+
+            // Filter by selectedType if it's not set to "all"
+            if (state.selectedType !== "all") {
+                items = items.filter(item => item.type === state.selectedType);
             }
+
+            // Sort items if a sort option is selected
+            if (state.selectedSort !== "none") {
+                items = items.slice(); // Make a shallow copy before sorting
+                items.sort((a, b) => {
+                    if (state.selectedSort === "lh") {
+                        return a.sellingPrice - b.sellingPrice;
+                    } else if (state.selectedSort === "hl") {
+                        return b.sellingPrice - a.sellingPrice;
+                    } else if (state.selectedSort === "za") {
+                        return a.name.localeCompare(b.name);
+                    } else if (state.selectedSort === "az") {
+                        return b.name.localeCompare(a.name);
+                    }
+                    return 0;
+                });
+            }
+
+            // Update state with the filtered and sorted items
+            state.items = items;
             state.loading = false;
-            state.error = null;
         });
-        builder.addCase(fetchInventory.pending, (state) => {
+        builder.addCase(getInventoryItems.pending, (state) => {
             state.loading = true;
         });
-        builder.addCase(fetchInventory.rejected, (state, action) => {
+        builder.addCase(getInventoryItems.rejected, (state) => {
             state.loading = false;
-            state.error = action.payload as string;
-        });
-        builder.addCase(deleteItemById.pending, (state, action) => {
-            state.loading = true;
-        })
-        builder.addCase(deleteItemById.fulfilled, (state, action) => {
-            state.inventory = state.inventory.filter(item => item.id !== action.payload.id);
-            state.loading = false;
-            state.error = null;
-        }).addCase(deleteItemById.rejected, (state, action) => {
-            state.error = action.payload as string;
-            state.loading = false;
-            state.error = null;
         });
     }
 })
-
-export const fetchInventory = createAsyncThunk(
-    "inventory/fetchInventory",
-    async ({page, size}: { page: number, size: number }, thunkAPI) => {
-        const uid = getCurrentUser()?.uid;
-        const token = await getCurrentUser()?.getIdToken()
-        try {
-            const res = await axios({
-                method: 'GET',
-                url: `/api/inventory?page=${page}&size=${size}&uid=${uid}`,
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-
-            if (res.status !== 200) {
-                new Error(res.data.message)
-            }
-            return res.data;
-        } catch (error: any) {
-            console.error(error)
-            return thunkAPI.rejectWithValue(error.message);
-        }
+export const getInventoryItems = createAsyncThunk("inventory/fetchInventory", async ({size, page}: {
+    size: number;
+    page: number;
+}, thunkAPI) => {
+    try {
+        return await fetchInventory(size, page);
+    } catch (error: any) {
+        return thunkAPI.rejectWithValue(error.message);
     }
-);
-export const deleteItemById = createAsyncThunk(
-    "inventory/deleteItem",
-    async ({id}:{id:string}, thunkAPI) => {
-        const uid = getCurrentUser()?.uid;
-        const token = await getCurrentUser()?.getIdToken()
-
-        try {
-            const res = await axios({
-                method: 'DELETE',
-                url: `/api/inventory/${id}?uid=${uid}`,
-                headers:{
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            if (res.status !== 200) {
-                new Error(res.data.message)
-            }
-            return res.data;
-        } catch (error: any) {
-            console.error(error)
-            return thunkAPI.rejectWithValue(error.message);
-        }
-    }
-);
-
-export const {setLoading,setError, setPage, setSize,setSelectedBrand,setItems} = inventorySlice.actions;
+});
+export const {
+    setSelectedItem,
+    setShowEditingForm,
+    setSelectedSort,
+    setSelectedType,
+    setSize,
+    setPage,
+    setItems,
+} = inventorySlice.actions;
 export default inventorySlice.reducer;
+

@@ -1,86 +1,75 @@
 import {Order} from "@/interfaces";
-import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
-import axios from "axios";
-import {getCurrentUser, getToken} from "@/firebase/firebaseClient";
-import {orderStatus} from "@/constant";
+import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
+import {fetchOrders} from "@/actions/ordersActions";
 
 interface OrderSlice {
-    orders: Order[],
-    loading: boolean,
-    selectedSort: orderStatus,
-    page: number,
+    orders: Order[];
+    selectedOrder: Order | null;
     size: number,
+    page: number,
+    selectedSort: string;
+    selectedType: string;
+    showEditingForm: boolean;
 }
 
 const initialState: OrderSlice = {
-    selectedSort: "",
-    loading: false,
-    orders: [],
+    orders: [] as Order[],
     page: 1,
-    size: 20
+    size: 50,
+    selectedOrder: null,
+    selectedSort: "none",
+    selectedType: "all",
+    showEditingForm: false,
 }
-
 const orderSlice = createSlice({
-    name: 'order',
+    name: "order",
     initialState,
     reducers: {
-        setSelectedSort: (state, action: PayloadAction<orderStatus>) => {
-            console.log(action.payload);
-            state.selectedSort = action.payload;
+        setOrders: (state, action) => {
+            state.orders = action.payload;
         },
-        setPage: (state, action: PayloadAction<number>) => {
+        setPage: (state, action) => {
             state.page = action.payload;
         },
-        setSize: (state, action: PayloadAction<number>) => {
+        setSize: (state, action) => {
             state.size = action.payload;
         },
-        setLoading: (state, action: PayloadAction<boolean>) => {
-            state.loading = action.payload;
+        setSelectedOrder: (state, action) => {
+            state.selectedOrder = action.payload;
         },
-        setOrders: (state, action: PayloadAction<Order[]>) => {
-            state.orders = action.payload;
-        }
+        setSelectedSort: (state, action) => {
+            state.selectedSort = action.payload;
+        },
+        setSelectedType: (state, action) => {
+            state.selectedType = action.payload;
+        },
+        setShowEditingForm: (state, action) => {
+            state.showEditingForm = action.payload;
+        },
     },
-    extraReducers: builder => {
-        builder.addCase(sortOrders.fulfilled, (state, action) => {
-            const originals: Order[] = action.payload;
-            if (state.selectedSort === orderStatus.PROCESSING) {
-                state.orders = originals.filter(order => order.tracking === undefined);
-            } else if (state.selectedSort === orderStatus.SHIPPED) {
-                state.orders = originals.filter(order => order.tracking?.status === orderStatus.SHIPPED);
-            } else if (state.selectedSort === orderStatus.DELIVERED) {
-                state.orders = originals.filter(order => order.tracking?.status === orderStatus.DELIVERED);
-            } else if (state.selectedSort === orderStatus.CANCELLED) {
-                state.orders = originals.filter(order => order.tracking?.status === orderStatus.CANCELLED);
-            } else {
-                state.orders = originals
-            }
-            state.loading = false;
-        })
+    extraReducers: (builder) => {
+        builder.addCase(getOrders.fulfilled, (state, action) => {
+            state.orders = action.payload;
+        });
     }
-})
-export const sortOrders = createAsyncThunk('order/sortOrders', async ({page, size}: {
+});
+export const getOrders = createAsyncThunk("order/getOrders", async ({page, size}: {
     page: number,
     size: number
 }, thunkAPI) => {
     try {
-        const uid = getCurrentUser()?.uid;
-        const token = await getToken();
-        const response = await axios({
-            method: 'GET',
-            url: `/api/orders?uid=${uid}`,
-            params: {
-                pageNumber: page,
-                size
-            },
-            headers: {
-                "Authorization": `Bearer ${token}`
-            }
-        });
-        return response.data;
-    } catch (error) {
-        return thunkAPI.rejectWithValue({message: 'Error fetching orders', error});
+        return await fetchOrders(page, size);
+    } catch (e: any) {
+        return thunkAPI.rejectWithValue(e.message);
     }
 });
-export const {setLoading, setSelectedSort, setPage,setSize, setOrders} = orderSlice.actions;
+export const {
+    setOrders,
+    setPage,
+    setSize,
+    setSelectedOrder,
+    setSelectedSort,
+    setSelectedType,
+    setShowEditingForm
+} = orderSlice.actions;
 export default orderSlice.reducer;

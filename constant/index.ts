@@ -153,41 +153,48 @@ export const paymentStatusList = [
         value: paymentStatus.REFUNDED
     }
 ]
-
-export const recordsSizes = [
+export const sortInventoryOptions = [
     {
         id: 1,
-        name: "20",
-        value: "20"
+        name: "A-Z",
+        value: "ab"
     },
     {
         id: 2,
-        name: "50",
-        value: "50"
+        name: "Z-A",
+        value: "za"
     },
     {
         id: 3,
-        name: "100",
-        value: "100"
+        name: "Price: Low-High",
+        value: "lh"
     },
     {
         id: 4,
-        name: "200",
-        value: "200"
+        name: "Price: High-Low",
+        value: "hl"
     },
     {
         id: 5,
-        name: "300",
-        value: "200"
+        name: "None",
+        value: "none"
+    },
+]
+
+export const filterInventoryOptions = [
+    {
+        id: 1,
+        name: "All",
+        value: "all"
     },
     {
-        id: 6,
-        name: "500",
-        value: "500"
+        id: 2,
+        name: "Low Stock",
+        value: "low"
     },
     {
-        id: 7,
-        name: "1000",
-        value: "1000"
-    }
+        id: 3,
+        name: "Out of Stock",
+        value: "out"
+    },
 ]

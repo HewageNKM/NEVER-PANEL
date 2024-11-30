@@ -26,32 +26,3 @@ const config = {
 const app = initializeApp(config);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
-
-// Firestore collection references
-export const usersCollectionRef = collection(db, "users");
-
-
-export const logUser = async (email: string, password: string) => {
-    await setPersistence(auth, browserLocalPersistence);
-    return await signInWithEmailAndPassword(auth, email, password);
-};
-
-export const getUserById = async (id: string) => {
-    const document = await getDoc(doc(usersCollectionRef, id));
-    return document ? document.data() : null;
-};
-
-export const observeAuthState = (callback: (user: any) => void) => {
-    onAuthStateChanged(auth, (user) => {
-        callback(user);
-    });
-}
-export const getCurrentUser = () => {
-    return auth.currentUser;
-}
-export const logout = async () => {
-    await auth.signOut();
-}
-export const getToken = () => {
-    return auth?.currentUser?.getIdToken();
-}

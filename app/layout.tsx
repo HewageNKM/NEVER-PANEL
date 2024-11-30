@@ -1,34 +1,26 @@
-import type {Metadata} from "next";
-import {Inter} from "next/font/google";
-import "@/app/styles/globals.css";
+"use client";
+import {baselightTheme} from "@/utils/theme/DefaultColors";
+import {ThemeProvider} from "@mui/material/styles";
+import CssBaseline from "@mui/material/CssBaseline";
+import GlobalProvider from "@/components/GlobalProvider";
 import StoreProvider from "@/components/StoreProvider";
-import AuthProvider from "@/components/AuthProvider";
-import ToastProvider from "@/components/ToastProvider";
-
-const inter = Inter({subsets: ["latin"]});
-
-export const metadata: Metadata = {
-    title: {
-        default: "NEVER PANEL",
-        template: "%s | NEVER PANEL",
-    },
-    description: "NEVER ADMIN PANEL FOR MANGING NEVERBE WEBSITE.",
-};
 
 export default function RootLayout({
                                        children,
-                                   }: Readonly<{
+                                   }: {
     children: React.ReactNode;
-}>) {
+}) {
     return (
         <html lang="en">
-        <body className={inter.className}>
+        <body>
         <StoreProvider>
-            <ToastProvider>
-                <AuthProvider>
+            <GlobalProvider>
+                <ThemeProvider theme={baselightTheme}>
+                    {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
+                    <CssBaseline/>
                     {children}
-                </AuthProvider>
-            </ToastProvider>
+                </ThemeProvider>
+            </GlobalProvider>
         </StoreProvider>
         </body>
         </html>

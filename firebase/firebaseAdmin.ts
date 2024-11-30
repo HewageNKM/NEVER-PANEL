@@ -32,9 +32,14 @@ export const getOrders = async (pageNumber: number = 1, size: number = 20) => {
             .offset(offset)
             .get();
 
-        let orders: Order[] = [];
+        const orders: Order[] = [];
         ordersSnapshot.forEach(doc => {
-            const order = doc.data() as Order;
+            let order: Order = doc.data() as Order;
+            order = {
+                ...order,
+                createdAt: order.createdAt.toDate().toLocaleString(),
+                updatedAt: order.updatedAt.toDate().toLocaleString
+            }
             if (!(order.paymentStatus === paymentStatus.PENDING && order.paymentMethod === paymentMethods.PAYHERE)) {
                 orders.push(order);
             }
@@ -107,8 +112,8 @@ export const getItemById = async (itemId: string) => {
         const itemData = itemDoc.data();
         return {
             ...itemData,
-            createdAt: itemData?.createdAt.toDate(),
-            updatedAt: itemData?.updatedAt.toDate(),
+            createdAt: itemData?.createdAt.toDate().toLocaleString(),
+            updatedAt: itemData?.updatedAt.toDate().toLocaleString(),
         } as Item;
 
     } catch (error: any) {
@@ -246,18 +251,50 @@ export const deleteFiles = async (path: string) => {
 };
 
 export const deleteItemById = async (itemId: string) => {
+    console.log(`[START] Deleting item with ID: ${itemId}`);
     try {
-        // Delete all files in the directory and subdirectories
+        // Step 1: Log the start of file deletion
+        console.log(`[INFO] Retrieving files from storage for item ID: ${itemId}`);
         const [files] = await adminStorageBucket.getFiles({prefix: `inventory/${itemId}/`});
 
-        const deletePromises = files.map(file => file.delete());
-        await Promise.all(deletePromises);
+        if (files.length === 0) {
+            console.log(`[INFO] No files found for item ID: ${itemId}`);
+        } else {
+            console.log(`[INFO] Found ${files.length} files for item ID: ${itemId}. Starting deletion.`);
+        }
 
-        // Delete Firestore document
+        // Step 2: Log each file being deleted
+        const deletePromises = files.map(async (file) => {
+            console.log(`[INFO] Deleting file: ${file.name}`);
+            await file.delete();
+        });
+
+        await Promise.all(deletePromises);
+        console.log(`[SUCCESS] All files for item ID: ${itemId} deleted successfully`);
+
+        // Step 3: Log Firestore document deletion
+        console.log(`[INFO] Deleting Firestore document for item ID: ${itemId}`);
         await adminFirestore.collection('inventory').doc(itemId).delete();
-        console.log(`Item with ID ${itemId} and associated files deleted successfully`);
+        console.log(`[SUCCESS] Firestore document for item ID: ${itemId} deleted successfully`);
+
+        console.log(`[END] Successfully deleted item with ID: ${itemId} and associated files`);
     } catch (error: any) {
-        console.error(`Error deleting item with ID ${itemId}:`, error);
+        console.error(`[ERROR] Error deleting item with ID ${itemId}:`, error);
         throw new Error(error.message);
     }
 };
+
+
+export const getUserById = async (userId: string) => {
+    try {
+        const user = await adminFirestore.collection('users').doc(userId).get();
+        if (!user.exists) {
+            console.warn(`User with ID ${userId} not found`);
+            return null;
+        }
+        return user.data();
+    } catch (error: any) {
+        console.error(error);
+        throw new Error(error.message);
+    }
+}
