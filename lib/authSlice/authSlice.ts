@@ -1,22 +1,28 @@
-import { createSlice } from '@reduxjs/toolkit';
+import {createSlice} from '@reduxjs/toolkit';
+import {User} from "@firebase/auth";
+
+interface Interface {
+    currentUser: User | null;
+    loading: boolean;
+}
+
+const initialState: Interface = {
+    currentUser: null,
+    loading: false,
+}
 
 const userSlice = createSlice({
     name: 'user',
-    initialState: {
-        currentUser: null,
-        loading: true,
-    },
+    initialState,
     reducers: {
         setUser(state, action) {
             state.currentUser = action.payload;
-            state.loading = false; // Set loading to false when user data is available
         },
         clearUser(state) {
             state.currentUser = null;
-            state.loading = false; // Clear user and set loading to false
         },
     },
 });
 
-export const { setUser, clearUser } = userSlice.actions;
+export const {setUser, clearUser} = userSlice.actions;
 export default userSlice.reducer;

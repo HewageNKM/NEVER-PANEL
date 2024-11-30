@@ -16,7 +16,6 @@ import {generateId} from "@/utils/genarateIds";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
 import {addAItem, deleteAFile, updateAItem, uploadAFile} from '@/actions/inventoryActions';
 import Image from "next/image";
-import {setError} from "@/lib/loadSlice/loadSlice";
 
 const ItemFormDialog = () => {
     const dispatch = useAppDispatch();
@@ -94,11 +93,6 @@ const ItemFormDialog = () => {
             evt.target.reset()
         } catch (e: any) {
             console.log(e)
-            dispatch(setError({
-                id: new Date().getTime(),
-                message: e.message,
-                severity: "error"
-            }))
         } finally {
             setIsLoading(false)
         }
