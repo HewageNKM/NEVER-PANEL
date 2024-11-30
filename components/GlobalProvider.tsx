@@ -7,7 +7,7 @@ import {setUser} from '@/lib/authSlice/authSlice';
 const GlobalProvider = ({children}: { children: ReactNode }) => {
     const dispatch = useDispatch();
     useEffect(() => {
-        const neverPanelUser = window.localStorage.get("neverPanelUser");
+        const neverPanelUser = window.localStorage.getItem("neverPanelUser");
         dispatch(setUser(neverPanelUser || null));
     }, []);
     return (
