@@ -2,20 +2,22 @@ import {Order} from "@/interfaces";
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
 import {fetchOrders} from "@/actions/ordersActions";
 
-interface OrderSlice {
+interface OrdersSlice {
     orders: Order[];
     selectedOrder: Order | null;
     size: number,
     page: number,
+    loading: boolean;
     selectedSort: string;
     selectedType: string;
     showEditingForm: boolean;
 }
 
-const initialState: OrderSlice = {
+const initialState: OrdersSlice = {
     orders: [] as Order[],
     page: 1,
     size: 50,
+    loading: false,
     selectedOrder: null,
     selectedSort: "none",
     selectedType: "all",
@@ -50,6 +52,9 @@ const orderSlice = createSlice({
     extraReducers: (builder) => {
         builder.addCase(getOrders.fulfilled, (state, action) => {
             state.orders = action.payload;
+            state.loading = false;
+        }).addCase(getOrders.pending, (state) => {
+            state.loading = true;
         });
     }
 });

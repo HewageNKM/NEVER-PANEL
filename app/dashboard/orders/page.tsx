@@ -1,23 +1,23 @@
 'use client';
-import {Stack, Typography} from '@mui/material';
+import {Stack} from '@mui/material';
 import PageContainer from '../components/container/PageContainer';
 import DashboardCard from '../components/shared/DashboardCard';
 import Header from "@/app/dashboard/orders/components/Header";
-import Orders from "@/app/dashboard/orders/components/Orders";
+import OrdersTable from "@/app/dashboard/orders/components/OrdersTable";
 
 
-const SamplePage = () => {
-  return (
-    <PageContainer title="Orders" description="Orders Management">
-      <DashboardCard title="Order Page">
-          <Stack>
-              <Header />
-              <Orders />
-          </Stack>
-      </DashboardCard>
-    </PageContainer>
-  );
+const Orders = () => {
+    return (
+        <PageContainer title="Orders" description="OrdersTable Management">
+            <DashboardCard title="Order Page">
+                <Stack>
+                    <Header/>
+                    <OrdersTable/>
+                </Stack>
+            </DashboardCard>
+        </PageContainer>
+    );
 };
 
-export default SamplePage;
+export default Orders;
 

@@ -3,7 +3,7 @@ import loadSlice from './loadSlice/loadSlice'
 import authSlice from "@/lib/authSlice/authSlice";
 import inventorySlice from "@/lib/inventorySlice/inventorySlice";
 import itemDetailsSlice from "@/lib/itemDetailsSlice/itemDetailsSlice";
-import orderSlice from "@/lib/orderSlice/orderSlice";
+import ordersSlice from "@/lib/ordersSlice/ordersSlice";
 
 export const makeStore = () => {
     return configureStore({
@@ -12,7 +12,7 @@ export const makeStore = () => {
             authSlice,
             inventorySlice,
             itemDetailsSlice,
-            orderSlice
+            ordersSlice
         },
     })
 }

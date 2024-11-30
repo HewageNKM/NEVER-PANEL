@@ -12,7 +12,7 @@ export const GET = async (req: Request) => {
 
         // Get the URL and parse the query parameters
         const url = new URL(req.url);
-        const pageNumber = parseInt(url.searchParams.get('pageNumber') as string) || 1;
+        const pageNumber = parseInt(url.searchParams.get('page') as string) || 1;
         const size = parseInt(url.searchParams.get('size') as string) || 20;
 
         console.log(`Page number: ${pageNumber}, Size: ${size}`);
