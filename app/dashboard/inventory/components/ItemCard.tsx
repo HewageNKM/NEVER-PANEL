@@ -60,12 +60,33 @@ const ItemCard = ({item, onEdit}: { item: Item, onEdit: any }) => {
                 bgcolor: "background.default",
             }}
         >
-            <CardMedia
-                onClick={() => router.push(`/dashboard/inventory/${item.itemId}`)}
-                sx={{height: 160, borderTopLeftRadius: 8, borderTopRightRadius: 8}}
-                image={item.thumbnail.url}
-                title={item.name}
-            />
+            <Box sx={{position:"relative"}}>
+                <CardMedia
+                    onClick={() => router.push(`/dashboard/inventory/${item.itemId}`)}
+                    sx={{height: 160, borderTopLeftRadius: 8, borderTopRightRadius: 8}}
+                    image={item.thumbnail.url}
+                    title={item.name}
+                />
+                {item.status == "Inactive" && (
+                    <Box
+                        sx={{
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            width: "100%",
+                            height: "100%",
+                            bgcolor: "rgba(0, 0, 0, 0.5)",
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                        }}
+                    >
+                        <Typography variant="h6" sx={{color: "white"}}>
+                            Inactive
+                        </Typography>
+                    </Box>
+                )}
+            </Box>
             <CardContent sx={{p: 1}}>
                 <Typography variant="body2" sx={{color: "text.secondary", textTransform: "uppercase"}}>
                     {item.itemId}

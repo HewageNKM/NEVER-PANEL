@@ -12,6 +12,7 @@ export interface Item {
     buyingPrice: number,
     sellingPrice: number,
     discount: number,
+    status: "Active" | "Inactive",
 
     createdAt: Timestamp | null,
     updatedAt: Timestamp | null,
