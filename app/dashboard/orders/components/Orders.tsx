@@ -4,6 +4,7 @@ import {
     DialogActions,
     DialogContent,
     DialogTitle,
+    IconButton,
     Paper,
     Table,
     TableBody,
@@ -11,15 +12,14 @@ import {
     TableContainer,
     TableHead,
     TableRow,
-    Typography,
     Tooltip,
-    IconButton
+    Typography
 } from '@mui/material';
 import InfoIcon from '@mui/icons-material/Info';
 import React, {useEffect, useState} from 'react';
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import {getOrders} from "@/lib/orderSlice/orderSlice";
-import {Customer, Order, OrderItem} from "@/interfaces";
+import {Customer, OrderItem, Tracking} from "@/interfaces";
 
 interface CustomerDialogProps {
     customer: Customer;
@@ -33,43 +33,40 @@ interface OrderItemsDialogProps {
     onClose: () => void;
 }
 
-// Customer dialog component
-const CustomerDialog: React.FC<CustomerDialogProps> = ({customer, open, onClose}) => (
+const AddressDialog: React.FC<CustomerDialogProps> = ({customer, open, onClose}) => (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
         <DialogTitle>Customer Details</DialogTitle>
         <DialogContent>
-            <Typography variant="body1" gutterBottom><strong>ID:</strong> {customer.id}</Typography>
-            <Typography variant="body1" gutterBottom><strong>Name:</strong> {customer.name}</Typography>
-            <Typography variant="body1" gutterBottom><strong>Email:</strong> {customer.email}</Typography>
-            <Typography variant="body1" gutterBottom><strong>Phone:</strong> {customer.phone}</Typography>
-            <Typography variant="body1" gutterBottom><strong>Address:</strong> {customer.address}</Typography>
-            <Typography variant="body1" gutterBottom><strong>City:</strong> {customer.city}</Typography>
+            <Typography variant="body1" gutterBottom><strong>Name:</strong> {customer?.name}</Typography>
+            <Typography variant="body1" gutterBottom><strong>Email:</strong> {customer?.email}</Typography>
+            <Typography variant="body1" gutterBottom><strong>Phone:</strong> {customer?.phone}</Typography>
+            <Typography variant="body1" gutterBottom><strong>Address:</strong> {customer?.address}</Typography>
+            <Typography variant="body1" gutterBottom><strong>City:</strong> {customer?.city}</Typography>
         </DialogContent>
         <DialogActions>
-            <Button variant="contained" onClick={onClose} color="primary">Close</Button>
+            <Button onClick={onClose} color="primary" variant="contained">Close</Button>
         </DialogActions>
     </Dialog>
 );
 
-// Order items dialog component
 const OrderItemsDialog: React.FC<OrderItemsDialogProps> = ({items, open, onClose}) => (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
+    <Dialog open={open} onClose={onClose} sx={{padding:"3rem"}}>
         <DialogTitle>Order Items</DialogTitle>
-        <DialogContent>
-            {items.map((item, index) => (
-                <div key={index} style={{marginBottom: '10px'}}>
-                    <Typography variant="body1"><strong>Item ID:</strong> {item.itemId}</Typography>
-                    <Typography variant="body1"><strong>Name:</strong> {item.name}</Typography>
-                    <Typography variant="body1"><strong>Variant:</strong> {item.variantName}</Typography>
-                    <Typography variant="body1"><strong>Size:</strong> {item.size}</Typography>
-                    <Typography variant="body1"><strong>Quantity:</strong> {item.quantity}</Typography>
-                    <Typography variant="body1"><strong>Price:</strong> LKR {item.price.toFixed(2)}</Typography>
-                    <hr style={{border: '0.5px solid #ddd'}}/>
+        <DialogContent sx={{padding: '20px', backgroundColor: '#f9f9f9'}}>
+            {items?.map((item, index) => (
+                <div key={index} style={{marginBottom: '15px', borderBottom: '1px solid #ddd', paddingBottom: '10px'}}>
+                    <Typography variant="body1" gutterBottom><strong>Item ID:</strong> {item.itemId}</Typography>
+                    <Typography variant="body1" gutterBottom><strong>Name:</strong> {item.name}</Typography>
+                    <Typography variant="body1" gutterBottom><strong>Variant:</strong> {item.variantName}</Typography>
+                    <Typography variant="body1" gutterBottom><strong>Size:</strong> {item.size}</Typography>
+                    <Typography variant="body1" gutterBottom><strong>Quantity:</strong> {item.quantity}</Typography>
+                    <Typography variant="body1" gutterBottom><strong>Price:</strong> LKR {item.price.toFixed(2)}
+                    </Typography>
                 </div>
             ))}
         </DialogContent>
         <DialogActions>
-            <Button variant="contained" onClick={onClose} color="primary">Close</Button>
+            <Button onClick={onClose} color="primary" variant="contained">Close</Button>
         </DialogActions>
     </Dialog>
 );
@@ -77,6 +74,7 @@ const OrderItemsDialog: React.FC<OrderItemsDialogProps> = ({items, open, onClose
 const Orders = () => {
     const {currentUser} = useAppSelector(state => state.authSlice);
     const {page, size, orders} = useAppSelector(state => state.orderSlice);
+    const [tracking, setTracking] = useState<Tracking | null>(null)
     const dispatch = useAppDispatch();
 
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
@@ -92,17 +90,22 @@ const Orders = () => {
     }, [currentUser, page, size, dispatch]);
 
     return (
-        <TableContainer component={Paper} elevation={3} style={{marginTop: '20px'}}>
-            <Table>
+        <TableContainer
+            component={Paper}
+            elevation={3}
+            sx={{
+                marginTop: 2,
+                overflowX: 'auto', // Enable horizontal scrolling
+            }}
+        >
+            <Table stickyHeader>
                 <TableHead>
-                    <TableRow style={{backgroundColor: '#f5f5f5'}}>
-                        <TableCell><strong>Order ID</strong></TableCell>
-                        <TableCell><strong>Payment ID</strong></TableCell>
-                        <TableCell><strong>Payment Status</strong></TableCell>
-                        <TableCell><strong>Payment Method</strong></TableCell>
-                        <TableCell><strong>Shipping Cost</strong></TableCell>
-                        <TableCell><strong>Created At</strong></TableCell>
-                        <TableCell><strong>Actions</strong></TableCell>
+                    <TableRow>
+                        {["Order ID", "Payment ID", "Payment Status", "Payment Method", "Total", "Shipping Cost", "Address", "Created At", "Location", "Status","Actions"].map((header) => (
+                            <TableCell key={header} sx={{fontWeight: 'bold', backgroundColor: '#f5f5f5'}}>
+                                {header}
+                            </TableCell>
+                        ))}
                     </TableRow>
                 </TableHead>
                 <TableBody>
@@ -116,23 +119,33 @@ const Orders = () => {
                                 </Tooltip>
                                 <IconButton
                                     color="primary"
-                                    onClick={() => setSelectedCustomer(order.customer)}
-                                    style={{marginRight: '10px'}}
+                                    sx={{marginRight: 1}}
                                 >
                                     <InfoIcon/>
                                 </IconButton>
                             </TableCell>
                             <TableCell>{order.paymentMethod}</TableCell>
-                            <TableCell>LKR {order.shippingCost.toFixed(2)}</TableCell>
-                            <TableCell>{new Date(order.createdAt).toLocaleString()}</TableCell>
                             <TableCell>
+                                LKR {order.items.reduce((acc, item) => acc + (item.price * item.quantity), 0).toFixed(2)}
+                            </TableCell>
+                            <TableCell>LKR {order.shippingCost.toFixed(2)}</TableCell>
+                            <TableCell>
+                                {order.customer ? order.customer.name : "Not Available"} {order.customer && (
                                 <IconButton
                                     color="primary"
                                     onClick={() => setSelectedCustomer(order.customer)}
-                                    style={{marginRight: '10px'}}
+                                    sx={{marginRight: 1}}
                                 >
                                     <InfoIcon/>
                                 </IconButton>
+                            )}
+                            </TableCell>
+                            <TableCell>{new Date(order.createdAt).toLocaleString()}</TableCell>
+                            <TableCell>{order.from}</TableCell>
+                            <TableCell>
+
+                            </TableCell>
+                            <TableCell>
                                 <Button
                                     variant="outlined"
                                     onClick={() => setSelectedItems(order.items)}
@@ -146,21 +159,16 @@ const Orders = () => {
                 </TableBody>
             </Table>
 
-            {/* Dialogs */}
-            {selectedCustomer && (
-                <CustomerDialog
-                    customer={selectedCustomer}
-                    open={Boolean(selectedCustomer)}
-                    onClose={handleCustomerDialogClose}
-                />
-            )}
-            {selectedItems && (
-                <OrderItemsDialog
-                    items={selectedItems}
-                    open={Boolean(selectedItems)}
-                    onClose={handleOrderItemsDialogClose}
-                />
-            )}
+            <AddressDialog
+                customer={selectedCustomer}
+                open={selectedCustomer !== null}
+                onClose={handleCustomerDialogClose}
+            />
+            <OrderItemsDialog
+                items={selectedItems}
+                open={selectedItems !== null}
+                onClose={handleOrderItemsDialogClose}
+            />
         </TableContainer>
     );
 };
