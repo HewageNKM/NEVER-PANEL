@@ -6,45 +6,35 @@ import Logo from "@/app/dashboard/layout/shared/logo/Logo";
 import AuthLogin from "./components/AuthLogin";
 import {authenticateUser} from "@/actions/authAction";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
-import {setError, setLoading} from "@/lib/loadSlice/loadSlice";
 import {useRouter} from "next/navigation";
-import {useEffect} from "react";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
+import {setUser} from "@/lib/authSlice/authSlice";
+import {useEffect} from "react";
 
 const Login = () => {
     const dispatch = useAppDispatch();
     const router = useRouter();
 
-    const {currentUser, loading} = useAppSelector(state => state.authSlice);
+    const {loading, currentUser} = useAppSelector(state => state.authSlice);
 
     const onFormSubmit = async (evt: any) => {
         evt.preventDefault();
-        dispatch(setLoading(true));
         try {
             const email: string = evt.target.email.value;
             const password: string = evt.target.password.value;
             const credential = await authenticateUser(email, password);
-
-            console.log(credential);
+            window.localStorage.setItem("neverPanelUser", JSON.stringify(credential));
+            dispatch(setUser(credential));
             router.replace("/dashboard");
         } catch (e: any) {
-            dispatch(setError({
-                id: new Date().getTime(),
-                message: "Invalid email or password",
-                severity: "error"
-            }))
             console.log(e);
-        } finally {
-            dispatch(setLoading(false)); // Hide loading indicator after authentication attempt
         }
     };
-
     useEffect(() => {
-        if (!loading && currentUser) {
-            router.replace("/dashboard");
+        if (currentUser) {
+            router.replace("/dashboard")
         }
-    }, [currentUser, loading, router]);
-
+    }, [currentUser]);
     return (
         <PageContainer title="Login" description="this is Login page">
             <Box

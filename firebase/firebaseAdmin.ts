@@ -177,6 +177,7 @@ export const updateItem = async (item: Item) => {
             buyingPrice: item.buyingPrice,
             itemId: item.itemId,
             brand: item.brand,
+            status: item.status,
             thumbnail: item.thumbnail,
             type: item.type,
             discount: item.discount,

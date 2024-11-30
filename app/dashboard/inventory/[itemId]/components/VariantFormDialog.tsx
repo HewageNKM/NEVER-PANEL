@@ -23,7 +23,6 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import {Img, Item, Size, Variant} from "@/interfaces";
 import Image from "next/image";
 import {IoCloudUpload, IoPencil, IoTrashBin} from "react-icons/io5";
-import {setError} from "@/lib/loadSlice/loadSlice";
 import {generateId} from "@/utils/genarateIds";
 import {updateAItem, uploadAFile} from "@/actions/inventoryActions";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
@@ -111,11 +110,6 @@ const VariantFormDialog = () => {
                 }
                 await updateAItem(updatedItem)
                 dispatch(setItem(updatedItem));
-                dispatch(setError({
-                    id: new Date().getTime(),
-                    message: "Variant updated successfully",
-                    severity: "success"
-                }))
                 evt.target.reset();
                 clear();
             } else {
@@ -147,20 +141,11 @@ const VariantFormDialog = () => {
                 console.log(updatedItem)
                 await updateAItem(updatedItem)
                 dispatch(setItem(updatedItem));
-                dispatch(setError({
-                    id: new Date().getTime(),
-                    message: "Variant added successfully",
-                    severity: "success"
-                }))
                 evt.target.reset();
                 clear();
             }
         } catch (e) {
-            dispatch(setError({
-                id: new Date().getTime(),
-                message: e.message,
-                severity: "error"
-            }))
+            console.error(e)
         } finally {
             setIsLoading(false)
         }
@@ -200,9 +185,9 @@ const VariantFormDialog = () => {
                                         direction="column"
                                         spacing={2}
                                         alignItems="center"
-                                        sx={{ minWidth: 120, mr: 2 }} // Ensure a consistent width for each item
+                                        sx={{minWidth: 120, mr: 2}} // Ensure a consistent width for each item
                                     >
-                                        <Image src={image.url} alt={image.file} width={100} height={100} />
+                                        <Image src={image.url} alt={image.file} width={100} height={100}/>
                                     </Stack>
                                 ))}
                                 {newImages?.map((image, index) => (
@@ -211,13 +196,14 @@ const VariantFormDialog = () => {
                                         direction="column"
                                         spacing={2}
                                         alignItems="center"
-                                        sx={{ minWidth: 120, mr: 2 }}
+                                        sx={{minWidth: 120, mr: 2}}
                                     >
-                                        <Image src={URL.createObjectURL(image)} alt={image.name} width={100} height={100} />
-                                        <Button color={"error"} onClick={()=>{
+                                        <Image src={URL.createObjectURL(image)} alt={image.name} width={100}
+                                               height={100}/>
+                                        <Button color={"error"} onClick={() => {
                                             setNewImages(prevState => prevState.filter((_, i) => i !== index))
                                         }}>
-                                            <IoTrashBin />
+                                            <IoTrashBin/>
                                         </Button>
                                     </Stack>
                                 ))}

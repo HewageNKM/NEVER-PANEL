@@ -8,7 +8,6 @@ import ConfirmationDialog from "@/components/ConfirmationDialog";
 import {useDispatch} from "react-redux";
 import {setItem, setSelectedVariant, setShowEditingForm} from "@/lib/itemDetailsSlice/itemDetailsSlice";
 import {useAppSelector} from "@/lib/hooks";
-import {setError} from "@/lib/loadSlice/loadSlice";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
 import {deleteAFile, updateAItem} from "@/actions/inventoryActions";
 
@@ -48,18 +47,8 @@ const VariantCard = ({variant}: { variant: Variant }) => {
 
             await updateAItem(updatedItem)
             dispatch(setItem(updatedItem))
-            dispatch(setError({
-                id: new Date().getTime(),
-                message: "Variant deleted successfully",
-                severity: "success"
-            }))
         } catch (e: any) {
             console.error(e)
-            dispatch(setError({
-                id: new Date().getTime(),
-                message: e.message,
-                severity: "error"
-            }))
         } finally {
             setIsLoading(false)
         }

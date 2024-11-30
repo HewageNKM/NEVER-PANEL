@@ -27,7 +27,7 @@ const Header = () => {
             const client = getAlgoliaClient();
 
             const searchResults = await client.search({
-                requests:[{indexName: "inventory_index", query: search}]
+                requests: [{indexName: "inventory_index", query: search}]
             });
             console.log(searchResults.results[0].hits)
             dispatch(setItems(searchResults.results[0].hits))

@@ -5,7 +5,6 @@ import {Box, Button, Grid, MenuItem, Pagination, Select, Stack} from "@mui/mater
 import React, {useEffect} from "react";
 import {Error, Item} from "@/interfaces";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
-import {setError} from "@/lib/loadSlice/loadSlice";
 import ItemCard from "@/app/dashboard/inventory/components/ItemCard";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
 import {IoRefresh} from "react-icons/io5";
@@ -38,13 +37,7 @@ const Page = () => {
         try {
             dispatch(getInventoryItems({size, page}))
         } catch (e: any) {
-            const error: Error = {
-                // @ts-ignore
-                id: new Date().getTime(),
-                message: e.message,
-                severity: "error"
-            }
-            dispatch(setError(error))
+            console.error(e)
         }
     }
 
@@ -108,5 +101,5 @@ const Page = () => {
         </PageContainer>
     );
 };
-
+export const dynamic = 'force-dynamic';
 export default Page;

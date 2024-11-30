@@ -16,7 +16,6 @@ import {generateId} from "@/utils/genarateIds";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
 import {addAItem, deleteAFile, updateAItem, uploadAFile} from '@/actions/inventoryActions';
 import Image from "next/image";
-import {setError} from "@/lib/loadSlice/loadSlice";
 
 const ItemFormDialog = () => {
     const dispatch = useAppDispatch();
@@ -36,7 +35,6 @@ const ItemFormDialog = () => {
         whiteSpace: 'nowrap',
         width: 1,
     });
-
     const onFormSubmit = async (evt: any) => {
         evt.preventDefault();
         setIsLoading(true)
@@ -49,8 +47,10 @@ const ItemFormDialog = () => {
             const sellingPrice = evt.target.sellingPrice.value;
             const discount = evt.target.discount.value;
             const itemId = evt.target.itemId.value == "" ? generateId("item", manufacturer) : evt.target.itemId.value;
+            const status = evt.target.status.value;
 
             const newItem: Item = {
+                status: status,
                 brand: brand.toLowerCase(),
                 buyingPrice: Number.parseInt(buyingPrice),
                 createdAt: item?.createdAt ? item?.createdAt : Timestamp.now(),
@@ -64,6 +64,7 @@ const ItemFormDialog = () => {
                 updatedAt: Timestamp.now(),
                 variants: item?.variants ? item.variants : []
             }
+
             if (newImage) {
                 if (item) {
                     await deleteAFile(`inventory/${item.itemId}/${item.thumbnail.file}`);
@@ -92,11 +93,6 @@ const ItemFormDialog = () => {
             evt.target.reset()
         } catch (e: any) {
             console.log(e)
-            dispatch(setError({
-                id: new Date().getTime(),
-                message: e.message,
-                severity: "error"
-            }))
         } finally {
             setIsLoading(false)
         }
@@ -260,6 +256,16 @@ const ItemFormDialog = () => {
                                     />
                                 </Grid>
                             </Grid>
+                        </Box>
+                        <Box mt={2} justifyItems={"start"} alignItems={"start"}>
+                            <Typography>
+                                Status
+                            </Typography>
+                            <Select variant={"outlined"} size={"small"} defaultValue={item?.status || "Inactive"}
+                                    name={"status"}>
+                                <MenuItem value={"Active"}>Active</MenuItem>
+                                <MenuItem value={"Inactive"}>Inactive</MenuItem>
+                            </Select>
                         </Box>
                     </DialogContent>
                     <DialogActions>

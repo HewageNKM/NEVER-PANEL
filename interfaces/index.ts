@@ -12,6 +12,8 @@ export interface Item {
     buyingPrice: number,
     sellingPrice: number,
     discount: number,
+    status: "Active" | "Inactive",
+
     createdAt: Timestamp | null,
     updatedAt: Timestamp | null,
 }
@@ -64,6 +66,7 @@ export interface OrderItem {
     size: string,
     quantity: number,
     price: number,
+    discount: number,
 }
 
 export interface Tracking {

@@ -12,7 +12,6 @@ import Box from '@mui/material/Box';
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import {deleteAItem} from "@/actions/inventoryActions";
-import {setError} from "@/lib/loadSlice/loadSlice";
 import {getInventoryItems} from "@/lib/inventorySlice/inventorySlice";
 import {useRouter} from "next/navigation";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
@@ -29,18 +28,8 @@ const ItemCard = ({item, onEdit}: { item: Item, onEdit: any }) => {
             setIsLoading(true);
             setShowConfirmedDialog(false);
             await deleteAItem(item.itemId);
-            dispatch(setError({
-                id: new Date().getTime(),
-                message: "Item deleted successfully",
-                severity: "success"
-            }))
         } catch (e: any) {
             console.error(e)
-            dispatch(setError({
-                id: new Date().getTime(),
-                message: e.message,
-                severity: "error"
-            }))
         } finally {
             setIsLoading(false);
             dispatch(getInventoryItems({size: size, page: page}))
@@ -60,12 +49,33 @@ const ItemCard = ({item, onEdit}: { item: Item, onEdit: any }) => {
                 bgcolor: "background.default",
             }}
         >
-            <CardMedia
-                onClick={() => router.push(`/dashboard/inventory/${item.itemId}`)}
-                sx={{height: 160, borderTopLeftRadius: 8, borderTopRightRadius: 8}}
-                image={item.thumbnail.url}
-                title={item.name}
-            />
+            <Box sx={{position: "relative"}}>
+                <CardMedia
+                    onClick={() => router.push(`/dashboard/inventory/${item.itemId}`)}
+                    sx={{height: 160, borderTopLeftRadius: 8, borderTopRightRadius: 8}}
+                    image={item.thumbnail.url}
+                    title={item.name}
+                />
+                {item.status == "Inactive" && (
+                    <Box
+                        sx={{
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            width: "100%",
+                            height: "100%",
+                            bgcolor: "rgba(0, 0, 0, 0.5)",
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                        }}
+                    >
+                        <Typography variant="h6" sx={{color: "white"}}>
+                            Inactive
+                        </Typography>
+                    </Box>
+                )}
+            </Box>
             <CardContent sx={{p: 1}}>
                 <Typography variant="body2" sx={{color: "text.secondary", textTransform: "uppercase"}}>
                     {item.itemId}
