@@ -96,6 +96,11 @@ export const accessoriesSizesList = [
         id: 8,
         name: "XL",
         value: "xl",
+    },
+    {
+        id: 9,
+        name: "Free Size",
+        value: "free size",
     }
 ]
 export enum orderStatus {
