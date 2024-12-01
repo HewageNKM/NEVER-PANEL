@@ -33,6 +33,11 @@ export const brands = [
         id: 8,
         name: "Polo",
         value: "polo"
+    },
+    {
+        id:8,
+        name:"LK",
+        value:"lk"
     }
 
 ]
