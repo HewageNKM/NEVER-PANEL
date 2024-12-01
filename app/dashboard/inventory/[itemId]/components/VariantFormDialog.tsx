@@ -54,11 +54,6 @@ const VariantFormDialog = () => {
 
     const handleAddSize = () => {
         if (selectedSize === "none") {
-            dispatch(setError({
-                id: new Date().getTime(),
-                message: "Please select a size",
-                severity: "error"
-            }));
             return;
         }
 
@@ -271,7 +266,7 @@ const VariantFormDialog = () => {
                                 onChange={(e) => setSelectedSize(e.target.value)}
                                 sx={{flexGrow: 1}}
                             >
-                                {item?.type === "shoes" && shoeSizesList.map((option) => (
+                                {(item?.type === "shoes" || item?.type == "sandals") && shoeSizesList.map((option) => (
                                     <MenuItem value={option} key={option}>{option}</MenuItem>
                                 ))}
                                 {item?.type === "accessories" && accessoriesSizesList.map((option) => (
