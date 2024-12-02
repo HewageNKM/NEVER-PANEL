@@ -20,11 +20,36 @@ const adminFirestore = admin.firestore();
 const adminAuth = admin.auth();
 const adminStorageBucket = admin.storage().bucket(process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET);
 
+export async function getTodayOrders() {
+    const ordersRef = adminFirestore.collection('orders');
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0); // Midnight today
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999); // End of today
+
+    const querySnapshot = await ordersRef
+        .where('timestamp', '>=', admin.firestore.Timestamp.fromDate(startOfDay))
+        .where('timestamp', '<=', admin.firestore.Timestamp.fromDate(endOfDay))
+        .get();
+
+    const orders: Order[] = [];
+    querySnapshot.forEach(doc => {
+        if(doc.exists) {
+            const order = doc.data() as Order;
+            orders.push({
+                ...order,
+                createdAt: order.createdAt.toDate().toLocaleString(),
+                updatedAt: order.updatedAt.toDate().toLocaleString(),
+            });
+        }
+    });
+    return orders;
+}
+
 // Get paginated orders, excluding 'Pending' orders with 'PayHere' as payment method
 export const getOrders = async (pageNumber: number = 1, size: number = 20) => {
     try {
         const offset = (pageNumber - 1) * size;
-
         // Fetch orders with pagination and sorting by createdAt
         const ordersSnapshot = await adminFirestore.collection('orders')
             .orderBy('createdAt', 'desc' as any)
