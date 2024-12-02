@@ -1,15 +1,19 @@
-import React from 'react';
-import { Select, MenuItem } from '@mui/material';
+import React, { useEffect, useState } from 'react';
+import { Select, MenuItem, Box, CircularProgress } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import DashboardCard from '../shared/DashboardCard';
 import dynamic from "next/dynamic";
+import { collection, query, where, getDocs, Timestamp } from "@firebase/firestore";
+import { db } from "@/firebase/firebaseClient"; // Ensure the correct path
+import { Order } from "@/interfaces"; // Ensure the correct path
+
 const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
-
 const SalesOverview = () => {
-
-    // select
-    const [month, setMonth] = React.useState('1');
+    const [month, setMonth] = useState<string>('');
+    const [salesData, setSalesData] = useState({ website: [], store: [] });
+    const [loading, setLoading] = useState(true);
+    const [months, setMonths] = useState<string[]>([]);
 
     const handleChange = (event: any) => {
         setMonth(event.target.value);
@@ -20,7 +24,7 @@ const SalesOverview = () => {
     const primary = theme.palette.primary.main;
     const secondary = theme.palette.secondary.main;
 
-    // chart
+    // chart options
     const optionscolumnchart: any = {
         chart: {
             type: 'bar',
@@ -42,13 +46,12 @@ const SalesOverview = () => {
                 borderRadiusWhenStacked: 'all',
             },
         },
-
         stroke: {
             show: true,
             width: 5,
             lineCap: "butt",
             colors: ["transparent"],
-          },
+        },
         dataLabels: {
             enabled: false,
         },
@@ -68,7 +71,7 @@ const SalesOverview = () => {
             tickAmount: 4,
         },
         xaxis: {
-            categories: ['16/08', '17/08', '18/08', '19/08', '20/08', '21/08', '22/08', '23/08'],
+            categories: [],
             axisBorder: {
                 show: false,
             },
@@ -78,38 +81,105 @@ const SalesOverview = () => {
             fillSeriesColor: false,
         },
     };
+
+    // Placeholder for chart data
     const seriescolumnchart: any = [
         {
-            name: 'Eanings this month',
-            data: [355, 390, 300, 350, 390, 180, 355, 390],
+            name: 'Earnings this month (Website)',
+            data: salesData.website,
         },
         {
-            name: 'Expense this month',
-            data: [280, 250, 325, 215, 250, 310, 280, 250],
+            name: 'Earnings this month (Store)',
+            data: salesData.store,
         },
     ];
 
-    return (
+    useEffect(() => {
+        const fetchSalesData = async () => {
+            try {
+                setLoading(true);
 
-        <DashboardCard title="Sales Overview" action={
-            <Select
-                labelId="month-dd"
-                id="month-dd"
-                value={month}
-                size="small"
-                onChange={handleChange}
-            >
-                <MenuItem value={1}>March 2023</MenuItem>
-                <MenuItem value={2}>April 2023</MenuItem>
-                <MenuItem value={3}>May 2023</MenuItem>
-            </Select>
-        }>
-            <Chart
-                options={optionscolumnchart}
-                series={seriescolumnchart}
-                type="bar"
-                height={370} width={"100%"}
-            />
+                // Get the first day and last day of the current month
+                const startOfMonth = new Date();
+                startOfMonth.setDate(1);
+                startOfMonth.setHours(0, 0, 0, 0);
+
+                const endOfMonth = new Date(startOfMonth);
+                endOfMonth.setMonth(endOfMonth.getMonth() + 1);
+                endOfMonth.setDate(0);
+                endOfMonth.setHours(23, 59, 59, 999);
+
+                const startTimestamp = Timestamp.fromDate(startOfMonth);
+                const endTimestamp = Timestamp.fromDate(endOfMonth);
+
+
+
+                const ordersRef = collection(db, "orders");
+                const ordersQuery = query(
+                    ordersRef,
+                    where("createdAt", ">=", startTimestamp),
+                    where("createdAt", "<=", endTimestamp)
+                );
+
+                const querySnapshot = await getDocs(ordersQuery);
+
+                if (querySnapshot.empty) {
+                    console.log('No matching documents found.');
+                } else {
+                    console.log('Found documents:', querySnapshot.size);
+                }
+
+                querySnapshot.forEach((doc) => {
+                    console.log('Document data:', doc.data()); // Log each document's data
+                });
+
+                // Continue with the processing logic...
+            } catch (error) {
+                console.error("Error fetching sales data:", error.message, error.stack);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchSalesData();
+    }, [month]);
+
+    return (
+        <DashboardCard
+            title="Sales Overview"
+            action={
+                <Select
+                    labelId="month-dd"
+                    id="month-dd"
+                    value={month}
+                    size="small"
+                    onChange={handleChange}
+                    disabled={loading || !months.length}
+                >
+                    {months.map((monthYear) => {
+                        const [year, monthIndex] = monthYear.split('-');
+                        const monthName = new Date(parseInt(year), parseInt(monthIndex) - 1).toLocaleString('default', { month: 'long' });
+                        return (
+                            <MenuItem key={monthYear} value={monthYear}>
+                                {monthName} {year}
+                            </MenuItem>
+                        );
+                    })}
+                </Select>
+            }
+        >
+            {loading ? (
+                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100px" }}>
+                    <CircularProgress />
+                </Box>
+            ) : (
+                <Chart
+                    options={optionscolumnchart}
+                    series={seriescolumnchart}
+                    type="bar"
+                    height={370}
+                    width={"100%"}
+                />
+            )}
         </DashboardCard>
     );
 };
