@@ -83,6 +83,14 @@ const ItemCard = ({item, onEdit}: { item: Item, onEdit: any }) => {
                 <Typography variant="h5" sx={{fontWeight: 500, textTransform: "capitalize"}}>
                     {item.name}
                 </Typography>
+                <Box mt={1}>
+                    <Typography>
+                        Buying: LKR {item.buyingPrice}
+                    </Typography>
+                    <Typography>
+                        Selling: LKR {item.sellingPrice}
+                    </Typography>
+                </Box>
                 <Typography
                     variant="h6"
                     sx={{
