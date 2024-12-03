@@ -1,17 +1,18 @@
 "use client";
 
-import { Box, Fab, Typography, CircularProgress } from "@mui/material";
-import { IconCurrencyDollar } from "@tabler/icons-react";
+import {Box, CircularProgress, Typography} from "@mui/material";
 import DashboardCard from "../shared/DashboardCard";
-import { useEffect, useState } from "react";
-import { collection, query, where, getDocs, Timestamp } from "@firebase/firestore";
-import { db } from "@/firebase/firebaseClient";
-import { Order } from "@/interfaces"; // Ensure the correct path to your interfaces
+import {useEffect, useState} from "react";
+import {collection, getDocs, query, Timestamp, where} from "@firebase/firestore";
+import {db} from "@/firebase/firebaseClient";
+import {Order} from "@/interfaces"; // Ensure the correct path to your interfaces
 
 const DailyEarnings = () => {
     const [totalEarnings, setTotalEarnings] = useState(0);
     const [invoiceCount, setInvoiceCount] = useState(0);
-    const [loading, setLoading] = useState(true); // Add loading state
+    const [loading, setLoading] = useState(true);
+    const [totalProfit, setTotalProfit] = useState(0);
+    // Add loading state
 
     useEffect(() => {
         const fetchDailyEarnings = async () => {
@@ -60,27 +61,36 @@ const DailyEarnings = () => {
             title="Daily Earnings"
         >
             {loading ? (
-                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100px" }}>
-                    <CircularProgress />
+                <Box sx={{display: "flex", justifyContent: "center", alignItems: "center", height: "100px"}}>
+                    <CircularProgress/>
                 </Box>
             ) : (
                 <Box
                     sx={{
                         display: "flex",
-                        direction: "column",
-                        gap: 2,
+                        flexDirection: "column", // Use flexDirection instead of direction
+                        gap: 3,
                     }}
                 >
-                    <Typography variant="h3" fontWeight="700" mt="-20px">
-                        <span>Total: </span> LKR {totalEarnings.toLocaleString()}
-                    </Typography>
-                    <Typography variant="h3" fontWeight="700" mt="-20px">
-                        <span>Invoices: </span> {invoiceCount}
-                    </Typography>
+                    <Box mt={2} sx={{
+                        display: "flex",
+                        gap: 3,
+                        flexDirection: "column"
+                    }}>
+                        <Typography variant="h4" fontWeight="700" mt="-20px">
+                            <span>Total Sale: </span> LKR {totalEarnings.toLocaleString()}
+                        </Typography>
+                        <Typography variant="h4" fontWeight="700" mt="-20px">
+                            <span>Profit: </span> LKR {totalProfit}
+                        </Typography>
+                        <Typography variant="h4" fontWeight="700" mt="-20px">
+                            <span>Invoices: </span> {invoiceCount}
+                        </Typography>
+                    </Box>
                 </Box>
             )}
         </DashboardCard>
     );
 };
-
+export const dynamic = 'force-dynamic';
 export default DailyEarnings;

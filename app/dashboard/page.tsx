@@ -31,11 +31,6 @@ const Dashboard = () => {
                         </Grid>
                     </Grid>
 
-                    {/* Product Performance Section */}
-                    <Grid item xs={12} md={8}>
-                        <ProductPerformance />
-                    </Grid>
-
                     {/* Blog Section */}
                     <Grid item xs={12}>
                         <Blog />
@@ -45,5 +40,5 @@ const Dashboard = () => {
         </PageContainer>
     );
 };
-
+export const dynamic = 'force-dynamic';
 export default Dashboard;

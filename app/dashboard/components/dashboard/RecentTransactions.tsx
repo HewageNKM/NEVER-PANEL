@@ -1,21 +1,21 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, {useEffect, useState} from "react";
 import DashboardCard from "../shared/DashboardCard";
 import {
     Timeline,
-    TimelineItem,
-    TimelineOppositeContent,
-    TimelineSeparator,
-    TimelineDot,
     TimelineConnector,
     TimelineContent,
+    TimelineDot,
+    TimelineItem,
+    TimelineOppositeContent,
     timelineOppositeContentClasses,
+    TimelineSeparator,
 } from "@mui/lab";
-import { Typography, Link, CircularProgress } from "@mui/material";
-import { collection, onSnapshot, query, orderBy, limit } from "@firebase/firestore";
-import { db } from "@/firebase/firebaseClient";
-import { Order } from "@/interfaces";
+import {CircularProgress, Typography} from "@mui/material";
+import {collection, limit, onSnapshot, orderBy, query} from "@firebase/firestore";
+import {db} from "@/firebase/firebaseClient";
+import {Order} from "@/interfaces";
 
 const RecentTransactions = () => {
     const [orders, setOrders] = useState<Order[]>([]);
@@ -40,9 +40,9 @@ const RecentTransactions = () => {
     return (
         <DashboardCard title="Recent Orders">
             {loading ? (
-                <CircularProgress sx={{ display: "block", margin: "20px auto" }} />
+                <CircularProgress sx={{display: "block", margin: "20px auto"}}/>
             ) : orders.length === 0 ? (
-                <Typography variant="body2" sx={{ textAlign: "center", padding: "20px" }}>
+                <Typography variant="body2" sx={{textAlign: "center", padding: "20px"}}>
                     No recent orders available.
                 </Typography>
             ) : (
@@ -50,7 +50,7 @@ const RecentTransactions = () => {
                     className="theme-timeline"
                     sx={{
                         p: 0,
-                        mb: "-40px",
+                        mb: "-20px",
                         "& .MuiTimelineConnector-root": {
                             width: "1px",
                             backgroundColor: "#efefef",
@@ -83,7 +83,7 @@ const RecentTransactions = () => {
                                     }
                                     variant="outlined"
                                 />
-                                <TimelineConnector />
+                                <TimelineConnector/>
                             </TimelineSeparator>
                             <TimelineContent>
                                 <Typography fontWeight="600">Order #{order.orderId}</Typography>
@@ -91,11 +91,9 @@ const RecentTransactions = () => {
                                     {order?.customer?.name || "Not Available"} - {order.paymentStatus}
                                 </Typography>
                                 <Typography variant="body2">
-                                    Total: LKR {order.items.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)}
+                                    Total:
+                                    LKR {order.items.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)}
                                 </Typography>
-                                <Link href={`/orders/${order.orderId}`} underline="none">
-                                    View Details
-                                </Link>
                             </TimelineContent>
                         </TimelineItem>
                     ))}
@@ -104,5 +102,5 @@ const RecentTransactions = () => {
         </DashboardCard>
     );
 };
-
+export const dynamic = 'force-dynamic';
 export default RecentTransactions;

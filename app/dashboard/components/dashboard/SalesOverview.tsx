@@ -1,17 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import { Select, MenuItem, Box, CircularProgress } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
+import React, {useEffect, useState} from 'react';
+import {Box, CircularProgress, MenuItem, Select} from '@mui/material';
+import {useTheme} from '@mui/material/styles';
 import DashboardCard from '../shared/DashboardCard';
 import dynamic from "next/dynamic";
-import { collection, query, where, getDocs, Timestamp } from "@firebase/firestore";
-import { db } from "@/firebase/firebaseClient"; // Ensure the correct path
-import { Order } from "@/interfaces"; // Ensure the correct path
+import {collection, getDocs, query, Timestamp, where} from "@firebase/firestore";
+import {db} from "@/firebase/firebaseClient"; // Ensure the correct path
 
-const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
+const Chart = dynamic(() => import("react-apexcharts"), {ssr: false});
 
 const SalesOverview = () => {
     const [month, setMonth] = useState<string>('');
-    const [salesData, setSalesData] = useState({ website: [], store: [] });
+    const [salesData, setSalesData] = useState({website: [], store: []});
     const [loading, setLoading] = useState(true);
     const [months, setMonths] = useState<string[]>([]);
 
@@ -112,8 +111,6 @@ const SalesOverview = () => {
                 const startTimestamp = Timestamp.fromDate(startOfMonth);
                 const endTimestamp = Timestamp.fromDate(endOfMonth);
 
-
-
                 const ordersRef = collection(db, "orders");
                 const ordersQuery = query(
                     ordersRef,
@@ -157,7 +154,7 @@ const SalesOverview = () => {
                 >
                     {months.map((monthYear) => {
                         const [year, monthIndex] = monthYear.split('-');
-                        const monthName = new Date(parseInt(year), parseInt(monthIndex) - 1).toLocaleString('default', { month: 'long' });
+                        const monthName = new Date(parseInt(year), parseInt(monthIndex) - 1).toLocaleString('default', {month: 'long'});
                         return (
                             <MenuItem key={monthYear} value={monthYear}>
                                 {monthName} {year}
@@ -168,8 +165,8 @@ const SalesOverview = () => {
             }
         >
             {loading ? (
-                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100px" }}>
-                    <CircularProgress />
+                <Box sx={{display: "flex", justifyContent: "center", alignItems: "center", height: "100px"}}>
+                    <CircularProgress/>
                 </Box>
             ) : (
                 <Chart
