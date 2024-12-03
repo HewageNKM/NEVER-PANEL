@@ -91,6 +91,14 @@ const ItemCard = ({item, onEdit}: { item: Item, onEdit: any }) => {
                         Selling: LKR {item.sellingPrice}
                     </Typography>
                 </Box>
+                <Box>
+                    <Typography>
+                        Status: {item.status}
+                    </Typography>
+                    <Typography>
+                        Listings: {item.listing}
+                    </Typography>
+                </Box>
                 <Typography
                     variant="h6"
                     sx={{

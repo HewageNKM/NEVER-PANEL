@@ -1,7 +1,7 @@
 "use client"
 import React, {useState} from "react";
 import {Box, Button, Card, CardActions, CardContent, Stack, Typography} from "@mui/material";
-import {Variant} from "@/interfaces";
+import {Item, Variant} from "@/interfaces";
 import "swiper/css";
 import ImageSlider from "@/app/dashboard/inventory/[itemId]/components/ImageSlider";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
@@ -16,7 +16,6 @@ const VariantCard = ({variant}: { variant: Variant }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const [showConfirmedDialog, setShowConfirmedDialog] = useState(false)
     const dispatch = useDispatch();
-    const [isLoading, setIsLoading] = useState(false)
 
     const toggleExpand = () => {
         setIsExpanded((prev) => !prev);
@@ -35,22 +34,16 @@ const VariantCard = ({variant}: { variant: Variant }) => {
             }
 
             setShowConfirmedDialog(false)
-            setIsLoading(true)
-            const updatedItem = {
-                ...item,
-                variants: item.variants.filter(v => v.variantId !== variant.variantId)
-            }
-
+            const filteredVariants = item?.variants.filter(v => v.variantId !== variant.variantId)
+            const updatedItem = {...item, variants: filteredVariants}
             for (const image of variant.images) {
-                await deleteAFile(`inventory/${item.itemId}/${variant.variantId}/${image.file}`);
+                await deleteAFile(`inventory/${item?.itemId}/${variant.variantId}/${image.file}`);
             }
 
             await updateAItem(updatedItem)
             dispatch(setItem(updatedItem))
         } catch (e: any) {
             console.error(e)
-        } finally {
-            setIsLoading(false)
         }
     };
 
@@ -185,7 +178,6 @@ const VariantCard = ({variant}: { variant: Variant }) => {
                 onConfirm={deleteVariant}
                 onCancel={() => setShowConfirmedDialog(false)} open={showConfirmedDialog}
             />
-            {isLoading && <ComponentsLoader title={"Working"}/>}
         </Card>
     );
 }

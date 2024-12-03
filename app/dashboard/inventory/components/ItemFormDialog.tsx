@@ -5,7 +5,7 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import TextField from '@mui/material/TextField';
-import {Box, Grid, MenuItem, Select, styled, Typography} from "@mui/material";
+import {Box, FormControlLabel, Grid, MenuItem, Select, styled, Switch, Typography} from "@mui/material";
 import {brands, types} from "@/constant";
 import {IoCloudUpload} from "react-icons/io5";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
@@ -16,6 +16,7 @@ import {generateId} from "@/utils/genarateIds";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
 import {addAItem, deleteAFile, updateAItem, uploadAFile} from '@/actions/inventoryActions';
 import Image from "next/image";
+import {status} from "@grpc/grpc-js";
 
 const ItemFormDialog = () => {
     const dispatch = useAppDispatch();
@@ -47,9 +48,11 @@ const ItemFormDialog = () => {
             const sellingPrice = evt.target.sellingPrice.value;
             const discount = evt.target.discount.value;
             const itemId = evt.target.itemId.value == "" ? generateId("item", manufacturer) : evt.target.itemId.value;
-            const status = evt.target.status.value;
+            const status = evt.target.status.checked ? "Active" : "Inactive";
+            const listing = evt.target.listOnWeb.checked ? "Active" : "Inactive";
 
             const newItem: Item = {
+                listing: listing,
                 status: status,
                 brand: brand.toLowerCase(),
                 buyingPrice: Number.parseInt(buyingPrice),
@@ -257,16 +260,37 @@ const ItemFormDialog = () => {
                                 </Grid>
                             </Grid>
                         </Box>
-                        <Box mt={2} justifyItems={"start"} alignItems={"start"}>
-                            <Typography>
-                                Status
-                            </Typography>
-                            <Select variant={"outlined"} size={"small"} defaultValue={item?.status || "Inactive"}
-                                    name={"status"}>
-                                <MenuItem value={"Active"}>Active</MenuItem>
-                                <MenuItem value={"Inactive"}>Inactive</MenuItem>
-                            </Select>
+                        <Box display="flex" alignItems="center" mb={1}>
+                            <FormControlLabel
+                                name="status"
+                                control={<Switch defaultChecked={item?.status === "Active"} />}
+                                label="Status"
+                                labelPlacement="start"
+                                sx={{
+                                    marginRight: 2,
+                                    ".MuiFormControlLabel-label": {
+                                        fontWeight: 500,
+                                        fontSize: "1rem",
+                                    },
+                                }}
+                            />
                         </Box>
+                        <Box display="flex" alignItems="center" mb={2}>
+                            <FormControlLabel
+                                name="listOnWeb"
+                                control={<Switch defaultChecked={item?.listing === "Active"} />}
+                                label="List on Website"
+                                labelPlacement="start"
+                                sx={{
+                                    marginRight: 2,
+                                    ".MuiFormControlLabel-label": {
+                                        fontWeight: 500,
+                                        fontSize: "1rem",
+                                    },
+                                }}
+                            />
+                        </Box>
+
                     </DialogContent>
                     <DialogActions>
                         <Button variant="contained" type={"button"} color="primary" onClick={() => closeForm()}>
