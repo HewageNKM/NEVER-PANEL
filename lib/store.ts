@@ -2,6 +2,7 @@ import {configureStore} from '@reduxjs/toolkit'
 import authSlice from "@/lib/authSlice/authSlice";
 import inventorySlice from "@/lib/inventorySlice/inventorySlice";
 import itemDetailsSlice from "@/lib/itemDetailsSlice/itemDetailsSlice";
+import ordersSlice from "@/lib/ordersSlice/ordersSlice";
 
 export const makeStore = () => {
     return configureStore({
@@ -9,6 +10,7 @@ export const makeStore = () => {
             authSlice,
             inventorySlice,
             itemDetailsSlice,
+            ordersSlice
         },
     })
 }
