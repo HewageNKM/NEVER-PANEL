@@ -48,7 +48,7 @@ export default function RootLayout({
       {/* ------------------------------------------- */}
       <PageWrapper className="page-wrapper">
         {/* ------------------------------------------- */}
-        {/* Header */}
+        {/* OrdersHeader */}
         {/* ------------------------------------------- */}
         <Header toggleMobileSidebar={() => setMobileSidebarOpen(true)} />
         {/* ------------------------------------------- */}

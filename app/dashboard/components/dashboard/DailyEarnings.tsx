@@ -3,21 +3,19 @@
 import {Box, CircularProgress, Typography} from "@mui/material";
 import DashboardCard from "../shared/DashboardCard";
 import {useEffect, useState} from "react";
-import {collection, getDocs, query, Timestamp, where} from "@firebase/firestore";
+import {collection, getDocs, query, Timestamp, where, doc, getDoc} from "@firebase/firestore";
 import {db} from "@/firebase/firebaseClient";
-import {Order} from "@/interfaces"; // Ensure the correct path to your interfaces
+import {Item, Order} from "@/interfaces"; // Ensure the correct path to your interfaces
 
 const DailyEarnings = () => {
     const [totalEarnings, setTotalEarnings] = useState(0);
+    const [totalProfit, setTotalProfit] = useState(0);
     const [invoiceCount, setInvoiceCount] = useState(0);
     const [loading, setLoading] = useState(true);
-    const [totalProfit, setTotalProfit] = useState(0);
-    // Add loading state
 
     useEffect(() => {
         const fetchDailyEarnings = async () => {
             try {
-                // Get today's start and end timestamps
                 const startOfDay = new Date();
                 startOfDay.setHours(0, 0, 0, 0);
                 const endOfDay = new Date();
@@ -25,31 +23,46 @@ const DailyEarnings = () => {
 
                 const startTimestamp = Timestamp.fromDate(startOfDay);
 
-                // Query Firestore for today's orders
                 const ordersRef = collection(db, "orders");
                 const todayOrdersQuery = query(ordersRef, where("createdAt", ">=", startTimestamp));
 
                 const querySnapshot = await getDocs(todayOrdersQuery);
 
-                // Calculate total earnings and invoice count
                 let earnings = 0;
+                let buyingCost = 0;
                 let count = 0;
 
-                querySnapshot.forEach((doc) => {
-                    const data = doc.data() as Order;
+                for (const docSnap of querySnapshot.docs) {
+                    const data = docSnap.data() as Order;
 
                     if (Array.isArray(data.items)) {
-                        earnings += data.items.reduce((acc, item) => acc + (item.price || 0), 0);
+                        for (const item of data.items) {
+                            earnings += item.price || 0;
+
+                            // Fetch buying price from inventory
+                            if (item.itemId) {
+                                const inventoryDocRef = doc(db, "inventory", item.itemId);
+                                const inventoryDoc = await getDoc(inventoryDocRef);
+
+                                if (inventoryDoc.exists()) {
+                                    const inventoryData = inventoryDoc.data() as Item;
+                                    buyingCost += (inventoryData.buyingPrice || 0) * (item.quantity || 1);
+                                }
+                            }
+                        }
                         count += 1;
                     }
-                });
+                }
+
+                const profit = earnings - buyingCost;
 
                 setTotalEarnings(earnings);
+                setTotalProfit(profit);
                 setInvoiceCount(count);
             } catch (error) {
                 console.error("Error fetching daily earnings:", error.message, error.stack);
             } finally {
-                setLoading(false); // Set loading to false when done
+                setLoading(false);
             }
         };
 
@@ -68,7 +81,7 @@ const DailyEarnings = () => {
                 <Box
                     sx={{
                         display: "flex",
-                        flexDirection: "column", // Use flexDirection instead of direction
+                        flexDirection: "column",
                         gap: 3,
                     }}
                 >
@@ -81,7 +94,7 @@ const DailyEarnings = () => {
                             <span>Total Sale: </span> LKR {totalEarnings.toLocaleString()}
                         </Typography>
                         <Typography variant="h4" fontWeight="700" mt="-20px">
-                            <span>Profit: </span> LKR {totalProfit}
+                            <span>Profit: </span> LKR {totalProfit.toLocaleString()}
                         </Typography>
                         <Typography variant="h4" fontWeight="700" mt="-20px">
                             <span>Invoices: </span> {invoiceCount}
@@ -92,5 +105,6 @@ const DailyEarnings = () => {
         </DashboardCard>
     );
 };
+
 export const dynamic = 'force-dynamic';
 export default DailyEarnings;
