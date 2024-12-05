@@ -179,6 +179,7 @@ export const updateItem = async (item: Item) => {
             type: item.type,
             discount: item.discount,
             variants: item.variants,
+            listing: item.listing,
             updatedAt: admin.firestore.Timestamp.now(),
         }, {merge: true});
 

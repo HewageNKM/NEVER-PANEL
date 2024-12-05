@@ -101,6 +101,8 @@ const Hero = () => {
                             <Typography variant="body1">Selling Price: {item?.sellingPrice}</Typography>
                             <Typography variant="body1">Discount: {item?.discount}%</Typography>
                             <Typography variant="body1">Variants: {item?.variants?.length || 0}</Typography>
+                            <Typography variant="body1">Listing: {item?.listing || "Inactive"} </Typography>
+                            <Typography variant="body1">Status: {item?.status || "Inactive"}</Typography>
                             <Typography variant="body1">Created At: {item?.createdAt}</Typography>
                             <Typography variant="body1">Updated At: {item?.updatedAt}</Typography>
                         </>
