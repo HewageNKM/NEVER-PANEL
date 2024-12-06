@@ -32,7 +32,7 @@ const ordersSlice = createSlice({
         setLoading: (state, action: PayloadAction<boolean>) => {
             state.isLoading = action.payload;
         },
-        setSelectedOrder: (state, action: PayloadAction<Order>) => {
+        setSelectedOrder: (state, action: PayloadAction<Order | null>) => {
             state.selectedOrder = action.payload;
         },
         setSelectedCustomer: (state, action: PayloadAction<Customer>) => {

@@ -16,7 +16,7 @@ import {
     Typography
 } from "@mui/material";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
-import {getOrders, setPage, setSize} from '@/lib/ordersSlice/ordersSlice';
+import {getOrders, setPage, setSelectedOrder, setSize} from '@/lib/ordersSlice/ordersSlice';
 import {IoInformationCircle} from "react-icons/io5";
 import EmptyState from "@/app/components/EmptyState";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
@@ -101,6 +101,7 @@ const OrderTable = () => {
                                         <IconButton onClick={() => {
                                             setPaymentStatus(order.paymentStatus)
                                             setShowPaymentStatusForm(true)
+                                            dispatch(setSelectedOrder(order))
                                         }}>
                                             <IoInformationCircle color={"blue"} size={30}/>
                                         </IconButton>
@@ -186,6 +187,8 @@ const OrderTable = () => {
             <PaymentStatusFormDialog initialStatus={paymentStatus} showForm={showPaymentStatusForm} onClose={() => {
                 setShowPaymentStatusForm(false)
                 setPaymentStatus(null)
+                dispatch(setSelectedOrder(null))
+                dispatch(getOrders({size, page: selectedPage}))
             }}/>
         </Stack>
     );

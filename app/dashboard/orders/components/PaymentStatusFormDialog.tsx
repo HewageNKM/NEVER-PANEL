@@ -8,6 +8,9 @@ import {paymentStatus, paymentStatusList} from "@/constant";
 import Typography from "@mui/material/Typography";
 import CardActions from "@mui/material/CardActions";
 import {PaymentStatus} from "@/functions/src/constant";
+import {useAppSelector} from "@/lib/hooks";
+import {Order} from "@/interfaces";
+import {updatePaymentStatusOfOrder} from "@/actions/ordersActions";
 
 
 const PaymentStatusFormDialog = ({initialStatus, showForm, onClose}: {
@@ -15,7 +18,25 @@ const PaymentStatusFormDialog = ({initialStatus, showForm, onClose}: {
     showForm: boolean;
     onClose: () => void;
 }) => {
+
+    const {selectedOrder} = useAppSelector(state => state.ordersSlice);
+    const updatePaymentStatus = async () => {
+        try {
+            setIsLoading(true);
+            const updatedOrder: Order = {
+                ...selectedOrder,
+                paymentStatus: selectedStatus
+            }
+            await updatePaymentStatusOfOrder(updatedOrder);
+            onClose();
+        }catch (e) {
+            console.log(e);
+        }finally {
+            setIsLoading(false);
+        }
+    }
     const [selectedStatus, setSelectedStatus] = useState(initialStatus);
+    const [isLoading, setIsLoading] = useState(false)
     useEffect(() => {
         setSelectedStatus(initialStatus);
     }, [initialStatus]);
@@ -50,10 +71,10 @@ const PaymentStatusFormDialog = ({initialStatus, showForm, onClose}: {
                     marginTop: '24px'
                 }}>
                     <div style={{display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '24px'}}>
-                        <Button size="small" color="primary" onClick={onClose}>
+                        <Button className="disabled:bg-opacity-60 disabled:cursor-not-allowed"  disabled={isLoading} size="small" color="primary" onClick={onClose}>
                             Close
                         </Button>
-                        <Button variant="contained" color="secondary">
+                        <Button className="disabled:bg-opacity-60 disabled:cursor-not-allowed" disabled={selectedStatus == selectedOrder?.paymentStatus || isLoading} onClick={updatePaymentStatus} variant="contained" color="secondary">
                             Update
                         </Button>
                     </div>
