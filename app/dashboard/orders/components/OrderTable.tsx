@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
     Box,
     IconButton,
@@ -17,13 +17,31 @@ import {
 } from "@mui/material";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import {getOrders, setPage, setSize} from '@/lib/ordersSlice/ordersSlice';
-import {IoInformation, IoInformationCircle} from "react-icons/io5";
+import {IoInformationCircle} from "react-icons/io5";
 import EmptyState from "@/app/components/EmptyState";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
+import {Customer, OrderItem, Tracking} from "@/interfaces";
+import CustomerFormDialog from "@/app/dashboard/orders/components/CustomerFormDialog";
+import ItemsFormDialog from "@/app/dashboard/orders/components/ItemsFormDialog";
+import PaymentStatusFormDialog from "@/app/dashboard/orders/components/PaymentStatusFormDialog";
+import {PaymentStatus} from "@/functions/src/constant";
 
 const OrderTable = () => {
     const {orders, size, selectedPage, isLoading} = useAppSelector(state => state.ordersSlice);
     const {currentUser, loading} = useAppSelector(state => state.authSlice);
+
+    const [customer, setCustomer] = useState<Customer | null>(null)
+    const [showCustomerForm, setShowCustomerForm] = useState(false)
+
+    const [showItemsForm, setShowItemsForm] = useState(false)
+    const [orderItems, setOrderItems] = useState<OrderItem []>([])
+
+    const [showPaymentStatusForm, setShowPaymentStatusForm] = useState(false)
+    const [paymentStatus, setPaymentStatus] = useState<null | PaymentStatus>(null)
+
+    const [showTrackingForm, setShowTrackingForm] = useState(false)
+    const [tracking, setTracking] = useState<Tracking | null>(null)
+
     const dispatch = useAppDispatch();
 
     useEffect(() => {
@@ -50,6 +68,7 @@ const OrderTable = () => {
                             <TableCell>Shipping Cost</TableCell>
                             <TableCell>Items</TableCell>
                             <TableCell>From</TableCell>
+                            <TableCell>Status</TableCell>
                             <TableCell>Created At</TableCell>
                         </TableRow>
                     </TableHead>
@@ -67,12 +86,26 @@ const OrderTable = () => {
                                         <Typography>
                                             {order.customer.name}
                                         </Typography>
-                                        <IconButton>
-                                            <IoInformation size={20}/>
+                                        <IconButton onClick={() => {
+                                            setCustomer(order?.customer)
+                                            setShowCustomerForm(true)
+                                        }
+                                        }>
+                                            <IoInformationCircle color={"blue"} size={30}/>
                                         </IconButton>
                                     </Box>
                                 ) : "Not Available"}</TableCell>
-                                <TableCell>{order.paymentStatus}</TableCell>
+                                <TableCell>
+                                    {order.paymentStatus}
+                                    {order.from == "Website" && (
+                                        <IconButton onClick={() => {
+                                            setPaymentStatus(order.paymentStatus)
+                                            setShowPaymentStatusForm(true)
+                                        }}>
+                                            <IoInformationCircle color={"blue"} size={30}/>
+                                        </IconButton>
+                                    )}
+                                </TableCell>
                                 <TableCell>{order.paymentMethod}</TableCell>
                                 <TableCell>
                                     LKR {order.items.reduce(
@@ -89,13 +122,19 @@ const OrderTable = () => {
                                         <Typography>
                                             {order.items.length}
                                         </Typography>
-                                        <IconButton>
-                                            <IoInformationCircle color={"blue"} size={20}/>
+                                        <IconButton onClick={() => {
+                                            setOrderItems(order.items)
+                                            setShowItemsForm(true)
+                                        }}>
+                                            <IoInformationCircle color={"blue"} size={30}/>
                                         </IconButton>
                                     </Stack>
                                 </TableCell>
                                 <TableCell>
                                     {order.from}
+                                </TableCell>
+                                <TableCell>
+                                    {order.from == "Store" ? ("Complete") :(order.tracking ? (order.tracking.status):("Processing"))}
                                 </TableCell>
                                 <TableCell>
                                     {order.createdAt}
@@ -112,7 +151,7 @@ const OrderTable = () => {
                 />
             )}
             {isLoading && (
-                <ComponentsLoader title={"Loading Orders"} />
+                <ComponentsLoader title={"Loading Orders"}/>
             )}
             <Box
                 mt={2}
@@ -132,6 +171,22 @@ const OrderTable = () => {
                 <Pagination count={10} variant="outlined" shape="rounded"
                             onChange={(event, page) => dispatch(setPage(page))}/>
             </Box>
+            <CustomerFormDialog customer={customer} showForm={showCustomerForm} onClose={() => {
+                setShowCustomerForm(false)
+                setCustomer(null)
+            }}/>
+            <ItemsFormDialog
+                items={orderItems}
+                showItemForm={showItemsForm}
+                onClose={() => {
+                    setShowItemsForm(false)
+                    setOrderItems([])
+                }}
+            />
+            <PaymentStatusFormDialog initialStatus={paymentStatus} showForm={showPaymentStatusForm} onClose={() => {
+                setShowPaymentStatusForm(false)
+                setPaymentStatus(null)
+            }}/>
         </Stack>
     );
 };

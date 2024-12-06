@@ -1,8 +1,13 @@
 import React from 'react';
-import {Button, FormControl, InputLabel, MenuItem, Select, Stack, TextField} from '@mui/material';
+import {Button, FormControl, IconButton, InputLabel, MenuItem, Select, Stack, TextField} from '@mui/material';
 import Typography from "@mui/material/Typography";
+import {IoRefreshCircle} from "react-icons/io5";
+import {useAppDispatch, useAppSelector} from "@/lib/hooks";
+import {getOrders} from "@/lib/ordersSlice/ordersSlice";
 
 const OrdersHeader = () => {
+    const dispatch = useAppDispatch();
+    const {selectedPage, size} = useAppSelector(state => state.ordersSlice);
     return (
         <Stack direction="column" spacing={2} alignItems="start" justifyContent="space-between" p={2}>
             <Stack>
@@ -47,7 +52,7 @@ const OrdersHeader = () => {
                         </Select>
                     </FormControl>
                 </Stack>
-                <Stack direction="row" spacing={2} alignItems="center">
+                <Stack direction="row" spacing={1} alignItems="center">
                     {/* Search TextField */}
                     <TextField
                         variant="outlined"
@@ -57,6 +62,9 @@ const OrdersHeader = () => {
                     <Button variant="contained" color="primary">
                         Search
                     </Button>
+                    <IconButton onClick={() => dispatch(getOrders({size, page: selectedPage}))}>
+                        <IoRefreshCircle size={30}/>
+                    </IconButton>
                 </Stack>
             </Stack>
         </Stack>
