@@ -46,6 +46,8 @@ export interface Order {
     shippingCost: number,
     from:string,
 
+    tracking: Tracking | null,
+
     createdAt: Timestamp,
     updatedAt: Timestamp,
 }

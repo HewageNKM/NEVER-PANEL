@@ -149,7 +149,7 @@ export const orderStatusList = [
 export const paymentStatusList = [
     {
         id: 1,
-        name: "Success",
+        name: "Paid",
         value: paymentStatus.PAID
     },
     {
