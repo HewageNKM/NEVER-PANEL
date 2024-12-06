@@ -130,6 +130,7 @@ const ItemCard = ({item, onEdit}: { item: Item, onEdit: any }) => {
                 <Typography
                     variant="caption"
                     sx={{
+                        width: "fit-content",
                         bgcolor: "#4caf50", // Green color for manufacturer
                         textTransform: "capitalize",
                         color: "white",
@@ -142,6 +143,7 @@ const ItemCard = ({item, onEdit}: { item: Item, onEdit: any }) => {
                 <Typography
                     variant="caption"
                     sx={{
+                        width: "fit-content",
                         bgcolor: "#2196f3", // Blue color for brand
                         textTransform: "capitalize",
                         color: "white",
