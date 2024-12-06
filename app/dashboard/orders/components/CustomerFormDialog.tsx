@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Customer } from "@/interfaces";
+import React, {useEffect, useState} from 'react';
+import {Customer, Order} from "@/interfaces";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -8,13 +8,21 @@ import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import IconButton from "@mui/material/IconButton";
 import EditIcon from "@mui/icons-material/Edit";
-import { CardActionArea, Stack } from "@mui/material";
+import {Stack} from "@mui/material";
 import Typography from "@mui/material/Typography";
 import CardActions from "@mui/material/CardActions";
+import {updateAOrder} from "@/actions/ordersActions";
+import {useAppSelector} from "@/lib/hooks";
 
-const CustomerFormDialog = ({ customer, showForm, onClose }: { customer: Customer | null, showForm: boolean, onClose: () => void }) => {
+const CustomerFormDialog = ({customer, showForm, onClose}: {
+    customer: Customer | null,
+    showForm: boolean,
+    onClose: () => void
+}) => {
     const [isEditing, setIsEditing] = useState(false);
     const [editableCustomer, setEditableCustomer] = useState<Customer | null>(customer);
+    const [isLoading, setIsLoading] = useState(false)
+    const {selectedOrder} = useAppSelector(state => state.ordersSlice);
 
     const handleEditToggle = () => {
         setIsEditing(!isEditing);
@@ -22,19 +30,32 @@ const CustomerFormDialog = ({ customer, showForm, onClose }: { customer: Custome
 
     const handleInputChange = (field: keyof Customer, value: string) => {
         if (editableCustomer) {
-            setEditableCustomer({ ...editableCustomer, [field]: value });
+            setEditableCustomer({...editableCustomer, [field]: value});
         }
     };
 
-    const handleUpdate = () => {
-        console.log("Updated customer details:", editableCustomer);
-        // Implement update functionality here
-        setIsEditing(false);
+    const handleUpdate = async (evt) => {
+        try {
+            setIsLoading(true);
+            evt.preventDefault()
+            const updatedOrder: Order = {
+                ...selectedOrder,
+                customer: editableCustomer
+            }
+            await updateAOrder(updatedOrder);
+            onClose();
+
+        } catch (e) {
+            console.log(e);
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     const handlePrint = () => {
         console.log("Print functionality triggered");
         // Implement print functionality here
+
     };
 
     useEffect(() => {
@@ -51,8 +72,9 @@ const CustomerFormDialog = ({ customer, showForm, onClose }: { customer: Custome
         <Dialog open={showForm} onClose={onFormClose} maxWidth="sm" fullWidth>
             <DialogTitle>
                 <Typography variant={"h4"}>Customer Details</Typography>
-                <IconButton onClick={handleEditToggle} style={{ float: 'right' }}>
-                    <EditIcon />
+                <IconButton className="disabled:bg-opacity-60 disabled:cursor-not-allowed" disabled={isLoading}
+                            onClick={handleEditToggle} style={{float: 'right'}}>
+                    <EditIcon/>
                 </IconButton>
             </DialogTitle>
 
@@ -61,31 +83,48 @@ const CustomerFormDialog = ({ customer, showForm, onClose }: { customer: Custome
                     {isEditing ? (
                         <Stack flexDirection="column" gap={2} mt={3}>
                             <TextField
+                                disabled={isLoading}
                                 label="Name"
+                                name={"name"}
+                                required
                                 value={editableCustomer?.name || ''}
                                 onChange={(e) => handleInputChange('name', e.target.value)}
                                 fullWidth
                             />
                             <TextField
+                                disabled={isLoading}
                                 label="Email"
+                                name={"email"}
+                                required
+                                type="email"
                                 value={editableCustomer?.email || ''}
                                 onChange={(e) => handleInputChange('email', e.target.value)}
                                 fullWidth
                             />
                             <TextField
+                                disabled={isLoading}
+                                name={"phone"}
                                 label="Phone"
+                                required
+                                type="tel"
                                 value={editableCustomer?.phone || ''}
                                 onChange={(e) => handleInputChange('phone', e.target.value)}
                                 fullWidth
                             />
                             <TextField
+                                required
+                                disabled={isLoading}
                                 label="Address"
+                                name={"address"}
                                 value={editableCustomer?.address || ''}
                                 onChange={(e) => handleInputChange('address', e.target.value)}
                                 fullWidth
                             />
                             <TextField
+                                disabled={isLoading}
+                                required
                                 label="City"
+                                name={"city"}
                                 value={editableCustomer?.city || ''}
                                 onChange={(e) => handleInputChange('city', e.target.value)}
                                 fullWidth
@@ -108,16 +147,19 @@ const CustomerFormDialog = ({ customer, showForm, onClose }: { customer: Custome
                     gap: '16px',
                     marginTop: '24px'
                 }}>
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '24px' }}>
-                        <Button size="small" color="primary" onClick={onFormClose}>
+                    <div style={{display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '24px'}}>
+                        <Button size="small" className="disabled:bg-opacity-60 disabled:cursor-not-allowed"
+                                disabled={isLoading} color="primary" onClick={onFormClose}>
                             Close
                         </Button>
                         {isEditing && (
-                            <Button variant="contained" color="primary" onClick={handleUpdate}>
+                            <Button className="disabled:bg-opacity-60 disabled:cursor-not-allowed" disabled={isLoading}
+                                    variant="contained" color="primary" onClick={handleUpdate}>
                                 Save
                             </Button>
                         )}
-                        <Button variant="contained" color="secondary" onClick={handlePrint}>
+                        <Button className="disabled:bg-opacity-60 disabled:cursor-not-allowed" disabled={isLoading}
+                                variant="contained" color="secondary" onClick={handlePrint}>
                             Print
                         </Button>
                     </div>

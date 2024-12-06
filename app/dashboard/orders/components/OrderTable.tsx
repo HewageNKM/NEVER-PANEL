@@ -89,6 +89,7 @@ const OrderTable = () => {
                                         <IconButton onClick={() => {
                                             setCustomer(order?.customer)
                                             setShowCustomerForm(true)
+                                            dispatch(setSelectedOrder(order))
                                         }
                                         }>
                                             <IoInformationCircle color={"blue"} size={30}/>
@@ -175,6 +176,8 @@ const OrderTable = () => {
             <CustomerFormDialog customer={customer} showForm={showCustomerForm} onClose={() => {
                 setShowCustomerForm(false)
                 setCustomer(null)
+                dispatch(setSelectedOrder(null))
+                dispatch(getOrders({size, page: selectedPage}))
             }}/>
             <ItemsFormDialog
                 items={orderItems}

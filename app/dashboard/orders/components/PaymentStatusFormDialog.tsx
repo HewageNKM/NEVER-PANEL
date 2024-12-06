@@ -10,7 +10,7 @@ import CardActions from "@mui/material/CardActions";
 import {PaymentStatus} from "@/functions/src/constant";
 import {useAppSelector} from "@/lib/hooks";
 import {Order} from "@/interfaces";
-import {updatePaymentStatusOfOrder} from "@/actions/ordersActions";
+import {updateAOrder} from "@/actions/ordersActions";
 
 
 const PaymentStatusFormDialog = ({initialStatus, showForm, onClose}: {
@@ -27,7 +27,7 @@ const PaymentStatusFormDialog = ({initialStatus, showForm, onClose}: {
                 ...selectedOrder,
                 paymentStatus: selectedStatus
             }
-            await updatePaymentStatusOfOrder(updatedOrder);
+            await updateAOrder(updatedOrder);
             onClose();
         }catch (e) {
             console.log(e);

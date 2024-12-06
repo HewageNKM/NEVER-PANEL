@@ -18,7 +18,7 @@ export const fetchOrders = async (page: number, size: number) => {
     }
 }
 
-export const updatePaymentStatusOfOrder = async (order: Order) => {
+export const updateAOrder = async (order: Order) => {
     try {
         const token = await auth.currentUser?.getIdToken();
         console.log(`Token: ${token}`);
