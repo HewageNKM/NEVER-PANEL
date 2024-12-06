@@ -24,9 +24,6 @@ const PaymentStatusFormDialog = ({initialStatus, showForm, onClose}: {
             <DialogTitle>Payment Status</DialogTitle>
             <DialogContent>
                 <Stack direction="column" mt={1} spacing={2}>
-                    <Box>
-                        <Typography variant="h6">Current Status: {initialStatus}</Typography>
-                    </Box>
                     <FormControl sx={{marginTop: '2rem'}}>
                         <Select
                             labelId="payment-status-label"

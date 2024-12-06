@@ -41,7 +41,7 @@ const ItemCard = ({item, onEdit}: { item: Item, onEdit: any }) => {
         <Card
             sx={{
                 position: "relative",
-                maxWidth: 300,
+                maxWidth: 200,
                 borderRadius: 2,
                 boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.1)",
                 transition: "transform 0.2s ease",
@@ -91,7 +91,7 @@ const ItemCard = ({item, onEdit}: { item: Item, onEdit: any }) => {
                         Selling: LKR {item.sellingPrice}
                     </Typography>
                 </Box>
-                <Box>
+                <Box mt={3}>
                     <Typography>
                         Status: {item.status}
                     </Typography>
