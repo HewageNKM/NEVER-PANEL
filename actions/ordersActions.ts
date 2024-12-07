@@ -21,7 +21,6 @@ export const fetchOrders = async (page: number, size: number) => {
 export const updateAOrder = async (order: Order) => {
     try {
         const token = await auth.currentUser?.getIdToken();
-        console.log(`Token: ${token}`);
         const response = await axios({
             method: 'PUT',
             url: `/api/v1/orders/${order.orderId}`,

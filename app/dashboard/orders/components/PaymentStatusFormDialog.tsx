@@ -3,14 +3,14 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import Button from "@mui/material/Button";
-import {Box, FormControl, MenuItem, Select, Stack} from "@mui/material";
+import {FormControl, MenuItem, Select, Stack} from "@mui/material";
 import {paymentStatus, paymentStatusList} from "@/constant";
-import Typography from "@mui/material/Typography";
 import CardActions from "@mui/material/CardActions";
 import {PaymentStatus} from "@/functions/src/constant";
-import {useAppSelector} from "@/lib/hooks";
+import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import {Order} from "@/interfaces";
 import {updateAOrder} from "@/actions/ordersActions";
+import {getOrders} from "@/lib/ordersSlice/ordersSlice";
 
 
 const PaymentStatusFormDialog = ({initialStatus, showForm, onClose}: {
@@ -18,6 +18,11 @@ const PaymentStatusFormDialog = ({initialStatus, showForm, onClose}: {
     showForm: boolean;
     onClose: () => void;
 }) => {
+    const {selectedPage, size} = useAppSelector(state => state.ordersSlice);
+    const dispatch = useAppDispatch();
+
+    const [selectedStatus, setSelectedStatus] = useState(initialStatus);
+    const [isLoading, setIsLoading] = useState(false)
 
     const {selectedOrder} = useAppSelector(state => state.ordersSlice);
     const updatePaymentStatus = async () => {
@@ -28,18 +33,18 @@ const PaymentStatusFormDialog = ({initialStatus, showForm, onClose}: {
                 paymentStatus: selectedStatus
             }
             await updateAOrder(updatedOrder);
-            onClose();
-        }catch (e) {
+            dispatch(getOrders({size, page: selectedPage}))
+        } catch (e) {
             console.log(e);
-        }finally {
+        } finally {
             setIsLoading(false);
+            onClose();
         }
     }
-    const [selectedStatus, setSelectedStatus] = useState(initialStatus);
-    const [isLoading, setIsLoading] = useState(false)
     useEffect(() => {
         setSelectedStatus(initialStatus);
     }, [initialStatus]);
+
     return (
         <Dialog open={showForm} onClose={onClose}>
             <DialogTitle>Payment Status</DialogTitle>
@@ -71,10 +76,13 @@ const PaymentStatusFormDialog = ({initialStatus, showForm, onClose}: {
                     marginTop: '24px'
                 }}>
                     <div style={{display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '24px'}}>
-                        <Button className="disabled:bg-opacity-60 disabled:cursor-not-allowed"  disabled={isLoading} size="small" color="primary" onClick={onClose}>
+                        <Button className="disabled:bg-opacity-60 disabled:cursor-not-allowed" disabled={isLoading}
+                                size="small" color="primary" onClick={onClose}>
                             Close
                         </Button>
-                        <Button className="disabled:bg-opacity-60 disabled:cursor-not-allowed" disabled={selectedStatus == selectedOrder?.paymentStatus || isLoading} onClick={updatePaymentStatus} variant="contained" color="secondary">
+                        <Button className="disabled:bg-opacity-60 disabled:cursor-not-allowed"
+                                disabled={selectedStatus == selectedOrder?.paymentStatus || isLoading}
+                                onClick={updatePaymentStatus} variant="contained" color="secondary">
                             Update
                         </Button>
                     </div>
