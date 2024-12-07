@@ -2,12 +2,14 @@
  * Sends an email using Firestore's mail collection.
  */
 import axios from "axios";
-import {TEXTIT_API_URL, TEXTIT_AUTH} from "./constant";
 import {db} from "./index";
 
 export const sendEmail = async (
     to: string, templateName: string, templateData: object
 ) => {
+    console.log("Sending email to: ", to);
+    console.log("Template: ", templateName);
+    console.log("Data: ", templateData);
     await db.collection("mail").add({
         to,
         template: {
@@ -21,17 +23,26 @@ export const sendEmail = async (
  * Sends an SMS using TextIt API.
  */
 export const sendSMS = async (to: string, text: string) => {
-    await axios.post(
-        TEXTIT_API_URL,
-        {
-            to,
-            text,
-        },
-        {
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": TEXTIT_AUTH,
-            },
-        }
-    );
+    try {
+        const data = JSON.stringify({
+            to: to,
+            text: text,
+        });
+        console.log("Sending SMS to: ", to);
+        console.log("Text: ", text);
+        await axios(
+            {
+                method: 'POST',
+                url: "https://api.textit.biz/",
+                data: data,
+                headers: {
+                    Authorization: "Basic 20e5gkd160cdecea7dtd26cfadh8421",
+                    'Content-Type': 'application/json',
+                    "Accept": "*/*"
+                }
+            }
+        )
+    } catch (e) {
+        console.log("Failed to send SMS: ", e)
+    }
 };

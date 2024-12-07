@@ -2,8 +2,6 @@
 import {firestore} from "firebase-admin";
 import Timestamp = firestore.Timestamp;
 
-export const TEXTIT_API_URL = "https://api.textit.biz/";
-export const TEXTIT_AUTH = "Basic 20e5gkd160cdecea7dtd26cfadh8421";
 export const ADMIN_PHONE = "94705208999";
 export const ADMIN_EMAIL = "orders@neverbe.lk";
 export const BATCH_LIMIT = 450;

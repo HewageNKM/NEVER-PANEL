@@ -1,9 +1,9 @@
-import * as functions from "firebase-functions/v1";  // Updated import for v6
+import * as functions from "firebase-functions/v1"; // Updated import for v6
 import * as admin from "firebase-admin";
-import { adminNotifySMS, getOrderStatusSMS, orderTrackingUpdateSMS } from "./templates";
-import { BATCH_LIMIT, Item, Order, orderStatus, PaymentMethod, PaymentStatus } from "./constant";
-import { sendEmail, sendSMS } from "./notifications";
-import { calculateTotal, commitBatch, sendAdminEmail, sendAdminSMS } from "./util";
+import {adminNotifySMS, getOrderStatusSMS, orderTrackingUpdateSMS} from "./templates";
+import {BATCH_LIMIT, Item, Order, orderStatus, PaymentMethod, PaymentStatus} from "./constant";
+import {sendEmail, sendSMS} from "./notifications";
+import {calculateTotal, commitBatch, sendAdminEmail, sendAdminSMS} from "./util";
 
 admin.initializeApp();
 export const db = admin.firestore();
@@ -121,11 +121,12 @@ export const onPaymentStatusUpdates = functions.firestore
 
         if (!orderData) return null;
 
-        const { paymentMethod, paymentStatus, items, customer, shippingCost } = orderData;
+        const {paymentMethod, paymentStatus, items, customer, shippingCost} = orderData;
         const customerEmail = customer.email.trim();
         const total = calculateTotal(items, shippingCost);
 
-        const templateData = { name: customer.name,
+        const templateData = {
+            name: customer.name,
             orderId,
             items,
             shippingCost,
@@ -143,7 +144,7 @@ export const onPaymentStatusUpdates = functions.firestore
         try {
             const sendNotifications = async (additionalTemplateData?: any) => {
                 await Promise.all([
-                    sendEmail(customerEmail, "orderUpdate", { ...templateData, ...additionalTemplateData }),
+                    sendEmail(customerEmail, "orderUpdate", {...templateData, ...additionalTemplateData}),
                     sendSMS(customer.phone, getOrderStatusSMS(customer.name, orderId, total, paymentMethod, paymentStatus)),
                 ]);
             };
@@ -168,8 +169,7 @@ export const onPaymentStatusUpdates = functions.firestore
                 }
 
                 if (paymentMethod === PaymentMethod.COD && previousOrderData.paymentStatus === PaymentStatus.Pending && paymentStatus === PaymentStatus.Paid) {
-                    await sendSMS(customer.phone, getOrderStatusSMS(customer.name,orderId,total,paymentMethod,paymentStatus
-                    ))
+                    await sendSMS(customer.phone, getOrderStatusSMS(customer.name, orderId, total, paymentMethod, paymentStatus))
                     console.log(`Payment confirmation SMS sent for COD order ${orderId}`);
                 }
 
@@ -179,9 +179,6 @@ export const onPaymentStatusUpdates = functions.firestore
                         await sendAdminSMS(adminNotifySMS(orderId, paymentMethod, total));
                         await sendAdminEmail("adminOrderNotify", templateData);
                         console.log(`Order confirmation sent for PayHere order ${orderId}`);
-                    } else if (previousOrderData.paymentStatus === PaymentStatus.Pending && paymentStatus === PaymentStatus.Failed) {
-                        await sendNotifications();
-                        console.log(`Order failed notification sent for PayHere order ${orderId}`);
                     }
                 }
 
@@ -225,7 +222,7 @@ export const onTrackingUpdates = functions.firestore
             const templateData = {
                 name: newOrderData.customer.name,
                 orderId,
-                address:newOrderData.customer.address,
+                address: newOrderData.customer.address,
                 status: newTracking.status,
                 trackingNumber: newTracking.trackingNumber,
                 trackingUrl: newTracking.trackingUrl,
