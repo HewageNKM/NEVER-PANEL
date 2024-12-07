@@ -244,6 +244,10 @@ export const deleteFiles = async (path: string) => {
         await adminStorageBucket.file(path).delete();
         console.log(`File at ${path} deleted successfully`);
     } catch (error: any) {
+        if (error.code === 404) {
+            console.log(`File at ${path} does not exist. Skipping deletion.`);
+            return;
+        }
         console.error(error);
         throw new Error(error.message);
     }
