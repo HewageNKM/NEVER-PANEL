@@ -133,7 +133,14 @@ export const updateOrder = async (order: Order) => {
         paymentMethod: order.paymentMethod,
         paymentStatus: order.paymentStatus,
         shippingCost: order.shippingCost,
-        updatedAt: admin.firestore.Timestamp.now()
+        updatedAt: admin.firestore.Timestamp.now(),
+        tracking: order.tracking ? {
+            trackingCompany: order.tracking.trackingCompany,
+            trackingNumber: order.tracking.trackingNumber,
+            trackingUrl: order.tracking.trackingUrl,
+            status: order.tracking.status,
+            updatedAt: admin.firestore.Timestamp.now(),
+        } : null,
     }
 
     try {

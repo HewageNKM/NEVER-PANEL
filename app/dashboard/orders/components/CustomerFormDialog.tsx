@@ -12,7 +12,8 @@ import {Stack} from "@mui/material";
 import Typography from "@mui/material/Typography";
 import CardActions from "@mui/material/CardActions";
 import {updateAOrder} from "@/actions/ordersActions";
-import {useAppSelector} from "@/lib/hooks";
+import {useAppDispatch, useAppSelector} from "@/lib/hooks";
+import {getOrders} from "@/lib/ordersSlice/ordersSlice";
 
 const CustomerFormDialog = ({customer, showForm, onClose}: {
     customer: Customer | null,
@@ -23,6 +24,9 @@ const CustomerFormDialog = ({customer, showForm, onClose}: {
     const [editableCustomer, setEditableCustomer] = useState<Customer | null>(customer);
     const [isLoading, setIsLoading] = useState(false)
     const {selectedOrder} = useAppSelector(state => state.ordersSlice);
+
+    const {selectedPage, size} = useAppSelector(state => state.ordersSlice);
+    const dispatch = useAppDispatch();
 
     const handleEditToggle = () => {
         setIsEditing(!isEditing);
@@ -44,7 +48,7 @@ const CustomerFormDialog = ({customer, showForm, onClose}: {
             }
             await updateAOrder(updatedOrder);
             onClose();
-
+            dispatch(getOrders({size, page: selectedPage}))
         } catch (e) {
             console.log(e);
         } finally {
@@ -54,8 +58,6 @@ const CustomerFormDialog = ({customer, showForm, onClose}: {
 
     const handlePrint = () => {
         console.log("Print functionality triggered");
-        // Implement print functionality here
-
     };
 
     useEffect(() => {

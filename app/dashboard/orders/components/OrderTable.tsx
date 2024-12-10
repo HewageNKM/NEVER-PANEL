@@ -25,6 +25,7 @@ import CustomerFormDialog from "@/app/dashboard/orders/components/CustomerFormDi
 import ItemsFormDialog from "@/app/dashboard/orders/components/ItemsFormDialog";
 import PaymentStatusFormDialog from "@/app/dashboard/orders/components/PaymentStatusFormDialog";
 import {PaymentStatus} from "@/functions/src/constant";
+import TrackingFormDialog from "@/app/dashboard/orders/components/TrackingFormDialog";
 
 const OrderTable = () => {
     const {orders, size, selectedPage, isLoading} = useAppSelector(state => state.ordersSlice);
@@ -92,19 +93,19 @@ const OrderTable = () => {
                                             dispatch(setSelectedOrder(order))
                                         }
                                         }>
-                                            <IoInformationCircle color={"blue"} size={30}/>
+                                            <IoInformationCircle color={"blue"} size={25}/>
                                         </IconButton>
                                     </Box>
                                 ) : "Not Available"}</TableCell>
                                 <TableCell>
                                     {order.paymentStatus}
-                                    {order.from == "Website" && (
+                                    {(order.from == "Website" && order.paymentMethod != "PayHere") && (
                                         <IconButton onClick={() => {
                                             setPaymentStatus(order.paymentStatus)
                                             setShowPaymentStatusForm(true)
                                             dispatch(setSelectedOrder(order))
                                         }}>
-                                            <IoInformationCircle color={"blue"} size={30}/>
+                                            <IoInformationCircle color={"blue"} size={25}/>
                                         </IconButton>
                                     )}
                                 </TableCell>
@@ -128,7 +129,7 @@ const OrderTable = () => {
                                             setOrderItems(order.items)
                                             setShowItemsForm(true)
                                         }}>
-                                            <IoInformationCircle color={"blue"} size={30}/>
+                                            <IoInformationCircle color={"blue"} size={25}/>
                                         </IconButton>
                                     </Stack>
                                 </TableCell>
@@ -136,7 +137,29 @@ const OrderTable = () => {
                                     {order.from}
                                 </TableCell>
                                 <TableCell>
-                                    {order.from == "Store" ? ("Complete") :(order.tracking ? (order.tracking.status):("Processing"))}
+                                    {order.from == "Store" ? ("Complete") : (order.tracking ? (
+                                            <Box>
+                                                <Typography>{order.tracking.status}</Typography>
+                                                <IconButton onClick={() => {
+                                                    setTracking(order.tracking)
+                                                    setShowTrackingForm(true)
+                                                    dispatch(setSelectedOrder(order))
+                                                }}>
+                                                    <IoInformationCircle color={"blue"} size={25}/>
+                                                </IconButton>
+                                            </Box>
+                                    ) : (
+                                    <Box>
+                                        <Typography>Processing</Typography>
+                                        <IconButton onClick={() => {
+                                            setTracking(order.tracking)
+                                            setShowTrackingForm(true)
+                                            dispatch(setSelectedOrder(order))
+                                        }}>
+                                            <IoInformationCircle color={"blue"} size={25}/>
+                                        </IconButton>
+                                    </Box>)
+                                    )}
                                 </TableCell>
                                 <TableCell>
                                     {order.createdAt}
@@ -177,7 +200,6 @@ const OrderTable = () => {
                 setShowCustomerForm(false)
                 setCustomer(null)
                 dispatch(setSelectedOrder(null))
-                dispatch(getOrders({size, page: selectedPage}))
             }}/>
             <ItemsFormDialog
                 items={orderItems}
@@ -191,8 +213,13 @@ const OrderTable = () => {
                 setShowPaymentStatusForm(false)
                 setPaymentStatus(null)
                 dispatch(setSelectedOrder(null))
-                dispatch(getOrders({size, page: selectedPage}))
             }}/>
+            <TrackingFormDialog tracking={tracking} showForm={showTrackingForm} onFormClose={() => {
+                setShowTrackingForm(false)
+                setTracking(null)
+                dispatch(setSelectedOrder(null))
+            }}
+            />
         </Stack>
     );
 };

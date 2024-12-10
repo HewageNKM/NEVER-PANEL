@@ -5,11 +5,10 @@ import axios from "axios";
 export const authenticateUser = async (email: string, password: string) => {
     const credential = await signInWithEmailAndPassword(auth, email, password);
     const token = await auth.currentUser?.getIdToken();
-    const uid = credential.user.uid;
 
     const response = await axios({
         method: 'GET',
-        url: `/api/v1/users/${credential.user.uid}?uid=${uid}`,
+        url: `/api/v1/users/${credential.user.uid}`,
         headers: {
             Authorization: `Bearer ${token}`
         },
@@ -17,13 +16,10 @@ export const authenticateUser = async (email: string, password: string) => {
     return response.data;
 }
 
-export const checkUser = async () => {
-    const token = await auth.currentUser?.getIdToken();
-    const uid = auth.currentUser?.uid;
-
+export const checkUser = async (uid:string,token:string) => {
     const response = await axios({
         method: 'GET',
-        url: `/api/v1/users/${uid}?uid=${uid}`,
+        url: `/api/v1/users/${uid}`,
         headers: {
             Authorization: `Bearer ${token}`
         }

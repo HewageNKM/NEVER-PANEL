@@ -11,8 +11,8 @@ export const GET = async (req: Request) => {
         }
 
         const url = new URL(req.url);
-        const uid = url.searchParams.get('uid') || "";
-        const user = await getUserById(uid);
+        const uid = url.pathname.split('/').pop();
+        const user = await getUserById(uid || "None");
 
         if (!user) {
             return NextResponse.json({message: 'User not found'}, {status: 404});
