@@ -16,8 +16,8 @@ export const brands = [
     },
     {
         id: 5,
-        name: "Cross",
-        value: "cross"
+        name: "Crocs",
+        value: "crocs"
     },
     {
         id: 6,
@@ -31,15 +31,24 @@ export const brands = [
     },
     {
         id: 8,
+        name: "Tommy Hilfiger",
+        value: "tommy hilfiger"
+    },
+    {
+        id: 9,
         name: "Polo",
         value: "polo"
     },
     {
-        id:8,
+        id:10,
         name:"LK",
         value:"lk"
+    },
+    {
+        id:11,
+        name:"Other",
+        value:"other"
     }
-
 ]
 export const shoeSizesList = [
     "36",

@@ -99,7 +99,7 @@ const OrderTable = () => {
                                 ) : "Not Available"}</TableCell>
                                 <TableCell>
                                     {order.paymentStatus}
-                                    {order.from == "Website" && (
+                                    {(order.from == "Website" && order.paymentMethod != "PayHere") && (
                                         <IconButton onClick={() => {
                                             setPaymentStatus(order.paymentStatus)
                                             setShowPaymentStatusForm(true)

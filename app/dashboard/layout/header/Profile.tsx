@@ -5,6 +5,7 @@ import {IconUser} from "@tabler/icons-react";
 import {useDispatch} from "react-redux";
 import {clearUser} from "@/lib/authSlice/authSlice";
 import {useRouter} from "next/navigation";
+import {auth} from "@/firebase/firebaseClient";
 
 const Profile = () => {
     const [anchorEl2, setAnchorEl2] = useState(null);
@@ -17,10 +18,15 @@ const Profile = () => {
     const handleClose2 = () => {
         setAnchorEl2(null);
     };
-    const handleLogout = () => {
-        window.localStorage.removeItem("neverPanelUser");
-        dispatch(clearUser());
-        router.replace("/");
+    const handleLogout = async () => {
+        try {
+            await auth.signOut();
+            window.localStorage.removeItem("neverPanelUser");
+            dispatch(clearUser());
+            router.replace("/");
+        } catch (e: any) {
+            console.error(e)
+        }
     }
     return (
         <Box>

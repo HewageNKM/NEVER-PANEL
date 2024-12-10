@@ -81,7 +81,7 @@ const PaymentStatusFormDialog = ({initialStatus, showForm, onClose}: {
                             Close
                         </Button>
                         <Button className="disabled:bg-opacity-60 disabled:cursor-not-allowed"
-                                disabled={selectedStatus == selectedOrder?.paymentStatus || isLoading}
+                                disabled={selectedStatus == selectedOrder?.paymentStatus || isLoading || selectedOrder?.paymentStatus == selectedStatus}
                                 onClick={updatePaymentStatus} variant="contained" color="secondary">
                             Update
                         </Button>
