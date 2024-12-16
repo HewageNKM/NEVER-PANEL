@@ -5,13 +5,15 @@ import DashboardCard from "../shared/DashboardCard";
 import {useEffect, useState} from "react";
 import {collection, getDocs, query, Timestamp, where, doc, getDoc} from "@firebase/firestore";
 import {db} from "@/firebase/firebaseClient";
-import {Item, Order} from "@/interfaces"; // Ensure the correct path to your interfaces
+import {Item, Order} from "@/interfaces";
+import {useAppSelector} from "@/lib/hooks"; // Ensure the correct path to your interfaces
 
 const DailyEarnings = () => {
     const [totalEarnings, setTotalEarnings] = useState(0);
     const [totalProfit, setTotalProfit] = useState(0);
     const [invoiceCount, setInvoiceCount] = useState(0);
     const [loading, setLoading] = useState(true);
+    const {currentUser} = useAppSelector(state => state.authSlice);
 
     useEffect(() => {
         const fetchDailyEarnings = async () => {
@@ -67,7 +69,7 @@ const DailyEarnings = () => {
         };
 
         fetchDailyEarnings();
-    }, []);
+    }, [currentUser]);
 
     return (
         <DashboardCard

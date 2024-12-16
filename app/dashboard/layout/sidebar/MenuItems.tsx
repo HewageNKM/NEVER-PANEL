@@ -1,4 +1,4 @@
-import {IconFileInvoice, IconLayoutDashboard, IconList, IconUsersGroup} from "@tabler/icons-react";
+import {IconFileInvoice, IconLayoutDashboard, IconList, IconUsersGroup, IconShoppingCart} from "@tabler/icons-react";
 
 import {uniqueId} from "lodash";
 
@@ -19,8 +19,14 @@ const Menuitems = [
     {
         id: uniqueId(),
         title: "Orders",
-        icon: IconFileInvoice,
+        icon: IconShoppingCart,
         href: "/dashboard/orders",
+    },
+    {
+        id: uniqueId(),
+        title: "Reports",
+        icon: IconFileInvoice,
+        href: "/dashboard/reports",
     },
     {
         id: uniqueId(),
