@@ -10,9 +10,12 @@ import {useAppSelector} from "@/lib/hooks";
 const Chart = dynamic(() => import("react-apexcharts"), {ssr: false});
 
 const SalesOverview = () => {
-    const [salesData, setSalesData] = useState({website: [], store: []});
     const [loading, setLoading] = useState(true);
-    const [months, setMonths] = useState<string[]>([]);
+    const [salesData, setSalesData] = useState({website: Array(12).fill(0), store: Array(12).fill(0)});
+    const [months, setMonths] = useState<string[]>(Array.from({length: 12}, (_, i) =>
+        new Date(0, i).toLocaleString("default", {month: "short"})
+    ));
+
     const {currentUser} = useAppSelector(state => state.authSlice);
 
     // Chart colors
@@ -20,22 +23,28 @@ const SalesOverview = () => {
     const primary = theme.palette.primary.main;
     const secondary = theme.palette.secondary.main;
 
-    // Chart options
     const optionscolumnchart: any = {
         chart: {type: "bar", height: 370},
         colors: [primary, secondary],
         plotOptions: {
             bar: {horizontal: false, columnWidth: "42%", borderRadius: 6},
         },
-        xaxis: {categories: months},
+        xaxis: {categories: months.length ? months : Array(12).fill("No Data")},
         yaxis: {tickAmount: 4},
         tooltip: {theme: "dark"},
     };
 
     const seriescolumnchart = [
-        {name: "Website", data: salesData.website},
-        {name: "Store", data: salesData.store},
+        {
+            name: "Website",
+            data: salesData.website && salesData.website.length ? salesData.website : Array(12).fill(0),
+        },
+        {
+            name: "Store",
+            data: salesData.store && salesData.store.length ? salesData.store : Array(12).fill(0),
+        },
     ];
+
 
     useEffect(() => {
         if (currentUser) {
@@ -98,20 +107,14 @@ const SalesOverview = () => {
         }
     };
 
-    // Ensure the chart and the dropdown render only when data is available
-    if (loading) {
-        return (
-            <Box sx={{display: "flex", justifyContent: "center", alignItems: "center", height: "100px"}}>
-                <CircularProgress/>
-            </Box>
-        );
-    }
 
     return (
         <DashboardCard
             title="Sales Overview"
         >
-            <Chart options={optionscolumnchart} series={seriescolumnchart} type="bar" height={370}/>
+            {loading ? (<Box sx={{display: "flex", justifyContent: "center", alignItems: "center", height: "100px"}}>
+                <CircularProgress/>
+            </Box>) : (<Chart options={optionscolumnchart} series={seriescolumnchart} type="bar" height={370}/>)}
         </DashboardCard>
     );
 };
