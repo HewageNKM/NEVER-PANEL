@@ -121,15 +121,15 @@ export const onPaymentStatusUpdates = functions.firestore
 
         if (!orderData) return null;
 
-        const {paymentMethod, paymentStatus, items, customer, shippingCost} = orderData;
+        const {paymentMethod, paymentStatus, items, customer} = orderData;
         const customerEmail = customer.email.trim();
-        const total = calculateTotal(items, shippingCost);
+        const total = calculateTotal(items);
 
         const templateData = {
             name: customer.name,
+            address: customer.address,
             orderId,
             items,
-            shippingCost,
             total,
             paymentMethod,
             isRefunded: paymentStatus === PaymentStatus.Refunded,

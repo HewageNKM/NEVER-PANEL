@@ -13,7 +13,7 @@ import {
     TimelineSeparator,
 } from "@mui/lab";
 import {CircularProgress, Typography} from "@mui/material";
-import {collection, limit, onSnapshot, orderBy, query} from "@firebase/firestore";
+import {collection, limit, onSnapshot, orderBy, query, where} from "@firebase/firestore";
 import {db} from "@/firebase/firebaseClient";
 import {Order} from "@/interfaces";
 
@@ -23,7 +23,7 @@ const RecentTransactions = () => {
 
     useEffect(() => {
         const ordersRef = collection(db, "orders");
-        const ordersQuery = query(ordersRef, orderBy("createdAt", "desc"), limit(6));
+        const ordersQuery = query(ordersRef, where("paymentStatus", "==", "Paid"), orderBy("createdAt", "desc"), limit(6));
 
         const unsubscribe = onSnapshot(ordersQuery, (snapshot) => {
             const ordersData = snapshot.docs.map((doc) => ({

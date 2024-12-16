@@ -26,7 +26,7 @@ const DailyEarnings = () => {
                 const startTimestamp = Timestamp.fromDate(startOfDay);
 
                 const ordersRef = collection(db, "orders");
-                const todayOrdersQuery = query(ordersRef, where("createdAt", ">=", startTimestamp));
+                const todayOrdersQuery = query(ordersRef, where("createdAt", ">=", startTimestamp), where("paymentStatus", "==", "Paid"));
 
                 const querySnapshot = await getDocs(todayOrdersQuery);
 
