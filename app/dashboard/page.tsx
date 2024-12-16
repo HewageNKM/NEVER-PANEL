@@ -1,11 +1,10 @@
 "use client";
 
-import { Box, Grid } from "@mui/material";
+import {Box, Grid} from "@mui/material";
 import PageContainer from "./components/container/PageContainer";
 // components
 import SalesOverview from "./components/dashboard/SalesOverview";
 import RecentTransactions from "./components/dashboard/RecentTransactions";
-import ProductPerformance from "./components/dashboard/ProductPerformance";
 import Blog from "./components/dashboard/Blog";
 import DailyEarnings from "./components/dashboard/DailyEarnings";
 
@@ -16,24 +15,24 @@ const Dashboard = () => {
                 <Grid container spacing={3}>
                     {/* Sales Overview Section */}
                     <Grid item xs={12} md={8}>
-                        <SalesOverview />
+                        <SalesOverview/>
                     </Grid>
 
                     {/* Daily Earnings and Recent Transactions */}
                     <Grid item xs={12} md={4}>
                         <Grid container spacing={3}>
                             <Grid item xs={12}>
-                                <DailyEarnings />
+                                <DailyEarnings/>
                             </Grid>
                             <Grid item xs={12}>
-                                <RecentTransactions />
+                                <RecentTransactions/>
                             </Grid>
                         </Grid>
                     </Grid>
 
                     {/* Blog Section */}
                     <Grid item xs={12}>
-                        <Blog />
+                        <Blog/>
                     </Grid>
                 </Grid>
             </Box>
