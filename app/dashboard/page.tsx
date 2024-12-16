@@ -5,7 +5,6 @@ import PageContainer from "./components/container/PageContainer";
 // components
 import SalesOverview from "./components/dashboard/SalesOverview";
 import RecentTransactions from "./components/dashboard/RecentTransactions";
-import Blog from "./components/dashboard/Blog";
 import DailyEarnings from "./components/dashboard/DailyEarnings";
 
 const Dashboard = () => {
@@ -28,11 +27,6 @@ const Dashboard = () => {
                                 <RecentTransactions/>
                             </Grid>
                         </Grid>
-                    </Grid>
-
-                    {/* Blog Section */}
-                    <Grid item xs={12}>
-                        <Blog/>
                     </Grid>
                 </Grid>
             </Box>
