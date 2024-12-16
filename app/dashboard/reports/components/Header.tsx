@@ -41,7 +41,7 @@ const Header = () => {
             const startTimestamp = Timestamp.fromDate(startOfMonth);
 
             const ordersRef = collection(db, "orders");
-            const todayOrdersQuery = query(ordersRef, where("createdAt", ">=", startTimestamp));
+            const todayOrdersQuery = query(ordersRef, where("createdAt", ">=", startTimestamp), where("paymentStatus", "==", "Paid"));
 
             const querySnapshot = await getDocs(todayOrdersQuery);
 
@@ -78,7 +78,7 @@ const Header = () => {
             setInvoiceCount(count);
         } catch (error) {
             console.error("Error fetching daily earnings:", error.message, error.stack);
-        }finally {
+        } finally {
             setIsLoading(false);
         }
     }

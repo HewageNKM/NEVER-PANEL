@@ -23,11 +23,10 @@ export const sendAdminSMS = (text: string) => {
  * Calculates the total price of order items.
  */
 export const calculateTotal = (
-  items: OrderItem[], shippingCost: number
+  items: OrderItem[]
 ): number => {
-  const itemsTotal = items.reduce((total, item) =>
-    total + item.price * item.quantity, 0);
-  return itemsTotal + shippingCost;
+  return items.reduce((total, item) =>
+      total + item.price * item.quantity, 0);
 };
 
 /*
