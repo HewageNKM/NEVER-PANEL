@@ -27,6 +27,7 @@ export const getOrders = async (pageNumber: number = 1, size: number = 20) => {
         const offset = (pageNumber - 1) * size;
         // Fetch orders with pagination and sorting by createdAt
         const ordersSnapshot = await adminFirestore.collection('orders')
+            .where('paymentStatus', 'not-in', [paymentStatus.PENDING,paymentStatus.FAILED])
             .orderBy('createdAt', 'desc' as any)
             .limit(size)
             .offset(offset)

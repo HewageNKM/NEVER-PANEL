@@ -167,7 +167,7 @@ const pageLinks = [
   },
   {
     href: '/apps/blog/posts',
-    title: 'Blog Design'
+    title: 'PopularItems Design'
   },
   {
     href: '/apps/ecommerce/eco-checkout',
