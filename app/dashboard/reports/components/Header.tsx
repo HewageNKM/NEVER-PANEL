@@ -4,10 +4,10 @@ import HeaderCard from '@/app/dashboard/reports/components/HeaderCard';
 import {DatePicker} from '@mui/x-date-pickers/DatePicker';
 import {LocalizationProvider} from '@mui/x-date-pickers';
 import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs';
-import {collection, doc, getDoc, getDocs, query, Timestamp, where} from "@firebase/firestore";
-import {db} from "@/firebase/firebaseClient";
-import {Item, Order} from "@/interfaces";
 import {useAppSelector} from "@/lib/hooks";
+import SaleReport from "@/app/dashboard/reports/components/SaleReport";
+import {getReport} from "@/actions/ordersActions";
+import {getMonthlyOverview} from "@/actions/reportsAction";
 
 const Header = () => {
     const [fromDate, setFromDate] = useState(null);
@@ -18,64 +18,50 @@ const Header = () => {
     const [invoiceCount, setInvoiceCount] = useState(0);
     const {currentUser} = useAppSelector(state => state.authSlice);
     const [isLoading, setIsLoading] = useState(true)
+    const [isReportLoading, setIsReportLoading] = useState(false)
+    const [sales, setSales] = useState(null)
+    const [showSaleReport, setShowSaleReport] = useState(false)
 
     const onSubmit = async (evt) => {
         evt.preventDefault();
-        if (selectedType === "" || toDate === null || fromDate === null) {
+        setIsReportLoading(true);
+        if (selectedType !== "sale" && (toDate == null && fromDate == null)) {
             alert("Please fill all fields");
             return;
         }
         try {
+            const startDate = fromDate?.toDate().toDateString();
+            const endDate = toDate?.toDate().toDateString();
 
+            const response = await getReport(startDate, endDate);
+            if (response?.data?.data?.length == 0) {
+                alert("No data found");
+                return;
+            } else {
+                console.log(response.data)
+                setSales(response.data.data)
+
+                setShowSaleReport(true);
+            }
         } catch (e) {
             console.log(e);
+        } finally {
+            setIsReportLoading(false);
         }
     }
+
     const fetchMonthlyEarning = async () => {
         setIsLoading(true);
         try {
-            const startOfMonth = new Date();
-            startOfMonth.setDate(1);
-            startOfMonth.setHours(0, 0, 0, 0);
-
-            const startTimestamp = Timestamp.fromDate(startOfMonth);
-
-            const ordersRef = collection(db, "orders");
-            const todayOrdersQuery = query(ordersRef, where("createdAt", ">=", startTimestamp), where("paymentStatus", "==", "Paid"));
-
-            const querySnapshot = await getDocs(todayOrdersQuery);
-
-            let earnings = 0;
-            let buyingCost = 0;
-            let count = 0;
-
-            for (const docSnap of querySnapshot.docs) {
-                const data = docSnap.data() as Order;
-
-                if (Array.isArray(data.items)) {
-                    for (const item of data.items) {
-                        earnings += item.price || 0;
-
-                        // Fetch buying price from inventory
-                        if (item.itemId) {
-                            const inventoryDocRef = doc(db, "inventory", item.itemId);
-                            const inventoryDoc = await getDoc(inventoryDocRef);
-
-                            if (inventoryDoc.exists()) {
-                                const inventoryData = inventoryDoc.data() as Item;
-                                buyingCost += (inventoryData.buyingPrice || 0) * (item.quantity || 1);
-                            }
-                        }
-                    }
-                    count += 1;
-                }
-            }
-
-            const profit = earnings - buyingCost;
-
-            setTotalSale(earnings);
-            setTotalProfit(profit);
-            setInvoiceCount(count);
+            const overview: {
+                totalOrders: number,
+                totalEarnings: number,
+                totalBuyingCost: number,
+                totalProfit: number,
+            } = await getMonthlyOverview();
+            setTotalSale(overview.totalEarnings | 0);
+            setTotalProfit(overview.totalProfit | 0);
+            setInvoiceCount(overview.totalOrders | 0);
         } catch (error) {
             console.error("Error fetching daily earnings:", error.message, error.stack);
         } finally {
@@ -84,7 +70,9 @@ const Header = () => {
     }
 
     useEffect(() => {
-        fetchMonthlyEarning()
+        if (currentUser) {
+            fetchMonthlyEarning()
+        }
     }, [currentUser]);
 
     return (
@@ -159,7 +147,7 @@ const Header = () => {
                             justifyContent: 'center',
                         }}>
                             <DatePicker
-                                disabled={selectedType === "" || selectedType === "stock"}
+                                disabled={selectedType === "" || selectedType === "stock" || isReportLoading}
                                 label="From"
                                 value={fromDate}
                                 onChange={(newValue) => setFromDate(newValue)}
@@ -167,20 +155,22 @@ const Header = () => {
                             />
                             <DatePicker
                                 label="To"
-                                disabled={selectedType === "" || selectedType === "stock"}
+                                disabled={selectedType === "" || selectedType === "stock" || isReportLoading}
                                 value={toDate}
                                 onChange={(newValue) => setToDate(newValue)}
                                 renderInput={(params) => <TextField {...params} />}
                             />
                         </Box>
                         <Box>
-                            <Button type={"submit"} variant={"contained"}>
+                            <Button disabled={isReportLoading} className={"disabled:opacity-60 disabled:cursor-not-allowed"}
+                                    type={"submit"} variant={"contained"}>
                                 View Report
                             </Button>
                         </Box>
                     </Stack>
                 </form>
             </Stack>
+            <SaleReport sales={sales} setShow={() => setShowSaleReport(false)} show={showSaleReport}/>
         </LocalizationProvider>
     );
 };

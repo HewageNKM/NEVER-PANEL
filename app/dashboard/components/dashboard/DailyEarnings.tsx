@@ -1,9 +1,8 @@
 "use client";
-
 import {Box, CircularProgress, Typography} from "@mui/material";
 import DashboardCard from "../shared/DashboardCard";
 import {useEffect, useState} from "react";
-import {collection, getDocs, query, Timestamp, where, doc, getDoc} from "@firebase/firestore";
+import {collection, doc, getDoc, getDocs, query, Timestamp, where} from "@firebase/firestore";
 import {db} from "@/firebase/firebaseClient";
 import {Item, Order} from "@/interfaces";
 import {useAppSelector} from "@/lib/hooks"; // Ensure the correct path to your interfaces
@@ -24,9 +23,10 @@ const DailyEarnings = () => {
                 endOfDay.setHours(23, 59, 59, 999);
 
                 const startTimestamp = Timestamp.fromDate(startOfDay);
+                const endTimestamp = Timestamp.fromDate(endOfDay);
 
                 const ordersRef = collection(db, "orders");
-                const todayOrdersQuery = query(ordersRef, where("createdAt", ">=", startTimestamp), where("paymentStatus", "==", "Paid"));
+                const todayOrdersQuery = query(ordersRef, where("createdAt", ">=", startTimestamp), where("createdAt", "<=", endTimestamp), where("paymentStatus", "==", "Paid"));
 
                 const querySnapshot = await getDocs(todayOrdersQuery);
 

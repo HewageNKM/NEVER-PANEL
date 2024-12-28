@@ -1,8 +1,9 @@
 import admin, {credential} from 'firebase-admin';
-import {Item, Order} from "@/interfaces";
+import {Item, Order, SalesReport} from "@/interfaces";
 import {NextResponse} from "next/server";
 import {paymentMethods, paymentStatus} from "@/constant";
 import {uuidv4} from "@firebase/util";
+import {Timestamp} from "firebase-admin/firestore";
 
 // Initialize Firebase Admin if not already initialized
 if (!admin.apps.length) {
@@ -27,7 +28,7 @@ export const getOrders = async (pageNumber: number = 1, size: number = 20) => {
         const offset = (pageNumber - 1) * size;
         // Fetch orders with pagination and sorting by createdAt
         const ordersSnapshot = await adminFirestore.collection('orders')
-            .where('paymentStatus', 'not-in', [paymentStatus.PENDING,paymentStatus.FAILED])
+            .where('paymentStatus', 'not-in', [paymentStatus.PENDING, paymentStatus.FAILED])
             .orderBy('createdAt', 'desc' as any)
             .limit(size)
             .offset(offset)
@@ -295,6 +296,230 @@ export const deleteItemById = async (itemId: string) => {
     }
 };
 
+export const getSaleReport = async (fromDate: string, toDate: string) => {
+    try {
+        console.log(`Fetching sales data from ${fromDate} to ${toDate}`);
+
+        const startTimestamp = admin.firestore.Timestamp.fromDate(new Date(fromDate));
+        const endTimestamp = admin.firestore.Timestamp.fromDate(new Date(toDate));
+
+        const ordersQuery = admin.firestore()
+            .collection('orders')
+            .where('createdAt', '>=', startTimestamp)
+            .where('createdAt', '<=', endTimestamp)
+            .where('paymentStatus', '==', 'Paid');
+
+        const querySnapshot = await ordersQuery.get();
+        if (querySnapshot.empty) {
+            console.log('No orders found');
+            return [];
+        }
+        console.log(`Fetched ${querySnapshot.size} orders`);
+
+        const salesData: SalesReport['data'] = [];
+        const itemRefs: FirebaseFirestore.DocumentReference[] = [];
+
+        // Collect item references from orders
+        for (const orderDoc of querySnapshot.docs) {
+            const order = orderDoc.data() as Order;
+            for (const orderItem of order.items) {
+                const itemRef = admin.firestore().collection('inventory').doc(orderItem.itemId.toLowerCase());
+                if (!itemRefs.some(ref => ref.id === itemRef.id)) {
+                    itemRefs.push(itemRef); // Add only unique item references
+                }
+            }
+        }
+
+        // Fetch item documents in parallel
+        const itemDocs = await Promise.all(itemRefs.map(ref => ref.get()));
+        const itemsMap = new Map<string, Item>(); // Map to store items by itemId
+
+        // Store item data for faster lookup
+        itemDocs.forEach(doc => {
+            if (doc.exists) {
+                itemsMap.set(doc.id.toLowerCase(), doc.data() as Item);
+            }
+        });
+
+        // Process orders with cached item data
+        for (const orderDoc of querySnapshot.docs) {
+            const order = orderDoc.data() as Order;
+
+            for (const orderItem of order.items) {
+                const item = itemsMap.get(orderItem.itemId.toLowerCase()) || null;
+
+                const itemType = item?.type || 'Unknown';
+                const itemName = item?.name || '[deleted]';
+                const manufacturer = item?.manufacturer || '[deleted]';
+                const brand = item?.brand || '[deleted]';
+                const buyingPrice = item?.buyingPrice || 0;
+
+                // Find or create the type entry
+                let typeEntry = salesData.find(entry => entry.type.toLowerCase() === itemType.toLowerCase());
+                if (!typeEntry) {
+                    typeEntry = {type: itemType, data: []};
+                    salesData.push(typeEntry);
+                }
+
+                // Find or create the item entry
+                let itemEntry = typeEntry.data.find(entry => entry.itemId.toLowerCase() === (item?.itemId || orderItem.itemId).toLowerCase());
+                if (!itemEntry) {
+                    itemEntry = {
+                        itemId: item?.itemId || orderItem.itemId,
+                        manufacturer,
+                        brand,
+                        itemName,
+                        data: []
+                    };
+                    typeEntry.data.push(itemEntry);
+                }
+
+                // Find or create the variant entry
+                let variantEntry = itemEntry.data.find(entry => entry.variantId.toLowerCase() === orderItem.variantId.toLowerCase());
+                if (!variantEntry) {
+                    const variant = item?.variants?.find(v => v.variantId.toLowerCase() === orderItem.variantId.toLowerCase());
+                    variantEntry = {
+                        variantId: orderItem.variantId,
+                        variantName: variant?.variantName || '[deleted]',
+                        data: []
+                    };
+                    itemEntry.data.push(variantEntry);
+                }
+
+                // Add size details with unique sold price
+                const sizeEntry = variantEntry.data.find(
+                    entry => entry.size === orderItem.size && entry.soldPrice === orderItem.price
+                );
+                if (sizeEntry) {
+                    sizeEntry.quantity += orderItem.quantity;
+                } else {
+                    variantEntry.data.push({
+                        size: orderItem.size,
+                        quantity: orderItem.quantity,
+                        soldPrice: orderItem.price,
+                        boughtPrice: buyingPrice
+                    });
+                }
+            }
+        }
+
+        console.log(salesData);
+        return {type: 'sales', data: salesData};
+    } catch (error: any) {
+        console.error(error);
+        throw new Error(error.message);
+    }
+};
+
+export const getMonthlyOverview = async () => {
+    try {
+        console.log('Fetching monthly earnings');
+
+        // Get the current month start and end timestamps
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+
+        const startTimestamp = Timestamp.fromDate(startOfMonth);
+        const endTimestamp = Timestamp.fromDate(endOfMonth);
+        return getOverview(startTimestamp, endTimestamp);
+    } catch (e) {
+        console.error(e);
+        throw new Error(e.message);
+    }
+};
+export const getOverview = async (start:Timestamp,end:Timestamp) => {
+  try {
+      const todayOrdersQuery = adminFirestore
+          .collection('orders')
+          .where('createdAt', '>=', start)
+          .where('createdAt', '<=', end)
+          .where('paymentStatus', '==', 'Paid');
+
+      const querySnapshot = await todayOrdersQuery.get();
+
+      let earnings = 0;
+      let buyingCost = 0;
+      let count = 0;
+
+      // Collect all unique itemIds from the orders
+      const itemIds: string[] = [];
+
+      querySnapshot.docs.forEach((docSnap) => {
+          const data = docSnap.data() as Order;
+          if (Array.isArray(data.items)) {
+              data.items.forEach((item) => {
+                  if (item.itemId && !itemIds.includes(item.itemId)) {
+                      itemIds.push(item.itemId); // Collect unique itemIds
+                  }
+              });
+          }
+          count += 1;
+      });
+
+      // Fetch all inventory documents in parallel
+      const inventoryDocs = await Promise.all(
+          itemIds.map((itemId) => adminFirestore.collection('inventory').doc(itemId).get())
+      );
+
+      const inventoryDataMap = new Map<string, Item>(); // Map to store inventory data by itemId
+
+      // Cache inventory data in the map for quick lookup
+      inventoryDocs.forEach((doc) => {
+          if (doc.exists) {
+              inventoryDataMap.set(doc.id, doc.data() as Item);
+          }
+      });
+
+      // Calculate earnings and buying cost using cached inventory data
+      querySnapshot.docs.forEach((docSnap) => {
+          const data = docSnap.data() as Order;
+          if (Array.isArray(data.items)) {
+              data.items.forEach((item) => {
+                  earnings += item.price || 0;
+
+                  // Lookup inventory data in the cache
+                  const inventoryData = inventoryDataMap.get(item.itemId);
+                  if (inventoryData) {
+                      buyingCost += (inventoryData.buyingPrice || 0) * (item.quantity || 1);
+                  }
+              });
+          }
+      });
+
+      const profit = earnings - buyingCost;
+      console.log(`Fetched ${count} orders with total earnings: ${earnings}, buying cost: ${buyingCost}, profit: ${profit}`);
+
+      return {
+          totalOrders: count,
+          totalEarnings: earnings.toFixed(2),
+          totalBuyingCost: buyingCost.toFixed(2),
+          totalProfit: profit.toFixed(2),
+      };
+  }catch (e) {
+      throw new Error(e.message);
+  }
+}
+export const getDailyOverview = async () => {
+    try {
+        console.log('Fetching daily earnings');
+
+        // Get the current month start and end timestamps
+        const now = new Date();
+        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        startOfDay.setHours(0, 0, 0, 0);
+        const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        endOfDay.setHours(23, 59, 59, 999);
+
+        const startTimestamp = Timestamp.fromDate(startOfDay);
+        const endTimestamp = Timestamp.fromDate(endOfDay);
+
+        return getOverview(startTimestamp, endTimestamp);
+    } catch (error: any) {
+        console.error(error);
+        throw new Error(error.message);
+    }
+}
 
 export const getUserById = async (userId: string) => {
     try {
