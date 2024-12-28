@@ -317,18 +317,36 @@ export const getSaleReport = async (fromDate: string, toDate: string) => {
         console.log(`Fetched ${querySnapshot.size} orders`);
 
         const salesData: SalesReport['data'] = [];
+        const itemRefs: FirebaseFirestore.DocumentReference[] = [];
 
+        // Collect item references from orders
+        for (const orderDoc of querySnapshot.docs) {
+            const order = orderDoc.data() as Order;
+            for (const orderItem of order.items) {
+                const itemRef = admin.firestore().collection('inventory').doc(orderItem.itemId.toLowerCase());
+                if (!itemRefs.some(ref => ref.id === itemRef.id)) {
+                    itemRefs.push(itemRef); // Add only unique item references
+                }
+            }
+        }
+
+        // Fetch item documents in parallel
+        const itemDocs = await Promise.all(itemRefs.map(ref => ref.get()));
+        const itemsMap = new Map<string, Item>(); // Map to store items by itemId
+
+        // Store item data for faster lookup
+        itemDocs.forEach(doc => {
+            if (doc.exists) {
+                itemsMap.set(doc.id.toLowerCase(), doc.data() as Item);
+            }
+        });
+
+        // Process orders with cached item data
         for (const orderDoc of querySnapshot.docs) {
             const order = orderDoc.data() as Order;
 
             for (const orderItem of order.items) {
-                const itemRef = admin.firestore().collection('inventory').doc(orderItem.itemId.toLowerCase());
-                const itemDoc = await itemRef.get();
-
-                let item: Item | null = null;
-                if (itemDoc.exists) {
-                    item = itemDoc.data() as Item;
-                }
+                const item = itemsMap.get(orderItem.itemId.toLowerCase()) || null;
 
                 const itemType = item?.type || 'Unknown';
                 const itemName = item?.name || '[deleted]';
@@ -339,7 +357,7 @@ export const getSaleReport = async (fromDate: string, toDate: string) => {
                 // Find or create the type entry
                 let typeEntry = salesData.find(entry => entry.type.toLowerCase() === itemType.toLowerCase());
                 if (!typeEntry) {
-                    typeEntry = {type: itemType, data: []};
+                    typeEntry = { type: itemType, data: [] };
                     salesData.push(typeEntry);
                 }
 
@@ -386,7 +404,7 @@ export const getSaleReport = async (fromDate: string, toDate: string) => {
         }
 
         console.log(salesData);
-        return {type: 'sales', data: salesData};
+        return { type: 'sales', data: salesData };
     } catch (error: any) {
         console.error(error);
         throw new Error(error.message);
@@ -395,8 +413,9 @@ export const getSaleReport = async (fromDate: string, toDate: string) => {
 
 export const getOverview = async () => {
     try {
-        // Get the current month start and end timestamps
         console.log('Fetching monthly earnings');
+
+        // Get the current month start and end timestamps
         const now = new Date();
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
         const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
@@ -404,7 +423,11 @@ export const getOverview = async () => {
         const startTimestamp = Timestamp.fromDate(startOfMonth);
         const endTimestamp = Timestamp.fromDate(endOfMonth);
 
-        let todayOrdersQuery = adminFirestore.collection('orders').where('createdAt', '>=', startTimestamp).where('createdAt', '<=', endTimestamp).where('paymentStatus', '==', 'Paid')
+        const todayOrdersQuery = adminFirestore
+            .collection('orders')
+            .where('createdAt', '>=', startTimestamp)
+            .where('createdAt', '<=', endTimestamp)
+            .where('paymentStatus', '==', 'Paid');
 
         const querySnapshot = await todayOrdersQuery.get();
 
@@ -412,30 +435,54 @@ export const getOverview = async () => {
         let buyingCost = 0;
         let count = 0;
 
-        for (const docSnap of querySnapshot.docs) {
-            const data = docSnap.data() as Order;
+        // Collect all unique itemIds from the orders
+        const itemIds: string[] = [];
 
+        querySnapshot.docs.forEach((docSnap) => {
+            const data = docSnap.data() as Order;
             if (Array.isArray(data.items)) {
-                for (const item of data.items) {
+                data.items.forEach((item) => {
+                    if (item.itemId && !itemIds.includes(item.itemId)) {
+                        itemIds.push(item.itemId); // Collect unique itemIds
+                    }
+                });
+            }
+            count += 1;
+        });
+
+        // Fetch all inventory documents in parallel
+        const inventoryDocs = await Promise.all(
+            itemIds.map((itemId) => adminFirestore.collection('inventory').doc(itemId).get())
+        );
+
+        const inventoryDataMap = new Map<string, Item>(); // Map to store inventory data by itemId
+
+        // Cache inventory data in the map for quick lookup
+        inventoryDocs.forEach((doc) => {
+            if (doc.exists) {
+                inventoryDataMap.set(doc.id, doc.data() as Item);
+            }
+        });
+
+        // Calculate earnings and buying cost using cached inventory data
+        querySnapshot.docs.forEach((docSnap) => {
+            const data = docSnap.data() as Order;
+            if (Array.isArray(data.items)) {
+                data.items.forEach((item) => {
                     earnings += item.price || 0;
 
-                    // Fetch buying price from inventory
-                    if (item.itemId) {
-                        const inventoryDocRef = adminFirestore.collection("inventory").doc(item.itemId);
-                        const inventoryDoc = await inventoryDocRef.get();
-
-                        if (inventoryDoc.exists) {
-                            const inventoryData = inventoryDoc.data() as Item;
-                            buyingCost += (inventoryData.buyingPrice || 0) * (item.quantity || 1);
-                        }
+                    // Lookup inventory data in the cache
+                    const inventoryData = inventoryDataMap.get(item.itemId);
+                    if (inventoryData) {
+                        buyingCost += (inventoryData.buyingPrice || 0) * (item.quantity || 1);
                     }
-                }
-                count += 1;
+                });
             }
-        }
+        });
 
         const profit = earnings - buyingCost;
         console.log(`Fetched ${count} orders with total earnings: ${earnings}, buying cost: ${buyingCost}, profit: ${profit}`);
+
         return {
             totalOrders: count,
             totalEarnings: earnings.toFixed(2),
