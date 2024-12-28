@@ -3,6 +3,7 @@ import {Item, Order, SalesReport} from "@/interfaces";
 import {NextResponse} from "next/server";
 import {paymentMethods, paymentStatus} from "@/constant";
 import {uuidv4} from "@firebase/util";
+import {Timestamp} from "firebase-admin/firestore";
 
 // Initialize Firebase Admin if not already initialized
 if (!admin.apps.length) {
@@ -27,7 +28,7 @@ export const getOrders = async (pageNumber: number = 1, size: number = 20) => {
         const offset = (pageNumber - 1) * size;
         // Fetch orders with pagination and sorting by createdAt
         const ordersSnapshot = await adminFirestore.collection('orders')
-            .where('paymentStatus', 'not-in', [paymentStatus.PENDING,paymentStatus.FAILED])
+            .where('paymentStatus', 'not-in', [paymentStatus.PENDING, paymentStatus.FAILED])
             .orderBy('createdAt', 'desc' as any)
             .limit(size)
             .offset(offset)
@@ -338,7 +339,7 @@ export const getSaleReport = async (fromDate: string, toDate: string) => {
                 // Find or create the type entry
                 let typeEntry = salesData.find(entry => entry.type.toLowerCase() === itemType.toLowerCase());
                 if (!typeEntry) {
-                    typeEntry = { type: itemType, data: [] };
+                    typeEntry = {type: itemType, data: []};
                     salesData.push(typeEntry);
                 }
 
@@ -385,10 +386,65 @@ export const getSaleReport = async (fromDate: string, toDate: string) => {
         }
 
         console.log(salesData);
-        return { type: 'sales', data: salesData };
+        return {type: 'sales', data: salesData};
     } catch (error: any) {
         console.error(error);
         throw new Error(error.message);
+    }
+};
+
+export const getOverview = async () => {
+    try {
+        // Get the current month start and end timestamps
+        console.log('Fetching monthly earnings');
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+
+        const startTimestamp = Timestamp.fromDate(startOfMonth);
+        const endTimestamp = Timestamp.fromDate(endOfMonth);
+
+        let todayOrdersQuery = adminFirestore.collection('orders').where('createdAt', '>=', startTimestamp).where('createdAt', '<=', endTimestamp).where('paymentStatus', '==', 'Paid')
+
+        const querySnapshot = await todayOrdersQuery.get();
+
+        let earnings = 0;
+        let buyingCost = 0;
+        let count = 0;
+
+        for (const docSnap of querySnapshot.docs) {
+            const data = docSnap.data() as Order;
+
+            if (Array.isArray(data.items)) {
+                for (const item of data.items) {
+                    earnings += item.price || 0;
+
+                    // Fetch buying price from inventory
+                    if (item.itemId) {
+                        const inventoryDocRef = adminFirestore.collection("inventory").doc(item.itemId);
+                        const inventoryDoc = await inventoryDocRef.get();
+
+                        if (inventoryDoc.exists) {
+                            const inventoryData = inventoryDoc.data() as Item;
+                            buyingCost += (inventoryData.buyingPrice || 0) * (item.quantity || 1);
+                        }
+                    }
+                }
+                count += 1;
+            }
+        }
+
+        const profit = earnings - buyingCost;
+        console.log(`Fetched ${count} orders with total earnings: ${earnings}, buying cost: ${buyingCost}, profit: ${profit}`);
+        return {
+            totalOrders: count,
+            totalEarnings: earnings.toFixed(2),
+            totalBuyingCost: buyingCost.toFixed(2),
+            totalProfit: profit.toFixed(2),
+        };
+    } catch (e) {
+        console.error(e);
+        throw new Error(e.message);
     }
 };
 

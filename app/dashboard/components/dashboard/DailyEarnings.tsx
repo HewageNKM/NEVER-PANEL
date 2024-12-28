@@ -1,5 +1,4 @@
 "use client";
-
 import {Box, CircularProgress, Typography} from "@mui/material";
 import DashboardCard from "../shared/DashboardCard";
 import {useEffect, useState} from "react";
