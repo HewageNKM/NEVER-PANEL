@@ -8,6 +8,8 @@ import {collection, doc, getDoc, getDocs, query, Timestamp, where} from "@fireba
 import {db} from "@/firebase/firebaseClient";
 import {Item, Order} from "@/interfaces";
 import {useAppSelector} from "@/lib/hooks";
+import SaleReport from "@/app/dashboard/reports/components/SaleReport";
+import {getReport} from "@/actions/ordersActions";
 
 const Header = () => {
     const [fromDate, setFromDate] = useState(null);
@@ -18,30 +20,51 @@ const Header = () => {
     const [invoiceCount, setInvoiceCount] = useState(0);
     const {currentUser} = useAppSelector(state => state.authSlice);
     const [isLoading, setIsLoading] = useState(true)
+    const [sales, setSales] = useState(null)
+    const [showSaleReport, setShowSaleReport] = useState(false)
 
     const onSubmit = async (evt) => {
         evt.preventDefault();
-        if (selectedType === "" || toDate === null || fromDate === null) {
+        setIsLoading(true);
+        if (selectedType !== "sale" && (toDate == null && fromDate == null)) {
             alert("Please fill all fields");
             return;
         }
         try {
+            const startDate = fromDate?.toDate().toDateString();
+            const endDate = toDate?.toDate().toDateString();
 
+            const response = await getReport(startDate, endDate);
+            if (response?.data?.data?.length == 0) {
+                alert("No data found");
+                return;
+            } else {
+                console.log(response.data)
+                setSales(response.data.data)
+
+                setShowSaleReport(true);
+            }
         } catch (e) {
             console.log(e);
+        } finally {
+            setIsLoading(false);
         }
     }
+
     const fetchMonthlyEarning = async () => {
         setIsLoading(true);
         try {
             const startOfMonth = new Date();
             startOfMonth.setDate(1);
             startOfMonth.setHours(0, 0, 0, 0);
+            const endOfMonth = new Date();
+            endOfMonth.setHours(23, 59, 59, 999);
 
+            const endTimestamp = Timestamp.fromDate(endOfMonth);
             const startTimestamp = Timestamp.fromDate(startOfMonth);
 
             const ordersRef = collection(db, "orders");
-            const todayOrdersQuery = query(ordersRef, where("createdAt", ">=", startTimestamp), where("paymentStatus", "==", "Paid"));
+            const todayOrdersQuery = query(ordersRef, where("createdAt", ">=", startTimestamp), where("createdAt", "<=", endTimestamp), where("paymentStatus", "==", "Paid"));
 
             const querySnapshot = await getDocs(todayOrdersQuery);
 
@@ -159,7 +182,7 @@ const Header = () => {
                             justifyContent: 'center',
                         }}>
                             <DatePicker
-                                disabled={selectedType === "" || selectedType === "stock"}
+                                disabled={selectedType === "" || selectedType === "stock" || isLoading}
                                 label="From"
                                 value={fromDate}
                                 onChange={(newValue) => setFromDate(newValue)}
@@ -167,20 +190,22 @@ const Header = () => {
                             />
                             <DatePicker
                                 label="To"
-                                disabled={selectedType === "" || selectedType === "stock"}
+                                disabled={selectedType === "" || selectedType === "stock" || isLoading}
                                 value={toDate}
                                 onChange={(newValue) => setToDate(newValue)}
                                 renderInput={(params) => <TextField {...params} />}
                             />
                         </Box>
                         <Box>
-                            <Button type={"submit"} variant={"contained"}>
+                            <Button disabled={isLoading} className={"disabled:opacity-60 disabled:cursor-not-allowed"}
+                                    type={"submit"} variant={"contained"}>
                                 View Report
                             </Button>
                         </Box>
                     </Stack>
                 </form>
             </Stack>
+            <SaleReport sales={sales} setShow={() => setShowSaleReport(false)} show={showSaleReport}/>
         </LocalizationProvider>
     );
 };

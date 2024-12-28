@@ -34,3 +34,17 @@ export const updateAOrder = async (order: Order) => {
         throw e;
     }
 }
+export const getReport = async (from:string,to:string) => {
+    try {
+        const token = auth.currentUser?.getIdToken();
+        return await axios({
+            method: 'GET',
+            url: `/api/v1/reports/sales?fromDate=${from}&toDate=${to}`,
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+    }catch (e){
+        throw e;
+    }
+}

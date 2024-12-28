@@ -1,5 +1,5 @@
 import admin, {credential} from 'firebase-admin';
-import {Item, Order} from "@/interfaces";
+import {Item, Order, SalesReport} from "@/interfaces";
 import {NextResponse} from "next/server";
 import {paymentMethods, paymentStatus} from "@/constant";
 import {uuidv4} from "@firebase/util";
@@ -295,6 +295,102 @@ export const deleteItemById = async (itemId: string) => {
     }
 };
 
+export const getSaleReport = async (fromDate: string, toDate: string) => {
+    try {
+        console.log(`Fetching sales data from ${fromDate} to ${toDate}`);
+
+        const startTimestamp = admin.firestore.Timestamp.fromDate(new Date(fromDate));
+        const endTimestamp = admin.firestore.Timestamp.fromDate(new Date(toDate));
+
+        const ordersQuery = admin.firestore()
+            .collection('orders')
+            .where('createdAt', '>=', startTimestamp)
+            .where('createdAt', '<=', endTimestamp)
+            .where('paymentStatus', '==', 'Paid');
+
+        const querySnapshot = await ordersQuery.get();
+        if (querySnapshot.empty) {
+            console.log('No orders found');
+            return [];
+        }
+        console.log(`Fetched ${querySnapshot.size} orders`);
+
+        const salesData: SalesReport['data'] = [];
+
+        for (const orderDoc of querySnapshot.docs) {
+            const order = orderDoc.data() as Order;
+
+            for (const orderItem of order.items) {
+                const itemRef = admin.firestore().collection('inventory').doc(orderItem.itemId.toLowerCase());
+                const itemDoc = await itemRef.get();
+
+                let item: Item | null = null;
+                if (itemDoc.exists) {
+                    item = itemDoc.data() as Item;
+                }
+
+                const itemType = item?.type || 'Unknown';
+                const itemName = item?.name || '[deleted]';
+                const manufacturer = item?.manufacturer || '[deleted]';
+                const brand = item?.brand || '[deleted]';
+                const buyingPrice = item?.buyingPrice || 0;
+
+                // Find or create the type entry
+                let typeEntry = salesData.find(entry => entry.type.toLowerCase() === itemType.toLowerCase());
+                if (!typeEntry) {
+                    typeEntry = { type: itemType, data: [] };
+                    salesData.push(typeEntry);
+                }
+
+                // Find or create the item entry
+                let itemEntry = typeEntry.data.find(entry => entry.itemId.toLowerCase() === (item?.itemId || orderItem.itemId).toLowerCase());
+                if (!itemEntry) {
+                    itemEntry = {
+                        itemId: item?.itemId || orderItem.itemId,
+                        manufacturer,
+                        brand,
+                        itemName,
+                        data: []
+                    };
+                    typeEntry.data.push(itemEntry);
+                }
+
+                // Find or create the variant entry
+                let variantEntry = itemEntry.data.find(entry => entry.variantId.toLowerCase() === orderItem.variantId.toLowerCase());
+                if (!variantEntry) {
+                    const variant = item?.variants?.find(v => v.variantId.toLowerCase() === orderItem.variantId.toLowerCase());
+                    variantEntry = {
+                        variantId: orderItem.variantId,
+                        variantName: variant?.variantName || '[deleted]',
+                        data: []
+                    };
+                    itemEntry.data.push(variantEntry);
+                }
+
+                // Add size details with unique sold price
+                const sizeEntry = variantEntry.data.find(
+                    entry => entry.size === orderItem.size && entry.soldPrice === orderItem.price
+                );
+                if (sizeEntry) {
+                    sizeEntry.quantity += orderItem.quantity;
+                } else {
+                    variantEntry.data.push({
+                        size: orderItem.size,
+                        quantity: orderItem.quantity,
+                        soldPrice: orderItem.price,
+                        boughtPrice: buyingPrice
+                    });
+                }
+            }
+        }
+
+        console.log(salesData);
+        return { type: 'sales', data: salesData };
+    } catch (error: any) {
+        console.error(error);
+        throw new Error(error.message);
+    }
+};
 
 export const getUserById = async (userId: string) => {
     try {
