@@ -18,12 +18,13 @@ const Header = () => {
     const [invoiceCount, setInvoiceCount] = useState(0);
     const {currentUser} = useAppSelector(state => state.authSlice);
     const [isLoading, setIsLoading] = useState(true)
+    const [isReportLoading, setIsReportLoading] = useState(false)
     const [sales, setSales] = useState(null)
     const [showSaleReport, setShowSaleReport] = useState(false)
 
     const onSubmit = async (evt) => {
         evt.preventDefault();
-        setIsLoading(true);
+        setIsReportLoading(true);
         if (selectedType !== "sale" && (toDate == null && fromDate == null)) {
             alert("Please fill all fields");
             return;
@@ -45,7 +46,7 @@ const Header = () => {
         } catch (e) {
             console.log(e);
         } finally {
-            setIsLoading(false);
+            setIsReportLoading(false);
         }
     }
 
@@ -146,7 +147,7 @@ const Header = () => {
                             justifyContent: 'center',
                         }}>
                             <DatePicker
-                                disabled={selectedType === "" || selectedType === "stock" || isLoading}
+                                disabled={selectedType === "" || selectedType === "stock" || isReportLoading}
                                 label="From"
                                 value={fromDate}
                                 onChange={(newValue) => setFromDate(newValue)}
@@ -154,14 +155,14 @@ const Header = () => {
                             />
                             <DatePicker
                                 label="To"
-                                disabled={selectedType === "" || selectedType === "stock" || isLoading}
+                                disabled={selectedType === "" || selectedType === "stock" || isReportLoading}
                                 value={toDate}
                                 onChange={(newValue) => setToDate(newValue)}
                                 renderInput={(params) => <TextField {...params} />}
                             />
                         </Box>
                         <Box>
-                            <Button disabled={isLoading} className={"disabled:opacity-60 disabled:cursor-not-allowed"}
+                            <Button disabled={isReportLoading} className={"disabled:opacity-60 disabled:cursor-not-allowed"}
                                     type={"submit"} variant={"contained"}>
                                 View Report
                             </Button>
