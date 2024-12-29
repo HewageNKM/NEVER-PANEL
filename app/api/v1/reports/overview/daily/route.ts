@@ -1,5 +1,5 @@
 import {NextResponse} from "next/server";
-import {getMonthlyOverview} from "@/firebase/firebaseAdmin";
+import {getDailyOverview, getMonthlyOverview} from "@/firebase/firebaseAdmin";
 import {authorizeRequest} from "@/lib/middleware";
 
 export const GET = async (req: Request) => {
@@ -9,12 +9,12 @@ export const GET = async (req: Request) => {
         if (!response) {
             return NextResponse.json({message: 'Unauthorized'}, {status: 401});
         }
-        const overview = await getMonthlyOverview();
+        const overview = await getDailyOverview();
         return NextResponse.json(overview);
     } catch (error: any) {
         console.error(error);
         // Return a response with error message
-        return NextResponse.json({message: 'Error fetching orders', error: error.message}, {status: 500});
+        return NextResponse.json({message: 'Error fetching daily overview', error: error.message}, {status: 500});
     }
 };
 export const dynamic = 'force-dynamic';
