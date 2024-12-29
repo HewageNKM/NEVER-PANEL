@@ -45,6 +45,8 @@ const Header = () => {
             }
         } catch (e) {
             console.log(e);
+        }finally {
+            setIsReportLoading(false)
         }
     }
 
