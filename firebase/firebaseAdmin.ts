@@ -1,5 +1,5 @@
 import admin, {credential} from 'firebase-admin';
-import {Item, Order, SalesReport} from "@/interfaces";
+import {Item, Order, SalesReport, StocksReport} from "@/interfaces";
 import {NextResponse} from "next/server";
 import {paymentMethods, paymentStatus} from "@/constant";
 import {uuidv4} from "@firebase/util";
@@ -520,6 +520,58 @@ export const getDailyOverview = async () => {
         throw new Error(error.message);
     }
 }
+
+export const getStockReport = async (): Promise<StocksReport[]> => {
+    try {
+        console.log('Fetching stock report');
+        const inventoryCollection = adminFirestore.collection('inventory').where('status', '==', 'Active');
+        const snapshot = await inventoryCollection.get();
+
+        if (snapshot.empty) {
+            console.log('No inventory data found');
+            return [];
+        }
+
+        const stockReport: StocksReport[] = [];
+
+        snapshot.forEach(doc => {
+            const itemData = doc.data() as Item;
+
+            const itemReport = {
+                itemId: itemData.itemId,
+                manufacturer: itemData.manufacturer,
+                brand: itemData.brand,
+                itemName: itemData.name,
+                data: itemData.variants.map(variant => ({
+                    variantId: variant.variantId,
+                    variantName: variant.variantName,
+                    stock: variant.sizes.map(size => ({
+                        size: size.size,
+                        stock: size.stock,
+                    })),
+                })),
+            };
+
+            const typeIndex = stockReport.findIndex(
+                report => report.type === itemData.type.toLowerCase()
+            );
+
+            if (typeIndex > -1) {
+                stockReport[typeIndex].data.push(itemReport);
+            } else {
+                stockReport.push({
+                    type: itemData.type.toLowerCase() as 'shoes' | 'sandals' | 'accessories',
+                    data: [itemReport],
+                });
+            }
+        });
+
+        return stockReport;
+    } catch (e) {
+        console.error('Error fetching stock report:', e.message);
+        throw new Error(e.message);
+    }
+};
 
 export const getUserById = async (userId: string) => {
     try {

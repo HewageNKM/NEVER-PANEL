@@ -90,6 +90,24 @@ export interface SalesReport {
         }
     ]
 }
+export interface StocksReport {
+    type: "shoes" | "sandals" | "accessories",
+    data:[
+        {
+            itemId: string,
+            manufacturer: string,
+            brand: string,
+            itemName: string,
+            data:[
+                {
+                    variantId: string,
+                    variantName: string,
+                    stock:Size[]
+                }
+            ]
+        }
+    ]
+}
 export interface OrderItem {
     itemId: string,
     variantId: string,
