@@ -476,7 +476,7 @@ export const getOverview = async (start:Timestamp,end:Timestamp) => {
           const data = docSnap.data() as Order;
           if (Array.isArray(data.items)) {
               data.items.forEach((item) => {
-                  earnings += item.price || 0;
+                  earnings += (item.price || 0) * item.quantity;
 
                   // Lookup inventory data in the cache
                   const inventoryData = inventoryDataMap.get(item.itemId);
