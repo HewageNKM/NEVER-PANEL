@@ -35,3 +35,20 @@ export const getDailyOverview = async () => {
         throw e;
     }
 }
+export const getStocksReport = async () => {
+  try {
+        const token = await auth.currentUser?.getIdToken();
+        const res = await axios(
+            {
+                method: 'GET',
+                url: '/api/v1/reports/stock',
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        );
+        return res.data;
+  }catch (e){
+      throw e;
+  }
+}

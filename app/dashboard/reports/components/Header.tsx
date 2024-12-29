@@ -7,7 +7,8 @@ import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs';
 import {useAppSelector} from "@/lib/hooks";
 import SaleReport from "@/app/dashboard/reports/components/SaleReport";
 import {getReport} from "@/actions/ordersActions";
-import {getMonthlyOverview} from "@/actions/reportsAction";
+import {getMonthlyOverview, getStocksReport} from "@/actions/reportsAction";
+import StockReport from "@/app/dashboard/reports/components/StockReport";
 
 const Header = () => {
     const [fromDate, setFromDate] = useState(null);
@@ -20,33 +21,30 @@ const Header = () => {
     const [isLoading, setIsLoading] = useState(true)
     const [isReportLoading, setIsReportLoading] = useState(false)
     const [sales, setSales] = useState(null)
+    const [stocks, setStocks] = useState(null)
     const [showSaleReport, setShowSaleReport] = useState(false)
+    const [showStockReport, setShowStockReport] = useState(false)
 
     const onSubmit = async (evt) => {
-        evt.preventDefault();
-        setIsReportLoading(true);
-        if (selectedType !== "sale" && (toDate == null && fromDate == null)) {
-            alert("Please fill all fields");
-            return;
-        }
         try {
-            const startDate = fromDate?.toDate().toDateString();
-            const endDate = toDate?.toDate().toDateString();
+            evt.preventDefault();
+            setIsReportLoading(true);
+            if (selectedType == "sale" && (toDate != null && fromDate != null)) {
+                const startDate = fromDate?.toDate().toDateString();
+                const endDate = toDate?.toDate().toDateString();
 
-            const response = await getReport(startDate, endDate);
-            if (response?.data?.data?.length == 0) {
-                alert("No data found");
-                return;
-            } else {
-                console.log(response.data)
+                const response = await getReport(startDate, endDate);
                 setSales(response.data.data)
-
                 setShowSaleReport(true);
+            } else if (selectedType == "stock") {
+                const report = await getStocksReport();
+                setStocks(report)
+                setShowStockReport(true)
+            } else {
+                alert("Please select a type and date range")
             }
         } catch (e) {
             console.log(e);
-        } finally {
-            setIsReportLoading(false);
         }
     }
 
@@ -162,7 +160,8 @@ const Header = () => {
                             />
                         </Box>
                         <Box>
-                            <Button disabled={isReportLoading} className={"disabled:opacity-60 disabled:cursor-not-allowed"}
+                            <Button disabled={isReportLoading}
+                                    className={"disabled:opacity-60 disabled:cursor-not-allowed"}
                                     type={"submit"} variant={"contained"}>
                                 View Report
                             </Button>
@@ -171,6 +170,7 @@ const Header = () => {
                 </form>
             </Stack>
             <SaleReport sales={sales} setShow={() => setShowSaleReport(false)} show={showSaleReport}/>
+            <StockReport show={showStockReport} setShow={() => setShowStockReport(false)} stocks={stocks}/>
         </LocalizationProvider>
     );
 };
