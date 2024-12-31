@@ -44,6 +44,7 @@ export interface Order {
     paymentMethod: string,
     customer: Customer,
     shippingCost: number,
+    discount: number,
     from:string,
 
     tracking: Tracking | null,

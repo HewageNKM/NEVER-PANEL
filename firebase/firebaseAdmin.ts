@@ -485,6 +485,7 @@ export const getOverview = async (start:Timestamp,end:Timestamp) => {
                   }
               });
           }
+          earnings -= data?.discount || 0;
       });
 
       const profit = earnings - buyingCost;
