@@ -115,7 +115,7 @@ const OrderTable = () => {
                                     (sum, item) =>
                                         sum + item.price * item.quantity,
                                     0
-                                )}
+                                ) - (order?.discount | 0)}
                                 </TableCell>
                                 <TableCell>
                                     LKR {order.shippingCost}
