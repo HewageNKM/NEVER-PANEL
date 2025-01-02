@@ -30,25 +30,37 @@ const Header = () => {
             evt.preventDefault();
             setIsReportLoading(true);
             if (selectedType == "sale" && (toDate != null && fromDate != null)) {
-                const startDate = fromDate?.toDate().toDateString();
-                const endDate = toDate?.toDate().toDateString();
+                // Set start and end times to include hours, minutes, seconds
+                const startDate = fromDate?.toDate();
+                startDate.setHours(0, 0, 0, 0);  // Set time to 00:00:00
 
-                const response = await getReport(startDate, endDate);
-                setSales(response.data.data)
+                const endDate = toDate?.toDate();
+                endDate.setHours(23, 59, 59, 999);  // Set time to 23:59:59
+
+                // Convert dates to ISO strings
+                const startDateString = startDate.toLocaleString();
+                const endDateString = endDate.toLocaleString();
+
+                console.log("Start Date: ", startDateString);
+                console.log("End Date: ", endDateString);
+
+                const response = await getReport(startDateString, endDateString);
+                setSales(response.data.data);
                 setShowSaleReport(true);
             } else if (selectedType == "stock") {
                 const report = await getStocksReport();
-                setStocks(report)
-                setShowStockReport(true)
+                setStocks(report);
+                setShowStockReport(true);
             } else {
-                alert("Please select a type and date range")
+                alert("Please select a type and date range");
             }
         } catch (e) {
             console.log(e);
-        }finally {
-            setIsReportLoading(false)
+        } finally {
+            setIsReportLoading(false);
         }
-    }
+    };
+
 
     const fetchMonthlyEarning = async () => {
         setIsLoading(true);
