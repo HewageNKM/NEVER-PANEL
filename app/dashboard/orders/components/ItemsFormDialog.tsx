@@ -30,7 +30,7 @@ const ItemsFormDialog = ({ items, showItemForm, onClose }: {
                             {items.length > 0 ? (
                                 items.map((item: OrderItem, index: number) => (
                                     <TableRow key={index} hover>
-                                        <TableCell>{item.name} / {item.itemId} / {item.variantName} / {item.variantId}</TableCell>
+                                        <TableCell>{item.name} / {item.variantName} / {item.size}</TableCell>
                                         <TableCell align="right">{item.quantity}</TableCell>
                                         <TableCell align="right">{item.price.toFixed(2)}</TableCell>
                                         <TableCell align="right">{(item.price * item.quantity).toFixed(2)}</TableCell>
