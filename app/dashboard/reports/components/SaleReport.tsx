@@ -176,14 +176,14 @@ const SaleReport = ({
                             <TableCell>{totalQuantity}</TableCell>
                             <TableCell>{totalSales.toFixed(2)}</TableCell>
                             <TableCell>{totalCost.toFixed(2)}</TableCell>
-                            <TableCell>{(totalProfit - sales?.totalDiscount).toFixed(2)}</TableCell>
+                            <TableCell>{(totalProfit - (sales?.totalDiscount | 0)).toFixed(2)}</TableCell>
                         </TableRow>
                         <TableRow style={{ fontWeight: "bold", backgroundColor: "#f5f5f5" }}>
                             <TableCell colSpan={7} align="right" style={{ color: "#3f51b5", fontSize: "1.1em" }}>
                                 Total Orders
                             </TableCell>
                             <TableCell colSpan={4} style={{ textAlign: "center", color: "#3f51b5", fontSize: "1.1em" }}>
-                                {sales?.totalOrders}
+                                {sales?.totalOrders | 0}
                             </TableCell>
                         </TableRow>
                         <TableRow style={{ fontWeight: "bold", backgroundColor: "#f5f5f5" }}>
@@ -191,7 +191,7 @@ const SaleReport = ({
                                 Total Discount
                             </TableCell>
                             <TableCell colSpan={4} style={{ textAlign: "center", color: "#3f51b5", fontSize: "1.1em" }}>
-                                {sales?.totalDiscount.toFixed(2)}
+                                {(sales?.totalDiscount | 0).toFixed(2)}
                             </TableCell>
                         </TableRow>
                     </TableBody>
