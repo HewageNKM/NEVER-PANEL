@@ -260,7 +260,19 @@ const Header = () => {
                     </Stack>
                 </form>
             </Stack>
-            <SaleReport sales={sales} setShow={() => setShowSaleReport(false)} show={showSaleReport}/>
+            <SaleReport sales={sales} setShow={() => setShowSaleReport(false)} show={showSaleReport} date={()=>{
+                const startDate = fromDate?.toDate();
+                startDate?.setHours(0, 0, 0, 0);  // Set time to 00:00:00
+
+                const endDate = toDate?.toDate();
+                endDate?.setHours(23, 59, 59, 999);  // Set time to 23:59:59
+
+                // Convert dates to ISO strings
+                const startDateString = startDate?.toLocaleString();
+                const endDateString = endDate?.toLocaleString();
+
+                return `${startDate} - ${endDate}`
+            }}/>
             <StockReport show={showStockReport} setShow={() => setShowStockReport(false)} stocks={stocks}/>
         </LocalizationProvider>
     );

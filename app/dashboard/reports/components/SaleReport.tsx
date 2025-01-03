@@ -9,15 +9,18 @@ import TableCell from "@mui/material/TableCell";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import { SalesReport } from "@/interfaces";
+import {Stack} from "@mui/material";
 
 const SaleReport = ({
                         show,
                         setShow,
                         sales,
+    date
                     }: {
     show: boolean;
     setShow: () => void;
     sales: SalesReport[];
+    date:()=>string;
 }) => {
     let totalSales = 0;
     let totalProfit = 0;
@@ -27,13 +30,18 @@ const SaleReport = ({
     return (
         <Dialog open={show} fullScreen>
             <DialogContent>
-                <h2 style={{ textAlign: "center", marginBottom: "20px", color: "#3f51b5", fontSize: "1.8em" }}>
-                    Sales Report
-                </h2>
+                <Stack>
+                    <h2 style={{textAlign: "center", marginBottom: "20px", color: "#3f51b5", fontSize: "1.8rem"}}>
+                        Sales Report
+                    </h2>
+                    <h4 style={{textAlign: "center", marginBottom: "20px", color: "#3f51b5", fontSize: "1rem"}}>
+                        Date: {date()}
+                    </h4>
+                </Stack>
                 <Table>
                     <TableHead>
-                        <TableRow style={{ backgroundColor: "#f5f5f5" }}>
-                            <TableCell style={{ fontWeight: "bold", textTransform: "uppercase", color: "#3f51b5", fontSize: "1.1em" }}>
+                        <TableRow style={{backgroundColor: "#f5f5f5"}}>
+                        <TableCell style={{ fontWeight: "bold", textTransform: "uppercase", color: "#3f51b5", fontSize: "1.1em" }}>
                                 Item ID
                             </TableCell>
                             <TableCell style={{ fontWeight: "bold", textTransform: "uppercase", color: "#3f51b5", fontSize: "1.1em" }}>
