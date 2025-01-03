@@ -340,11 +340,13 @@ export const getSaleReport = async (fromDate: string, toDate: string) => {
                 itemsMap.set(doc.id.toLowerCase(), doc.data() as Item);
             }
         });
-
+        let totalDiscount = 0
+        let totalOrders = 0
         // Process orders with cached item data
         for (const orderDoc of querySnapshot.docs) {
             const order = orderDoc.data() as Order;
-
+            totalDiscount += order?.discount || 0
+            totalOrders += 1
             for (const orderItem of order.items) {
                 const item = itemsMap.get(orderItem.itemId.toLowerCase()) || null;
 
@@ -404,7 +406,7 @@ export const getSaleReport = async (fromDate: string, toDate: string) => {
         }
 
         console.log(salesData);
-        return {type: 'sales', data: salesData};
+        return {data: salesData, totalDiscount: totalDiscount, totalOrders:totalOrders};
     } catch (error: any) {
         console.error(error);
         throw new Error(error.message);

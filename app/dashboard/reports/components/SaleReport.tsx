@@ -9,18 +9,22 @@ import TableCell from "@mui/material/TableCell";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import { SalesReport } from "@/interfaces";
-import {Stack} from "@mui/material";
+import { Stack } from "@mui/material";
 
 const SaleReport = ({
                         show,
                         setShow,
                         sales,
-    date
+                        date,
                     }: {
     show: boolean;
     setShow: () => void;
-    sales: SalesReport[];
-    date:()=>string;
+    sales: {
+        data: SalesReport[];
+        totalDiscount: number;
+        totalOrders: number;
+    };
+    date: () => string;
 }) => {
     let totalSales = 0;
     let totalProfit = 0;
@@ -31,17 +35,17 @@ const SaleReport = ({
         <Dialog open={show} fullScreen>
             <DialogContent>
                 <Stack>
-                    <h2 style={{textAlign: "center", marginBottom: "20px", color: "#3f51b5", fontSize: "1.8rem"}}>
+                    <h2 style={{ textAlign: "center", marginBottom: "20px", color: "#3f51b5", fontSize: "1.8rem" }}>
                         Sales Report
                     </h2>
-                    <h4 style={{textAlign: "center", marginBottom: "20px", color: "#3f51b5", fontSize: "1rem"}}>
+                    <h4 style={{ textAlign: "center", marginBottom: "20px", color: "#3f51b5", fontSize: "1rem" }}>
                         Date: {date()}
                     </h4>
                 </Stack>
                 <Table>
                     <TableHead>
-                        <TableRow style={{backgroundColor: "#f5f5f5"}}>
-                        <TableCell style={{ fontWeight: "bold", textTransform: "uppercase", color: "#3f51b5", fontSize: "1.1em" }}>
+                        <TableRow style={{ backgroundColor: "#f5f5f5" }}>
+                            <TableCell style={{ fontWeight: "bold", textTransform: "uppercase", color: "#3f51b5", fontSize: "1.1em" }}>
                                 Item ID
                             </TableCell>
                             <TableCell style={{ fontWeight: "bold", textTransform: "uppercase", color: "#3f51b5", fontSize: "1.1em" }}>
@@ -77,7 +81,7 @@ const SaleReport = ({
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {sales?.map((category, categoryIndex) => {
+                        {sales?.data?.map((category, categoryIndex) => {
                             let categorySales = 0;
                             let categoryProfit = 0;
                             let categoryQuantity = 0;
@@ -85,7 +89,6 @@ const SaleReport = ({
 
                             return (
                                 <React.Fragment key={categoryIndex}>
-                                    {/* Category Header */}
                                     <TableRow style={{ backgroundColor: "#e3f2fd" }}>
                                         <TableCell colSpan={11} style={{ fontWeight: "bold", fontSize: "1.2em", textTransform: "uppercase", color: "#0d47a1" }}>
                                             {category.type}
@@ -99,20 +102,11 @@ const SaleReport = ({
 
                                         return (
                                             <React.Fragment key={itemIndex}>
-                                                {/* Item Header */}
                                                 <TableRow>
-                                                    <TableCell colSpan={11} style={{
-                                                        fontWeight: "bold",
-                                                        fontSize: "1.1em",
-                                                        paddingLeft: "20px",
-                                                        backgroundColor: "#f1f8e9",
-                                                        color: "#388e3c",
-                                                        textTransform: "capitalize",
-                                                    }}>
+                                                    <TableCell colSpan={11} style={{ fontWeight: "bold", fontSize: "1.1em", paddingLeft: "20px", backgroundColor: "#f1f8e9", color: "#388e3c", textTransform: "capitalize" }}>
                                                         {item.itemName}
                                                     </TableCell>
                                                 </TableRow>
-                                                {/* Item Data */}
                                                 {item.data.map((variant) =>
                                                     variant.data.map((sizeDetail, index) => {
                                                         const salesAmount = sizeDetail.soldPrice * sizeDetail.quantity;
@@ -135,9 +129,9 @@ const SaleReport = ({
                                                         categoryCost += costAmount;
 
                                                         return (
-                                                            <TableRow key={index} style={{textTransform:"capitalize"    }}>
-                                                                <TableCell  style={{textTransform:"uppercase"}}>{item.itemId}</TableCell>
-                                                                <TableCell style={{textTransform:"uppercase"}}>{variant.variantId}</TableCell>
+                                                            <TableRow key={index} style={{ textTransform: "capitalize" }}>
+                                                                <TableCell style={{ textTransform: "uppercase" }}>{item.itemId}</TableCell>
+                                                                <TableCell style={{ textTransform: "uppercase" }}>{variant.variantId}</TableCell>
                                                                 <TableCell>{variant.variantName}</TableCell>
                                                                 <TableCell>{sizeDetail.size}</TableCell>
                                                                 <TableCell>{item.manufacturer}</TableCell>
@@ -151,7 +145,6 @@ const SaleReport = ({
                                                         );
                                                     })
                                                 )}
-                                                {/* Item Totals */}
                                                 <TableRow style={{ backgroundColor: "#e8f5e9", fontWeight: "bold" }}>
                                                     <TableCell colSpan={7} align="right" style={{ color: "#388e3c" }}>
                                                         {item.itemName} Totals
@@ -164,7 +157,6 @@ const SaleReport = ({
                                             </React.Fragment>
                                         );
                                     })}
-                                    {/* Category Totals */}
                                     <TableRow style={{ backgroundColor: "#bbdefb", fontWeight: "bold" }}>
                                         <TableCell colSpan={7} align="right" style={{ color: "#0d47a1" }}>
                                             {category.type.toLocaleUpperCase()} Totals
@@ -177,7 +169,6 @@ const SaleReport = ({
                                 </React.Fragment>
                             );
                         })}
-                        {/* Overall Totals */}
                         <TableRow style={{ fontWeight: "bold", backgroundColor: "#e0e0e0" }}>
                             <TableCell colSpan={7} align="right" style={{ textTransform: "uppercase", color: "#d32f2f", fontSize: "1.1em" }}>
                                 Totals
@@ -185,7 +176,23 @@ const SaleReport = ({
                             <TableCell>{totalQuantity}</TableCell>
                             <TableCell>{totalSales.toFixed(2)}</TableCell>
                             <TableCell>{totalCost.toFixed(2)}</TableCell>
-                            <TableCell>{totalProfit.toFixed(2)}</TableCell>
+                            <TableCell>{(totalProfit - sales?.totalDiscount).toFixed(2)}</TableCell>
+                        </TableRow>
+                        <TableRow style={{ fontWeight: "bold", backgroundColor: "#f5f5f5" }}>
+                            <TableCell colSpan={7} align="right" style={{ color: "#3f51b5", fontSize: "1.1em" }}>
+                                Total Orders
+                            </TableCell>
+                            <TableCell colSpan={4} style={{ textAlign: "center", color: "#3f51b5", fontSize: "1.1em" }}>
+                                {sales?.totalOrders}
+                            </TableCell>
+                        </TableRow>
+                        <TableRow style={{ fontWeight: "bold", backgroundColor: "#f5f5f5" }}>
+                            <TableCell colSpan={7} align="right" style={{ color: "#3f51b5", fontSize: "1.1em" }}>
+                                Total Discount
+                            </TableCell>
+                            <TableCell colSpan={4} style={{ textAlign: "center", color: "#3f51b5", fontSize: "1.1em" }}>
+                                {sales?.totalDiscount.toFixed(2)}
+                            </TableCell>
                         </TableRow>
                     </TableBody>
                 </Table>

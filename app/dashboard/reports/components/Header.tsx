@@ -9,6 +9,7 @@ import SaleReport from "@/app/dashboard/reports/components/SaleReport";
 import {getReport} from "@/actions/ordersActions";
 import {getMonthlyOverview, getStocksReport} from "@/actions/reportsAction";
 import StockReport from "@/app/dashboard/reports/components/StockReport";
+import {SalesReport} from "@/interfaces";
 
 const Header = () => {
     const [fromDate, setFromDate] = useState(null);
@@ -65,7 +66,12 @@ const Header = () => {
                 console.log("End Date: ", endDateString);
 
                 const response = await getReport(startDateString, endDateString);
-                setSales(response.data.data);
+                console.log("Response: ", response.data);
+                setSales({
+                    data: response.data.data as SalesReport[],
+                    totalDiscount: response.data.totalDiscount,
+                    totalOrders: response.data.totalOrders,
+                });
                 setShowSaleReport(true);
             } else if (selectedType == "stock") {
                 const report = await getStocksReport();
