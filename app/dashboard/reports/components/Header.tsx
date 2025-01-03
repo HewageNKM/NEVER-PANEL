@@ -117,12 +117,6 @@ const Header = () => {
     }
 
     useEffect(() => {
-        if (currentUser) {
-            fetchMonthlyEarning()
-        }
-    }, [currentUser, selectedYear]);
-
-    useEffect(() => {
         const years = [];
         for (let i = selectedYear; i >= selectedYear - 3; i--) {
             years.push(i);
