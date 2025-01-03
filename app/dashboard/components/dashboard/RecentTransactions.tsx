@@ -94,6 +94,12 @@ const RecentTransactions = () => {
                                     Total:
                                     LKR {order.items.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)}
                                 </Typography>
+                                <Typography  variant="body2">
+                                    Discount: LKR {(order?.discount || 0).toFixed(2)}
+                                </Typography>
+                                <Typography  variant="h6">
+                                    Subtotal: LKR {order.items.reduce((sum, item) => sum + item.price * item.quantity, 0) - (order?.discount | 0)}
+                                </Typography>
                             </TimelineContent>
                         </TimelineItem>
                     ))}

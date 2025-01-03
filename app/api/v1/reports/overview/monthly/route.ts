@@ -9,7 +9,10 @@ export const GET = async (req: Request) => {
         if (!response) {
             return NextResponse.json({message: 'Unauthorized'}, {status: 401});
         }
-        const overview = await getMonthlyOverview();
+        let url = new URL(req.url);
+        const fromDate = url.searchParams.get('from') as string
+        const toDate = url.searchParams.get('to') as string
+        const overview = await getMonthlyOverview(fromDate,toDate);
         return NextResponse.json(overview);
     } catch (error: any) {
         console.error(error);
