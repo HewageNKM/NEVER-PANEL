@@ -411,14 +411,12 @@ export const getSaleReport = async (fromDate: string, toDate: string) => {
     }
 };
 
-export const getMonthlyOverview = async () => {
+export const getMonthlyOverview = async (from:string,to:string) => {
     try {
         console.log('Fetching monthly earnings');
 
-        // Get the current month start and end timestamps
-        const now = new Date();
-        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-        const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+        const startOfMonth = new Date(from);
+        const endOfMonth = new Date(to);
 
         const startTimestamp = Timestamp.fromDate(startOfMonth);
         const endTimestamp = Timestamp.fromDate(endOfMonth);
@@ -470,32 +468,32 @@ export const getOverview = async (start:Timestamp,end:Timestamp) => {
               inventoryDataMap.set(doc.id, doc.data() as Item);
           }
       });
-
+      let discount = 0;
       // Calculate earnings and buying cost using cached inventory data
       querySnapshot.docs.forEach((docSnap) => {
           const data = docSnap.data() as Order;
           if (Array.isArray(data.items)) {
               data.items.forEach((item) => {
-                  earnings += (item.price || 0) * item.quantity;
-
+                    earnings += (item.price || 0) * item.quantity;
                   // Lookup inventory data in the cache
                   const inventoryData = inventoryDataMap.get(item.itemId);
                   if (inventoryData) {
                       buyingCost += (inventoryData.buyingPrice || 0) * (item.quantity || 1);
                   }
               });
+              discount += (data.discount || 0)
           }
-          earnings -= data?.discount || 0;
       });
 
-      const profit = earnings - buyingCost;
-      console.log(`Fetched ${count} orders with total earnings: ${earnings}, buying cost: ${buyingCost}, profit: ${profit}`);
+      const profit = earnings - buyingCost - discount;
+      console.log(`Fetched ${count} orders with total earnings: ${earnings}, buying cost: ${buyingCost}, profit: ${profit}, discount: ${discount}`);
 
       return {
           totalOrders: count,
           totalEarnings: earnings.toFixed(2),
           totalBuyingCost: buyingCost.toFixed(2),
           totalProfit: profit.toFixed(2),
+          totalDiscount: discount.toFixed(2),
       };
   }catch (e) {
       throw new Error(e.message);

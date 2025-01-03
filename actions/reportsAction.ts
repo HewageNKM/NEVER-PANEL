@@ -1,13 +1,13 @@
 import {auth} from "@/firebase/firebaseClient";
 import axios from "axios";
 
-export const getMonthlyOverview = async () => {
+export const getMonthlyOverview = async (from:string, to:string) => {
     try {
         const token = await auth.currentUser?.getIdToken();
         const res = await axios(
             {
                 method: 'GET',
-                url: '/api/v1/reports/overview/monthly',
+                url: '/api/v1/reports/overview/monthly?from=' + from + '&to=' + to,
                 headers: {
                     Authorization: `Bearer ${token}`
                 }

@@ -17,6 +17,7 @@ const Header = () => {
     const [totalSale, setTotalSale] = useState(0);
     const [totalProfit, setTotalProfit] = useState(0);
     const [invoiceCount, setInvoiceCount] = useState(0);
+    const [totalDiscount, setTotalDiscount] = useState(0);
     const {currentUser} = useAppSelector(state => state.authSlice);
     const [isLoading, setIsLoading] = useState(true)
     const [isReportLoading, setIsReportLoading] = useState(false)
@@ -24,6 +25,25 @@ const Header = () => {
     const [stocks, setStocks] = useState(null)
     const [showSaleReport, setShowSaleReport] = useState(false)
     const [showStockReport, setShowStockReport] = useState(false)
+
+    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
+    const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth())
+
+    const [years, setYears] = useState([])
+    const months = [
+        {value: 0, label: 'January'},
+        {value: 1, label: 'February'},
+        {value: 2, label: 'March'},
+        {value: 3, label: 'April'},
+        {value: 4, label: 'May'},
+        {value: 5, label: 'June'},
+        {value: 6, label: 'July'},
+        {value: 7, label: 'August'},
+        {value: 8, label: 'September'},
+        {value: 9, label: 'October'},
+        {value: 10, label: 'November'},
+        {value: 11, label: 'December'},
+    ]
 
     const onSubmit = async (evt) => {
         try {
@@ -65,15 +85,24 @@ const Header = () => {
     const fetchMonthlyEarning = async () => {
         setIsLoading(true);
         try {
+            const fromDate = new Date(selectedYear, selectedMonth, 1, 0, 0, 0, 0).toLocaleString();
+            const toDate = new Date(selectedYear, selectedMonth + 1, 0, 23, 59, 59, 999).toLocaleString();
+
+            console.log("Start Date:", fromDate);
+            console.log("End Date:", toDate);
+
             const overview: {
                 totalOrders: number,
                 totalEarnings: number,
                 totalBuyingCost: number,
                 totalProfit: number,
-            } = await getMonthlyOverview();
+                totalDiscount: number,
+            } = await getMonthlyOverview(fromDate, toDate);
+
             setTotalSale(overview.totalEarnings | 0);
             setTotalProfit(overview.totalProfit | 0);
             setInvoiceCount(overview.totalOrders | 0);
+            setTotalDiscount(overview.totalDiscount | 0);
         } catch (error) {
             console.error("Error fetching daily earnings:", error.message, error.stack);
         } finally {
@@ -85,7 +114,21 @@ const Header = () => {
         if (currentUser) {
             fetchMonthlyEarning()
         }
-    }, [currentUser]);
+    }, [currentUser, selectedYear]);
+
+    useEffect(() => {
+        const years = [];
+        for (let i = selectedYear; i >= selectedYear - 3; i--) {
+            years.push(i);
+        }
+        setYears(years);
+    }, [])
+
+    useEffect(() => {
+        if (currentUser) {
+            fetchMonthlyEarning()
+        }
+    }, [selectedMonth, selectedYear, currentUser]);
 
     return (
         <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -98,6 +141,35 @@ const Header = () => {
                     gap: 3,
                 }}
             >
+                <Stack sx={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    gap: 3,
+                    flexWrap: 'wrap',
+                    justifyContent: 'end',
+                    width: '100%',
+                }}>
+                    <Select
+                        variant="outlined"
+                        displayEmpty
+                        defaultValue={selectedYear}
+                        onChange={(event) => setSelectedYear(event.target.value as number)}
+                    >
+                        {years.map((year, index) => (
+                            <MenuItem key={index} value={year}>{year}</MenuItem>
+                        ))}
+                    </Select>
+                    <Select
+                        variant="outlined"
+                        displayEmpty
+                        defaultValue={selectedMonth}
+                        onChange={(event) => setSelectedMonth(event.target.value as number)}
+                    >
+                        {months.map((month, index) => (
+                            <MenuItem key={index} value={month.value}>{month.label}</MenuItem>
+                        ))}
+                    </Select>
+                </Stack>
                 <Stack
                     sx={{
                         display: 'flex',
@@ -111,19 +183,25 @@ const Header = () => {
                     <HeaderCard
                         invoices={invoiceCount}
                         isLoading={isLoading}
-                        startDate={new Date(new Date().setDate(1)).toDateString()}
-                        endDate={new Date().toDateString()}
+                        startDate={new Date(selectedYear, selectedMonth, 1, 0, 0, 0, 0).toLocaleString()}
+                        endDate={new Date(selectedYear, selectedMonth + 1, 0, 23, 59, 59, 999).toLocaleString()}
                         title={'Sales'}
                         value={totalSale}
                     />
                     <HeaderCard
                         invoices={invoiceCount}
                         isLoading={isLoading}
-                        startDate={new Date(new Date().setDate(1)).toDateString()}
-                        endDate={new Date().toDateString()}
+                        startDate={new Date(selectedYear, selectedMonth, 1, 0, 0, 0, 0).toLocaleString()}
+                        endDate={new Date(selectedYear, selectedMonth + 1, 0, 23, 59, 59, 999).toLocaleString()}
                         title={'Profit'}
                         value={totalProfit}
                     />
+                    <HeaderCard
+                        title={"Discount"}
+                        value={totalDiscount}
+                        startDate={new Date(selectedYear, selectedMonth, 1,).toLocaleString()}
+                        endDate={new Date(selectedYear, selectedMonth + 1, 0, 23, 59, 59, 999).toLocaleString()}
+                        isLoading={isLoading} invoices={invoiceCount}/>
                 </Stack>
                 <form onSubmit={onSubmit}>
                     <Stack
@@ -150,7 +228,6 @@ const Header = () => {
                                 <MenuItem value={"sale"}>Sale</MenuItem>
                                 <MenuItem value={"stock"}>Stock</MenuItem>
                             </Select>
-
                         </Box>
                         <Box sx={{
                             display: 'flex',
