@@ -66,6 +66,7 @@ const OrderTable = () => {
                             <TableCell>Payment Status</TableCell>
                             <TableCell>Payment Method</TableCell>
                             <TableCell>Total</TableCell>
+                            <TableCell>Discount</TableCell>
                             <TableCell>Shipping Cost</TableCell>
                             <TableCell>Items</TableCell>
                             <TableCell>From</TableCell>
@@ -116,6 +117,9 @@ const OrderTable = () => {
                                         sum + item.price * item.quantity,
                                     0
                                 ) - (order?.discount | 0)}
+                                </TableCell>
+                                <TableCell>
+                                    LKR {order?.discount | 0}
                                 </TableCell>
                                 <TableCell>
                                     LKR {order.shippingCost}
