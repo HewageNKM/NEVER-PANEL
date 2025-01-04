@@ -406,14 +406,14 @@ export const getSaleReport = async (fromDate: string, toDate: string) => {
         }
 
         console.log(salesData);
-        return {data: salesData, totalDiscount: totalDiscount, totalOrders:totalOrders};
+        return {data: salesData, totalDiscount: totalDiscount, totalOrders: totalOrders};
     } catch (error: any) {
         console.error(error);
         throw new Error(error.message);
     }
 };
 
-export const getMonthlyOverview = async (from:string,to:string) => {
+export const getMonthlyOverview = async (from: string, to: string) => {
     try {
         console.log('Fetching monthly earnings');
 
@@ -428,78 +428,78 @@ export const getMonthlyOverview = async (from:string,to:string) => {
         throw new Error(e.message);
     }
 };
-export const getOverview = async (start:Timestamp,end:Timestamp) => {
-  try {
-      const todayOrdersQuery = adminFirestore
-          .collection('orders')
-          .where('createdAt', '>=', start)
-          .where('createdAt', '<=', end)
-          .where('paymentStatus', '==', 'Paid');
+export const getOverview = async (start: Timestamp, end: Timestamp) => {
+    try {
+        const todayOrdersQuery = adminFirestore
+            .collection('orders')
+            .where('createdAt', '>=', start)
+            .where('createdAt', '<=', end)
+            .where('paymentStatus', '==', 'Paid');
 
-      const querySnapshot = await todayOrdersQuery.get();
+        const querySnapshot = await todayOrdersQuery.get();
 
-      let earnings = 0;
-      let buyingCost = 0;
-      let count = 0;
+        let earnings = 0;
+        let buyingCost = 0;
+        let count = 0;
 
-      // Collect all unique itemIds from the orders
-      const itemIds: string[] = [];
+        // Collect all unique itemIds from the orders
+        const itemIds: string[] = [];
 
-      querySnapshot.docs.forEach((docSnap) => {
-          const data = docSnap.data() as Order;
-          if (Array.isArray(data.items)) {
-              data.items.forEach((item) => {
-                  if (item.itemId && !itemIds.includes(item.itemId)) {
-                      itemIds.push(item.itemId); // Collect unique itemIds
-                  }
-              });
-          }
-          count += 1;
-      });
+        querySnapshot.docs.forEach((docSnap) => {
+            const data = docSnap.data() as Order;
+            if (Array.isArray(data.items)) {
+                data.items.forEach((item) => {
+                    if (item.itemId && !itemIds.includes(item.itemId)) {
+                        itemIds.push(item.itemId); // Collect unique itemIds
+                    }
+                });
+            }
+            count += 1;
+        });
 
-      // Fetch all inventory documents in parallel
-      const inventoryDocs = await Promise.all(
-          itemIds.map((itemId) => adminFirestore.collection('inventory').doc(itemId).get())
-      );
+        // Fetch all inventory documents in parallel
+        const inventoryDocs = await Promise.all(
+            itemIds.map((itemId) => adminFirestore.collection('inventory').doc(itemId).get())
+        );
 
-      const inventoryDataMap = new Map<string, Item>(); // Map to store inventory data by itemId
+        const inventoryDataMap = new Map<string, Item>(); // Map to store inventory data by itemId
 
-      // Cache inventory data in the map for quick lookup
-      inventoryDocs.forEach((doc) => {
-          if (doc.exists) {
-              inventoryDataMap.set(doc.id, doc.data() as Item);
-          }
-      });
-      let discount = 0;
-      // Calculate earnings and buying cost using cached inventory data
-      querySnapshot.docs.forEach((docSnap) => {
-          const data = docSnap.data() as Order;
-          if (Array.isArray(data.items)) {
-              data.items.forEach((item) => {
+        // Cache inventory data in the map for quick lookup
+        inventoryDocs.forEach((doc) => {
+            if (doc.exists) {
+                inventoryDataMap.set(doc.id, doc.data() as Item);
+            }
+        });
+        let discount = 0;
+        // Calculate earnings and buying cost using cached inventory data
+        querySnapshot.docs.forEach((docSnap) => {
+            const data = docSnap.data() as Order;
+            if (Array.isArray(data.items)) {
+                data.items.forEach((item) => {
                     earnings += (item.price || 0) * item.quantity;
-                  // Lookup inventory data in the cache
-                  const inventoryData = inventoryDataMap.get(item.itemId);
-                  if (inventoryData) {
-                      buyingCost += (inventoryData.buyingPrice || 0) * (item.quantity || 1);
-                  }
-              });
-              discount += (data.discount || 0)
-          }
-      });
+                    // Lookup inventory data in the cache
+                    const inventoryData = inventoryDataMap.get(item.itemId);
+                    if (inventoryData) {
+                        buyingCost += (inventoryData.buyingPrice || 0) * (item.quantity || 1);
+                    }
+                });
+                discount += (data.discount || 0)
+            }
+        });
 
-      const profit = earnings - buyingCost - discount;
-      console.log(`Fetched ${count} orders with total earnings: ${earnings}, buying cost: ${buyingCost}, profit: ${profit}, discount: ${discount}`);
+        const profit = earnings - buyingCost - discount;
+        console.log(`Fetched ${count} orders with total earnings: ${earnings}, buying cost: ${buyingCost}, profit: ${profit}, discount: ${discount}`);
 
-      return {
-          totalOrders: count,
-          totalEarnings: earnings.toFixed(2),
-          totalBuyingCost: buyingCost.toFixed(2),
-          totalProfit: profit.toFixed(2),
-          totalDiscount: discount.toFixed(2),
-      };
-  }catch (e) {
-      throw new Error(e.message);
-  }
+        return {
+            totalOrders: count,
+            totalEarnings: earnings.toFixed(2),
+            totalBuyingCost: buyingCost.toFixed(2),
+            totalProfit: profit.toFixed(2),
+            totalDiscount: discount.toFixed(2),
+        };
+    } catch (e) {
+        throw new Error(e.message);
+    }
 }
 export const getDailyOverview = async () => {
     try {
@@ -521,7 +521,43 @@ export const getDailyOverview = async () => {
         throw new Error(error.message);
     }
 }
+export const getOrdersByDate = async (date: string) => {
+    try {
+        console.log(`Fetching orders on ${date}`);
+        const startDate = new Date(date);
+        startDate.setHours(0, 0);
+        const endDate = new Date(date);
+        endDate.setHours(23, 59);
 
+        const startTimestamp = Timestamp.fromDate(startDate);
+        const endTimestamp = Timestamp.fromDate(endDate);
+
+        const ordersQuery = adminFirestore.collection('orders')
+            .where('createdAt', '>=', startTimestamp)
+            .where('createdAt', '<=', endTimestamp)
+            .where('paymentStatus', '==', 'Paid');
+
+        const querySnapshot = await ordersQuery.get();
+        if (querySnapshot.empty) {
+            console.log('No orders found');
+            return [];
+        }
+
+        const orders: Order[] = [];
+        querySnapshot.forEach(doc => {
+            orders.push({
+                ...doc.data(),
+                createdAt: doc.data().createdAt.toDate().toLocaleString(),
+                updatedAt: doc.data().updatedAt.toDate().toLocaleString(),
+            } as Order);
+        });
+
+        console.log(`Fetched ${orders.length} orders on ${date}`);
+        return orders;
+    } catch (e) {
+        throw new Error(e.message);
+    }
+}
 export const getStockReport = async (): Promise<StocksReport[]> => {
     try {
         console.log('Fetching stock report');
@@ -601,7 +637,7 @@ export const getCashReport = async (from: string, to: string): Promise<CashFlowR
 
         querySnapshot.forEach((doc) => {
             const order = doc.data() as Order;
-            const { paymentMethod, shippingCost, discount, items } = order;
+            const {paymentMethod, shippingCost, discount, items} = order;
 
             const itemTotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
             const discountAmount = discount || 0;
@@ -629,7 +665,7 @@ export const getCashReport = async (from: string, to: string): Promise<CashFlowR
             }
 
             if (!paymentSummary[normalizedMethod]) {
-                paymentSummary[normalizedMethod] = { total: 0, fee: 0 };
+                paymentSummary[normalizedMethod] = {total: 0, fee: 0};
             }
 
             let netTotal = orderTotal;
@@ -654,7 +690,6 @@ export const getCashReport = async (from: string, to: string): Promise<CashFlowR
         throw new Error(e.message);
     }
 };
-
 
 
 export const getUserById = async (userId: string) => {

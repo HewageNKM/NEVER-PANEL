@@ -5,6 +5,10 @@ import {IoRefreshCircle} from "react-icons/io5";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import {getOrders, setOrders} from "@/lib/ordersSlice/ordersSlice";
 import {getAlgoliaClient} from "@/lib/middleware";
+import {DatePicker} from '@mui/x-date-pickers/DatePicker';
+import {LocalizationProvider} from '@mui/x-date-pickers';
+import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
+import {getOrdersByDate} from "@/actions/ordersActions";
 
 const OrdersHeader = () => {
     const dispatch = useAppDispatch();
@@ -18,14 +22,34 @@ const OrdersHeader = () => {
             const searchResults = await client.search({
                 requests: [{indexName: "orders_index", query: search}]
             });
-            console.log(searchResults.results[0].hits)
-            dispatch(setOrders(searchResults.results[0].hits))
+            const getDate = (date) => {
+                return new Date(date).toLocaleString()
+            }
+            const orders = searchResults.results[0].hits.map(order => {
+                return {
+                    ...order,
+                    createdAt:getDate(order.createdAt)
+                }
+            })
+            dispatch(setOrders(orders))
         } catch (e) {
             console.error(e)
         }
     }
+    const onDatePick = async (date) => {
+        try {
+            if(date){
+                const d = date.toDate().toLocaleString()
+                const orders = await getOrdersByDate(d);
+                console.log(orders)
+                dispatch(setOrders(orders))
+            }
+        }catch (e) {
+            console.error(e)
+        }
+    }
     return (
-        <Stack direction="column" spacing={2} alignItems="start" justifyContent="space-between" p={2}>
+        <Stack direction="column" spacing={2} alignItems="start" flexWrap={"wrap"} justifyContent="space-between" p={2}>
             <Stack>
                 <Typography>
                     Options
@@ -46,26 +70,7 @@ const OrdersHeader = () => {
                             <MenuItem value={"all"} key="all">All</MenuItem>
                             <MenuItem value="pending">Pending</MenuItem>
                             <MenuItem value="shipped">Shipped</MenuItem>
-                            <MenuItem value="delivered">Delivered</MenuItem>
-                        </Select>
-                    </FormControl>
-
-                    {/* Sort Dropdown */}
-                    <FormControl variant="outlined" size="small">
-                        <InputLabel id="sort-label">Sort</InputLabel>
-                        <Select
-                            placeholder={"Sort"}
-                            labelId="sort-label"
-                            label="Sort"
-                            defaultValue="none" // Ensure a default value is set
-                        >
-                            <MenuItem value="none" disabled>
-                                Select
-                            </MenuItem>
-                            <MenuItem value="date_asc">Date (Ascending)</MenuItem>
-                            <MenuItem value="date_desc">Date (Descending)</MenuItem>
-                            <MenuItem value="total_asc">Total (Low to High)</MenuItem>
-                            <MenuItem value="total_desc">Total (High to Low)</MenuItem>
+                            <MenuItem value="complete">Complete</MenuItem>
                         </Select>
                     </FormControl>
                 </Stack>
@@ -88,6 +93,13 @@ const OrdersHeader = () => {
                         <IoRefreshCircle size={30}/>
                     </IconButton>
                 </Stack>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                        label="Date"
+                        onChange={onDatePick}
+                        renderInput={(params) => <TextField {...params} />}
+                    />
+                </LocalizationProvider>
             </Stack>
         </Stack>
     );
