@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React from 'react';
 import {Button, FormControl, IconButton, InputLabel, MenuItem, Select, Stack, TextField} from '@mui/material';
 import Typography from "@mui/material/Typography";
 import {IoRefreshCircle} from "react-icons/io5";
@@ -20,7 +20,7 @@ const OrdersHeader = () => {
             });
             console.log(searchResults.results[0].hits)
             dispatch(setOrders(searchResults.results[0].hits))
-        }catch (e) {
+        } catch (e) {
             console.error(e)
         }
     }
@@ -31,7 +31,8 @@ const OrdersHeader = () => {
                     Options
                 </Typography>
             </Stack>
-            <Stack direction="row" spacing={5} alignItems="center" justifyContent="space-between" py={2} flexWrap={"wrap"}>
+            <Stack direction="row" spacing={5} alignItems="center" justifyContent="space-between" py={2}
+                   flexWrap={"wrap"}>
                 <Stack direction="row" spacing={2} alignItems="center">
                     {/* Filter Dropdown */}
                     <FormControl variant="outlined" size="small">

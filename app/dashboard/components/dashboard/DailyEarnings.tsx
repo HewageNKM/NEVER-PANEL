@@ -23,7 +23,7 @@ const DailyEarnings = () => {
             const overview = await getDailyOverview();
             setTotalEarnings(overview.totalEarnings);
             setTotalProfit(overview.totalProfit);
-            setInvoiceCount(overview.invoiceCount);
+            setInvoiceCount(overview.totalOrders);
         } catch (error) {
             console.error("Error fetching daily earnings:", error.message, error.stack);
         } finally {

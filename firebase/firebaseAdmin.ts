@@ -508,9 +508,9 @@ export const getDailyOverview = async () => {
         // Get the current month start and end timestamps
         const now = new Date();
         const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        startOfDay.setHours(0, 0, 0, 0);
+        startOfDay.setHours(0, 0, 0);
         const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        endOfDay.setHours(23, 59, 59, 999);
+        endOfDay.setHours(23, 59, 59);
 
         const startTimestamp = Timestamp.fromDate(startOfDay);
         const endTimestamp = Timestamp.fromDate(endOfDay);
@@ -572,7 +572,36 @@ export const getStockReport = async (): Promise<StocksReport[]> => {
         console.error('Error fetching stock report:', e.message);
         throw new Error(e.message);
     }
-};
+}
+
+export const getCashReport = async (from:string,to:string) => {
+    try {
+        console.log('Fetching cash report');
+        const startOfMonth = new Date(from);
+        const endOfMonth = new Date(to);
+
+        const startTimestamp = Timestamp.fromDate(startOfMonth);
+        const endTimestamp = Timestamp.fromDate(endOfMonth);
+
+        const orders = adminFirestore
+            .collection('orders')
+            .where('createdAt', '>=', startTimestamp)
+            .where('createdAt', '<=', endTimestamp)
+            .where('paymentStatus', '==', 'Paid');
+
+        const querySnapshot = await orders.get();
+        if (querySnapshot.empty) {
+            console.log('No orders found');
+            return [];
+        }
+        console.log(`Fetched ${querySnapshot.size} orders`);
+
+
+    }catch (e) {
+        console.error(e);
+        throw new Error(e.message);
+    }
+}
 
 export const getUserById = async (userId: string) => {
     try {
