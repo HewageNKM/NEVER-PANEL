@@ -7,9 +7,10 @@ import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs';
 import {useAppSelector} from "@/lib/hooks";
 import SaleReport from "@/app/dashboard/reports/components/SaleReport";
 import {getReport} from "@/actions/ordersActions";
-import {getMonthlyOverview, getStocksReport} from "@/actions/reportsAction";
+import {getCashReport, getMonthlyOverview, getStocksReport} from "@/actions/reportsAction";
 import StockReport from "@/app/dashboard/reports/components/StockReport";
 import {SalesReport} from "@/interfaces";
+import CashReport from "@/app/dashboard/reports/components/CashReport";
 
 const Header = () => {
     const [fromDate, setFromDate] = useState(null);
@@ -18,6 +19,7 @@ const Header = () => {
     const [totalSale, setTotalSale] = useState(0);
     const [totalProfit, setTotalProfit] = useState(0);
     const [invoiceCount, setInvoiceCount] = useState(0);
+    const [cost, setCost] = useState(0);
     const [totalDiscount, setTotalDiscount] = useState(0);
     const {currentUser} = useAppSelector(state => state.authSlice);
     const [isLoading, setIsLoading] = useState(true)
@@ -26,7 +28,8 @@ const Header = () => {
     const [stocks, setStocks] = useState(null)
     const [showSaleReport, setShowSaleReport] = useState(false)
     const [showStockReport, setShowStockReport] = useState(false)
-
+    const [showCashReport, setShowCashReport] = useState(false)
+    const [cash, setCash] = useState(null)
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
     const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth())
 
@@ -77,7 +80,7 @@ const Header = () => {
                 const report = await getStocksReport();
                 setStocks(report);
                 setShowStockReport(true);
-            } else if(selectedType === "cash" && (toDate != null && fromDate != null)){
+            } else if (selectedType === "cash" && (toDate != null && fromDate != null)) {
                 const startDate = fromDate?.toDate();
                 startDate.setHours(0, 0, 0);
 
@@ -91,7 +94,11 @@ const Header = () => {
                 console.log("Start Date: ", startDateString);
                 console.log("End Date: ", endDateString);
 
-            }else {
+                const response = await getCashReport(startDateString, endDateString);
+                console.log("Response: ", response.data);
+                setCash(response.data);
+                setShowCashReport(true);
+            } else {
                 alert("Please select a type and date range");
             }
         } catch (e) {
@@ -123,6 +130,7 @@ const Header = () => {
             setTotalProfit(overview.totalProfit | 0);
             setInvoiceCount(overview.totalOrders | 0);
             setTotalDiscount(overview.totalDiscount | 0);
+            setCost(overview.totalBuyingCost | 0);
         } catch (error) {
             console.error("Error fetching daily earnings:", error.message, error.stack);
         } finally {
@@ -205,6 +213,14 @@ const Header = () => {
                     <HeaderCard
                         invoices={invoiceCount}
                         isLoading={isLoading}
+                        title={"Cost"}
+                        value={cost}
+                        startDate={new Date(selectedYear, selectedMonth, 1, 0, 0, 0).toLocaleString()}
+                        endDate={new Date(selectedYear, selectedMonth + 1, 0, 23, 59, 59).toLocaleString()}
+                    />
+                    <HeaderCard
+                        invoices={invoiceCount}
+                        isLoading={isLoading}
                         startDate={new Date(selectedYear, selectedMonth, 1, 0, 0, 0).toLocaleString()}
                         endDate={new Date(selectedYear, selectedMonth + 1, 0, 23, 59, 59).toLocaleString()}
                         title={'Profit'}
@@ -275,7 +291,7 @@ const Header = () => {
                     </Stack>
                 </form>
             </Stack>
-            <SaleReport sales={sales} setShow={() => setShowSaleReport(false)} show={showSaleReport} date={()=>{
+            <SaleReport sales={sales} setShow={() => setShowSaleReport(false)} show={showSaleReport} date={() => {
                 const startDate = fromDate?.toDate();
                 startDate?.setHours(0, 0, 0);  // Set time to 00:00:00
 
@@ -286,9 +302,22 @@ const Header = () => {
                 const startDateString = startDate?.toLocaleString();
                 const endDateString = endDate?.toLocaleString();
 
-                return `${startDate} - ${endDate}`
+                return `${startDateString} - ${endDateString}`
             }}/>
             <StockReport show={showStockReport} setShow={() => setShowStockReport(false)} stocks={stocks}/>
+            <CashReport setShow={() => setShowCashReport(false)} cash={cash} show={showCashReport} date={() => {
+                const startDate = fromDate?.toDate();
+                startDate?.setHours(0, 0, 0);  // Set time to 00:00:00
+
+                const endDate = toDate?.toDate();
+                endDate?.setHours(23, 59, 59);  // Set time to 23:59:59
+
+                // Convert dates to ISO strings
+                const startDateString = startDate?.toLocaleString();
+                const endDateString = endDate?.toLocaleString();
+
+                return `${startDateString} - ${endDateString}`
+            }}/>
         </LocalizationProvider>
     );
 };

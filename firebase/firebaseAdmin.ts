@@ -1,5 +1,5 @@
 import admin, {credential} from 'firebase-admin';
-import {Item, Order, SalesReport, StocksReport} from "@/interfaces";
+import {CashFlowReport, Item, Order, SalesReport, StocksReport} from "@/interfaces";
 import {NextResponse} from "next/server";
 import {paymentMethods, paymentStatus} from "@/constant";
 import {uuidv4} from "@firebase/util";
@@ -574,12 +574,13 @@ export const getStockReport = async (): Promise<StocksReport[]> => {
     }
 }
 
-export const getCashReport = async (from:string,to:string) => {
+export const getCashReport = async (from: string, to: string): Promise<CashFlowReport[]> => {
     try {
         console.log('Fetching cash report');
         const startOfMonth = new Date(from);
         const endOfMonth = new Date(to);
-
+        console.log(startOfMonth)
+        console.log(endOfMonth)
         const startTimestamp = Timestamp.fromDate(startOfMonth);
         const endTimestamp = Timestamp.fromDate(endOfMonth);
 
@@ -596,12 +597,65 @@ export const getCashReport = async (from:string,to:string) => {
         }
         console.log(`Fetched ${querySnapshot.size} orders`);
 
+        const paymentSummary: { [method: string]: { total: number, fee: number } } = {};
 
-    }catch (e) {
+        querySnapshot.forEach((doc) => {
+            const order = doc.data() as Order;
+            const { paymentMethod, shippingCost, discount, items } = order;
+
+            const itemTotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
+            const discountAmount = discount || 0;
+
+            const orderTotal = itemTotal + shippingCost - discountAmount;
+
+            // Normalize payment method to match CashFlowReport's method type
+            let normalizedMethod: CashFlowReport["method"];
+            switch (paymentMethod.toLowerCase()) {
+                case "cash":
+                    normalizedMethod = "cash";
+                    break;
+                case "qr":
+                    normalizedMethod = "qr";
+                    break;
+                case "card":
+                    normalizedMethod = "card";
+                    break;
+                case "bank transfer":
+                    normalizedMethod = "bank";
+                    break;
+                default:
+                    console.warn(`Unknown payment method: ${paymentMethod}`);
+                    return;
+            }
+
+            if (!paymentSummary[normalizedMethod]) {
+                paymentSummary[normalizedMethod] = { total: 0, fee: 0 };
+            }
+
+            let netTotal = orderTotal;
+
+            // Apply fee deduction for "qr" and "card" methods
+            if (normalizedMethod === "qr" || normalizedMethod === "card") {
+                const fee = 2.75;
+                paymentSummary[normalizedMethod].fee = fee; // Accumulate the fee
+                paymentSummary[normalizedMethod].total = netTotal - (fee * orderTotal / 100);
+            }
+
+            paymentSummary[normalizedMethod].total += netTotal;
+        });
+
+        return Object.keys(paymentSummary).map((method) => ({
+            method: method as CashFlowReport["method"],
+            fee: paymentSummary[method].fee,
+            total: paymentSummary[method].total,
+        }));
+    } catch (e) {
         console.error(e);
         throw new Error(e.message);
     }
-}
+};
+
+
 
 export const getUserById = async (userId: string) => {
     try {
