@@ -59,7 +59,7 @@ export const getCashReport = (from: string, to: string) => {
         return axios(
             {
                 method: 'GET',
-                url: '/api/v1/reports/cash?fromDate=' + from + '&toDate=' + to,
+                url: '/api/v1/reports/cash?from=' + from + '&to=' + to,
                 headers: {
                     Authorization: `Bearer ${token}`
                 }

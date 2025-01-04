@@ -91,6 +91,11 @@ export interface SalesReport {
         }
     ]
 }
+export interface CashFlowReport {
+    method: "cash" | "card" | "bank" | "qr",
+    fee: number,
+    total: number,
+}
 export interface StocksReport {
     type: "shoes" | "sandals" | "accessories",
     data:[
