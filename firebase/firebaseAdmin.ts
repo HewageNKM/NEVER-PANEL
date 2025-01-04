@@ -508,9 +508,9 @@ export const getDailyOverview = async () => {
         // Get the current month start and end timestamps
         const now = new Date();
         const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        startOfDay.setHours(0, 0, 0, 0);
+        startOfDay.setHours(0, 0, 0);
         const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        endOfDay.setHours(23, 59, 59, 999);
+        endOfDay.setHours(23, 59, 59);
 
         const startTimestamp = Timestamp.fromDate(startOfDay);
         const endTimestamp = Timestamp.fromDate(endOfDay);
