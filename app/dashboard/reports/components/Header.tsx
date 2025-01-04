@@ -296,7 +296,7 @@ const Header = () => {
                 const startDateString = startDate?.toLocaleString();
                 const endDateString = endDate?.toLocaleString();
 
-                return `${startDate} - ${endDate}`
+                return `${startDateString} - ${endDateString}`
             }}/>
             <StockReport show={showStockReport} setShow={() => setShowStockReport(false)} stocks={stocks}/>
         </LocalizationProvider>
