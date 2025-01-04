@@ -589,6 +589,14 @@ export const getCashReport = async (from:string,to:string) => {
             .where('createdAt', '<=', endTimestamp)
             .where('paymentStatus', '==', 'Paid');
 
+        const querySnapshot = await orders.get();
+        if (querySnapshot.empty) {
+            console.log('No orders found');
+            return [];
+        }
+        console.log(`Fetched ${querySnapshot.size} orders`);
+
+
     }catch (e) {
         console.error(e);
         throw new Error(e.message);
