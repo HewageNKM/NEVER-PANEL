@@ -18,6 +18,22 @@ export const fetchOrders = async (page: number, size: number) => {
     }
 }
 
+export const getOrdersByDate = async (date:string) => {
+    try {
+        const token = auth.currentUser?.getIdToken();
+         const response = await axios({
+            method: 'GET',
+            url: `/api/v1/orders/date?date=${date}`,
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return response.data;
+    }catch (e) {
+        throw e;
+    }
+}
+
 export const updateAOrder = async (order: Order) => {
     try {
         const token = await auth.currentUser?.getIdToken();

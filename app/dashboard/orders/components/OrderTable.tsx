@@ -37,9 +37,6 @@ const OrderTable = () => {
     const [showItemsForm, setShowItemsForm] = useState(false)
     const [orderItems, setOrderItems] = useState<OrderItem []>([])
 
-    const [showPaymentStatusForm, setShowPaymentStatusForm] = useState(false)
-    const [paymentStatus, setPaymentStatus] = useState<null | PaymentStatus>(null)
-
     const [showTrackingForm, setShowTrackingForm] = useState(false)
     const [tracking, setTracking] = useState<Tracking | null>(null)
 
@@ -63,11 +60,9 @@ const OrderTable = () => {
                         <TableRow>
                             <TableCell>Order ID</TableCell>
                             <TableCell>Customer</TableCell>
-                            <TableCell>Payment Status</TableCell>
                             <TableCell>Payment Method</TableCell>
                             <TableCell>Total</TableCell>
                             <TableCell>Discount</TableCell>
-                            <TableCell>Shipping Cost</TableCell>
                             <TableCell>Items</TableCell>
                             <TableCell>From</TableCell>
                             <TableCell>Status</TableCell>
@@ -98,18 +93,6 @@ const OrderTable = () => {
                                         </IconButton>
                                     </Box>
                                 ) : "Not Available"}</TableCell>
-                                <TableCell>
-                                    {order.paymentStatus}
-                                    {(order.from == "Website" && order.paymentMethod != "PayHere") && (
-                                        <IconButton onClick={() => {
-                                            setPaymentStatus(order.paymentStatus)
-                                            setShowPaymentStatusForm(true)
-                                            dispatch(setSelectedOrder(order))
-                                        }}>
-                                            <IoInformationCircle color={"blue"} size={25}/>
-                                        </IconButton>
-                                    )}
-                                </TableCell>
                                 <TableCell>{order.paymentMethod}</TableCell>
                                 <TableCell>
                                     LKR {order.items.reduce(
@@ -120,9 +103,6 @@ const OrderTable = () => {
                                 </TableCell>
                                 <TableCell>
                                     LKR {order?.discount | 0}
-                                </TableCell>
-                                <TableCell>
-                                    LKR {order.shippingCost}
                                 </TableCell>
                                 <TableCell>
                                     <Stack direction={"row"} justifyItems={"center"} alignItems={"center"}>
@@ -213,11 +193,6 @@ const OrderTable = () => {
                     setOrderItems([])
                 }}
             />
-            <PaymentStatusFormDialog initialStatus={paymentStatus} showForm={showPaymentStatusForm} onClose={() => {
-                setShowPaymentStatusForm(false)
-                setPaymentStatus(null)
-                dispatch(setSelectedOrder(null))
-            }}/>
             <TrackingFormDialog tracking={tracking} showForm={showTrackingForm} onFormClose={() => {
                 setShowTrackingForm(false)
                 setTracking(null)
