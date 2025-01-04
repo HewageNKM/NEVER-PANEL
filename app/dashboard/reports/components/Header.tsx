@@ -53,14 +53,14 @@ const Header = () => {
             if (selectedType == "sale" && (toDate != null && fromDate != null)) {
                 // Set start and end times to include hours, minutes, seconds
                 const startDate = fromDate?.toDate();
-                startDate.setHours(0, 0, 0, 0);  // Set time to 00:00:00
+                startDate.setHours(0, 0, 0);  // Set time to 00:00:00
 
                 const endDate = toDate?.toDate();
-                endDate.setHours(23, 59, 59, 999);  // Set time to 23:59:59
+                endDate.setHours(23, 59, 59);  // Set time to 23:59:59
 
                 // Convert dates to ISO strings
-                const startDateString = startDate.toLocaleString();
-                const endDateString = endDate.toLocaleString();
+                const startDateString = startDate.toString();
+                const endDateString = endDate.toString();
 
                 console.log("Start Date: ", startDateString);
                 console.log("End Date: ", endDateString);
@@ -79,20 +79,18 @@ const Header = () => {
                 setShowStockReport(true);
             } else if(selectedType === "cash" && (toDate != null && fromDate != null)){
                 const startDate = fromDate?.toDate();
-                startDate.setHours(0, 0, 0, 0);  // Set time to 00:00:00
+                startDate.setHours(0, 0, 0);
 
                 const endDate = toDate?.toDate();
-                endDate.setHours(23, 59, 59, 999);  // Set time to 23:59:59
+                endDate.setHours(23, 59, 59);
 
                 // Convert dates to ISO strings
-                const startDateString = startDate.toLocaleString();
-                const endDateString = endDate.toLocaleString();
+                const startDateString = startDate.toString();
+                const endDateString = endDate.toString();
 
                 console.log("Start Date: ", startDateString);
                 console.log("End Date: ", endDateString);
 
-                const response = await getCashReport(startDateString, endDateString);
-                console.log("Response: ", response.data);
             }else {
                 alert("Please select a type and date range");
             }
@@ -107,8 +105,8 @@ const Header = () => {
     const fetchMonthlyEarning = async () => {
         setIsLoading(true);
         try {
-            const fromDate = new Date(selectedYear, selectedMonth, 1, 0, 0, 0, 0).toLocaleString();
-            const toDate = new Date(selectedYear, selectedMonth + 1, 0, 23, 59, 59, 999).toLocaleString();
+            const fromDate = new Date(selectedYear, selectedMonth, 1, 0, 0, 0).toString();
+            const toDate = new Date(selectedYear, selectedMonth + 1, 0, 23, 59, 59).toString();
 
             console.log("Start Date:", fromDate);
             console.log("End Date:", toDate);
@@ -199,16 +197,16 @@ const Header = () => {
                     <HeaderCard
                         invoices={invoiceCount}
                         isLoading={isLoading}
-                        startDate={new Date(selectedYear, selectedMonth, 1, 0, 0, 0, 0).toLocaleString()}
-                        endDate={new Date(selectedYear, selectedMonth + 1, 0, 23, 59, 59, 999).toLocaleString()}
+                        startDate={new Date(selectedYear, selectedMonth, 1, 0, 0, 0).toLocaleString()}
+                        endDate={new Date(selectedYear, selectedMonth + 1, 0, 23, 59, 59).toLocaleString()}
                         title={'Sales'}
                         value={totalSale}
                     />
                     <HeaderCard
                         invoices={invoiceCount}
                         isLoading={isLoading}
-                        startDate={new Date(selectedYear, selectedMonth, 1, 0, 0, 0, 0).toLocaleString()}
-                        endDate={new Date(selectedYear, selectedMonth + 1, 0, 23, 59, 59, 999).toLocaleString()}
+                        startDate={new Date(selectedYear, selectedMonth, 1, 0, 0, 0).toLocaleString()}
+                        endDate={new Date(selectedYear, selectedMonth + 1, 0, 23, 59, 59).toLocaleString()}
                         title={'Profit'}
                         value={totalProfit}
                     />
@@ -216,7 +214,7 @@ const Header = () => {
                         title={"Discount"}
                         value={totalDiscount}
                         startDate={new Date(selectedYear, selectedMonth, 1,).toLocaleString()}
-                        endDate={new Date(selectedYear, selectedMonth + 1, 0, 23, 59, 59, 999).toLocaleString()}
+                        endDate={new Date(selectedYear, selectedMonth + 1, 0, 23, 59, 59).toLocaleString()}
                         isLoading={isLoading} invoices={invoiceCount}/>
                 </Stack>
                 <form onSubmit={onSubmit}>
