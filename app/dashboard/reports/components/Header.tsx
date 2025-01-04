@@ -18,6 +18,7 @@ const Header = () => {
     const [totalSale, setTotalSale] = useState(0);
     const [totalProfit, setTotalProfit] = useState(0);
     const [invoiceCount, setInvoiceCount] = useState(0);
+    const [cost, setCost] = useState(0);
     const [totalDiscount, setTotalDiscount] = useState(0);
     const {currentUser} = useAppSelector(state => state.authSlice);
     const [isLoading, setIsLoading] = useState(true)
@@ -123,6 +124,7 @@ const Header = () => {
             setTotalProfit(overview.totalProfit | 0);
             setInvoiceCount(overview.totalOrders | 0);
             setTotalDiscount(overview.totalDiscount | 0);
+            setCost(overview.totalBuyingCost | 0);
         } catch (error) {
             console.error("Error fetching daily earnings:", error.message, error.stack);
         } finally {
@@ -201,6 +203,14 @@ const Header = () => {
                         endDate={new Date(selectedYear, selectedMonth + 1, 0, 23, 59, 59).toLocaleString()}
                         title={'Sales'}
                         value={totalSale}
+                    />
+                    <HeaderCard
+                        invoices={invoiceCount}
+                        isLoading={isLoading}
+                        title={"Cost"}
+                        value={cost}
+                        startDate={new Date(selectedYear, selectedMonth, 1, 0, 0, 0).toLocaleString()}
+                        endDate={new Date(selectedYear, selectedMonth + 1, 0, 23, 59, 59).toLocaleString()}
                     />
                     <HeaderCard
                         invoices={invoiceCount}
