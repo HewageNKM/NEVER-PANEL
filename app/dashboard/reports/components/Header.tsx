@@ -77,7 +77,23 @@ const Header = () => {
                 const report = await getStocksReport();
                 setStocks(report);
                 setShowStockReport(true);
-            } else {
+            } else if(selectedType === "cash" && (toDate != null && fromDate != null)){
+                const startDate = fromDate?.toDate();
+                startDate.setHours(0, 0, 0, 0);  // Set time to 00:00:00
+
+                const endDate = toDate?.toDate();
+                endDate.setHours(23, 59, 59, 999);  // Set time to 23:59:59
+
+                // Convert dates to ISO strings
+                const startDateString = startDate.toLocaleString();
+                const endDateString = endDate.toLocaleString();
+
+                console.log("Start Date: ", startDateString);
+                console.log("End Date: ", endDateString);
+
+                const response = await getCashReport(startDateString, endDateString);
+                console.log("Response: ", response.data);
+            }else {
                 alert("Please select a type and date range");
             }
         } catch (e) {
@@ -227,6 +243,7 @@ const Header = () => {
                                 </MenuItem>
                                 <MenuItem value={"sale"}>Sale</MenuItem>
                                 <MenuItem value={"stock"}>Stock</MenuItem>
+                                <MenuItem value={"cash"}>Cash</MenuItem>
                             </Select>
                         </Box>
                         <Box sx={{

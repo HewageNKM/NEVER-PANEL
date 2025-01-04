@@ -572,7 +572,28 @@ export const getStockReport = async (): Promise<StocksReport[]> => {
         console.error('Error fetching stock report:', e.message);
         throw new Error(e.message);
     }
-};
+}
+
+export const getCashReport = async (from:string,to:string) => {
+    try {
+        console.log('Fetching cash report');
+        const startOfMonth = new Date(from);
+        const endOfMonth = new Date(to);
+
+        const startTimestamp = Timestamp.fromDate(startOfMonth);
+        const endTimestamp = Timestamp.fromDate(endOfMonth);
+
+        const orders = adminFirestore
+            .collection('orders')
+            .where('createdAt', '>=', startTimestamp)
+            .where('createdAt', '<=', endTimestamp)
+            .where('paymentStatus', '==', 'Paid');
+
+    }catch (e) {
+        console.error(e);
+        throw new Error(e.message);
+    }
+}
 
 export const getUserById = async (userId: string) => {
     try {

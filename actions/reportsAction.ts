@@ -1,7 +1,7 @@
 import {auth} from "@/firebase/firebaseClient";
 import axios from "axios";
 
-export const getMonthlyOverview = async (from:string, to:string) => {
+export const getMonthlyOverview = async (from: string, to: string) => {
     try {
         const token = await auth.currentUser?.getIdToken();
         const res = await axios(
@@ -14,7 +14,7 @@ export const getMonthlyOverview = async (from:string, to:string) => {
             }
         );
         return res.data;
-    }catch (e){
+    } catch (e) {
         throw e;
     }
 }
@@ -31,12 +31,12 @@ export const getDailyOverview = async () => {
             }
         );
         return res.data;
-    }catch (e){
+    } catch (e) {
         throw e;
     }
 }
 export const getStocksReport = async () => {
-  try {
+    try {
         const token = await auth.currentUser?.getIdToken();
         const res = await axios(
             {
@@ -48,7 +48,24 @@ export const getStocksReport = async () => {
             }
         );
         return res.data;
-  }catch (e){
-      throw e;
-  }
+    } catch (e) {
+        throw e;
+    }
+}
+
+export const getCashReport = (from: string, to: string) => {
+    try {
+        const token = auth.currentUser?.getIdToken();
+        return axios(
+            {
+                method: 'GET',
+                url: '/api/v1/reports/cash?fromDate=' + from + '&toDate=' + to,
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        );
+    } catch (e) {
+        throw e;
+    }
 }
