@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {Box, Button, MenuItem, Select, Stack, TextField} from '@mui/material';
-import HeaderCard from '@/app/dashboard/reports/components/HeaderCard';
+import HeaderCard from '@/app/dashboard/components/shared/HeaderCard';
 import {DatePicker} from '@mui/x-date-pickers/DatePicker';
 import {LocalizationProvider} from '@mui/x-date-pickers';
 import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs';
