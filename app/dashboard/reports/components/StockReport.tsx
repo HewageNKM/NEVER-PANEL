@@ -9,7 +9,7 @@ import TableCell from "@mui/material/TableCell";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import { StocksReport } from "@/interfaces";
-import {Stack} from "@mui/material";
+import { Stack } from "@mui/material";
 
 const StockReport = ({
                          show,
@@ -34,9 +34,6 @@ const StockReport = ({
                     <h2 style={{ textAlign: "center", marginBottom: "20px", color: "#3f51b5", fontSize: "1.8rem" }}>
                         Sales Report
                     </h2>
-                    <h4 style={{ textAlign: "center", marginBottom: "20px", color: "#3f51b5", fontSize: "1rem" }}>
-                        Date: {new Date().toDateString()}
-                    </h4>
                 </Stack>
                 <Table>
                     <TableHead>

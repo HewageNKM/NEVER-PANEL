@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import Table from "@mui/material/Table";
@@ -9,44 +9,62 @@ import TableCell from "@mui/material/TableCell";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import { Stack, Typography } from "@mui/material";
-import { ExpensesReport } from '@/interfaces';
+import { ExpensesReport } from "@/interfaces";
 
-const ExpenseReport = ({ setShow, expenseReport, show, date }: {
-    setShow: () => void,
-    expenseReport: ExpensesReport[],
-    show: boolean,
-    date: () => string
+const ExpenseReport = ({
+                           setShow,
+                           expenseReport,
+                           show,
+                           date,
+                       }: {
+    setShow: () => void;
+    expenseReport: ExpensesReport[];
+    show: boolean;
+    date: () => string;
 }) => {
-
     return (
         <Dialog open={show} fullWidth>
             <DialogContent>
-                <Stack>
-                    <h2 style={{ textAlign: "center", marginBottom: "20px", color: "#3f51b5", fontSize: "2rem" }}>
+                <Stack spacing={2}>
+                    <Typography
+                        variant="h4"
+                        align="center"
+                        gutterBottom
+                        sx={{ color: "#3f51b5" }}
+                    >
                         Expense Report
-                    </h2>
-                    <Typography variant={"h6"} style={{ textAlign: "center", marginBottom: "20px", color: "#3f51b5" }}>
+                    </Typography>
+                    <Typography
+                        variant="h6"
+                        align="center"
+                        gutterBottom
+                        sx={{ color: "#3f51b5" }}
+                    >
                         Date: {date()}
                     </Typography>
                 </Stack>
                 {expenseReport?.length === 0 ? (
-                    <Typography variant="body1" style={{ textAlign: "center", color: "#f44336", marginTop: "20px" }}>
+                    <Typography
+                        variant="body1"
+                        align="center"
+                        sx={{ mt: 4 }}
+                    >
                         No expenses available for the selected date range.
                     </Typography>
                 ) : (
                     expenseReport?.map((report) => (
-                        <div key={report.type} style={{ marginBottom: "30px" }}>
+                        <Stack key={report.type} spacing={2} sx={{ mb: 4 }}>
                             <Typography
                                 variant="h6"
-                                style={{ textTransform: "capitalize", marginBottom: "10px", color: "#3f51b5" }}
+                                sx={{ textTransform: "capitalize", color: "#3f51b5" }}
                             >
                                 {report.type}
                             </Typography>
                             <Table>
                                 <TableHead>
                                     <TableRow>
-                                        <TableCell style={{ fontWeight: "bold" }}>Category</TableCell>
-                                        <TableCell style={{ fontWeight: "bold" }}>Total Amount</TableCell>
+                                        <TableCell sx={{ fontWeight: "bold" }}>Category</TableCell>
+                                        <TableCell sx={{ fontWeight: "bold" }}>Total Amount</TableCell>
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -54,11 +72,7 @@ const ExpenseReport = ({ setShow, expenseReport, show, date }: {
                                         <>
                                             {report.data.map((item) => (
                                                 <TableRow key={item.for}>
-                                                    <TableCell
-                                                        sx={{
-                                                            textTransform: "capitalize"
-                                                        }}
-                                                    >
+                                                    <TableCell sx={{ textTransform: "capitalize" }}>
                                                         {item.for}
                                                     </TableCell>
                                                     <TableCell>{item.amount.toFixed(2)}</TableCell>
@@ -66,44 +80,45 @@ const ExpenseReport = ({ setShow, expenseReport, show, date }: {
                                             ))}
                                             <TableRow>
                                                 <TableCell
-                                                    style={{
+                                                    align="right"
+                                                    sx={{
                                                         fontWeight: "bold",
-                                                        fontSize: "1.2em",
-                                                        textAlign: "right"
+                                                        fontSize: "1.1rem",
                                                     }}
                                                 >
                                                     Total:
                                                 </TableCell>
                                                 <TableCell
-                                                    style={{
+                                                    sx={{
                                                         fontWeight: "bold",
-                                                        fontSize: "1.2em"
+                                                        fontSize: "1.1rem",
                                                     }}
                                                 >
-                                                    {report.data.reduce((total, item) => total + item.amount, 0).toFixed(2)}
+                                                    {report.data
+                                                        .reduce((total, item) => total + item.amount, 0)
+                                                        .toFixed(2)}
                                                 </TableCell>
                                             </TableRow>
                                         </>
                                     ) : (
                                         <TableRow>
-                                            <TableCell colSpan={2} style={{ textAlign: "center" }}>
+                                            <TableCell colSpan={2} align="center">
                                                 No data available.
                                             </TableCell>
                                         </TableRow>
                                     )}
                                 </TableBody>
                             </Table>
-                        </div>
+                        </Stack>
                     ))
                 )}
             </DialogContent>
             <DialogActions>
                 <Button
                     variant="contained"
-                    type="button"
                     color="primary"
-                    onClick={() => setShow()}
-                    style={{ fontWeight: "bold", fontSize: "1.2em" }}
+                    onClick={setShow}
+                    sx={{ fontWeight: "bold", fontSize: "1.1rem" }}
                 >
                     Close
                 </Button>
