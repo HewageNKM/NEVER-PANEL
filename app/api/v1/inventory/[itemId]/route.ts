@@ -1,6 +1,5 @@
-import {deleteItemById, getItemById, updateItem} from "@/firebase/firebaseAdmin";
+import {authorizeRequest, deleteItemById, getItemById, updateItem} from "@/firebase/firebaseAdmin";
 import {NextResponse} from "next/server";
-import {authorizeRequest} from "@/lib/middleware";
 
 export const PUT = async (req: Request) => {
     try {

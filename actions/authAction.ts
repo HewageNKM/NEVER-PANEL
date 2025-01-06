@@ -3,29 +3,37 @@ import {signInWithEmailAndPassword} from "@firebase/auth"
 import axios from "axios";
 
 export const authenticateUser = async (email: string, password: string) => {
-    const credential = await signInWithEmailAndPassword(auth, email, password);
-    const token = await auth.currentUser?.getIdToken();
+    try {
+        const credential = await signInWithEmailAndPassword(auth, email, password);
+        const token = await auth.currentUser?.getIdToken();
 
-    const response = await axios({
-        method: 'GET',
-        url: `/api/v1/users/${credential.user.uid}`,
-        headers: {
-            Authorization: `Bearer ${token}`
-        },
-    });
-    return response.data;
+        const response = await axios({
+            method: 'GET',
+            url: `/api/v1/users/${credential.user.uid}`,
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+        });
+        return response.data;
+    }catch (e) {
+        throw new Error(e.message);
+    }
 }
 
 export const checkUser = async (uid:string,token:string) => {
-    const response = await axios({
-        method: 'GET',
-        url: `/api/v1/users/${uid}`,
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
-    });
+    try {
+        const response = await axios({
+            method: 'GET',
+            url: `/api/v1/users/${uid}`,
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
 
-    return response.data;
+        return response.data;
+    }catch (e) {
+        throw new Error(e.message);
+    }
 }
 
 

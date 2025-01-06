@@ -1,6 +1,5 @@
 import admin, {credential} from 'firebase-admin';
 import {CashFlowReport, Expense, ExpensesReport, Item, Order, SalesReport, StocksReport} from "@/interfaces";
-import {NextResponse} from "next/server";
 import {paymentMethods, paymentStatus} from "@/constant";
 import {uuidv4} from "@firebase/util";
 import {Timestamp} from "firebase-admin/firestore";
@@ -192,25 +191,6 @@ export const updateItem = async (item: Item) => {
         }, {merge: true});
 
         console.log(`Item with ID ${item.itemId} updated in inventory`);
-    } catch (error: any) {
-        console.error(error);
-        throw new Error(error.message);
-    }
-};
-
-// Verify Firebase ID token from request headers
-export const verifyIdToken = async (req: any) => {
-    try {
-        const authHeader = req.headers.get("authorization");
-        const token = authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
-
-        if (!token) {
-            console.warn("Authorization token missing");
-            return NextResponse.json({message: 'Unauthorized'}, {status: 401});
-        }
-
-        return await adminAuth.verifyIdToken(token);
-
     } catch (error: any) {
         console.error(error);
         throw new Error(error.message);
@@ -860,5 +840,36 @@ export const getUserById = async (userId: string) => {
     } catch (error: any) {
         console.error(error);
         throw new Error(error.message);
+    }
+}
+
+export const authorizeRequest = async (req: any) => {
+    try {
+        const authHeader = req.headers.get("authorization");
+        const token = authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
+
+        if (token != "undefined") {
+            console.warn("Authorization Failed!");
+            const decodedIdToken =  await adminAuth.verifyIdToken(token);
+            const user = await getUserById(decodedIdToken.uid);
+            if (!user) {
+                console.warn("User not found!");
+                return false;
+            } else {
+                if (user.role === 'ADMIN') {
+                    console.log("User is an admin!, Authorization Success!");
+                    return true;
+                } else {
+                    console.warn("User is not an admin!, Authorization Failed!");
+                    return false;
+                }
+            }
+        } else {
+            console.log("Authorization Failed!");
+            return false;
+        }
+    }catch (e) {
+        console.error(e);
+        throw e;
     }
 }

@@ -1,7 +1,7 @@
 "use client"
 import React, {ReactNode, useEffect} from 'react';
 import {useDispatch} from "react-redux";
-import {setUser} from '@/lib/authSlice/authSlice';
+import {setLoading, setUser} from '@/lib/authSlice/authSlice';
 import {onAuthStateChanged} from "@firebase/auth";
 import {auth} from "@/firebase/firebaseClient";
 import {checkUser} from "@/actions/authAction";
@@ -9,11 +9,6 @@ import {checkUser} from "@/actions/authAction";
 
 const GlobalProvider = ({children}: { children: ReactNode }) => {
     const dispatch = useDispatch();
-    useEffect(() => {
-        const neverPanelUser = window.localStorage.getItem("neverPanelUser");
-        dispatch(setUser(neverPanelUser || null));
-    }, []);
-
     useEffect(() => {
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -24,6 +19,8 @@ const GlobalProvider = ({children}: { children: ReactNode }) => {
                 } else {
                     dispatch(setUser(null));
                 }
+            } else {
+                dispatch(setLoading(false));
             }
         })
     }, [])

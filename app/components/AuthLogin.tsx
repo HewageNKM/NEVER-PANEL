@@ -13,7 +13,6 @@ import Link from "next/link";
 import CustomTextField from "@/app/dashboard/components/forms/theme-elements/CustomTextField";
 
 
-
 const AuthLogin = ({ title, subtitle, subtext, onFormSubmit }:{title?:any,subtitle:any,onFormSubmit:any,subtext:any}) => (
     <>
       {title ? (
@@ -55,12 +54,6 @@ const AuthLogin = ({ title, subtitle, subtext, onFormSubmit }:{title?:any,subtit
               alignItems="center"
               my={2}
           >
-            <FormGroup>
-              <FormControlLabel
-                  control={<Checkbox defaultChecked/>}
-                  label="Remeber this Device"
-              />
-            </FormGroup>
             <Typography
                 component={Link}
                 href="/"

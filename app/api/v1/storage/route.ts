@@ -1,6 +1,5 @@
-import {deleteFiles, uploadFile} from "@/firebase/firebaseAdmin";
+import {authorizeRequest, deleteFiles, uploadFile} from "@/firebase/firebaseAdmin";
 import {NextResponse} from "next/server";
-import {authorizeRequest} from "@/lib/middleware";
 
 export const POST = async (req: Request) => {
     try {

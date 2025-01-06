@@ -1,17 +1,16 @@
-import {getInventoryItems, saveToInventory, verifyIdToken} from "@/firebase/firebaseAdmin";
+import {authorizeRequest, getInventoryItems, saveToInventory} from "@/firebase/firebaseAdmin";
 import {NextResponse} from "next/server";
-import {authorizeRequest} from "@/lib/middleware";
 
 export const POST = async (req: Request) => {
     try {
         // Verify the ID token
         const response = authorizeRequest(req);
         if (!response) {
-            return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+            return NextResponse.json({message: 'Unauthorized'}, {status: 401});
         }
 
         const body = await req.json();
-        await  saveToInventory(body);
+        await saveToInventory(body);
         return NextResponse.json({message: 'item saved successfully'}, {status: 200});
     } catch (error: any) {
         console.error(error);
@@ -24,7 +23,7 @@ export const GET = async (req: Request) => {
         // Verify the ID token
         const response = authorizeRequest(req);
         if (!response) {
-            return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+            return NextResponse.json({message: 'Unauthorized'}, {status: 401});
         }
 
         const url = new URL(req.url);
@@ -34,7 +33,7 @@ export const GET = async (req: Request) => {
         const items = await getInventoryItems(page, size);
 
         return NextResponse.json(items);
-    }catch (error:any){
+    } catch (error: any) {
         console.error(error);
         return NextResponse.json({message: 'Error getting items', error: error.message}, {status: 500});
     }

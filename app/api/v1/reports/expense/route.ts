@@ -1,6 +1,5 @@
 import {NextResponse} from "next/server";
-import {getExpensesReport} from "@/firebase/firebaseAdmin";
-import {authorizeRequest} from "@/lib/middleware";
+import {authorizeRequest, getExpensesReport} from "@/firebase/firebaseAdmin";
 
 export const GET = async (req: Request) => {
     try {

@@ -1,6 +1,5 @@
-import {authorizeRequest} from "@/lib/middleware";
 import {NextResponse} from "next/server";
-import {deleteExpenseById} from "@/firebase/firebaseAdmin";
+import {authorizeRequest, deleteExpenseById} from "@/firebase/firebaseAdmin";
 
 export const DELETE = async (req: Request) => {
     try {

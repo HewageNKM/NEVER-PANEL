@@ -1,6 +1,5 @@
 import {NextResponse} from "next/server";
-import {getCashReport, getMonthlyOverview} from "@/firebase/firebaseAdmin";
-import {authorizeRequest} from "@/lib/middleware";
+import {authorizeRequest, getCashReport} from "@/firebase/firebaseAdmin";
 
 export const GET = async (req: Request) => {
     try {

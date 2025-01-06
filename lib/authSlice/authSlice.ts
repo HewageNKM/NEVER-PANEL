@@ -8,7 +8,7 @@ interface Interface {
 
 const initialState: Interface = {
     currentUser: null,
-    loading: false,
+    loading: true,
 }
 
 const userSlice = createSlice({
@@ -17,12 +17,16 @@ const userSlice = createSlice({
     reducers: {
         setUser(state, action) {
             state.currentUser = action.payload;
+            state.loading = false;
         },
         clearUser(state) {
             state.currentUser = null;
         },
+        setLoading(state, action) {
+            state.loading = action.payload
+        }
     },
 });
 
-export const {setUser, clearUser} = userSlice.actions;
+export const {setUser, clearUser,setLoading} = userSlice.actions;
 export default userSlice.reducer;
