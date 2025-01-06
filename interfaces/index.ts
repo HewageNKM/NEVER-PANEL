@@ -48,10 +48,12 @@ export interface Order {
     from:string,
 
     tracking: Tracking | null,
-
     createdAt: Timestamp | string,
 }
-
+export interface ExpensesReport {
+    type: "expenses" | "utility"
+    data:{ for: string,amount: number}[]
+}
 export interface Customer {
     id: string;
     name: string;

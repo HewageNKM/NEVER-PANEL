@@ -1,5 +1,5 @@
 import admin, {credential} from 'firebase-admin';
-import {CashFlowReport, Expense, Item, Order, SalesReport, StocksReport} from "@/interfaces";
+import {CashFlowReport, Expense, ExpensesReport, Item, Order, SalesReport, StocksReport} from "@/interfaces";
 import {NextResponse} from "next/server";
 import {paymentMethods, paymentStatus} from "@/constant";
 import {uuidv4} from "@firebase/util";
@@ -547,7 +547,6 @@ export const getOrdersByDate = async (date: string) => {
             orders.push({
                 ...doc.data(),
                 createdAt: doc.data().createdAt.toDate().toLocaleString(),
-                updatedAt: doc.data().updatedAt.toDate().toLocaleString(),
             } as Order);
         });
 
@@ -740,9 +739,7 @@ export const getAllExpensesByDate = async (from: string, to: string) => {
         const fromTimestamp = admin.firestore.Timestamp.fromDate(new Date(from));
         const toTimestamp = admin.firestore.Timestamp.fromDate(new Date(to));
         console.log(`Fetching expenses from ${from} to ${to}`);
-        const expenses = await adminFirestore.collection('expenses').
-            where('createdAt', '>=', fromTimestamp).
-            where('createdAt', '<=', toTimestamp)
+        const expenses = await adminFirestore.collection('expenses').where('createdAt', '>=', fromTimestamp).where('createdAt', '<=', toTimestamp)
             .orderBy('createdAt', 'desc')
             .get();
         const expenseList: Expense[] = [];
@@ -766,7 +763,7 @@ export const getAllExpensesByDate = async (from: string, to: string) => {
     }
 }
 
-export const deleteExpenseById = async (id:string) => {
+export const deleteExpenseById = async (id: string) => {
     try {
         console.log(`Deleting expense with ID: ${id}`);
         const result = await adminFirestore.collection('expenses').doc(id).delete();
@@ -778,7 +775,7 @@ export const deleteExpenseById = async (id:string) => {
     }
 }
 
-export const getExpensesOverview = async (from: string, to: string) => {
+export const getExpensesReport = async (from: string, to: string) => {
     try {
         const fromTimestamp = admin.firestore.Timestamp.fromDate(new Date(from));
         const toTimestamp = admin.firestore.Timestamp.fromDate(new Date(to));
@@ -790,29 +787,54 @@ export const getExpensesOverview = async (from: string, to: string) => {
             .where('createdAt', '<=', toTimestamp)
             .orderBy('createdAt', 'desc');
 
-        const expenses = await expensesQuery.get();
-        if (expenses.empty) {
-            console.log('No expenses found')
-            return {totalExpense: 0, expenseCount: 0}
+        const expensesSnapshot = await expensesQuery.get();
+
+        if (expensesSnapshot.empty) {
+            console.log('No expenses found');
+            return [];
         }
 
-        let expenseCount = 0
-        let totalExpense = 0
+        console.log(`Fetched ${expensesSnapshot.size} expenses`);
+        const report: Record<string, Record<string, number>> = {};
 
-        expenses.forEach(doc => {
-            const data = doc.data() as Expense;
-            totalExpense += data.amount
-            expenseCount += 1
-        })
+        expensesSnapshot.forEach((doc) => {
+            const expense = doc.data();
 
-        console.log(`Fetched ${expenseCount} expenses with total amount: ${totalExpense}`)
+            console.log(`Processing expense document:`, expense);
 
-        return {totalExpense: totalExpense, expenseCount: expenseCount}
+            // Ensure the required fields exist
+            const expenseType = expense.type || "unknown"; // Default to "unknown" if not provided
+            const expenseFor = expense.for || "other"; // Default to "other" if not provided
+            const expenseAmount = expense.amount || 0; // Default to 0 if not provided
+
+            if (!report[expenseType]) {
+                report[expenseType] = {};
+            }
+
+            report[expenseType][expenseFor] =
+                (report[expenseType][expenseFor] || 0) + expenseAmount;
+        });
+
+        const formatReport = (data: Record<string, number>): ExpensesReport["data"] => {
+            return Object.entries(data).map(([forField, totalAmount]) => ({
+                for: forField,
+                amount: totalAmount,
+            }));
+        };
+
+        const result = Object.entries(report).map(([type, data]) => ({
+            type,
+            data: formatReport(data),
+        }));
+
+        console.log("Generated expenses report:", JSON.stringify(result, null, 2));
+        return result;
     } catch (e) {
-        console.error(e)
-        throw e
+        console.error("Error fetching expenses report:", e);
+        throw e;
     }
-}
+};
+
 export const getUserById = async (userId: string) => {
     try {
         const user = await adminFirestore.collection('users').doc(userId).get();
