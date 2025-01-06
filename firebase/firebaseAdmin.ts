@@ -848,6 +848,7 @@ export const authorizeRequest = async (req: any) => {
     try {
         const authHeader = req.headers.get("authorization");
         const token = authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
+        console.log("Token:", token);
 
         if (token != "undefined") {
             const decodedIdToken = await adminAuth.verifyIdToken(token);
