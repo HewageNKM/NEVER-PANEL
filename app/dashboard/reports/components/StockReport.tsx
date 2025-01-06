@@ -32,7 +32,7 @@ const StockReport = ({
             <DialogContent>
                 <Stack>
                     <h2 style={{ textAlign: "center", marginBottom: "20px", color: "#3f51b5", fontSize: "1.8rem" }}>
-                        Sales Report
+                        Stock Report
                     </h2>
                 </Stack>
                 <Table>

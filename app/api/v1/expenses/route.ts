@@ -5,7 +5,7 @@ import { Expense } from "@/interfaces";
 export const POST = async (req: Request) => {
     try {
         // Verify the ID token
-        const response = authorizeRequest(req);
+        const response = await authorizeRequest(req);
         if (!response) {
             return NextResponse.json({message: 'Unauthorized'}, {status: 401});
         }
@@ -22,7 +22,7 @@ export const POST = async (req: Request) => {
 export const GET = async (req: Request) => {
     try {
         // Verify the ID token
-        const response = authorizeRequest(req);
+        const response = await authorizeRequest(req);
         if (!response) {
             return NextResponse.json({message: 'Unauthorized'}, {status: 401});
         }

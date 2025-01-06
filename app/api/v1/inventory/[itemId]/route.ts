@@ -4,7 +4,7 @@ import {NextResponse} from "next/server";
 export const PUT = async (req: Request) => {
     try {
         // Verify the ID token
-        const response = authorizeRequest(req);
+        const response = await authorizeRequest(req);
         if (!response) {
             return NextResponse.json({message: 'Unauthorized'}, {status: 401});
         }
