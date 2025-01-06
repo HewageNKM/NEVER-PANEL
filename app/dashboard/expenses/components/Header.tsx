@@ -170,6 +170,7 @@ const Header = () => {
                             placeholder="Note"
                             minRows={4}
                             name="note"
+                            disabled={isLoading}
                             style={{
                                 width: "100%", // Makes it responsive to parent container
                                 maxWidth: "500px", // Optional: sets a maximum width
@@ -187,7 +188,7 @@ const Header = () => {
                     <Box>
                         <LocalizationProvider dateAdapter={AdapterDayjs}>
                             <DateTimePicker
-                                value={selectedDateTime}
+                                disabled={isLoading}                                value={selectedDateTime}
                                 onChange={(newValue) => setSelectedDateTime(newValue)}
                                 label="Select Date & Time"
                                 renderInput={(params) => <TextField {...params} />}
