@@ -40,7 +40,6 @@ export const getOrders = async (pageNumber: number = 1, size: number = 20) => {
             order = {
                 ...order,
                 createdAt: order.createdAt.toDate().toLocaleString(),
-                updatedAt: order.updatedAt.toDate().toLocaleString
             }
             if (!(order.paymentStatus === paymentStatus.PENDING && order.paymentMethod === paymentMethods.PAYHERE)) {
                 orders.push(order);
