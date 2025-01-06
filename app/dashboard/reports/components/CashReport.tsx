@@ -9,13 +9,13 @@ import TableBody from "@mui/material/TableBody";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import { CashFlowReport } from "@/interfaces";
-import {Stack, Typography} from "@mui/material";
+import { Stack, Typography } from "@mui/material";
 
-const CashReport = ({ setShow, cash, show, date }: { setShow: () => void, cash: CashFlowReport[], show: boolean, date: () => string }) => {
-    const totalCash = cash?.reduce((sum, report) => sum + report.total, 0);
+const CashReport = ({ setShow, cash, show, date }: { setShow: () => void, cash: { report: CashFlowReport[], totalExpense: number }, show: boolean, date: () => string }) => {
+    const totalCash = cash?.report?.reduce((sum, report) => sum + report.total, 0);
 
     return (
-        <Dialog open={show} fullWidth={{xs: true, sm: true, md: true, lg: true, xl: true}}>
+        <Dialog open={show} fullWidth={{ xs: true, sm: true, md: true, lg: true, xl: true }}>
             <DialogContent>
                 <Stack>
                     <h2 style={{ textAlign: "center", marginBottom: "20px", color: "#3f51b5", fontSize: "2rem" }}>
@@ -34,22 +34,49 @@ const CashReport = ({ setShow, cash, show, date }: { setShow: () => void, cash: 
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {cash?.map((report, index) => (
-                            <TableRow key={index}>
-                                <TableCell style={{ textTransform: "capitalize", fontSize: "1rem" }}>{report.method}</TableCell>
-                                <TableCell align="right" style={{ fontSize: "1rem" }}>{report?.fee?.toFixed(2)}</TableCell>
-                                <TableCell align="right" style={{ fontSize: "1rem" }}>{report?.total?.toFixed(2)}</TableCell>
+                        {cash?.report?.length > 0 ? (
+                            cash.report.map((report, index) => (
+                                <TableRow key={index}>
+                                    <TableCell style={{ textTransform: "capitalize", fontSize: "1rem" }}>{report.method}</TableCell>
+                                    <TableCell align="right" style={{ fontSize: "1rem" }}>{report?.fee?.toFixed(2)}</TableCell>
+                                    <TableCell align="right" style={{ fontSize: "1rem" }}>{report?.total?.toFixed(2)}</TableCell>
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell colSpan={3} align="center" style={{ fontStyle: "italic", fontSize: "1rem" }}>
+                                    No data available
+                                </TableCell>
                             </TableRow>
-                        ))}
-                        {/* Row for total cash */}
-                        <TableRow>
-                            <TableCell colSpan={2} align="right" style={{ fontWeight: 'bold', fontSize: "1.1rem" }}>
-                                Total Cash
-                            </TableCell>
-                            <TableCell align="right" style={{ fontWeight: 'bold', fontSize: "1.1rem" }}>
-                                {totalCash?.toFixed(2)}
-                            </TableCell>
-                        </TableRow>
+                        )}
+                        {cash?.report?.length > 0 && (
+                            <>
+                                <TableRow>
+                                    <TableCell colSpan={2} align="right" style={{ fontWeight: 'bold', fontSize: "1.1rem" }}>
+                                        Total Cash
+                                    </TableCell>
+                                    <TableCell align="right" style={{ fontWeight: 'bold', fontSize: "1.1rem" }}>
+                                        {totalCash?.toFixed(2)}
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell colSpan={2} align="right" style={{ fontWeight: 'bold', fontSize: "1.1rem" }}>
+                                        Total Expenses
+                                    </TableCell>
+                                    <TableCell align="right" style={{ fontWeight: 'bold', fontSize: "1.1rem" }}>
+                                        {cash?.totalExpense?.toFixed(2)}
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow>
+                                    <TableCell colSpan={2} align="right" style={{ fontWeight: 'bold', fontSize: "1.1rem" }}>
+                                        Net Cash
+                                    </TableCell>
+                                    <TableCell align="right" style={{ fontWeight: 'bold', fontSize: "1.1rem" }}>
+                                        {(totalCash - cash?.totalExpense)?.toFixed(2)}
+                                    </TableCell>
+                                </TableRow>
+                            </>
+                        )}
                     </TableBody>
                 </Table>
             </DialogContent>

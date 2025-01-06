@@ -440,6 +440,7 @@ export const getOverview = async (start: Timestamp, end: Timestamp) => {
         let earnings = 0;
         let buyingCost = 0;
         let count = 0;
+        let totalExpense = 0
 
         // Collect all unique itemIds from the orders
         const itemIds: string[] = [];
@@ -488,13 +489,19 @@ export const getOverview = async (start: Timestamp, end: Timestamp) => {
 
         const profit = earnings - buyingCost - discount;
         console.log(`Fetched ${count} orders with total earnings: ${earnings}, buying cost: ${buyingCost}, profit: ${profit}, discount: ${discount}`);
-
+        const expenses = await getExpensesReport(start.toDate().toLocaleString(), end.toDate().toLocaleString());
+        expenses.forEach((expense) => {
+            expense.data.forEach((data) => {
+                totalExpense += data.amount
+            })
+        })
         return {
             totalOrders: count,
             totalEarnings: earnings.toFixed(2),
             totalBuyingCost: buyingCost.toFixed(2),
             totalProfit: profit.toFixed(2),
             totalDiscount: discount.toFixed(2),
+            totalExpense: totalExpense
         };
     } catch (e) {
         throw new Error(e.message);
@@ -610,11 +617,9 @@ export const getStockReport = async (): Promise<StocksReport[]> => {
 
 export const getCashReport = async (from: string, to: string): Promise<CashFlowReport[]> => {
     try {
-        console.log('Fetching cash report');
         const startOfMonth = new Date(from);
         const endOfMonth = new Date(to);
-        console.log(startOfMonth)
-        console.log(endOfMonth)
+        console.log(`Fetching cash report from ${startOfMonth} to ${endOfMonth}`);
         const startTimestamp = Timestamp.fromDate(startOfMonth);
         const endTimestamp = Timestamp.fromDate(endOfMonth);
 
@@ -637,10 +642,9 @@ export const getCashReport = async (from: string, to: string): Promise<CashFlowR
             const order = doc.data() as Order;
             const {paymentMethod, items} = order;
 
-            const itemTotal = items.reduce((acc, item) => acc+item.price * item.quantity, 0);
+            const itemTotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
             const discountAmount = order?.discount | 0;
             const orderTotal = itemTotal - discountAmount;
-            // Normalize payment method to match CashFlowReport's method type
 
             let normalizedMethod: CashFlowReport["method"];
             switch (paymentMethod.toLowerCase()) {
@@ -672,16 +676,27 @@ export const getCashReport = async (from: string, to: string): Promise<CashFlowR
                 const fee = 2.75;
                 paymentSummary[normalizedMethod].fee = fee; // Accumulate the fee
                 paymentSummary[normalizedMethod].total += netTotal - (fee * netTotal / 100);
-            }else {
+            } else {
                 paymentSummary[normalizedMethod].total += netTotal;
             }
         });
 
-        return Object.keys(paymentSummary).map((method) => ({
+        const map = Object.keys(paymentSummary).map((method) => ({
             method: method as CashFlowReport["method"],
             fee: paymentSummary[method].fee,
             total: paymentSummary[method].total,
         }));
+        let totalExpense = 0
+        const expensesReport = await getExpensesReport(from, to);
+        expensesReport.forEach((expense) => {
+            expense.data.forEach((data) => {
+                totalExpense += data.amount
+            })
+        })
+        return {
+            report: map,
+            totalExpense: totalExpense
+        }
     } catch (e) {
         console.error(e);
         throw new Error(e.message);

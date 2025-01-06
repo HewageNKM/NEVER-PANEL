@@ -20,6 +20,7 @@ const Header = () => {
     const [totalSale, setTotalSale] = useState(0);
     const [totalProfit, setTotalProfit] = useState(0);
     const [invoiceCount, setInvoiceCount] = useState(0);
+    const [totalExpenses, setTotalExpenses] = useState(0)
     const [cost, setCost] = useState(0);
     const [totalDiscount, setTotalDiscount] = useState(0);
     const {currentUser} = useAppSelector(state => state.authSlice);
@@ -145,6 +146,7 @@ const Header = () => {
                 totalBuyingCost: number,
                 totalProfit: number,
                 totalDiscount: number,
+                totalExpense: number,
             } = await getMonthlyOverview(fromDate, toDate);
 
             setTotalSale(overview.totalEarnings | 0);
@@ -152,6 +154,7 @@ const Header = () => {
             setInvoiceCount(overview.totalOrders | 0);
             setTotalDiscount(overview.totalDiscount | 0);
             setCost(overview.totalBuyingCost | 0);
+            setTotalExpenses(overview.totalExpense | 0);
         } catch (error) {
             console.error("Error fetching daily earnings:", error.message, error.stack);
         } finally {
@@ -250,6 +253,12 @@ const Header = () => {
                     <HeaderCard
                         title={"Discount"}
                         value={totalDiscount}
+                        startDate={new Date(selectedYear, selectedMonth, 1,).toLocaleString()}
+                        endDate={new Date(selectedYear, selectedMonth + 1, 0, 23, 59, 59).toLocaleString()}
+                        isLoading={isLoading} invoices={invoiceCount}/>
+                    <HeaderCard
+                        title={"Expenses"}
+                        value={totalExpenses}
                         startDate={new Date(selectedYear, selectedMonth, 1,).toLocaleString()}
                         endDate={new Date(selectedYear, selectedMonth + 1, 0, 23, 59, 59).toLocaleString()}
                         isLoading={isLoading} invoices={invoiceCount}/>
