@@ -22,7 +22,6 @@ import {Expense} from "@/interfaces";
 import {addNewExpense, getAllExpenses, getAllExpensesByDate} from "@/actions/expenseAction";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import {setExpenses, setSelectedFilterFor, setSelectedFilterType} from "@/lib/expensesSlice/expensesSlice";
-import {setLoading} from "@/lib/ordersSlice/ordersSlice";
 
 const Header = () => {
 
@@ -30,11 +29,13 @@ const Header = () => {
     const {page, size, selectedFilterFor, selectedFilterType} = useAppSelector(state => state.expensesSlice);
     const [selectedType, setSelectedType] = useState("expense");
     const [selectedFor, setSelectedFor] = useState("food");
+    const [isLoading, setIsLoading] = useState(false)
 
     const [selectedDateTime, setSelectedDateTime] = useState(dayjs());
 
     const onSubmit = async (evt) => {
         try {
+            setIsLoading(true)
             evt.preventDefault();
             const note = evt.target.note.value || "";
 
@@ -52,11 +53,12 @@ const Header = () => {
             dispatch(setExpenses(expenses))
         } catch (e) {
             console.error(e)
+        }finally {
+            setIsLoading(false)
         }
     }
     const onDateSelect = async (evt) => {
         try {
-            setLoading(true)
             const from = evt.toDate();
             from.setHours(0, 0, 0);
             const to = evt.toDate();
@@ -65,8 +67,6 @@ const Header = () => {
             dispatch(setExpenses(allExpensesByDate))
         }catch (e) {
             console.error(e)
-        }finally {
-            setLoading(false)
         }
     }
     return (
@@ -111,6 +111,7 @@ const Header = () => {
                         <FormControl variant="outlined" size="medium">
                             <InputLabel id="type-label">Type</InputLabel>
                             <Select
+                                disabled={isLoading}
                                 required
                                 labelId="type-label"
                                 label={"Type"}
@@ -128,6 +129,7 @@ const Header = () => {
                         <FormControl variant="outlined" size="medium">
                             <InputLabel id="for-label">For</InputLabel>
                             <Select
+                                disabled={isLoading}
                                 required
                                 label={"For"}
                                 labelId="for-label"
@@ -153,6 +155,7 @@ const Header = () => {
                         <FormControl variant="outlined" size="medium">
                             <InputLabel htmlFor="amount-input">Amount</InputLabel>
                             <Input
+                                disabled={isLoading}
                                 required
                                 id="amount-input"
                                 type="number"
@@ -200,7 +203,7 @@ const Header = () => {
                             marginTop: 2,
                         }}
                     >
-                        <Button type="submit" variant="contained" color="primary">
+                        <Button type="submit" className="disabled:cursor-not-allowed disabled:bg-opacity-60"  disabled={isLoading} variant="contained" color="primary">
                             Add Expense
                         </Button>
                     </Box>
