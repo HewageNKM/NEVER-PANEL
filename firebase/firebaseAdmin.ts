@@ -853,8 +853,8 @@ export const authorizeRequest = async (req: any) => {
             const decodedIdToken = await adminAuth.verifyIdToken(token);
             const user = await getUserById(decodedIdToken.uid);
             if (!user) {
-                console.warn
-                ("User not found!");
+                console.warn("User not found!");
+                console.warn("Authorization Failed!");
                 return false;
             } else {
                 if (user.role === 'ADMIN') {
@@ -866,7 +866,7 @@ export const authorizeRequest = async (req: any) => {
                 }
             }
         } else {
-            console.log("Authorization Failed!");
+            console.warn("Authorization Failed!");
             return false;
         }
     } catch (e) {
