@@ -6,8 +6,7 @@ import {LocalizationProvider} from '@mui/x-date-pickers';
 import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs';
 import {useAppSelector} from "@/lib/hooks";
 import SaleReport from "@/app/dashboard/reports/components/SaleReport";
-import {getReport} from "@/actions/ordersActions";
-import {getCashReport, getExpenseReport, getMonthlyOverview, getStocksReport} from "@/actions/reportsAction";
+import {getCashReport, getExpenseReport, getMonthlyOverview, getSalesReport, getStocksReport} from "@/actions/reportsAction";
 import StockReport from "@/app/dashboard/reports/components/StockReport";
 import {SalesReport} from "@/interfaces";
 import CashReport from "@/app/dashboard/reports/components/CashReport";
@@ -72,7 +71,7 @@ const Header = () => {
                 console.log("Start Date: ", startDateString);
                 console.log("End Date: ", endDateString);
 
-                const response = await getReport(startDateString, endDateString);
+                const response = await getSalesReport(startDateString, endDateString);
                 setSales({
                     data: response.data.data as SalesReport[],
                     totalDiscount: response.data.totalDiscount,

@@ -1,12 +1,11 @@
-import {auth} from "@/firebase/firebaseClient"
+import {auth, getToken} from "@/firebase/firebaseClient"
 import {signInWithEmailAndPassword} from "@firebase/auth"
 import axios from "axios";
 
 export const authenticateUser = async (email: string, password: string) => {
     try {
         const credential = await signInWithEmailAndPassword(auth, email, password);
-        const token = await auth.currentUser?.getIdToken();
-
+        const token = await getToken()
         const response = await axios({
             method: 'GET',
             url: `/api/v1/users/${credential.user.uid}`,

@@ -1,9 +1,9 @@
-import {auth} from "@/firebase/firebaseClient";
+import {auth, getToken} from "@/firebase/firebaseClient";
 import axios from "axios";
 
 export const getMonthlyOverview = async (from: string, to: string) => {
     try {
-        const token = await auth.currentUser?.getIdToken();
+        const token = await getToken()
         const res = await axios(
             {
                 method: 'GET',
@@ -18,9 +18,23 @@ export const getMonthlyOverview = async (from: string, to: string) => {
         throw e;
     }
 }
+export const getSalesReport = async (from:string, to:string) => {
+    try {
+        const token = await getToken()
+        return await axios({
+            method: 'GET',
+            url: `/api/v1/reports/sales?fromDate=${from}&toDate=${to}`,
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+    }catch (e){
+        throw e;
+    }
+}
 export const getDailyOverview = async () => {
     try {
-        const token = await auth.currentUser?.getIdToken();
+        const token = await getToken()
         const res = await axios(
             {
                 method: 'GET',
@@ -37,7 +51,7 @@ export const getDailyOverview = async () => {
 }
 export const getStocksReport = async () => {
     try {
-        const token = await auth.currentUser?.getIdToken();
+        const token = await getToken()
         const res = await axios(
             {
                 method: 'GET',
@@ -53,9 +67,9 @@ export const getStocksReport = async () => {
     }
 }
 
-export const getCashReport = (from: string, to: string) => {
+export const getCashReport = async (from: string, to: string) => {
     try {
-        const token = auth.currentUser?.getIdToken();
+        const token = await getToken()
         return axios(
             {
                 method: 'GET',
@@ -72,7 +86,7 @@ export const getCashReport = (from: string, to: string) => {
 
 export const getExpenseReport = async (from: string, to: string) => {
     try {
-        const token = await auth.currentUser?.getIdToken();
+        const token = await getToken()
         const res = await axios(
             {
                 method: 'GET',

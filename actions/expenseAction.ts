@@ -1,10 +1,9 @@
-import {Expense} from "@/app/dashboard/expenses/components/Header";
 import axios from "axios";
-import {auth} from "@/firebase/firebaseClient";
+import {auth, getToken} from "@/firebase/firebaseClient";
 
 export const addNewExpense = async (expense: Expense) => {
     try {
-        const token = await auth.currentUser?.getIdToken();
+        const token = await getToken()
         const response = await axios({
             method: 'POST',
             url: `/api/v1/expenses`,
@@ -22,7 +21,7 @@ export const addNewExpense = async (expense: Expense) => {
 
 export const getAllExpenses = async (page: number, size: number) => {
     try {
-        const token = await auth.currentUser?.getIdToken();
+        const token = await getToken()
         const response = await axios({
             method: 'GET',
             url: `/api/v1/expenses?page=${page}&size=${size}`,
@@ -37,7 +36,7 @@ export const getAllExpenses = async (page: number, size: number) => {
 }
 export const getAllExpensesByDate = async (from: string, to: string) => {
     try {
-        const token = await auth.currentUser?.getIdToken();
+        const token = await getToken()
         const response = await axios({
             method: 'GET',
             url: `/api/v1/expenses?from=${from}&to=${to}`,
@@ -52,7 +51,7 @@ export const getAllExpensesByDate = async (from: string, to: string) => {
 }
 export const deleteExpenseById = async (id: string) => {
     try {
-        const token = await auth.currentUser?.getIdToken();
+        const token = await getToken()
         const response = await axios({
             method: 'DELETE',
             url: `/api/v1/expenses/${id}`,
