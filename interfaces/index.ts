@@ -49,8 +49,7 @@ export interface Order {
 
     tracking: Tracking | null,
 
-    createdAt: Timestamp,
-    updatedAt: Timestamp,
+    createdAt: Timestamp | string,
 }
 
 export interface Customer {

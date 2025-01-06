@@ -29,7 +29,7 @@ export const getOrders = async (pageNumber: number = 1, size: number = 20) => {
         // Fetch orders with pagination and sorting by createdAt
         const ordersSnapshot = await adminFirestore.collection('orders')
             .where('paymentStatus', 'not-in', [paymentStatus.PENDING, paymentStatus.FAILED])
-            .orderBy('createdAt', 'desc' as any)
+            .orderBy('createdAt', 'desc')
             .limit(size)
             .offset(offset)
             .get();
@@ -39,7 +39,7 @@ export const getOrders = async (pageNumber: number = 1, size: number = 20) => {
             let order: Order = doc.data() as Order;
             order = {
                 ...order,
-                createdAt: order.createdAt.toDate().toLocaleString(),
+                createdAt: order?.createdAt?.toDate().toLocaleString(),
             }
             if (!(order.paymentStatus === paymentStatus.PENDING && order.paymentMethod === paymentMethods.PAYHERE)) {
                 orders.push(order);
@@ -724,7 +724,7 @@ export const getAllExpenses = async (page: number, size: number) => {
             const data = doc.data() as Expense;
             expenseList.push({
                 ...data,
-                createdAt: data?.createdAt?.toDate().toLocaleString(),
+                createdAt: data.createdAt.toDate().toLocaleString(),
             });
         });
         console.log(`Fetched ${expenseList.length} expenses`);
