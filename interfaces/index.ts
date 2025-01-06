@@ -62,6 +62,15 @@ export interface Customer {
     city: string;
 }
 
+export interface Expense {
+    id: string;
+    type: string;
+    for: string;
+    amount: number;
+    note?: string;
+    createdAt: Timestamp | string;
+}
+
 export interface SalesReport {
     type: "shoes" | "sandals" | "accessories",
     data:[

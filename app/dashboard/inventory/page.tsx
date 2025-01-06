@@ -3,10 +3,9 @@ import PageContainer from '../components/container/PageContainer';
 import DashboardCard from '../components/shared/DashboardCard';
 import {Box, Button, Grid, MenuItem, Pagination, Select, Stack} from "@mui/material";
 import React, {useEffect} from "react";
-import {Error, Item} from "@/interfaces";
+import {Item} from "@/interfaces";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import ItemCard from "@/app/dashboard/inventory/components/ItemCard";
-import ComponentsLoader from "@/app/components/ComponentsLoader";
 import {IoRefresh} from "react-icons/io5";
 import EmptyState from "@/app/components/EmptyState";
 import Header from "@/app/dashboard/inventory/components/Header";
@@ -18,6 +17,7 @@ import {
     setSize
 } from '@/lib/inventorySlice/inventorySlice';
 import ItemFormDialog from "@/app/dashboard/inventory/components/ItemFormDialog";
+import ComponentsLoader from "@/app/components/ComponentsLoader";
 
 
 const Page = () => {
@@ -59,17 +59,16 @@ const Page = () => {
                 }}>
                     <Header/>
                     <Box>
-                        {loading ? (<ComponentsLoader/>) : (
-                            <Grid container gap={5} mt={2}>
-                                {items.map((item: Item) => (
-                                    <ItemCard item={item} key={item.itemId} onEdit={() => {
-                                        dispatch(setSelectedItem(item))
-                                        dispatch(setShowEditingForm(true))
-                                    }}/>
-                                ))}
-                            </Grid>
-                        )}
-                        {items.length === 0 && <EmptyState title={"Not Items"} subtitle={"Try adding item"}/>}
+                        <Grid container gap={5} mt={2}>
+                            {items.map((item: Item) => (
+                                <ItemCard item={item} key={item.itemId} onEdit={() => {
+                                    dispatch(setSelectedItem(item))
+                                    dispatch(setShowEditingForm(true))
+                                }}/>
+                            ))}
+                        </Grid>
+                        {loading && <ComponentsLoader title={"Loading Items"} position={"relative"}/>}
+                        {(items.length === 0 && !loading)&& <EmptyState title={"Not Items"} subtitle={"Try adding item"}/>}
                     </Box>
                     <Box sx={{
                         position: "absolute",
