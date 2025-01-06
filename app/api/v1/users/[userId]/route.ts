@@ -3,7 +3,7 @@ import {authorizeRequest, getUserById} from "@/firebase/firebaseAdmin";
 
 export const GET = async (req: Request) => {
     try {
-        const response = authorizeRequest(req);
+        const response = await authorizeRequest(req);
 
         if (!response) {
             return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
