@@ -161,7 +161,7 @@ const OrderTable = () => {
                     />
                 )}
                 {isLoading && (
-                    <ComponentsLoader position={"relative"} title={"Loading Orders"}/>
+                    <ComponentsLoader position={"absolute"} title={"Loading Orders"}/>
                 )}
             </TableContainer>
             <Box

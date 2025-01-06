@@ -67,7 +67,7 @@ const Page = () => {
                                 }}/>
                             ))}
                         </Grid>
-                        {loading && <ComponentsLoader title={"Loading Items"} position={"relative"}/>}
+                        {loading && <ComponentsLoader title={"Loading Items"} position={"absolute"}/>}
                         {(items.length === 0 && !loading)&& <EmptyState title={"Not Items"} subtitle={"Try adding item"}/>}
                     </Box>
                     <Box sx={{
