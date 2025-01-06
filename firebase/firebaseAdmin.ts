@@ -635,14 +635,13 @@ export const getCashReport = async (from: string, to: string): Promise<CashFlowR
 
         querySnapshot.forEach((doc) => {
             const order = doc.data() as Order;
-            const {paymentMethod, shippingCost, discount, items} = order;
+            const {paymentMethod, items} = order;
 
-            const itemTotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
-            const discountAmount = discount || 0;
-
-            const orderTotal = itemTotal + shippingCost - discountAmount;
-
+            const itemTotal = items.reduce((acc, item) => acc+item.price * item.quantity, 0);
+            const discountAmount = order?.discount | 0;
+            const orderTotal = itemTotal - discountAmount;
             // Normalize payment method to match CashFlowReport's method type
+
             let normalizedMethod: CashFlowReport["method"];
             switch (paymentMethod.toLowerCase()) {
                 case "cash":
@@ -672,10 +671,10 @@ export const getCashReport = async (from: string, to: string): Promise<CashFlowR
             if (normalizedMethod === "qr" || normalizedMethod === "card") {
                 const fee = 2.75;
                 paymentSummary[normalizedMethod].fee = fee; // Accumulate the fee
-                paymentSummary[normalizedMethod].total = netTotal - (fee * orderTotal / 100);
+                paymentSummary[normalizedMethod].total += netTotal - (fee * netTotal / 100);
+            }else {
+                paymentSummary[normalizedMethod].total += netTotal;
             }
-
-            paymentSummary[normalizedMethod].total += netTotal;
         });
 
         return Object.keys(paymentSummary).map((method) => ({

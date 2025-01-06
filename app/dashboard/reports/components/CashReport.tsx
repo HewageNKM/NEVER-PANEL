@@ -37,8 +37,8 @@ const CashReport = ({ setShow, cash, show, date }: { setShow: () => void, cash: 
                         {cash?.map((report, index) => (
                             <TableRow key={index}>
                                 <TableCell style={{ textTransform: "capitalize", fontSize: "1rem" }}>{report.method}</TableCell>
-                                <TableCell align="right" style={{ fontSize: "1rem" }}>{report.fee.toFixed(2)}</TableCell>
-                                <TableCell align="right" style={{ fontSize: "1rem" }}>{report.total.toFixed(2)}</TableCell>
+                                <TableCell align="right" style={{ fontSize: "1rem" }}>{report?.fee?.toFixed(2)}</TableCell>
+                                <TableCell align="right" style={{ fontSize: "1rem" }}>{report?.total?.toFixed(2)}</TableCell>
                             </TableRow>
                         ))}
                         {/* Row for total cash */}
