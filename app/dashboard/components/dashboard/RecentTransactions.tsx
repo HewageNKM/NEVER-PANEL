@@ -27,8 +27,8 @@ const RecentTransactions = () => {
 
         const unsubscribe = onSnapshot(ordersQuery, (snapshot) => {
             const ordersData = snapshot.docs.map((doc) => ({
-                id: doc.id,
                 ...doc.data(),
+                createdAt: doc.data().createdAt.toDate().toLocaleString(),
             }));
             setOrders(ordersData);
             setLoading(false);
@@ -65,11 +65,7 @@ const RecentTransactions = () => {
                         <TimelineItem key={order.orderId}>
                             <TimelineOppositeContent>
                                 <Typography variant="body2">
-                                    {new Date(order.createdAt.seconds * 1000).toLocaleDateString()}{" "}
-                                    {new Date(order.createdAt.seconds * 1000).toLocaleTimeString([], {
-                                        hour: "2-digit",
-                                        minute: "2-digit",
-                                    })}
+                                    {order.createdAt}
                                 </Typography>
                             </TimelineOppositeContent>
                             <TimelineSeparator>
