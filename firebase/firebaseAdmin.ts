@@ -724,7 +724,7 @@ export const getAllExpenses = async (page: number, size: number) => {
             const data = doc.data() as Expense;
             expenseList.push({
                 ...data,
-                createdAt: data.createdAt.toDate().toLocaleString(),
+                createdAt: data?.createdAt?.toDate().toLocaleString(),
             });
         });
         console.log(`Fetched ${expenseList.length} expenses`);
