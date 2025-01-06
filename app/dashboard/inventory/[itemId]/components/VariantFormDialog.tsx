@@ -133,7 +133,6 @@ const VariantFormDialog = () => {
                         ...item.variants, newVariant]
                 }
 
-                console.log(updatedItem)
                 await updateAItem(updatedItem)
                 dispatch(setItem(updatedItem));
                 evt.target.reset();

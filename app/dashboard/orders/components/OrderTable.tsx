@@ -23,8 +23,6 @@ import ComponentsLoader from "@/app/components/ComponentsLoader";
 import {Customer, OrderItem, Tracking} from "@/interfaces";
 import CustomerFormDialog from "@/app/dashboard/orders/components/CustomerFormDialog";
 import ItemsFormDialog from "@/app/dashboard/orders/components/ItemsFormDialog";
-import PaymentStatusFormDialog from "@/app/dashboard/orders/components/PaymentStatusFormDialog";
-import {PaymentStatus} from "@/functions/src/constant";
 import TrackingFormDialog from "@/app/dashboard/orders/components/TrackingFormDialog";
 
 const OrderTable = () => {
@@ -52,7 +50,7 @@ const OrderTable = () => {
     return (
         <Stack direction={"column"} gap={5}>
             <TableContainer component={Paper} sx={{
-                position:"relative"
+                position: "relative"
             }}>
                 <Typography variant="h6" component="div" sx={{padding: 2}}>
                     Orders
@@ -134,17 +132,17 @@ const OrderTable = () => {
                                                     <IoInformationCircle color={"blue"} size={25}/>
                                                 </IconButton>
                                             </Box>
-                                    ) : (
-                                    <Box>
-                                        <Typography>Processing</Typography>
-                                        <IconButton onClick={() => {
-                                            setTracking(order.tracking)
-                                            setShowTrackingForm(true)
-                                            dispatch(setSelectedOrder(order))
-                                        }}>
-                                            <IoInformationCircle color={"blue"} size={25}/>
-                                        </IconButton>
-                                    </Box>)
+                                        ) : (
+                                            <Box>
+                                                <Typography>Processing</Typography>
+                                                <IconButton onClick={() => {
+                                                    setTracking(order.tracking)
+                                                    setShowTrackingForm(true)
+                                                    dispatch(setSelectedOrder(order))
+                                                }}>
+                                                    <IoInformationCircle color={"blue"} size={25}/>
+                                                </IconButton>
+                                            </Box>)
                                     )}
                                 </TableCell>
                                 <TableCell>

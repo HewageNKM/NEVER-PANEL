@@ -73,7 +73,6 @@ const Header = () => {
                 console.log("End Date: ", endDateString);
 
                 const response = await getReport(startDateString, endDateString);
-                console.log("Response: ", response.data);
                 setSales({
                     data: response.data.data as SalesReport[],
                     totalDiscount: response.data.totalDiscount,
@@ -99,7 +98,6 @@ const Header = () => {
                 console.log("End Date: ", endDateString);
 
                 const response = await getCashReport(startDateString, endDateString);
-                console.log("Response: ", response.data);
                 setCash(response.data);
                 setShowCashReport(true);
             } else if(selectedType === "expense" && (toDate != null && fromDate != null)){
@@ -117,7 +115,6 @@ const Header = () => {
                 console.log("End Date: ", endDateString);
 
                 const response = await getExpenseReport(startDateString,endDateString);
-                console.log("Response: ", response);
                 setExpenses(response);
                 setShowExpenseReport(true);
             }else {

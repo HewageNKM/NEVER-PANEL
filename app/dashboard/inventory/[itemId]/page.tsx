@@ -38,8 +38,8 @@ const Page = () => {
                     flexDirection: "column",
                     gap: 3
                 }}>
-                    <Hero/>
-                    <Variants/>
+                    <Hero />
+                    <Variants />
                     <VariantFormDialog
                         onClose={() => {
                         }}

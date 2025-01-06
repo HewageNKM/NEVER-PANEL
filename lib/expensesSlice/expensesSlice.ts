@@ -24,8 +24,6 @@ export const expensesSlice = createSlice({
     reducers: {
         setExpenses: (state, action) => {
             let expenses = action.payload;
-            console.log(expenses)
-            console.log(state.selectedFilterType, state.selectedFilterFor)
             switch (state.selectedFilterType) {
                 case "utility":
                     expenses = expenses.filter((expense: Expense) => expense.type === state.selectedFilterType);
