@@ -41,7 +41,6 @@ const OrdersHeader = () => {
             if(date){
                 const d = date.toDate().toLocaleString()
                 const orders = await getOrdersByDate(d);
-                console.log(orders)
                 dispatch(setOrders(orders))
             }
         }catch (e) {
