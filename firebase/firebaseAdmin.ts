@@ -50,7 +50,7 @@ export const getOrders = async (pageNumber: number = 1, size: number = 20) => {
 
     } catch (error: any) {
         console.error(error);
-        throw new Error(error.message);
+        throw error
     }
 };
 
@@ -80,7 +80,7 @@ export const getInventoryItems = async (pageNumber: number = 1, size: number = 2
 
     } catch (error: any) {
         console.error(error);
-        throw new Error(error.message);
+        throw error
     }
 };
 
@@ -96,7 +96,7 @@ export const getOrder = async (orderId: string) => {
 
     } catch (error: any) {
         console.error(error);
-        throw new Error(error.message);
+        throw error
     }
 };
 
@@ -118,7 +118,7 @@ export const getItemById = async (itemId: string) => {
 
     } catch (error: any) {
         console.error(error);
-        throw new Error(error.message);
+        throw error;
     }
 };
 
@@ -150,8 +150,8 @@ export const updateOrder = async (order: Order) => {
 
         console.log(`Order with ID ${order.orderId} updated successfully`);
     } catch (error: any) {
-        console.error(`Error updating order with ID ${order.orderId}:`, error);
-        throw new Error(error.message);
+        console.error(error);
+        throw error
     }
 };
 
@@ -167,7 +167,7 @@ export const saveToInventory = async (item: Item) => {
         console.log(`Item with ID ${item.itemId} saved to inventory`);
     } catch (error: any) {
         console.error(error);
-        throw new Error(error.message);
+        throw error
     }
 };
 
@@ -193,7 +193,7 @@ export const updateItem = async (item: Item) => {
         console.log(`Item with ID ${item.itemId} updated in inventory`);
     } catch (error: any) {
         console.error(error);
-        throw new Error(error.message);
+        throw error
     }
 };
 
@@ -222,7 +222,7 @@ export const uploadFile = async (file: File, path: string) => {
 
     } catch (error: any) {
         console.error(error);
-        throw new Error(error.message);
+        throw error
     }
 };
 
@@ -237,7 +237,7 @@ export const deleteFiles = async (path: string) => {
             return;
         }
         console.error(error);
-        throw new Error(error.message);
+        throw error;
     }
 };
 
@@ -270,8 +270,8 @@ export const deleteItemById = async (itemId: string) => {
 
         console.log(`[END] Successfully deleted item with ID: ${itemId} and associated files`);
     } catch (error: any) {
-        console.error(`[ERROR] Error deleting item with ID ${itemId}:`, error);
-        throw new Error(error.message);
+        console.error(error);
+        throw error
     }
 };
 
@@ -383,12 +383,11 @@ export const getSaleReport = async (fromDate: string, toDate: string) => {
                 }
             }
         }
-
-        console.log(salesData);
+        console.log(`Fetched sales data for ${salesData.length} types`);
         return {data: salesData, totalDiscount: totalDiscount, totalOrders: totalOrders};
     } catch (error: any) {
         console.error(error);
-        throw new Error(error.message);
+        throw error;
     }
 };
 
@@ -404,7 +403,7 @@ export const getMonthlyOverview = async (from: string, to: string) => {
         return getOverview(startTimestamp, endTimestamp);
     } catch (e) {
         console.error(e);
-        throw new Error(e.message);
+        throw e;
     }
 };
 export const getOverview = async (start: Timestamp, end: Timestamp) => {
@@ -484,7 +483,8 @@ export const getOverview = async (start: Timestamp, end: Timestamp) => {
             totalExpense: totalExpense
         };
     } catch (e) {
-        throw new Error(e.message);
+        console.error(e);
+        throw e
     }
 }
 export const getDailyOverview = async () => {
@@ -540,7 +540,8 @@ export const getOrdersByDate = async (date: string) => {
         console.log(`Fetched ${orders.length} orders on ${date}`);
         return orders;
     } catch (e) {
-        throw new Error(e.message);
+        console.error(e);
+        throw e
     }
 }
 export const getStockReport = async (): Promise<StocksReport[]> => {
@@ -590,8 +591,8 @@ export const getStockReport = async (): Promise<StocksReport[]> => {
 
         return stockReport;
     } catch (e) {
-        console.error('Error fetching stock report:', e.message);
-        throw new Error(e.message);
+        console.error(e);
+        throw e
     }
 }
 
@@ -821,7 +822,7 @@ export const getExpensesReport = async (from: string, to: string) => {
             data: formatReport(data),
         }));
 
-        console.log("Generated expenses report:", JSON.stringify(result, null, 2));
+        console.log("Report Generated");
         return result;
     } catch (e) {
         console.error("Error fetching expenses report:", e);
@@ -839,7 +840,7 @@ export const getUserById = async (userId: string) => {
         return user.data();
     } catch (error: any) {
         console.error(error);
-        throw new Error(error.message);
+        throw error
     }
 }
 
@@ -849,26 +850,26 @@ export const authorizeRequest = async (req: any) => {
         const token = authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
 
         if (token != "undefined") {
-            console.warn("Authorization Failed!");
-            const decodedIdToken =  await adminAuth.verifyIdToken(token);
+            const decodedIdToken = await adminAuth.verifyIdToken(token);
             const user = await getUserById(decodedIdToken.uid);
             if (!user) {
                 console.warn("User not found!");
+                console.warn("Authorization Failed!");
                 return false;
             } else {
                 if (user.role === 'ADMIN') {
-                    console.log("User is an admin!, Authorization Success!");
+                    console.log("Authorization Success!");
                     return true;
                 } else {
-                    console.warn("User is not an admin!, Authorization Failed!");
+                    console.warn("Authorization Failed!");
                     return false;
                 }
             }
         } else {
-            console.log("Authorization Failed!");
+            console.warn("Authorization Failed!");
             return false;
         }
-    }catch (e) {
+    } catch (e) {
         console.error(e);
         throw e;
     }
