@@ -7,10 +7,11 @@ import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs';
 import {useAppSelector} from "@/lib/hooks";
 import SaleReport from "@/app/dashboard/reports/components/SaleReport";
 import {getReport} from "@/actions/ordersActions";
-import {getCashReport, getMonthlyOverview, getStocksReport} from "@/actions/reportsAction";
+import {getCashReport, getExpenseReport, getMonthlyOverview, getStocksReport} from "@/actions/reportsAction";
 import StockReport from "@/app/dashboard/reports/components/StockReport";
 import {SalesReport} from "@/interfaces";
 import CashReport from "@/app/dashboard/reports/components/CashReport";
+import ExpenseReport from "@/app/dashboard/reports/components/ExpenseReport";
 
 const Header = () => {
     const [fromDate, setFromDate] = useState(null);
@@ -32,6 +33,8 @@ const Header = () => {
     const [cash, setCash] = useState(null)
     const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
     const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth())
+    const [expenses, setExpenses] = useState(null)
+    const [showExpenseReport, setShowExpenseReport] = useState(false)
 
     const [years, setYears] = useState([])
     const months = [
@@ -98,7 +101,25 @@ const Header = () => {
                 console.log("Response: ", response.data);
                 setCash(response.data);
                 setShowCashReport(true);
-            } else {
+            } else if(selectedType === "expense" && (toDate != null && fromDate != null)){
+                const startDate = fromDate?.toDate();
+                startDate.setHours(0, 0, 0);
+
+                const endDate = toDate?.toDate();
+                endDate.setHours(23, 59, 59);
+
+                // Convert dates to ISO strings
+                const startDateString = startDate.toString();
+                const endDateString = endDate.toString();
+
+                console.log("Start Date: ", startDateString);
+                console.log("End Date: ", endDateString);
+
+                const response = await getExpenseReport(startDateString,endDateString);
+                console.log("Response: ", response);
+                setExpenses(response);
+                setShowExpenseReport(true);
+            }else {
                 alert("Please select a type and date range");
             }
         } catch (e) {
@@ -258,6 +279,7 @@ const Header = () => {
                                 <MenuItem value={"sale"}>Sale</MenuItem>
                                 <MenuItem value={"stock"}>Stock</MenuItem>
                                 <MenuItem value={"cash"}>Cash</MenuItem>
+                                <MenuItem value={"expense"}>Expense</MenuItem>
                             </Select>
                         </Box>
                         <Box sx={{
@@ -318,6 +340,19 @@ const Header = () => {
 
                 return `${startDateString} - ${endDateString}`
             }}/>
+            <ExpenseReport expenseReport={expenses} date={() => {
+                const startDate = fromDate?.toDate();
+                startDate?.setHours(0, 0, 0);  // Set time to 00:00:00
+
+                const endDate = toDate?.toDate();
+                endDate?.setHours(23, 59, 59);  // Set time to 23:59:59
+
+                // Convert dates to ISO strings
+                const startDateString = startDate?.toLocaleString();
+                const endDateString = endDate?.toLocaleString();
+
+                return `${startDateString} - ${endDateString}`
+            }} setShow={()=>setShowExpenseReport(false)} show={showExpenseReport} />
         </LocalizationProvider>
     );
 };

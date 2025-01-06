@@ -69,3 +69,21 @@ export const getCashReport = (from: string, to: string) => {
         throw e;
     }
 }
+
+export const getExpenseReport = async (from: string, to: string) => {
+    try {
+        const token = await auth.currentUser?.getIdToken();
+        const res = await axios(
+            {
+                method: 'GET',
+                url: '/api/v1/reports/expense?from=' + from + '&to=' + to,
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        );
+        return res.data;
+    } catch (e) {
+        throw e;
+    }
+}

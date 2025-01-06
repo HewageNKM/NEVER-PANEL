@@ -65,18 +65,3 @@ export const deleteExpenseById = async (id: string) => {
         throw e;
     }
 }
-export const getMonthlyOverview = async (from: string, to: string) => {
-    try {
-        const token = auth.currentUser?.getIdToken();
-        const response = await axios({
-            method: 'GET',
-            url: `/api/v1/expenses/overview/monthly?from=${from}&to=${to}`,
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        });
-        return response.data;
-    } catch (e) {
-        throw e;
-    }
-}
