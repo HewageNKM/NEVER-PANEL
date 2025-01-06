@@ -1,6 +1,5 @@
 import {NextResponse} from "next/server";
-import {authorizeRequest} from "@/lib/middleware";
-import {addNewExpense, getAllExpenses, getAllExpensesByDate} from "@/firebase/firebaseAdmin";
+import {addNewExpense, authorizeRequest, getAllExpenses, getAllExpensesByDate} from "@/firebase/firebaseAdmin";
 import { Expense } from "@/interfaces";
 
 export const POST = async (req: Request) => {

@@ -1,13 +1,12 @@
-import {getOrder, updateOrder, verifyIdToken} from "@/firebase/firebaseAdmin";
+import {authorizeRequest, getOrder, updateOrder} from "@/firebase/firebaseAdmin";
 import {NextResponse} from "next/server";
-import {authorizeRequest} from "@/lib/middleware";
 
 export const PUT = async (req: Request) => {
     try {
         // Verify the ID token
         const response = authorizeRequest(req);
         if (!response) {
-            return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+            return NextResponse.json({message: 'Unauthorized'}, {status: 401});
         }
 
         const body = await req.json();
@@ -17,7 +16,7 @@ export const PUT = async (req: Request) => {
     } catch (error: any) {
         console.error(error);
         // Return a response with error message
-        return NextResponse.json({message:error.message}, {status: 500});
+        return NextResponse.json({message: error.message}, {status: 500});
     }
 };
 export const GET = async (req: Request) => {
@@ -25,7 +24,7 @@ export const GET = async (req: Request) => {
 
         const response = authorizeRequest(req);
         if (!response) {
-            return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+            return NextResponse.json({message: 'Unauthorized'}, {status: 401});
         }
 
         const url = new URL(req.url);
@@ -41,6 +40,6 @@ export const GET = async (req: Request) => {
     } catch (error: any) {
         console.error(error);
         // Return a response with error message
-        return NextResponse.json({message:error.message}, {status: 500});
+        return NextResponse.json({message: error.message}, {status: 500});
     }
 }

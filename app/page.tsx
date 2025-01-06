@@ -10,6 +10,8 @@ import {useRouter} from "next/navigation";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
 import {setUser} from "@/lib/authSlice/authSlice";
 import {useEffect} from "react";
+import {User} from "@/interfaces";
+import {setLoading} from "@/lib/authSlice/authSlice";
 
 const Login = () => {
     const dispatch = useAppDispatch();
@@ -19,22 +21,30 @@ const Login = () => {
 
     const onFormSubmit = async (evt: any) => {
         evt.preventDefault();
+       dispatch(setLoading(true));
         try {
             const email: string = evt.target.email.value;
             const password: string = evt.target.password.value;
-            const credential = await authenticateUser(email, password);
-            window.localStorage.setItem("neverPanelUser", JSON.stringify(credential));
-            dispatch(setUser(credential));
-            router.replace("/dashboard");
+            const user:User = await authenticateUser(email, password);
+            if (user.role === "ADMIN"){
+                dispatch(setUser(user))
+                router.replace("/dashboard");
+            }else {
+                alert("You are not authorized to access this page")
+            }
         } catch (e: any) {
             console.log(e);
+        }finally {
+            dispatch(setLoading(false));
         }
     };
+
     useEffect(() => {
         if (currentUser) {
             router.replace("/dashboard")
         }
     }, [currentUser]);
+
     return (
         <PageContainer title="Login" description="this is Login page">
             <Box
@@ -99,7 +109,7 @@ const Login = () => {
                         </Card>
                     </Grid>
                 </Grid>
-                {loading && <ComponentsLoader title="Loading User"/>}
+                {loading && <ComponentsLoader title="Loading User" position={"fixed"}/>}
             </Box>
         </PageContainer>
     );

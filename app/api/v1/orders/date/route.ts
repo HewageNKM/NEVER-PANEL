@@ -1,6 +1,5 @@
 import {NextResponse} from "next/server";
-import {getOrdersByDate} from "@/firebase/firebaseAdmin";
-import {authorizeRequest} from "@/lib/middleware";
+import {authorizeRequest, getOrdersByDate} from "@/firebase/firebaseAdmin";
 
 export const GET = async (req: Request) => {
     try {
