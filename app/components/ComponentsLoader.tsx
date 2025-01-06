@@ -1,11 +1,11 @@
 import React from 'react';
-import { Box, CircularProgress, Typography } from "@mui/material";
+import {Box, CircularProgress, Typography} from "@mui/material";
 
-const ComponentsLoader = ({ title }: { title?: string }) => {
+const ComponentsLoader = ({title, position = "fixed"}: { title?: string, position: string }) => {
     return (
         <Box
             sx={{
-                position: "fixed",
+                position: `${position}`,
                 top: 0,
                 left: 0,
                 width: "100%",
@@ -16,7 +16,7 @@ const ComponentsLoader = ({ title }: { title?: string }) => {
                 alignItems: "center",
                 backgroundColor: "rgba(255, 255, 255, 0.8)", // Slightly more opaque
                 backdropFilter: "blur(10px)", // More blur for a softer background
-                zIndex: 99999,
+                zIndex: 99,
                 padding: 2, // Add padding around the content
                 boxShadow: "0 4px 20px rgba(0, 0, 0, 0.1)", // Optional shadow for depth
                 borderRadius: 2, // Rounded corners
@@ -35,7 +35,7 @@ const ComponentsLoader = ({ title }: { title?: string }) => {
                     {title}
                 </Typography>
             )}
-            <CircularProgress size="3rem" sx={{ color: "primary.main" }} /> {/* Change color to match theme */}
+            <CircularProgress size="3rem" sx={{color: "primary.main"}}/> {/* Change color to match theme */}
         </Box>
     );
 };

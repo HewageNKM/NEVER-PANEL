@@ -1,5 +1,5 @@
 import admin, {credential} from 'firebase-admin';
-import {CashFlowReport, Item, Order, SalesReport, StocksReport} from "@/interfaces";
+import {CashFlowReport, Expense, Item, Order, SalesReport, StocksReport} from "@/interfaces";
 import {NextResponse} from "next/server";
 import {paymentMethods, paymentStatus} from "@/constant";
 import {uuidv4} from "@firebase/util";
@@ -691,7 +691,129 @@ export const getCashReport = async (from: string, to: string): Promise<CashFlowR
     }
 };
 
+export const addNewExpense = async (expense: Expense) => {
+    try {
+        console.log('Adding new expense:', expense.id);
+        const result = await adminFirestore.collection('expenses').doc(expense.id).set({
+            ...expense,
+            createdAt: admin.firestore.Timestamp.fromDate(new Date(expense.createdAt)),
+        });
+        console.log(`Expense added successfully: ${result.writeTime}`);
+        return result.writeTime;
+    } catch (e) {
+        console.error(e)
+        throw e
+    }
+}
 
+export const getAllExpenses = async (page: number, size: number) => {
+    try {
+        console.log('Fetching all expenses');
+        const offset = (page - 1) * size;
+        const expenses = await adminFirestore.collection('expenses')
+            .limit(size)
+            .offset(offset)
+            .orderBy('createdAt', 'desc')
+            .get();
+        const expenseList: Expense[] = [];
+        if (expenses.empty) {
+            console.log('No expenses found');
+            return expenseList;
+        }
+
+        expenses.forEach(doc => {
+            const data = doc.data() as Expense;
+            expenseList.push({
+                ...data,
+                createdAt: data.createdAt.toDate().toLocaleString(),
+            });
+        });
+        console.log(`Fetched ${expenseList.length} expenses`);
+        return expenseList;
+    } catch (e) {
+        console.error(e)
+        throw e
+    }
+}
+
+export const getAllExpensesByDate = async (from: string, to: string) => {
+    try {
+        const fromTimestamp = admin.firestore.Timestamp.fromDate(new Date(from));
+        const toTimestamp = admin.firestore.Timestamp.fromDate(new Date(to));
+        console.log(`Fetching expenses from ${from} to ${to}`);
+        const expenses = await adminFirestore.collection('expenses').
+            where('createdAt', '>=', fromTimestamp).
+            where('createdAt', '<=', toTimestamp)
+            .orderBy('createdAt', 'desc')
+            .get();
+        const expenseList: Expense[] = [];
+        if (expenses.empty) {
+            console.log('No expenses found');
+            return expenseList;
+        }
+
+        expenses.forEach(doc => {
+            const data = doc.data() as Expense;
+            expenseList.push({
+                ...data,
+                createdAt: data.createdAt.toDate().toLocaleString(),
+            });
+        });
+        console.log(`Fetched ${expenseList.length} expenses`);
+        return expenseList;
+    } catch (e) {
+        console.error(e)
+        throw e
+    }
+}
+
+export const deleteExpenseById = async (id:string) => {
+    try {
+        console.log(`Deleting expense with ID: ${id}`);
+        const result = await adminFirestore.collection('expenses').doc(id).delete();
+        console.log(`Expense deleted successfully: ${result.writeTime}`);
+        return result.writeTime;
+    } catch (e) {
+        console.error(e)
+        throw e
+    }
+}
+
+export const getExpensesOverview = async (from: string, to: string) => {
+    try {
+        const fromTimestamp = admin.firestore.Timestamp.fromDate(new Date(from));
+        const toTimestamp = admin.firestore.Timestamp.fromDate(new Date(to));
+
+        console.log(`Fetching expenses from ${from} to ${to}`);
+
+        const expensesQuery = adminFirestore.collection('expenses')
+            .where('createdAt', '>=', fromTimestamp)
+            .where('createdAt', '<=', toTimestamp)
+            .orderBy('createdAt', 'desc');
+
+        const expenses = await expensesQuery.get();
+        if (expenses.empty) {
+            console.log('No expenses found')
+            return {totalExpense: 0, expenseCount: 0}
+        }
+
+        let expenseCount = 0
+        let totalExpense = 0
+
+        expenses.forEach(doc => {
+            const data = doc.data() as Expense;
+            totalExpense += data.amount
+            expenseCount += 1
+        })
+
+        console.log(`Fetched ${expenseCount} expenses with total amount: ${totalExpense}`)
+
+        return {totalExpense: totalExpense, expenseCount: expenseCount}
+    } catch (e) {
+        console.error(e)
+        throw e
+    }
+}
 export const getUserById = async (userId: string) => {
     try {
         const user = await adminFirestore.collection('users').doc(userId).get();

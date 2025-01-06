@@ -51,7 +51,9 @@ const OrderTable = () => {
     }, [currentUser, selectedPage, size, loading, dispatch]);
     return (
         <Stack direction={"column"} gap={5}>
-            <TableContainer component={Paper}>
+            <TableContainer component={Paper} sx={{
+                position:"relative"
+            }}>
                 <Typography variant="h6" component="div" sx={{padding: 2}}>
                     Orders
                 </Typography>
@@ -152,16 +154,16 @@ const OrderTable = () => {
                         ))}
                     </TableBody>
                 </Table>
+                {(orders.length === 0 && !isLoading) && (
+                    <EmptyState
+                        title={"No Orders"}
+                        subtitle={"No orders available."}
+                    />
+                )}
+                {isLoading && (
+                    <ComponentsLoader position={"relative"} title={"Loading Orders"}/>
+                )}
             </TableContainer>
-            {(orders.length === 0 && !isLoading) && (
-                <EmptyState
-                    title={"No Orders"}
-                    subtitle={"No orders available."}
-                />
-            )}
-            {isLoading && (
-                <ComponentsLoader title={"Loading Orders"}/>
-            )}
             <Box
                 mt={2}
                 gap={1}

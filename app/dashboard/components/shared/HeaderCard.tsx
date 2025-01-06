@@ -12,6 +12,7 @@ const HeaderCard = ({title, value,startDate,endDate,isLoading,invoices}: { title
             border: "1px solid #ccc",
             borderRadius: 2,
             position: "relative",
+            maxWidth: 350,
         }}>
             <Box>
                 <Box>
