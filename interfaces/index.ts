@@ -17,6 +17,7 @@ export interface Item {
     itemId: string,
     type: string,
     brand: string,
+    description: string,
     thumbnail: Img,
     variants: Variant[],
     manufacturer: string,

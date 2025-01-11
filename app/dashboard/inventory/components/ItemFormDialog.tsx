@@ -16,13 +16,14 @@ import {generateId} from "@/utils/genarateIds";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
 import {addAItem, deleteAFile, updateAItem, uploadAFile} from '@/actions/inventoryActions';
 import Image from "next/image";
-import {status} from "@grpc/grpc-js";
 
 const ItemFormDialog = () => {
     const dispatch = useAppDispatch();
     const [isLoading, setIsLoading] = useState(false)
     const {showEditingForm, selectedItem: item, page, size} = useAppSelector(state => state.inventorySlice);
     const [newImage, setNewImage] = useState(null)
+    const [discount, setDiscount] = useState(item?.discount ? item.discount : 0)
+    const [sellingPrice, setSellingPrice] = useState(item?.sellingPrice ? item.sellingPrice : 0)
 
 
     const VisuallyHiddenInput = styled('input')({
@@ -36,6 +37,11 @@ const ItemFormDialog = () => {
         whiteSpace: 'nowrap',
         width: 1,
     });
+    const calculateDiscount = (evt) => {
+        const marketPrice = evt.target.value;
+        const discount = Math.round((1 - (sellingPrice / marketPrice)) * 100)
+        setDiscount(discount)
+    }
     const onFormSubmit = async (evt: any) => {
         evt.preventDefault();
         setIsLoading(true)
@@ -44,6 +50,7 @@ const ItemFormDialog = () => {
             const manufacturer = evt.target.manufacturer.value;
             const brand = evt.target.brand.value;
             const name = evt.target.name.value;
+            const description = evt.target.description.value;
             const buyingPrice = evt.target.buyingPrice.value;
             const sellingPrice = evt.target.sellingPrice.value;
             const discount = evt.target.discount.value;
@@ -52,6 +59,7 @@ const ItemFormDialog = () => {
             const listing = evt.target.listOnWeb.checked ? "Active" : "Inactive";
 
             const newItem: Item = {
+                description: description,
                 listing: listing,
                 status: status,
                 brand: brand.toLowerCase(),
@@ -89,9 +97,11 @@ const ItemFormDialog = () => {
             if (item) {
                 await updateAItem(newItem);
                 closeForm()
+                dispatch(getInventoryItems({size: size, page: page}))
             } else {
                 await addAItem(newItem)
                 closeForm()
+                dispatch(getInventoryItems({size: size, page: page}))
             }
             evt.target.reset()
         } catch (e: any) {
@@ -105,7 +115,6 @@ const ItemFormDialog = () => {
         dispatch(setShowEditingForm(false))
         dispatch(setSelectedItem(null))
         setIsLoading(false)
-        dispatch(getInventoryItems({size: size, page: page}))
         setNewImage(null)
     }
     return (
@@ -115,7 +124,7 @@ const ItemFormDialog = () => {
             aria-labelledby="edit-item-dialog-title"
             aria-describedby="edit-item-dialog-description"
         >
-            {isLoading ? (<ComponentsLoader/>) : (<div>
+            {isLoading ? (<ComponentsLoader position=""/>) : (<div>
                 <DialogTitle id="edit-item-dialog-title">Edit/Add Item</DialogTitle>
                 <form onSubmit={onFormSubmit}>
                     <DialogContent>
@@ -209,61 +218,91 @@ const ItemFormDialog = () => {
                                 margin="normal"
                                 required
                             />
+                            <TextField
+                                name={"description"}
+                                label="Description"
+                                fullWidth
+                                defaultValue={item?.description || ""}
+                                margin="normal"
+                                multiline
+                                rows={4}
+                                placeholder="Enter a brief description of the item"
+                            />
                         </Box>
+
 
                         <Typography variant="subtitle1" gutterBottom>
                             Pricing Details
                         </Typography>
                         <Box mb={2}>
-                            <Grid container spacing={2}>
-                                <Grid item xs={12} md={4}>
-                                    <TextField
-                                        name={"buyingPrice"}
-                                        label="Buying Price"
-                                        type="number"
-                                        defaultValue={item?.buyingPrice}
-                                        fullWidth
-                                        required
-                                        margin="normal"
-                                        InputProps={{
-                                            endAdornment: <span>LKR</span>
-                                        }}
-                                    />
+                            <Box mb={2}>
+                                <Grid container spacing={2}>
+                                    <Grid item xs={12} md={4}>
+                                        <TextField
+                                            name="buyingPrice"
+                                            label="Buying Price"
+                                            type="number"
+                                            defaultValue={item?.buyingPrice}
+                                            fullWidth
+                                            required
+                                            margin="normal"
+                                            InputProps={{
+                                                endAdornment: <span>LKR</span>
+                                            }}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} md={4}>
+                                        <TextField
+                                            name="sellingPrice"
+                                            label="Selling Price"
+                                            onChange={(evt) => setSellingPrice(evt.target.value as number)}
+                                            defaultValue={item?.sellingPrice}
+                                            type="number"
+                                            required
+                                            fullWidth
+                                            margin="normal"
+                                            InputProps={{
+                                                endAdornment: <span>LKR</span>
+                                            }}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} md={4}>
+                                        <TextField
+                                            name="marketPrice"
+                                            label="Market Price"
+                                            defaultValue={(item?.sellingPrice || 0) + ((item?.sellingPrice || 0) * (item?.discount || 0) / 100)}
+                                            onChange={(evt) => calculateDiscount(evt)}
+                                            type="number"
+                                            fullWidth
+                                            required
+                                            margin="normal"
+                                            InputProps={{
+                                                endAdornment: <span>LKR</span>
+                                            }}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={12} md={4}>
+                                        <TextField
+                                            name="discount"
+                                            disabled
+                                            label="Discount"
+                                            value={discount}
+                                            type="number"
+                                            fullWidth
+                                            required
+                                            margin="normal"
+                                            InputProps={{
+                                                endAdornment: <span>%</span>
+                                            }}
+                                        />
+                                    </Grid>
                                 </Grid>
-                                <Grid item xs={12} md={4}>
-                                    <TextField
-                                        name={"sellingPrice"}
-                                        label="Selling Price"
-                                        defaultValue={item?.sellingPrice}
-                                        type="number"
-                                        required
-                                        fullWidth
-                                        margin="normal"
-                                        InputProps={{
-                                            endAdornment: <span>LKR</span>
-                                        }}
-                                    />
-                                </Grid>
-                                <Grid item xs={12} md={4}>
-                                    <TextField
-                                        name={"discount"}
-                                        label="Discount"
-                                        defaultValue={item?.discount}
-                                        type="number"
-                                        fullWidth
-                                        required
-                                        margin="normal"
-                                        InputProps={{
-                                            endAdornment: <span>%</span>
-                                        }}
-                                    />
-                                </Grid>
-                            </Grid>
+                            </Box>
                         </Box>
                         <Box display="flex" alignItems="center" mb={1}>
                             <FormControlLabel
                                 name="status"
-                                control={<Switch defaultChecked={item?.status === "Active"} />}
+                                control={<Switch defaultChecked={item?.status === "Active"}/>}
                                 label="Status"
                                 labelPlacement="start"
                                 sx={{
@@ -278,7 +317,7 @@ const ItemFormDialog = () => {
                         <Box display="flex" alignItems="center" mb={2}>
                             <FormControlLabel
                                 name="listOnWeb"
-                                control={<Switch defaultChecked={item?.listing === "Active"} />}
+                                control={<Switch defaultChecked={item?.listing === "Active"}/>}
                                 label="List on Website"
                                 labelPlacement="start"
                                 sx={{
