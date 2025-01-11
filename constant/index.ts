@@ -99,8 +99,6 @@ export const accessoriesSizesList = [
     }
 ]
 export enum orderStatus {
-    DELIVERED = "Delivered",
-    PROCESSING = "Processing",
     CANCELLED = "Cancelled",
     SHIPPED = "Shipped",
 }
@@ -108,38 +106,14 @@ export enum orderStatus {
 export enum paymentStatus {
     PAID = "Paid",
     PENDING = "Pending",
-    REFUNDED = "Refunded",
     FAILED = "Failed",
+    REFUNDED = "Refunded",
 }
 
 export enum paymentMethods {
-    CASH = "Cash",
-    CARD = "Card",
-    PAYHERE = "PayHere",
+    PAYHERE = "PAYHERE",
     COD = "COD",
 }
-export const orderStatusList = [
-    {
-        id: 1,
-        name: "Delivered",
-        value: orderStatus.DELIVERED
-    },
-    {
-        id: 2,
-        name: "Processing",
-        value:orderStatus.PROCESSING
-    },
-    {
-        id: 3,
-        name: "Cancelled",
-        value:orderStatus.CANCELLED
-    },
-    {
-        id: 4,
-        name: "Shipped",
-        value: orderStatus.SHIPPED
-    }
-]
 
 export const paymentStatusList = [
     {
@@ -154,9 +128,14 @@ export const paymentStatusList = [
     },
     {
         id: 3,
+        name: "Failed",
+        value: paymentStatus.FAILED
+    },
+    {
+        id: 4,
         name: "Refunded",
         value: paymentStatus.REFUNDED
-    }
+    },
 ]
 export const sortInventoryOptions = [
     {
@@ -183,23 +162,5 @@ export const sortInventoryOptions = [
         id: 5,
         name: "None",
         value: "none"
-    },
-]
-
-export const filterInventoryOptions = [
-    {
-        id: 1,
-        name: "All",
-        value: "all"
-    },
-    {
-        id: 2,
-        name: "Low Stock",
-        value: "low"
-    },
-    {
-        id: 3,
-        name: "Out of Stock",
-        value: "out"
     },
 ]

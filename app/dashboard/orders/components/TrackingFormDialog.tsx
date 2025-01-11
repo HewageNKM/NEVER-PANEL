@@ -133,15 +133,9 @@ const TrackingFormDialog = ({
                                         onChange={(event) => setStatus(event.target.value as orderStatus)}>
                                     <MenuItem
                                         value={orderStatus.SHIPPED}
-                                        disabled={selectedOrder.tracking.status === orderStatus.DELIVERED || selectedOrder.tracking.status === orderStatus.CANCELLED || selectedOrder.tracking.status === orderStatus.SHIPPED}
+                                        disabled={selectedOrder?.tracking?.status === orderStatus.CANCELLED || selectedOrder?.tracking?.status === orderStatus.SHIPPED}
                                     >
                                         {orderStatus.SHIPPED}
-                                    </MenuItem>
-                                    <MenuItem
-                                        value={orderStatus.DELIVERED}
-                                        disabled={selectedOrder.tracking.status === orderStatus.CANCELLED || selectedOrder.tracking.status === orderStatus.DELIVERED}
-                                    >
-                                        {orderStatus.DELIVERED}
                                     </MenuItem>
                                     <MenuItem
                                         value={orderStatus.CANCELLED}

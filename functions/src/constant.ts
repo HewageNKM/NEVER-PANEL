@@ -21,9 +21,8 @@ export interface Order {
 }
 
 export enum orderStatus {
-    DELIVERED = "delivered",
-    CANCELLED = "cancelled",
-    SHIPPED = "shipped",
+    CANCELLED = "Cancelled",
+    SHIPPED = "Shipped",
 }
 export interface Tracking {
     id:string
@@ -37,14 +36,14 @@ export interface Tracking {
 }
 // Enums for better type safety
 export enum PaymentMethod {
-    IPG = "ipg",
-    COD = "cod",
+    IPG = "PAYHERE",
+    COD = "COD",
 }
 
 export enum PaymentStatus {
-    Pending = "pending",
-    Paid = "paid",
-    Failed = "failed",
+    Pending = "Pending",
+    Paid = "Paid",
+    Failed = "Failed",
 }
 
 // Interfaces (Consider moving to separate files if they grow)

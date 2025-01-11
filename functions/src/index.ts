@@ -121,43 +121,68 @@ export const onPaymentStatusUpdates = functions.firestore
 
         if (!orderData) return null;
 
-        const {paymentMethod, paymentStatus, items, customer,createdAt} = orderData;
-        const customerEmail = customer.email.trim();
+        const { paymentMethod, paymentStatus, items, customer } = orderData;
+        const customerEmail = customer.email.trim().toLowerCase();
+        const paymentMethodLower = paymentMethod.toLowerCase();
+        const paymentStatusLower = paymentStatus.toLowerCase();
         const total = calculateTotal(items);
 
-        const templateData = {name: customer.name, address: customer.address, orderId, items, total, paymentMethod};
+        const templateData = {
+            name: customer.name,
+            address: customer.address,
+            orderId:orderId.toUpperCase(),
+            items,
+            total,
+            paymentMethod,
+        };
 
         try {
             const sendNotifications = async (additionalTemplateData?: any) => {
                 await Promise.all([
-                    sendEmail(customerEmail, "orderConfirmed", {...templateData, ...additionalTemplateData}),
-                    sendSMS(customer.phone, getOrderStatusSMS(customer.name, orderId, total, paymentMethod, paymentStatus,createdAt.toDate().toLocaleString())),
+                    sendEmail(customerEmail, "orderConfirmed", { ...templateData, ...additionalTemplateData }),
+                    sendSMS(
+                        customer.phone,
+                        getOrderStatusSMS(
+                            customer.name,
+                            orderId,
+                            paymentMethod,
+                            paymentStatus
+                        )
+                    ),
                 ]);
             };
 
             // Handle different payment statuses
-            if (!previousOrderData && paymentMethod === PaymentMethod.COD && paymentStatus === PaymentStatus.Pending) {
+            if (
+                !previousOrderData &&
+                paymentMethodLower === PaymentMethod.COD.toLowerCase() &&
+                paymentStatusLower === PaymentStatus.Pending.toLowerCase()
+            ) {
                 await sendNotifications();
-                await sendAdminSMS(adminNotifySMS(orderId, paymentMethod, total,createdAt.toDate().toLocaleString()));
+                await sendAdminSMS(adminNotifySMS(orderId));
                 await sendAdminEmail("adminOrderNotify", templateData);
                 console.log(`Order confirmation sent for COD order ${orderId}`);
             }
 
             if (previousOrderData) {
-                if (paymentStatus === previousOrderData.paymentStatus) {
+                const previousPaymentStatusLower = previousOrderData.paymentStatus.toLowerCase();
+
+                if (paymentStatusLower === previousPaymentStatusLower) {
                     console.log(`No change in payment status for order ${orderId}. No notification sent.`);
                     return null;
                 }
 
-                if (paymentMethod === PaymentMethod.IPG) {
-                    if (previousOrderData.paymentStatus === PaymentStatus.Pending && paymentStatus === PaymentStatus.Paid) {
+                if (paymentMethodLower === PaymentMethod.IPG.toLowerCase()) {
+                    if (
+                        previousPaymentStatusLower === PaymentStatus.Pending.toLowerCase() &&
+                        paymentStatusLower === PaymentStatus.Paid.toLowerCase()
+                    ) {
                         await sendNotifications();
-                        await sendAdminSMS(adminNotifySMS(orderId, paymentMethod, total,createdAt.toDate().toLocaleString()));
+                        await sendAdminSMS(adminNotifySMS(orderId));
                         await sendAdminEmail("adminOrderNotify", templateData);
                         console.log(`Order confirmation sent for PayHere order ${orderId}`);
                     }
                 }
-
             }
         } catch (error) {
             console.error(`Error processing order ${orderId}:`, error);
@@ -165,6 +190,7 @@ export const onPaymentStatusUpdates = functions.firestore
 
         return null;
     });
+
 
 /**
  * Tracking Updates
@@ -184,8 +210,11 @@ export const onTrackingUpdates = functions.firestore
             return null;
         }
 
-        if (!previousTracking || newTracking.status !== previousTracking.status) {
-            const customerEmail = newOrderData.customer.email.trim();
+        const newTrackingStatus = newTracking.status.toLowerCase();
+        const previousTrackingStatus = previousTracking?.status?.toLowerCase();
+
+        if (!previousTracking || newTrackingStatus !== previousTrackingStatus) {
+            const customerEmail = newOrderData.customer.email.trim().toLowerCase();
             const customerPhone = newOrderData.customer.phone.trim();
 
             const templateData = {
@@ -195,9 +224,8 @@ export const onTrackingUpdates = functions.firestore
                 status: newTracking.status,
                 trackingNumber: newTracking.trackingNumber,
                 trackingUrl: newTracking.trackingUrl,
-                isShipped: newOrderData.tracking?.status === orderStatus.SHIPPED,
-                isDelivered: newOrderData.tracking?.status === orderStatus.DELIVERED,
-                isCancelled: newOrderData.tracking?.status === orderStatus.CANCELLED,
+                isShipped: newTrackingStatus === orderStatus.SHIPPED.toLowerCase(),
+                isCancelled: newTrackingStatus === orderStatus.CANCELLED.toLowerCase(),
             };
 
             try {
@@ -213,15 +241,14 @@ export const onTrackingUpdates = functions.firestore
                                 newTracking.trackingNumber,
                                 newTracking.trackingUrl
                             )
-                        )
+                        ),
                     ]);
                     console.log(`Notifications sent for order ${orderId} with status ${status}.`);
                 };
 
-                switch (newTracking.status) {
-                    case orderStatus.SHIPPED:
-                    case orderStatus.DELIVERED:
-                    case orderStatus.CANCELLED:
+                switch (newTrackingStatus) {
+                    case orderStatus.SHIPPED.toLowerCase():
+                    case orderStatus.CANCELLED.toLowerCase():
                         await sendNotifications(newTracking.status);
                         break;
                     default:
@@ -235,3 +262,4 @@ export const onTrackingUpdates = functions.firestore
 
         return null;
     });
+
