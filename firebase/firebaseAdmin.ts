@@ -177,6 +177,7 @@ export const updateItem = async (item: Item) => {
         await adminFirestore.collection("inventory").doc(item.itemId).set({
             manufacturer: item.manufacturer,
             name: item.name,
+            description: item.description,
             sellingPrice: item.sellingPrice,
             buyingPrice: item.buyingPrice,
             itemId: item.itemId,
