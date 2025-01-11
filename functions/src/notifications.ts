@@ -3,6 +3,7 @@
  */
 import axios from "axios";
 import {db} from "./index";
+import {TEXT_API_KEY} from "./constant";
 
 export const sendEmail = async (
     to: string, templateName: string, templateData: object
@@ -36,7 +37,7 @@ export const sendSMS = async (to: string, text: string) => {
                 url: "https://api.textit.biz/",
                 data: data,
                 headers: {
-                    Authorization: "Basic 20e5gkd160cdecea7dtd26cfadh8421",
+                    Authorization: `Basic ${TEXT_API_KEY}`,
                     'Content-Type': 'application/json',
                     "Accept": "*/*"
                 }

@@ -86,9 +86,9 @@ const SalesOverview = () => {
                 const createdAt = data.createdAt?.toDate();
                 if (createdAt) {
                     const monthIndex = createdAt.getMonth();
-                    if (data.from === "Website") {
+                    if (data.from.toString().toLowerCase() === "website") {
                         websiteOrders[monthIndex]++;
-                    } else if (data.from === "Store") {
+                    } else if (data.from.toString().toLowerCase() === "store") {
                         storeOrders[monthIndex]++;
                     }
                 }

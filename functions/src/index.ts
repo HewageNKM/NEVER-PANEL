@@ -25,7 +25,7 @@ export const scheduledOrdersCleanup = functions.pubsub
 
             // Fetch failed and pending PayHere orders
             const payhereFailedOrders = await orderCollection
-                .where("paymentMethod", "==", PaymentMethod.PayHere)
+                .where("paymentMethod", "==", PaymentMethod.IPG)
                 .where("createdAt", "<=", halfHourAgo)
                 .where("paymentStatus", "in", [PaymentStatus.Failed, PaymentStatus.Pending])
                 .get();
@@ -121,38 +121,24 @@ export const onPaymentStatusUpdates = functions.firestore
 
         if (!orderData) return null;
 
-        const {paymentMethod, paymentStatus, items, customer} = orderData;
+        const {paymentMethod, paymentStatus, items, customer,createdAt} = orderData;
         const customerEmail = customer.email.trim();
         const total = calculateTotal(items);
 
-        const templateData = {
-            name: customer.name,
-            address: customer.address,
-            orderId,
-            items,
-            total,
-            paymentMethod,
-            isRefunded: paymentStatus === PaymentStatus.Refunded,
-            isConfirmed: paymentMethod === PaymentMethod.PayHere && paymentStatus === PaymentStatus.Paid || paymentMethod === PaymentMethod.COD && paymentStatus === PaymentStatus.Pending,
-        };
-
-        if (paymentMethod === PaymentMethod.Card || paymentMethod === PaymentMethod.Cash) {
-            console.log(`No notifications sent for Card or Cash payment method for order ${orderId}`);
-            return null;
-        }
+        const templateData = {name: customer.name, address: customer.address, orderId, items, total, paymentMethod};
 
         try {
             const sendNotifications = async (additionalTemplateData?: any) => {
                 await Promise.all([
-                    sendEmail(customerEmail, "orderUpdate", {...templateData, ...additionalTemplateData}),
-                    sendSMS(customer.phone, getOrderStatusSMS(customer.name, orderId, total, paymentMethod, paymentStatus)),
+                    sendEmail(customerEmail, "orderConfirmed", {...templateData, ...additionalTemplateData}),
+                    sendSMS(customer.phone, getOrderStatusSMS(customer.name, orderId, total, paymentMethod, paymentStatus,createdAt.toDate().toLocaleString())),
                 ]);
             };
 
             // Handle different payment statuses
             if (!previousOrderData && paymentMethod === PaymentMethod.COD && paymentStatus === PaymentStatus.Pending) {
                 await sendNotifications();
-                await sendAdminSMS(adminNotifySMS(orderId, paymentMethod, total));
+                await sendAdminSMS(adminNotifySMS(orderId, paymentMethod, total,createdAt.toDate().toLocaleString()));
                 await sendAdminEmail("adminOrderNotify", templateData);
                 console.log(`Order confirmation sent for COD order ${orderId}`);
             }
@@ -163,32 +149,15 @@ export const onPaymentStatusUpdates = functions.firestore
                     return null;
                 }
 
-                if (paymentMethod === PaymentMethod.COD && previousOrderData.paymentStatus === PaymentStatus.Pending && paymentStatus === PaymentStatus.Failed) {
-                    await sendNotifications();
-                    console.log(`Order failed notification sent for COD order ${orderId}`);
-                }
-
-                if (paymentMethod === PaymentMethod.COD && previousOrderData.paymentStatus === PaymentStatus.Pending && paymentStatus === PaymentStatus.Paid) {
-                    await sendSMS(customer.phone, getOrderStatusSMS(customer.name, orderId, total, paymentMethod, paymentStatus))
-                    console.log(`Payment confirmation SMS sent for COD order ${orderId}`);
-                }
-
-                if (paymentMethod === PaymentMethod.PayHere) {
+                if (paymentMethod === PaymentMethod.IPG) {
                     if (previousOrderData.paymentStatus === PaymentStatus.Pending && paymentStatus === PaymentStatus.Paid) {
                         await sendNotifications();
-                        await sendAdminSMS(adminNotifySMS(orderId, paymentMethod, total));
+                        await sendAdminSMS(adminNotifySMS(orderId, paymentMethod, total,createdAt.toDate().toLocaleString()));
                         await sendAdminEmail("adminOrderNotify", templateData);
                         console.log(`Order confirmation sent for PayHere order ${orderId}`);
                     }
                 }
 
-                if (paymentStatus === PaymentStatus.Refunded) {
-                    await Promise.all([
-                        sendEmail(customerEmail, "orderUpdate", templateData),
-                        sendSMS(customer.phone, getOrderStatusSMS(customer.name, orderId, total, paymentMethod, paymentStatus)),
-                    ]);
-                    console.log(`Order refund notification sent for order ${orderId}`);
-                }
             }
         } catch (error) {
             console.error(`Error processing order ${orderId}:`, error);

@@ -1,9 +1,11 @@
 // Constants and Configurations
 import {firestore} from "firebase-admin";
 import Timestamp = firestore.Timestamp;
+import * as functions from "firebase-functions";
 
-export const ADMIN_PHONE = "94705208999";
-export const ADMIN_EMAIL = "orders@neverbe.lk";
+export const ADMIN_PHONE = functions.config().admin.mobile;
+export const ADMIN_EMAIL = functions.config().admin.email;
+export const TEXT_API_KEY = functions.config().textitbiz.key;
 export const BATCH_LIMIT = 450;
 
 export interface Order {
@@ -13,16 +15,15 @@ export interface Order {
     paymentStatus: string,
     paymentMethod: string,
     customer: Customer,
-    shippingCost: number,
     tracking: Tracking | null,
     createdAt: Timestamp,
     updatedAt: Timestamp,
 }
 
 export enum orderStatus {
-    DELIVERED = "Delivered",
-    CANCELLED = "Cancelled",
-    SHIPPED = "Shipped",
+    DELIVERED = "delivered",
+    CANCELLED = "cancelled",
+    SHIPPED = "shipped",
 }
 export interface Tracking {
     id:string
@@ -36,17 +37,14 @@ export interface Tracking {
 }
 // Enums for better type safety
 export enum PaymentMethod {
-    PayHere = "PayHere",
-    COD = "COD",
-    Card = "Card",
-    Cash = "Cash",
+    IPG = "ipg",
+    COD = "cod",
 }
 
 export enum PaymentStatus {
-    Pending = "Pending",
-    Paid = "Paid",
-    Failed = "Failed",
-    Refunded = "Refunded",
+    Pending = "pending",
+    Paid = "paid",
+    Failed = "failed",
 }
 
 // Interfaces (Consider moving to separate files if they grow)
