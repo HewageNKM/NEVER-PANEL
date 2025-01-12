@@ -84,21 +84,42 @@ const ItemCard = ({item, onEdit}: { item: Item, onEdit: any }) => {
                     {item.name}
                 </Typography>
                 <Box mt={1}>
-                    <Typography>
+                    <Typography
+                        sx={{
+                            fontWeight: 700,
+                            fontSize: "0.9rem",
+                            color: "text.primary",
+                        }}
+                    >
                         Buying: LKR {item.buyingPrice}
                     </Typography>
-                    <Typography>
-                        Selling: LKR {item.sellingPrice}
+                    <Typography
+                        sx={{
+                            fontWeight: 700,
+                            fontSize: "0.9rem",
+                            color: "text.primary",
+                        }}
+                    >
+                        Selling: LKR {Math.round((item.sellingPrice - (item.discount * item.sellingPrice / 100)) / 10) * 10}
+                    </Typography>
+                    <Typography
+                        sx={{
+                            fontWeight: 700,
+                            fontSize: "0.9rem",
+                        }}
+                    >
+                        Discount: {item.discount.toFixed(0)}%
                     </Typography>
                 </Box>
                 <Box mt={3}>
-                    <Typography>
+                    <Typography sx={{ color: item.status === "Active" ? "green" : "red" }}>
                         Status: {item.status}
                     </Typography>
-                    <Typography>
+                    <Typography sx={{ color: item.listing === "Active" ? "green" : "red" }}>
                         Listings: {item.listing}
                     </Typography>
                 </Box>
+
                 <Typography
                     variant="h6"
                     sx={{
@@ -169,7 +190,7 @@ const ItemCard = ({item, onEdit}: { item: Item, onEdit: any }) => {
                 onConfirm={deleteItem}
                 onCancel={() => setShowConfirmedDialog(false)} open={showConfirmedDialog}
             />
-            {isLoading && (<ComponentsLoader title={"Working"}/>)}
+            {isLoading && (<ComponentsLoader title={"Working"} position={''}/>)}
         </Card>
     );
 };
