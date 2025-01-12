@@ -12,6 +12,7 @@ export interface Order {
     orderId: string,
     paymentId: string,
     items: OrderItem[],
+    feesAndCharges: number,
     paymentStatus: string,
     paymentMethod: string,
     customer: Customer,

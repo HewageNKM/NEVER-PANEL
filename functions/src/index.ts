@@ -121,11 +121,11 @@ export const onPaymentStatusUpdates = functions.firestore
 
         if (!orderData) return null;
 
-        const { paymentMethod, paymentStatus, items, customer } = orderData;
+        const { paymentMethod, paymentStatus, items, customer, feesAndCharges } = orderData;
         const customerEmail = customer.email.trim().toLowerCase();
         const paymentMethodLower = paymentMethod.toLowerCase();
         const paymentStatusLower = paymentStatus.toLowerCase();
-        const total = calculateTotal(items);
+        const total = calculateTotal(items)+feesAndCharges;
 
         const templateData = {
             name: customer.name,
