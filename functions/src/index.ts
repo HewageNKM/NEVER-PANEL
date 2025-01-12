@@ -14,7 +14,7 @@ export const db = admin.firestore();
  * Scheduled function to clean up failed orders and restock inventory.
  */
 export const scheduledOrdersCleanup = functions.pubsub
-    .schedule("every 30 minutes")
+    .schedule("every 45 minutes")
     .onRun(async () => {
         try {
             const orderCollection = db.collection("orders");
@@ -122,15 +122,20 @@ export const onPaymentStatusUpdates = functions.firestore
         if (!orderData) return null;
 
         const { paymentMethod, paymentStatus, items, customer, feesAndCharges } = orderData;
-        const customerEmail = customer.email.trim().toLowerCase();
         const paymentMethodLower = paymentMethod.toLowerCase();
+
+        if (paymentMethodLower !== PaymentMethod.IPG.toLowerCase()) {
+            console.log(`Order ${orderId} is not PayHere, skipping...`);
+            return null;
+        }
+
         const paymentStatusLower = paymentStatus.toLowerCase();
-        const total = calculateTotal(items) + (feesAndCharges | 0);
+        const total = calculateTotal(items) + (feesAndCharges || 0);
 
         const templateData = {
             name: customer.name,
             address: customer.address,
-            orderId:orderId.toUpperCase(),
+            orderId: orderId.toUpperCase(),
             items,
             total,
             paymentMethod,
@@ -139,7 +144,7 @@ export const onPaymentStatusUpdates = functions.firestore
         try {
             const sendNotifications = async (additionalTemplateData?: any) => {
                 await Promise.all([
-                    sendEmail(customerEmail, "orderConfirmed", { ...templateData, ...additionalTemplateData }),
+                    sendEmail(customer.email.trim().toLowerCase(), "orderConfirmed", { ...templateData, ...additionalTemplateData }),
                     sendSMS(
                         customer.phone,
                         getOrderStatusSMS(
@@ -152,36 +157,24 @@ export const onPaymentStatusUpdates = functions.firestore
                 ]);
             };
 
-            // Handle different payment statuses
-            if (
-                !previousOrderData &&
-                paymentMethodLower === PaymentMethod.COD.toLowerCase() &&
-                paymentStatusLower === PaymentStatus.Pending.toLowerCase()
-            ) {
-                await sendNotifications();
-                await sendAdminSMS(adminNotifySMS(orderId));
-                await sendAdminEmail("adminOrderNotify", templateData);
-                console.log(`Order confirmation sent for COD order ${orderId}`);
-            }
-
             if (previousOrderData) {
                 const previousPaymentStatusLower = previousOrderData.paymentStatus.toLowerCase();
 
+                // Check if payment status has changed
                 if (paymentStatusLower === previousPaymentStatusLower) {
                     console.log(`No change in payment status for order ${orderId}. No notification sent.`);
                     return null;
                 }
 
-                if (paymentMethodLower === PaymentMethod.IPG.toLowerCase()) {
-                    if (
-                        previousPaymentStatusLower === PaymentStatus.Pending.toLowerCase() &&
-                        paymentStatusLower === PaymentStatus.Paid.toLowerCase()
-                    ) {
-                        await sendNotifications();
-                        await sendAdminSMS(adminNotifySMS(orderId));
-                        await sendAdminEmail("adminOrderNotify", templateData);
-                        console.log(`Order confirmation sent for PayHere order ${orderId}`);
-                    }
+                if (
+                    paymentStatusLower === PaymentStatus.Paid.toLowerCase() &&
+                    previousPaymentStatusLower === PaymentStatus.Pending.toLowerCase()
+                ) {
+                    // Send order confirmation and admin notifications
+                    await sendNotifications();
+                    await sendAdminSMS(adminNotifySMS(orderId));
+                    await sendAdminEmail("adminOrderNotify", templateData);
+                    console.log(`Order confirmation sent for PayHere order ${orderId}`);
                 }
             }
         } catch (error) {
@@ -190,6 +183,7 @@ export const onPaymentStatusUpdates = functions.firestore
 
         return null;
     });
+
 
 
 /**
