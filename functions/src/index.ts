@@ -125,7 +125,7 @@ export const onPaymentStatusUpdates = functions.firestore
         const customerEmail = customer.email.trim().toLowerCase();
         const paymentMethodLower = paymentMethod.toLowerCase();
         const paymentStatusLower = paymentStatus.toLowerCase();
-        const total = calculateTotal(items)+feesAndCharges;
+        const total = calculateTotal(items) + (feesAndCharges | 0);
 
         const templateData = {
             name: customer.name,

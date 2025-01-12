@@ -9,19 +9,18 @@ const getOrderStatusSMS = (
     switch (paymentStatus) {
         case "Pending":
             if (paymentMethod === "COD") {
-                message = `Hi, ${name}.Thank you for shopping at NEVERBE.your order #${orderId.toUpperCase()}) is confirmed. We will process your order soon as possible.`;
+                message = `Hi ${name}, thank you for shopping at NEVERBE! Your order #${orderId.toUpperCase()} has been confirmed! We will process your order as soon as possible.`;
             }
             break;
         case "Paid":
             if (paymentMethod === "PAYHERE") {
-                message = `Hi, ${name}.Thank you for shopping at NEVERBE.your order #${orderId.toUpperCase()}) is confirmed. We will process your order soon as possible.`;
+                message = `Hi ${name}, thank you for shopping at NEVERBE! Your order #${orderId.toUpperCase()} has been confirmed! We will process your order as soon as possible.`;
             }
             break;
         default:
-            message = `Dear ${name},\n\n Your order  #${orderId} status is currently ${paymentStatus}.`;
+            message = `Dear ${name}, your order #${orderId} status is currently "${paymentStatus}". If you have any questions, please contact us.`;
             break;
     }
-
     return message;
 };
 
