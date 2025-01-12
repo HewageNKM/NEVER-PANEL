@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
@@ -9,9 +9,8 @@ import {Box, FormControlLabel, Grid, MenuItem, Select, styled, Switch, Typograph
 import {brands, types} from "@/constant";
 import {IoCloudUpload} from "react-icons/io5";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
-import {getInventoryItems, setSelectedItem, setShowEditingForm} from "@/lib/inventorySlice/inventorySlice";
+import {setItems, setSelectedItem, setShowEditingForm} from "@/lib/inventorySlice/inventorySlice";
 import {Item} from "@/interfaces";
-import {Timestamp} from "@firebase/firestore";
 import {generateId} from "@/utils/genarateIds";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
 import {addAItem, deleteAFile, updateAItem, uploadAFile} from '@/actions/inventoryActions';
@@ -20,10 +19,11 @@ import Image from "next/image";
 const ItemFormDialog = () => {
     const dispatch = useAppDispatch();
     const [isLoading, setIsLoading] = useState(false)
-    const {showEditingForm, selectedItem: item, page, size} = useAppSelector(state => state.inventorySlice);
+    const {showEditingForm, selectedItem: item, page, size, items} = useAppSelector(state => state.inventorySlice);
     const [newImage, setNewImage] = useState(null)
-    const [discount, setDiscount] = useState(item?.discount ? item.discount : 0)
-    const [sellingPrice, setSellingPrice] = useState(item?.sellingPrice ? item.sellingPrice : 0)
+    const [discount, setDiscount] = useState(0)
+    const [sellingPrice, setSellingPrice] = useState(0)
+    const [marketPrice, setMarketPrice] = useState(0)
 
 
     const VisuallyHiddenInput = styled('input')({
@@ -37,11 +37,18 @@ const ItemFormDialog = () => {
         whiteSpace: 'nowrap',
         width: 1,
     });
-    const calculateDiscount = (evt) => {
-        const marketPrice = evt.target.value;
-        const discount = Math.round((1 - (sellingPrice / marketPrice)) * 100)
-        setDiscount(discount)
-    }
+
+    useEffect(() => {
+        const discount = ((marketPrice - sellingPrice) / marketPrice) * 100
+        setDiscount(discount.toFixed(2) as number)
+    }, [sellingPrice, marketPrice])
+
+    useEffect(() => {
+        if (item) {
+            setSellingPrice(Math.round((item.sellingPrice - (item.discount * item.sellingPrice / 100)) / 10) * 10);
+            setMarketPrice(item.sellingPrice)
+        }
+    }, [item]);
     const onFormSubmit = async (evt: any) => {
         evt.preventDefault();
         setIsLoading(true)
@@ -52,30 +59,32 @@ const ItemFormDialog = () => {
             const name = evt.target.name.value;
             const description = evt.target.description.value;
             const buyingPrice = evt.target.buyingPrice.value;
-            const sellingPrice = evt.target.sellingPrice.value;
-            const discount = evt.target.discount.value;
+            const sellingPrice = evt.target.marketPrice.value;
+            const discount = parseFloat(evt.target.discount.value).toFixed(2); // Cast to float with 2 decimals
             const itemId = evt.target.itemId.value == "" ? generateId("item", manufacturer) : evt.target.itemId.value;
             const status = evt.target.status.checked ? "Active" : "Inactive";
-            const listing = evt.target.listOnWeb.checked ? "Active" : "Inactive";
+            let listing = evt.target.listOnWeb.checked ? "Active" : "Inactive";
 
+            if (status === "Inactive") {
+                listing = "Inactive"
+            }
             const newItem: Item = {
                 description: description,
                 listing: listing,
                 status: status,
                 brand: brand.toLowerCase(),
                 buyingPrice: Number.parseInt(buyingPrice),
-                createdAt: item?.createdAt ? item?.createdAt : Timestamp.now(),
-                discount: Number.parseInt(discount),
+                createdAt: item?.createdAt ? item?.createdAt : new Date().toLocaleString(),
+                discount: parseFloat(discount),
                 itemId: itemId,
                 manufacturer: manufacturer.toLowerCase(),
                 name: name,
                 thumbnail: {file: "", url: ""},
                 sellingPrice: Number.parseInt(sellingPrice),
                 type: type.toLowerCase(),
-                updatedAt: Timestamp.now(),
+                updatedAt: new Date().toLocaleString(),
                 variants: item?.variants ? item.variants : []
             }
-
             if (newImage) {
                 if (item) {
                     await deleteAFile(`inventory/${item.itemId}/${item.thumbnail.file}`);
@@ -97,11 +106,11 @@ const ItemFormDialog = () => {
             if (item) {
                 await updateAItem(newItem);
                 closeForm()
-                dispatch(getInventoryItems({size: size, page: page}))
+                updateItems(newItem)
             } else {
                 await addAItem(newItem)
                 closeForm()
-                dispatch(getInventoryItems({size: size, page: page}))
+                updateItems(newItem)
             }
             evt.target.reset()
         } catch (e: any) {
@@ -116,6 +125,16 @@ const ItemFormDialog = () => {
         dispatch(setSelectedItem(null))
         setIsLoading(false)
         setNewImage(null)
+    }
+    const updateItems = (newItem: Item) => {
+        const updatedItems = items?.map((item: Item) => {
+            if (item.itemId === newItem.itemId) {
+                return newItem
+            } else {
+                return item
+            }
+        });
+        dispatch(setItems(updatedItems))
     }
     return (
         <Dialog
@@ -255,8 +274,9 @@ const ItemFormDialog = () => {
                                         <TextField
                                             name="sellingPrice"
                                             label="Selling Price"
+                                            defaultValue={sellingPrice}
+                                            value={sellingPrice}
                                             onChange={(evt) => setSellingPrice(evt.target.value as number)}
-                                            defaultValue={item?.sellingPrice}
                                             type="number"
                                             required
                                             fullWidth
@@ -270,8 +290,9 @@ const ItemFormDialog = () => {
                                         <TextField
                                             name="marketPrice"
                                             label="Market Price"
-                                            defaultValue={(item?.sellingPrice || 0) + ((item?.sellingPrice || 0) * (item?.discount || 0) / 100)}
-                                            onChange={(evt) => calculateDiscount(evt)}
+                                            value={marketPrice}
+                                            defaultValue={marketPrice}
+                                            onChange={(evt) => setMarketPrice(evt.target.value as number)}
                                             type="number"
                                             fullWidth
                                             required
