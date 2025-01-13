@@ -27,7 +27,6 @@ export const getOrders = async (pageNumber: number = 1, size: number = 20) => {
         const offset = (pageNumber - 1) * size;
         // Fetch orders with pagination and sorting by createdAt
         const ordersSnapshot = await adminFirestore.collection('orders')
-            .where('paymentStatus', 'not-in', [paymentStatus.PENDING, paymentStatus.FAILED])
             .orderBy('createdAt', 'desc')
             .limit(size)
             .offset(offset)
@@ -522,7 +521,6 @@ export const getOrdersByDate = async (date: string) => {
         const ordersQuery = adminFirestore.collection('orders')
             .where('createdAt', '>=', startTimestamp)
             .where('createdAt', '<=', endTimestamp)
-            .where('paymentStatus', '==', 'Paid');
 
         const querySnapshot = await ordersQuery.get();
         if (querySnapshot.empty) {
