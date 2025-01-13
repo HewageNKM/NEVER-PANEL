@@ -22,6 +22,7 @@ export interface Item {
     variants: Variant[],
     manufacturer: string,
     name: string,
+    genders: string[],
     buyingPrice: number,
     sellingPrice: number,
     discount: number,

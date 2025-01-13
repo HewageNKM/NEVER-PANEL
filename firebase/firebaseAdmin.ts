@@ -181,8 +181,8 @@ export const saveToInventory = async (item: Item) => {
     try {
         await adminFirestore.collection("inventory").doc(item.itemId).set({
             ...item,
-            updatedAt: admin.firestore.Timestamp.now(),
-            createdAt: admin.firestore.Timestamp.now(),
+            updatedAt: admin.firestore.Timestamp.fromDate(new Date(item.createdAt)),
+            createdAt: admin.firestore.Timestamp.fromDate(new Date(item.updatedAt)),
         }, {merge: true});
 
         console.log(`Item with ID ${item.itemId} saved to inventory`);
@@ -198,6 +198,7 @@ export const updateItem = async (item: Item) => {
         await adminFirestore.collection("inventory").doc(item.itemId).set({
             manufacturer: item.manufacturer,
             name: item.name,
+            genders:item.genders,
             description: item.description,
             sellingPrice: item.sellingPrice,
             buyingPrice: item.buyingPrice,
@@ -209,7 +210,7 @@ export const updateItem = async (item: Item) => {
             discount: item.discount,
             variants: item.variants,
             listing: item.listing,
-            updatedAt: admin.firestore.Timestamp.now(),
+            updatedAt: admin.firestore.Timestamp.fromDate(new Date(item.updatedAt)),
         }, {merge: true});
 
         console.log(`Item with ID ${item.itemId} updated in inventory`);

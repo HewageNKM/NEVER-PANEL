@@ -5,8 +5,8 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import TextField from '@mui/material/TextField';
-import {Box, FormControlLabel, Grid, MenuItem, Select, styled, Switch, Typography} from "@mui/material";
-import {brands, types} from "@/constant";
+import {Box, Checkbox, FormControlLabel, Grid, MenuItem, Select, styled, Switch, Typography} from "@mui/material";
+import {brands, genders, types} from "@/constant";
 import {IoCloudUpload} from "react-icons/io5";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import {setItems, setSelectedItem, setShowEditingForm} from "@/lib/inventorySlice/inventorySlice";
@@ -19,11 +19,13 @@ import Image from "next/image";
 const ItemFormDialog = () => {
     const dispatch = useAppDispatch();
     const [isLoading, setIsLoading] = useState(false)
-    const {showEditingForm, selectedItem: item, page, size, items} = useAppSelector(state => state.inventorySlice);
+    const {showEditingForm, selectedItem: item, items} = useAppSelector(state => state.inventorySlice);
     const [newImage, setNewImage] = useState(null)
     const [discount, setDiscount] = useState(0)
     const [sellingPrice, setSellingPrice] = useState(0)
     const [marketPrice, setMarketPrice] = useState(0)
+
+    const [selectedGenders, setSelectedGenders] = useState<string[]>(item?.genders || []);
 
 
     const VisuallyHiddenInput = styled('input')({
@@ -38,6 +40,14 @@ const ItemFormDialog = () => {
         width: 1,
     });
 
+
+
+    const toggleGenderSelection = (gender: string) => {
+        setSelectedGenders((prev) =>
+            prev.includes(gender) ? prev.filter((g) => g !== gender) : [...prev, gender]
+        );
+    };
+
     useEffect(() => {
         const discount = ((marketPrice - sellingPrice) / marketPrice) * 100
         setDiscount(discount.toFixed(2) as number)
@@ -45,6 +55,7 @@ const ItemFormDialog = () => {
 
     useEffect(() => {
         if (item) {
+            setSelectedGenders(item?.genders || [])
             setSellingPrice(Math.round((item.sellingPrice - (item.discount * item.sellingPrice / 100)) / 10) * 10);
             setMarketPrice(item.sellingPrice)
         }
@@ -68,9 +79,11 @@ const ItemFormDialog = () => {
             if (status === "Inactive") {
                 listing = "Inactive"
             }
+
             const newItem: Item = {
                 description: description,
                 listing: listing,
+                genders: selectedGenders,
                 status: status,
                 brand: brand.toLowerCase(),
                 buyingPrice: Number.parseInt(buyingPrice),
@@ -123,6 +136,7 @@ const ItemFormDialog = () => {
     const closeForm = () => {
         dispatch(setShowEditingForm(false))
         dispatch(setSelectedItem(null))
+        setSelectedGenders([])
         setIsLoading(false)
         setNewImage(null)
     }
@@ -203,8 +217,8 @@ const ItemFormDialog = () => {
                                     <MenuItem value={option.value} key={option.value}>{option.name}</MenuItem>
                                 ))}
                             </Select>
-                            <Select
-                                placeholder={"Manufacturer"}
+                            <TextField
+                                placeholder={"Nike, Adidas................"}
                                 name={"manufacturer"}
                                 disabled={!!item?.manufacturer}
                                 variant="outlined"
@@ -212,12 +226,7 @@ const ItemFormDialog = () => {
                                 defaultValue={item?.manufacturer || "adidas"}
                                 fullWidth
                                 required
-                            >
-                                {brands.map((manufacturer) => (
-                                    <MenuItem value={manufacturer.value}
-                                              key={manufacturer.value}>{manufacturer.name}</MenuItem>
-                                ))}
-                            </Select>
+                            />
                         </Box>
 
                         <Box mb={2}>
@@ -319,6 +328,23 @@ const ItemFormDialog = () => {
                                     </Grid>
                                 </Grid>
                             </Box>
+                        </Box>
+                        <Typography variant="subtitle1" gutterBottom>
+                            Genders
+                        </Typography>
+                        <Box display="flex" gap={2} mb={2}>
+                            {genders.map((gender) => (
+                                <FormControlLabel
+                                    key={gender.value}
+                                    control={
+                                        <Checkbox
+                                            checked={selectedGenders.includes(gender.value)}
+                                            onChange={() => toggleGenderSelection(gender.value)}
+                                        />
+                                    }
+                                    label={gender.name}
+                                />
+                            ))}
                         </Box>
                         <Box display="flex" alignItems="center" mb={1}>
                             <FormControlLabel
