@@ -24,6 +24,7 @@ import {Customer, OrderItem, Tracking} from "@/interfaces";
 import CustomerFormDialog from "@/app/dashboard/orders/components/CustomerFormDialog";
 import ItemsFormDialog from "@/app/dashboard/orders/components/ItemsFormDialog";
 import TrackingFormDialog from "@/app/dashboard/orders/components/TrackingFormDialog";
+import PaymentStatusFormDialog from "@/app/dashboard/orders/components/PaymentStatusFormDialog";
 
 const OrderTable = () => {
     const {orders, size, selectedPage, isLoading} = useAppSelector(state => state.ordersSlice);
@@ -37,6 +38,9 @@ const OrderTable = () => {
 
     const [showTrackingForm, setShowTrackingForm] = useState(false)
     const [tracking, setTracking] = useState<Tracking | null>(null)
+
+    const [showPaymentStatusForm, setShowPaymentStatusForm] = useState(false)
+    const [paymentStatus, setPaymentStatus] = useState(null)
 
     const dispatch = useAppDispatch();
 
@@ -62,6 +66,8 @@ const OrderTable = () => {
                             <TableCell>Customer</TableCell>
                             <TableCell>Payment Method</TableCell>
                             <TableCell>Total</TableCell>
+                            <TableCell>Fees and Charges</TableCell>
+                            <TableCell>Payment Status</TableCell>
                             <TableCell>Discount</TableCell>
                             <TableCell>Items</TableCell>
                             <TableCell>From</TableCell>
@@ -102,6 +108,21 @@ const OrderTable = () => {
                                 ) - (order?.discount | 0)}
                                 </TableCell>
                                 <TableCell>
+                                    {order?.feesAndCharges?.toFixed(2) || "N/A"}
+                                </TableCell>
+                                <TableCell>
+                                    <Box>
+                                        <Typography>{order.paymentStatus}</Typography>
+                                        <IconButton onClick={() => {
+                                            setPaymentStatus(order.paymentStatus)
+                                            setShowPaymentStatusForm(true)
+                                            dispatch(setSelectedOrder(order))
+                                        }}>
+                                            <IoInformationCircle color={"blue"} size={25}/>
+                                        </IconButton>
+                                    </Box>
+                                </TableCell>
+                                <TableCell>
                                     LKR {order?.discount | 0}
                                 </TableCell>
                                 <TableCell>
@@ -134,13 +155,18 @@ const OrderTable = () => {
                                             </Box>
                                         ) : (
                                             <Box>
-                                                <Typography>Processing</Typography>
-                                                <IconButton onClick={() => {
+                                                <Typography>
+                                                    {order.paymentStatus.toLowerCase() == "failed" ? "N/A" : "Processing"}
+                                                </Typography>
+                                                <IconButton
+                                                    disabled={order.paymentStatus.toLowerCase() == "failed"}
+                                                    onClick={() => {
                                                     setTracking(order.tracking)
                                                     setShowTrackingForm(true)
                                                     dispatch(setSelectedOrder(order))
                                                 }}>
-                                                    <IoInformationCircle color={"blue"} size={25}/>
+                                                    {order.paymentStatus.toLowerCase() !== "failed"  && (
+                                                    <IoInformationCircle color={"blue"} size={25}/>)}
                                                 </IconButton>
                                             </Box>)
                                     )}
@@ -199,6 +225,11 @@ const OrderTable = () => {
                 dispatch(setSelectedOrder(null))
             }}
             />
+            <PaymentStatusFormDialog showForm={paymentStatus} onClose={()=>{
+                setPaymentStatus(null)
+                setShowPaymentStatusForm(false)
+                dispatch(setSelectedOrder(null))
+            }} initialStatus={paymentStatus}/>
         </Stack>
     );
 };

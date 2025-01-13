@@ -1,6 +1,6 @@
 import admin, {credential} from 'firebase-admin';
 import {CashFlowReport, Expense, ExpensesReport, Item, Order, SalesReport, StocksReport} from "@/interfaces";
-import {paymentMethods, paymentStatus} from "@/constant";
+import {paymentStatus} from "@/constant";
 import {uuidv4} from "@firebase/util";
 import {Timestamp} from "firebase-admin/firestore";
 
@@ -27,9 +27,9 @@ export const getOrders = async (pageNumber: number = 1, size: number = 20) => {
         const offset = (pageNumber - 1) * size;
         // Fetch orders with pagination and sorting by createdAt
         const ordersSnapshot = await adminFirestore.collection('orders')
-            .orderBy('createdAt', 'desc')
             .limit(size)
             .offset(offset)
+            .orderBy('createdAt', 'desc')
             .get();
 
         const orders: Order[] = [];
@@ -37,11 +37,19 @@ export const getOrders = async (pageNumber: number = 1, size: number = 20) => {
             let order: Order = doc.data() as Order;
             order = {
                 ...order,
+                customer: order.customer ? {
+                    ...order.customer,
+                    createdAt: order.customer.createdAt.toDate().toLocaleString(),
+                    updatedAt: order.customer.updatedAt.toDate().toLocaleString(),
+                } : null,
                 createdAt: order?.createdAt?.toDate().toLocaleString(),
+                updatedAt: order?.updatedAt?.toDate().toLocaleString(),
+                tracking: order?.tracking ? {
+                    ...order.tracking,
+                    updatedAt: order.tracking.updatedAt.toDate().toLocaleString(),
+                } : null,
             }
-            if (!(order.paymentStatus === paymentStatus.PENDING && order.paymentMethod === paymentMethods.PAYHERE)) {
-                orders.push(order);
-            }
+            orders.push(order);
         });
 
         console.log(`Fetched ${orders.length} orders on page ${pageNumber}`);
@@ -91,7 +99,20 @@ export const getOrder = async (orderId: string) => {
             console.warn(`Order with ID ${orderId} not found`);
             return null;
         }
-        return orderDoc.data() as Order;
+        return {
+            ...orderDoc.data(),
+            customer: orderDoc.data()?.customer ? {
+                ...orderDoc.data()?.customer,
+                createdAt: orderDoc.data()?.customer.createdAt.toDate().toLocaleString(),
+                updatedAt: orderDoc.data()?.customer.updatedAt.toDate().toLocaleString(),
+            } : null,
+            tracking: orderDoc.data()?.tracking ? {
+                ...orderDoc.data()?.tracking,
+                updatedAt: orderDoc.data()?.tracking.updatedAt.toDate().toLocaleString(),
+            } : null,
+            createdAt: orderDoc.data()?.createdAt.toDate().toLocaleString(),
+            updatedAt: orderDoc.data()?.updatedAt.toDate().toLocaleString(),
+        } as Order;
 
     } catch (error: any) {
         console.error(error);
@@ -125,20 +146,21 @@ export const getItemById = async (itemId: string) => {
 export const updateOrder = async (order: Order) => {
     const updatedOrder: Order = {
         from: order.from,
-        customer: order.customer,
+        customer: {
+            ...order.customer,
+            createdAt: admin.firestore.Timestamp.fromDate(new Date(order.customer.createdAt)),
+            updatedAt: admin.firestore.Timestamp.fromDate(new Date(order.customer.updatedAt)),
+        },
         items: order.items,
         orderId: order.orderId,
         paymentId: order.paymentId,
+        feesAndCharges: order.feesAndCharges,
         paymentMethod: order.paymentMethod,
         paymentStatus: order.paymentStatus,
-        shippingCost: order.shippingCost,
         updatedAt: admin.firestore.Timestamp.now(),
         tracking: order.tracking ? {
-            trackingCompany: order.tracking.trackingCompany,
-            trackingNumber: order.tracking.trackingNumber,
-            trackingUrl: order.tracking.trackingUrl,
-            status: order.tracking.status,
-            updatedAt: admin.firestore.Timestamp.now(),
+            ...order.tracking,
+            updatedAt: admin.firestore.Timestamp.fromDate(new Date(order.tracking.updatedAt))
         } : null,
     }
 
@@ -521,6 +543,7 @@ export const getOrdersByDate = async (date: string) => {
         const ordersQuery = adminFirestore.collection('orders')
             .where('createdAt', '>=', startTimestamp)
             .where('createdAt', '<=', endTimestamp)
+            .orderBy('createdAt', 'desc');
 
         const querySnapshot = await ordersQuery.get();
         if (querySnapshot.empty) {
@@ -533,6 +556,16 @@ export const getOrdersByDate = async (date: string) => {
             orders.push({
                 ...doc.data(),
                 createdAt: doc.data().createdAt.toDate().toLocaleString(),
+                updatedAt: doc.data().updatedAt.toDate().toLocaleString(),
+                customer: doc.data().customer ? {
+                    ...doc.data().customer,
+                    createdAt: doc.data().customer.createdAt.toDate().toLocaleString(),
+                    updatedAt: doc.data().customer.updatedAt.toDate().toLocaleString(),
+                } : null,
+                tracking: doc.data().tracking ? {
+                    ...doc.data().tracking,
+                    updatedAt: doc.data().tracking.updatedAt.toDate().toLocaleString(),
+                } : null
             } as Order);
         });
 

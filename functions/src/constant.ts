@@ -65,6 +65,7 @@ export interface Customer {
     phone: string;
     address: string;
     city: string;
+    zip: string;
     createdAt: FirebaseFirestore.Timestamp;
     updatedAt: FirebaseFirestore.Timestamp;
 }

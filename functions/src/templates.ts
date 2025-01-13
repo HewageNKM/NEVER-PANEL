@@ -40,12 +40,9 @@ const orderTrackingUpdateSMS = (
     trackingUrl?: string,
 ) => {
     let message = '';
-    switch (status) {
+    switch (status.toLowerCase()) {
         case "shipped":
-            message = `Dear ${name},\n\n Your order #${orderId} has been shipped.\nTracking Number: ${trackingNumber}\nTracking URL: ${trackingUrl}`;
-            break;
-        case "Cancelled":
-            message = `Dear ${name},\n\n Your order #${orderId} has been cancelled.`;
+            message = `Dear ${name},\n\n Your order #${orderId.toUpperCase()} has been shipped. Tracking Number: ${trackingNumber?.toUpperCase()}, Tracking URL: ${trackingUrl}`;
             break;
         default:
             message = `Dear ${name},\n\n Your order #${orderId} status has been updated to ${status}.`;

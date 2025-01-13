@@ -14,26 +14,27 @@ export const db = admin.firestore();
  * Scheduled function to clean up failed orders and restock inventory.
  */
 export const scheduledOrdersCleanup = functions.pubsub
-    .schedule("every 45 minutes")
+    .schedule("every 12 hours")
     .onRun(async () => {
         try {
+            console.log("Starting scheduled Firestore cleanup and deletion.");
             const orderCollection = db.collection("orders");
             const inventoryCollection = db.collection("inventory");
 
-            const halfHourAgo = admin.firestore.Timestamp
-                .fromDate(new Date(Date.now() - 30 * 60 * 1000));
+            const twentyFourHoursAgo = admin.firestore.Timestamp
+                .fromDate(new Date(Date.now() - 24 * 60 * 60 * 1000));
 
             // Fetch failed and pending PayHere orders
             const payhereFailedOrders = await orderCollection
                 .where("paymentMethod", "==", PaymentMethod.IPG)
-                .where("createdAt", "<=", halfHourAgo)
+                .where("createdAt", "<=", twentyFourHoursAgo)
                 .where("paymentStatus", "in", [PaymentStatus.Failed, PaymentStatus.Pending])
                 .get();
 
             // Fetch failed COD orders
             const codFailedOrders = await orderCollection
                 .where("paymentMethod", "==", PaymentMethod.COD)
-                .where("createdAt", "<=", halfHourAgo)
+                .where("createdAt", "<=", twentyFourHoursAgo)
                 .where("paymentStatus", "==", PaymentStatus.Failed)
                 .get();
 
@@ -115,6 +116,7 @@ export const scheduledOrdersCleanup = functions.pubsub
 export const onPaymentStatusUpdates = functions.firestore
     .document("orders/{orderId}")
     .onWrite(async (change, context) => {
+        console.log("Payment status update detected.");
         const orderId = context.params.orderId;
         const orderData = change.after.exists ? (change.after.data() as Order) : null;
         const previousOrderData = change.before.exists ? (change.before.data() as Order) : null;
@@ -132,9 +134,10 @@ export const onPaymentStatusUpdates = functions.firestore
         const paymentStatusLower = paymentStatus.toLowerCase();
         const total = calculateTotal(items) + (feesAndCharges || 0);
 
+        const  address  = customer.address+" "+customer.city+","+ (customer?.zip || "" );
         const templateData = {
             name: customer.name,
-            address: customer.address,
+            address: address,
             orderId: orderId.toUpperCase(),
             items,
             total,
@@ -208,24 +211,11 @@ export const onTrackingUpdates = functions.firestore
         const previousTrackingStatus = previousTracking?.status?.toLowerCase();
 
         if (!previousTracking || newTrackingStatus !== previousTrackingStatus) {
-            const customerEmail = newOrderData.customer.email.trim().toLowerCase();
             const customerPhone = newOrderData.customer.phone.trim();
-
-            const templateData = {
-                name: newOrderData.customer.name,
-                orderId,
-                address: newOrderData.customer.address,
-                status: newTracking.status,
-                trackingNumber: newTracking.trackingNumber,
-                trackingUrl: newTracking.trackingUrl,
-                isShipped: newTrackingStatus === orderStatus.SHIPPED.toLowerCase(),
-                isCancelled: newTrackingStatus === orderStatus.CANCELLED.toLowerCase(),
-            };
 
             try {
                 const sendNotifications = async (status: string) => {
                     await Promise.all([
-                        sendEmail(customerEmail, "trackingUpdate", templateData),
                         sendSMS(
                             customerPhone,
                             orderTrackingUpdateSMS(
@@ -242,7 +232,6 @@ export const onTrackingUpdates = functions.firestore
 
                 switch (newTrackingStatus) {
                     case orderStatus.SHIPPED.toLowerCase():
-                    case orderStatus.CANCELLED.toLowerCase():
                         await sendNotifications(newTracking.status);
                         break;
                     default:

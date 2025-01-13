@@ -101,6 +101,7 @@ export const accessoriesSizesList = [
 export enum orderStatus {
     CANCELLED = "Cancelled",
     SHIPPED = "Shipped",
+    COMPLETED = "Complete",
 }
 
 export enum paymentStatus {
