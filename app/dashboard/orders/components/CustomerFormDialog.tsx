@@ -44,7 +44,10 @@ const CustomerFormDialog = ({customer, showForm, onClose}: {
             evt.preventDefault()
             const updatedOrder: Order = {
                 ...selectedOrder,
-                customer: editableCustomer
+                customer: {
+                    ...editableCustomer,
+                    updatedAt: new Date().toLocaleString()
+                }
             }
             await updateAOrder(updatedOrder);
             onClose();
@@ -131,6 +134,15 @@ const CustomerFormDialog = ({customer, showForm, onClose}: {
                                 onChange={(e) => handleInputChange('city', e.target.value)}
                                 fullWidth
                             />
+                            <TextField
+                                disabled={isLoading}
+                                required
+                                label="zip"
+                                name={"zip"}
+                                value={editableCustomer?.zip || ''}
+                                onChange={(e) => handleInputChange('zip', e.target.value)}
+                                fullWidth
+                            />
                         </Stack>
                     ) : (
                         <Stack flexDirection="column" gap={1}>
@@ -139,6 +151,7 @@ const CustomerFormDialog = ({customer, showForm, onClose}: {
                             <Typography variant="h6">Phone: {editableCustomer?.phone}</Typography>
                             <Typography variant="h6">Address: {editableCustomer?.address}</Typography>
                             <Typography variant="h6">City: {editableCustomer?.city}</Typography>
+                            <Typography variant="h6">Zip: {editableCustomer?.zip}</Typography>
                         </Stack>
                     )}
                 </Box>

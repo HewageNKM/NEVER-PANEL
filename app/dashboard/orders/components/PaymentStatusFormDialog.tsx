@@ -30,6 +30,7 @@ const PaymentStatusFormDialog = ({initialStatus, showForm, onClose}: {
             setIsLoading(true);
             const updatedOrder: Order = {
                 ...selectedOrder,
+                updatedAt: new Date().toLocaleString(),
                 paymentStatus: selectedStatus
             }
             await updateAOrder(updatedOrder);
@@ -75,7 +76,7 @@ const PaymentStatusFormDialog = ({initialStatus, showForm, onClose}: {
                     gap: '16px',
                     marginTop: '24px'
                 }}>
-                    <div style={{display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '24px'}}>
+                    <div style={{display: 'flex', justifyContent: 'flex-end', gap: '16px', marginTop: '15px'}}>
                         <Button className="disabled:bg-opacity-60 disabled:cursor-not-allowed" disabled={isLoading}
                                 size="small" color="primary" onClick={onClose}>
                             Close

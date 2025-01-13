@@ -47,7 +47,7 @@ const TrackingFormDialog = ({
             const updatedTracking: Tracking = {
                 ...tracking,
                 status: status,
-                updatedAt: Timestamp.now(),
+                updatedAt: new Date().toLocaleString(),
             };
 
             const updatedOrder: Order = {
@@ -75,7 +75,7 @@ const TrackingFormDialog = ({
                 trackingNumber: formData.trackingNumber,
                 trackingUrl: formData.trackingUrl,
                 status: orderStatus.SHIPPED,
-                updatedAt: Timestamp.now(),
+                updatedAt: new Date().toLocaleString(),
             };
 
             const updatedOrder: Order = {
@@ -141,6 +141,11 @@ const TrackingFormDialog = ({
                                         value={orderStatus.CANCELLED}
                                     >
                                         {orderStatus.CANCELLED}
+                                    </MenuItem>
+                                    <MenuItem value={orderStatus.COMPLETED} disabled={
+                                        selectedOrder?.tracking?.status === orderStatus.CANCELLED || selectedOrder?.tracking?.status === orderStatus.COMPLETED
+                                    }>
+                                        {orderStatus.COMPLETED}
                                     </MenuItem>
                                 </Select>
                             </Box>

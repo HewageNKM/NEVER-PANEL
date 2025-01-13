@@ -41,7 +41,8 @@ const ItemCard = ({item, onEdit}: { item: Item, onEdit: any }) => {
         <Card
             sx={{
                 position: "relative",
-                maxWidth: 200,
+                maxWidth: 170,
+                minWidth:170,
                 borderRadius: 2,
                 boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.1)",
                 transition: "transform 0.2s ease",

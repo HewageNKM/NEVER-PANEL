@@ -22,6 +22,7 @@ export interface Item {
     variants: Variant[],
     manufacturer: string,
     name: string,
+    genders: string[],
     buyingPrice: number,
     sellingPrice: number,
     discount: number,
@@ -44,29 +45,33 @@ export interface Variant {
     sizes: Size[],
 }
 
-export interface Img{
+export interface Img {
     url: string,
     file: string,
 }
 
 export interface Order {
+    userId: string | null,
     orderId: string,
     paymentId: string,
     items: OrderItem[],
     paymentStatus: string,
+    feesAndCharges: number,
     paymentMethod: string,
     customer: Customer,
-    shippingCost: number,
     discount: number,
-    from:string,
+    from: string,
 
     tracking: Tracking | null,
     createdAt: Timestamp | string,
+    updatedAt: Timestamp | string,
 }
+
 export interface ExpensesReport {
     type: "expenses" | "utility"
-    data:{ for: string,amount: number}[]
+    data: { for: string, amount: number }[]
 }
+
 export interface Customer {
     id: string;
     name: string;
@@ -74,6 +79,10 @@ export interface Customer {
     phone: string;
     address: string;
     city: string;
+    zip: string;
+
+    createdAt: Timestamp | string,
+    updatedAt: Timestamp | string,
 }
 
 export interface Expense {
@@ -87,17 +96,17 @@ export interface Expense {
 
 export interface SalesReport {
     type: "shoes" | "sandals" | "accessories",
-    data:[
+    data: [
         {
             itemId: string,
             manufacturer: string,
             brand: string,
             itemName: string,
-            data:[
+            data: [
                 {
                     variantId: string,
                     variantName: string,
-                    data:[
+                    data: [
                         {
                             size: string,
                             quantity: number,
@@ -114,29 +123,32 @@ export interface SalesReport {
         }
     ]
 }
+
 export interface CashFlowReport {
     method: "cash" | "card" | "bank" | "qr",
     fee: number,
     total: number,
 }
+
 export interface StocksReport {
     type: "shoes" | "sandals" | "accessories",
-    data:[
+    data: [
         {
             itemId: string,
             manufacturer: string,
             brand: string,
             itemName: string,
-            data:[
+            data: [
                 {
                     variantId: string,
                     variantName: string,
-                    stock:Size[]
+                    stock: Size[]
                 }
             ]
         }
     ]
 }
+
 export interface OrderItem {
     itemId: string,
     variantId: string,
