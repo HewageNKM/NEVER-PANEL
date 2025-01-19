@@ -9,7 +9,6 @@ import {
     SalesReport,
     StocksReport
 } from "@/interfaces";
-import {paymentStatus} from "@/constant";
 import {uuidv4} from "@firebase/util";
 import {Timestamp} from "firebase-admin/firestore";
 
@@ -645,6 +644,8 @@ export const getCashReport = async (from: string, to: string): Promise<CashFlowR
             .where('createdAt', '>=', startTimestamp)
             .where('createdAt', '<=', endTimestamp)
             .where('paymentStatus', '==', 'Paid');
+        let paymentMethods = await adminFirestore.collection("paymentMethods").get()
+
 
         const querySnapshot = await orders.get();
         if (querySnapshot.empty) {
@@ -663,39 +664,22 @@ export const getCashReport = async (from: string, to: string): Promise<CashFlowR
             const discountAmount = order?.discount | 0;
             const orderTotal = itemTotal - discountAmount;
 
-            let normalizedMethod: CashFlowReport["method"];
-            switch (paymentMethod.toLowerCase()) {
-                case "cash":
-                    normalizedMethod = "cash";
+            let normalizedMethod: CashFlowReport["method"] = "unknown";
+            let fee = 0
+            for (const method of paymentMethods.docs) {
+                if (method.data().name.toLowerCase() === paymentMethod.toLowerCase()) {
+                    normalizedMethod = method.data().name.toLowerCase();
+                    fee = Number.parseFloat(method.data().fee)
                     break;
-                case "qr":
-                    normalizedMethod = "qr";
-                    break;
-                case "card":
-                    normalizedMethod = "card";
-                    break;
-                case "bank transfer":
-                    normalizedMethod = "bank";
-                    break;
-                default:
-                    console.warn(`Unknown payment method: ${paymentMethod}`);
-                    return;
+                }
             }
 
             if (!paymentSummary[normalizedMethod]) {
                 paymentSummary[normalizedMethod] = {total: 0, fee: 0};
             }
 
-            let netTotal = orderTotal;
-
-            // Apply fee deduction for "qr" and "card" methods
-            if (normalizedMethod === "qr" || normalizedMethod === "card") {
-                const fee = 2.75;
-                paymentSummary[normalizedMethod].fee = fee; // Accumulate the fee
-                paymentSummary[normalizedMethod].total += netTotal - (fee * netTotal / 100);
-            } else {
-                paymentSummary[normalizedMethod].total += netTotal;
-            }
+            paymentSummary[normalizedMethod].fee = fee;
+            paymentSummary[normalizedMethod].total += orderTotal - (fee * orderTotal / 100);
         });
 
         const map = Object.keys(paymentSummary).map((method) => ({
@@ -710,6 +694,7 @@ export const getCashReport = async (from: string, to: string): Promise<CashFlowR
                 totalExpense += data.amount
             })
         })
+        console.log(map)
         return {
             report: map,
             totalExpense: totalExpense
@@ -929,7 +914,7 @@ export const getAllPaymentMethods = async () => {
     }
 }
 
-export const createPaymentMethod = async (PaymentMethod: PaymentMethod) => {
+export const addNewPaymentMethod = async (PaymentMethod: PaymentMethod) => {
     try {
         console.log('Creating new payment method:', PaymentMethod.paymentId);
         const writeResultPromise = await adminFirestore.collection('paymentMethods').doc(PaymentMethod.paymentId).set({
