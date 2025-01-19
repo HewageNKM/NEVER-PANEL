@@ -66,7 +66,6 @@ const OrderTable = () => {
                             <TableCell>Customer</TableCell>
                             <TableCell>Payment Method</TableCell>
                             <TableCell>Total</TableCell>
-                            <TableCell>Fees and Charges</TableCell>
                             <TableCell>Payment Status</TableCell>
                             <TableCell>Discount</TableCell>
                             <TableCell>Items</TableCell>
@@ -106,9 +105,6 @@ const OrderTable = () => {
                                         sum + item.price * item.quantity,
                                     0
                                 ) - (order?.discount | 0)}
-                                </TableCell>
-                                <TableCell>
-                                    {order?.feesAndCharges?.toFixed(2) || "N/A"}
                                 </TableCell>
                                 <TableCell>
                                     <Box>
