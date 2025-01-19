@@ -1,6 +1,5 @@
 import {NextResponse} from "next/server";
-import {authorizeRequest, getAllPaymentMethods} from "@/firebase/firebaseAdmin";
-import {createPaymentMethod} from "@/actions/paymentMethodAction";
+import {addNewPaymentMethod, authorizeRequest, getAllPaymentMethods} from "@/firebase/firebaseAdmin";
 
 export const GET = async (req: Request) => {
     try {
@@ -28,7 +27,7 @@ export const POST = async (req: Request) => {
 
         const body = await req.json();
         // Save payment method to database
-        await createPaymentMethod(body);
+        await addNewPaymentMethod(body);
         return NextResponse.json({message: 'Payment method saved successfully'}, {status: 200});
     } catch (error: any) {
         console.error(error);

@@ -3,8 +3,8 @@ import axios from "axios";
 import {PaymentMethod} from "@/interfaces";
 
 export const getAllPaymentMethod = async () => {
-    const token = await getToken()
     try {
+        const token = await getToken()
         let response = await axios({
             method: 'GET',
             url: '/api/v1/payment-methods',
@@ -19,8 +19,8 @@ export const getAllPaymentMethod = async () => {
 }
 
 export const createPaymentMethod = async (paymentMethod: PaymentMethod) => {
-    const token = await getToken()
     try {
+        const token = await getToken()
         let response = await axios({
             method: 'POST',
             url: '/api/v1/payment-methods',

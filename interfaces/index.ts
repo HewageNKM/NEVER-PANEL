@@ -134,7 +134,7 @@ export interface SalesReport {
 }
 
 export interface CashFlowReport {
-    method: "cash" | "card" | "bank" | "qr",
+    method: string,
     fee: number,
     total: number,
 }
