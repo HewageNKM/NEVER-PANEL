@@ -6,7 +6,7 @@ import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import TextField from '@mui/material/TextField';
 import {Box, Checkbox, FormControlLabel, Grid, MenuItem, Select, styled, Switch, Typography} from "@mui/material";
-import {brands, genders, types} from "@/constant";
+import {genders, types} from "@/constant";
 import {IoCloudUpload} from "react-icons/io5";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import {setItems, setSelectedItem, setShowEditingForm} from "@/lib/inventorySlice/inventorySlice";
@@ -39,7 +39,6 @@ const ItemFormDialog = () => {
         whiteSpace: 'nowrap',
         width: 1,
     });
-
 
 
     const toggleGenderSelection = (gender: string) => {
@@ -87,7 +86,7 @@ const ItemFormDialog = () => {
                 status: status,
                 brand: brand.toLowerCase(),
                 buyingPrice: Number.parseInt(buyingPrice),
-                createdAt: item?.createdAt ? item?.createdAt : new Date().toLocaleString(),
+                createdAt: item?.createdAt ? item?.createdAt : new Date().toISOString(),
                 discount: parseFloat(discount),
                 itemId: itemId,
                 manufacturer: manufacturer.toLowerCase(),
@@ -95,7 +94,7 @@ const ItemFormDialog = () => {
                 thumbnail: {file: "", url: ""},
                 sellingPrice: Number.parseInt(sellingPrice),
                 type: type.toLowerCase(),
-                updatedAt: new Date().toLocaleString(),
+                updatedAt: new Date().toISOString(),
                 variants: item?.variants ? item.variants : []
             }
             if (newImage) {

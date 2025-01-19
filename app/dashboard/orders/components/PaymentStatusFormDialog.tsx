@@ -30,7 +30,7 @@ const PaymentStatusFormDialog = ({initialStatus, showForm, onClose}: {
             setIsLoading(true);
             const updatedOrder: Order = {
                 ...selectedOrder,
-                updatedAt: new Date().toLocaleString(),
+                updatedAt: new Date().toISOString(),
                 paymentStatus: selectedStatus
             }
             await updateAOrder(updatedOrder);

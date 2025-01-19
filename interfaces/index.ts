@@ -12,7 +12,16 @@ export interface User {
     createdAt: Timestamp | string;
     updatedAt: Timestamp | string;
 }
+export interface PaymentMethod{
+    paymentId: string;
+    name: string;
+    fee:number,
+    status: "Active" | "Inactive";
+    available: string[];
 
+    createdAt: Timestamp | string;
+    updatedAt: Timestamp | string;
+}
 export interface Item {
     itemId: string,
     type: string,
@@ -125,7 +134,7 @@ export interface SalesReport {
 }
 
 export interface CashFlowReport {
-    method: "cash" | "card" | "bank" | "qr",
+    method: string,
     fee: number,
     total: number,
 }

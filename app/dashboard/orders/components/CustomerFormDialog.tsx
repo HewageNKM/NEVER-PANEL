@@ -46,7 +46,7 @@ const CustomerFormDialog = ({customer, showForm, onClose}: {
                 ...selectedOrder,
                 customer: {
                     ...editableCustomer,
-                    updatedAt: new Date().toLocaleString()
+                    updatedAt: new Date().toISOString()
                 }
             }
             await updateAOrder(updatedOrder);

@@ -45,7 +45,7 @@ const Header = () => {
                 for: selectedFor,
                 note:note,
                 amount: parseFloat(evt.target.amount.value),
-                createdAt: selectedDateTime.toDate().toLocaleString(),
+                createdAt: selectedDateTime.toDate().toISOString(),
             }
             await addNewExpense(newExpense);
             evt.target.reset();

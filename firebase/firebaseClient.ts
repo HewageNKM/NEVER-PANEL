@@ -1,15 +1,7 @@
 "use client"
 import {initializeApp} from "firebase/app";
-import {
-    browserLocalPersistence,
-    getAuth,
-    onAuthStateChanged,
-    setPersistence,
-    signInWithEmailAndPassword
-} from "@firebase/auth";
-import {collection, deleteDoc, doc, getDoc, getDocs, getFirestore, query, setDoc, where} from "@firebase/firestore";
-import {deleteObject, getDownloadURL, getStorage, listAll, ref, uploadBytesResumable} from "@firebase/storage";
-import {Item} from "@/interfaces";
+import {getAuth} from "@firebase/auth";
+import {getFirestore} from "@firebase/firestore";
 // Firebase configuration
 const config = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -28,9 +20,9 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 
 export const getToken = async () => {
-  try {
-      return await auth.currentUser?.getIdToken();
-  }catch (error: any) {
-      console.error(error);
-  }
+    try {
+        return await auth.currentUser?.getIdToken();
+    } catch (error: any) {
+        console.error(error);
+    }
 }

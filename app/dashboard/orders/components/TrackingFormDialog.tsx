@@ -47,7 +47,7 @@ const TrackingFormDialog = ({
             const updatedTracking: Tracking = {
                 ...tracking,
                 status: status,
-                updatedAt: new Date().toLocaleString(),
+                updatedAt: new Date().toISOString(),
             };
 
             const updatedOrder: Order = {
