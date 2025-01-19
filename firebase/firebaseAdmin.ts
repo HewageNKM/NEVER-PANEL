@@ -145,25 +145,19 @@ export const getItemById = async (itemId: string) => {
 // Update an order, updating timestamps and nested tracking info
 export const updateOrder = async (order: Order) => {
     const updatedOrder: Order = {
-        from: order.from,
-        customer: {
+       ...order,
+        customer: order?.customer ? {
             ...order.customer,
             createdAt: admin.firestore.Timestamp.fromDate(new Date(order.customer.createdAt)),
             updatedAt: admin.firestore.Timestamp.fromDate(new Date(order.customer.updatedAt)),
-        },
-        items: order.items,
-        orderId: order.orderId,
-        paymentId: order.paymentId,
-        feesAndCharges: order.feesAndCharges,
-        paymentMethod: order.paymentMethod,
-        paymentStatus: order.paymentStatus,
-        updatedAt: admin.firestore.Timestamp.now(),
-        tracking: order.tracking ? {
-            ...order.tracking,
-            updatedAt: admin.firestore.Timestamp.fromDate(new Date(order.tracking.updatedAt))
         } : null,
+        tracking: order?.tracking ? {
+            ...order.tracking,
+            updatedAt: admin.firestore.Timestamp.fromDate(new Date(order.tracking.updatedAt)),
+        } : null,
+        createdAt: admin.firestore.Timestamp.fromDate(new Date(order.createdAt)),
+        updatedAt: admin.firestore.Timestamp.fromDate(new Date(order.updatedAt)),
     }
-
     try {
         await adminFirestore.collection('orders').doc(order.orderId).set({
             ...updatedOrder,
