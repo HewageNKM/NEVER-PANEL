@@ -123,16 +123,17 @@ export const onPaymentStatusUpdates = functions.firestore
 
         if (!orderData) return null;
 
-        const {paymentMethod, paymentStatus, items, customer, feesAndCharges} = orderData;
+        const { paymentMethod, paymentStatus, items, customer } = orderData;
         const paymentMethodLower = paymentMethod.toLowerCase();
 
-        if (paymentMethodLower !== PaymentMethod.IPG.toLowerCase()) {
-            console.log(`Order ${orderId} is not PayHere, skipping...`);
+        // Skip if paymentMethod is not IPG or COD
+        if (paymentMethodLower !== PaymentMethod.IPG.toLowerCase() && paymentMethodLower !== PaymentMethod.COD.toLowerCase()) {
+            console.log(`Order ${orderId} is not IPG or COD, skipping...`);
             return null;
         }
 
         const paymentStatusLower = paymentStatus.toLowerCase();
-        const total = calculateTotal(items) + (feesAndCharges || 0);
+        const total = calculateTotal(items);
 
         const address = customer.address + " " + customer.city + "," + (customer?.zip || "");
         const templateData = {
@@ -147,15 +148,10 @@ export const onPaymentStatusUpdates = functions.firestore
         try {
             const sendNotifications = async (additionalTemplateData?: any) => {
                 await Promise.all([
-                    sendEmail(customer.email.trim().toLowerCase(), "orderConfirmed", {...templateData, ...additionalTemplateData}),
+                    sendEmail(customer.email.trim().toLowerCase(), "orderConfirmed", { ...templateData, ...additionalTemplateData }),
                     sendSMS(
                         customer.phone,
-                        getOrderStatusSMS(
-                            customer.name,
-                            orderId,
-                            paymentMethod,
-                            paymentStatus
-                        )
+                        getOrderStatusSMS(customer.name, orderId, paymentMethod, paymentStatus)
                     ),
                 ]);
             };
@@ -186,7 +182,6 @@ export const onPaymentStatusUpdates = functions.firestore
 
         return null;
     });
-
 
 /**
  * Tracking Updates
