@@ -1,5 +1,14 @@
 import admin, {credential} from 'firebase-admin';
-import {CashFlowReport, Expense, ExpensesReport, Item, Order, SalesReport, StocksReport} from "@/interfaces";
+import {
+    CashFlowReport,
+    Expense,
+    ExpensesReport,
+    Item,
+    Order,
+    PaymentMethod,
+    SalesReport,
+    StocksReport
+} from "@/interfaces";
 import {paymentStatus} from "@/constant";
 import {uuidv4} from "@firebase/util";
 import {Timestamp} from "firebase-admin/firestore";
@@ -145,7 +154,7 @@ export const getItemById = async (itemId: string) => {
 // Update an order, updating timestamps and nested tracking info
 export const updateOrder = async (order: Order) => {
     const updatedOrder: Order = {
-       ...order,
+        ...order,
         customer: order?.customer ? {
             ...order.customer,
             createdAt: admin.firestore.Timestamp.fromDate(new Date(order.customer.createdAt)),
@@ -192,7 +201,7 @@ export const updateItem = async (item: Item) => {
         await adminFirestore.collection("inventory").doc(item.itemId).set({
             manufacturer: item.manufacturer,
             name: item.name,
-            genders:item.genders,
+            genders: item.genders,
             description: item.description,
             sellingPrice: item.sellingPrice,
             buyingPrice: item.buyingPrice,
@@ -900,5 +909,52 @@ export const authorizeRequest = async (req: any) => {
     } catch (e) {
         console.error(e);
         throw e;
+    }
+}
+
+export const getAllPaymentMethods = async () => {
+    try {
+        const paymentMethods = await adminFirestore.collection('paymentMethods').get();
+        const methods: PaymentMethod[] = [];
+        paymentMethods.forEach(doc => {
+            methods.push({
+                ...doc.data(),
+                createdAt: doc.data()?.createdAt?.toDate()?.toLocaleString(),
+                updatedAt: doc.data()?.updatedAt?.toDate()?.toLocaleString(),
+            } as PaymentMethod);
+        });
+        return methods;
+    } catch (e) {
+        throw e;
+    }
+}
+
+export const createPaymentMethod = async (PaymentMethod: PaymentMethod) => {
+    try {
+        console.log('Creating new payment method:', PaymentMethod.paymentId);
+        const writeResultPromise = await adminFirestore.collection('paymentMethods').doc(PaymentMethod.paymentId).set({
+            ...PaymentMethod,
+            createdAt: admin.firestore.Timestamp.fromDate(new Date(PaymentMethod.createdAt)),
+            updatedAt: admin.firestore.Timestamp.fromDate(new Date(PaymentMethod.updatedAt)),
+        });
+        console.log(`Payment method created successfully: ${PaymentMethod.paymentId}`);
+        return writeResultPromise;
+    } catch (e) {
+        throw e;
+    }
+}
+
+export const updatePaymentMethod = async (paymentMethod: PaymentMethod) => {
+    try {
+        console.log('Updating payment method:', paymentMethod.paymentId);
+        let writeResultPromise = await adminFirestore.collection('paymentMethods').doc(paymentMethod.paymentId).set({
+            ...paymentMethod,
+            createdAt: admin.firestore.Timestamp.fromDate(new Date(paymentMethod.createdAt)),
+            updatedAt: admin.firestore.Timestamp.fromDate(new Date(paymentMethod.updatedAt)),
+        }, {merge: true});
+        console.log(`Payment method updated successfully: ${paymentMethod.paymentId}`);
+        return writeResultPromise;
+    } catch (e) {
+        throw e
     }
 }

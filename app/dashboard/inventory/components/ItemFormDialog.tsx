@@ -87,7 +87,7 @@ const ItemFormDialog = () => {
                 status: status,
                 brand: brand.toLowerCase(),
                 buyingPrice: Number.parseInt(buyingPrice),
-                createdAt: item?.createdAt ? item?.createdAt : new Date().toLocaleString(),
+                createdAt: item?.createdAt ? item?.createdAt : new Date().toISOString(),
                 discount: parseFloat(discount),
                 itemId: itemId,
                 manufacturer: manufacturer.toLowerCase(),
@@ -95,7 +95,7 @@ const ItemFormDialog = () => {
                 thumbnail: {file: "", url: ""},
                 sellingPrice: Number.parseInt(sellingPrice),
                 type: type.toLowerCase(),
-                updatedAt: new Date().toLocaleString(),
+                updatedAt: new Date().toISOString(),
                 variants: item?.variants ? item.variants : []
             }
             if (newImage) {

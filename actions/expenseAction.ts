@@ -1,5 +1,6 @@
 import axios from "axios";
-import {auth, getToken} from "@/firebase/firebaseClient";
+import {getToken} from "@/firebase/firebaseClient";
+import {Expense} from "@/interfaces";
 
 export const addNewExpense = async (expense: Expense) => {
     try {

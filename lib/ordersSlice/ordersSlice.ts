@@ -1,10 +1,14 @@
-import {Customer, Order, Tracking} from "@/interfaces";
+import {Customer, Order, PaymentMethod, Tracking} from "@/interfaces";
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {fetchOrders} from "@/actions/ordersActions";
+import {getAllPaymentMethod} from "@/actions/paymentMethodAction";
 
 interface OrdersSlice {
     orders: Order[]
     isLoading: boolean;
+    isPaymentLoading: boolean;
+    payments: PaymentMethod[];
+    selectedPayment: PaymentMethod | null;
     selectedPage: number;
     size: number;
     selectedOrder: Order | null;
@@ -13,6 +17,9 @@ interface OrdersSlice {
 }
 
 const initialState: OrdersSlice = {
+    selectedPayment: null,
+    isPaymentLoading: false,
+    payments:[],
     orders: [],
     isLoading: false,
     selectedPage: 1,
@@ -46,6 +53,9 @@ const ordersSlice = createSlice({
         },
         setSize: (state, action: PayloadAction<number>) => {
             state.size = action.payload
+        },
+        setSelectedPayment: (state, action: PayloadAction<PaymentMethod | null>) => {
+            state.selectedPayment = action.payload;
         }
     },
     extraReducers: (builder) => {
@@ -55,7 +65,12 @@ const ordersSlice = createSlice({
         builder.addCase(getOrders.fulfilled, (state, action) => {
             state.orders = action.payload;
             state.isLoading = false;
-        });
+        }).addCase(getPayments.pending, (state) => {
+            state.isLoading = true;
+        }).addCase(getPayments.fulfilled, (state,action) => {
+            state.isLoading = false;
+            state.payments = action.payload;
+        })
     }
 });
 
@@ -69,6 +84,13 @@ export const getOrders = createAsyncThunk("orders/getOrders", async ({size, page
         return thunkAPI.rejectWithValue(error.message);
     }
 });
+export const getPayments = createAsyncThunk("orders/getPayments", async (arg,thunkAPI) => {
+    try {
+        return await getAllPaymentMethod();
+    } catch (error: any) {
+        return thunkAPI.rejectWithValue(error.message);
+    }
+});
 
 export const {
     setOrders,
@@ -77,7 +99,8 @@ export const {
     setLoading,
     setSelectedOrder,
     setSelectedCustomer,
-    setSelectedTracking
+    setSelectedTracking,
+    setSelectedPayment
 } = ordersSlice.actions;
 export default ordersSlice.reducer;
 
