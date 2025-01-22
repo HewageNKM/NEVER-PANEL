@@ -441,9 +441,9 @@ export const getOverview = async (start: Timestamp, end: Timestamp) => {
 
         const querySnapshot = await todayOrdersQuery.get();
 
-        let earnings = 0;
+        let totalEarnings = 0;
         let buyingCost = 0;
-        let count = 0;
+        let totalOrderCount = 0;
         let totalExpense = 0
 
         // Collect all unique itemIds from the orders
@@ -458,7 +458,7 @@ export const getOverview = async (start: Timestamp, end: Timestamp) => {
                     }
                 });
             }
-            count += 1;
+            totalOrderCount += 1;
         });
 
         // Fetch all inventory documents in parallel
@@ -474,37 +474,39 @@ export const getOverview = async (start: Timestamp, end: Timestamp) => {
                 inventoryDataMap.set(doc.id, doc.data() as Item);
             }
         });
-        let discount = 0;
-        // Calculate earnings and buying cost using cached inventory data
+        let totalDiscount = 0;
+        // Calculate totalEarnings and buying cost using cached inventory data
         querySnapshot.docs.forEach((docSnap) => {
             const data = docSnap.data() as Order;
             if (Array.isArray(data.items)) {
                 data.items.forEach((item) => {
-                    earnings += (item.price || 0) * item.quantity;
+                    totalEarnings += (item.price || 0) * item.quantity;
                     // Lookup inventory data in the cache
                     const inventoryData = inventoryDataMap.get(item.itemId);
                     if (inventoryData) {
                         buyingCost += (inventoryData.buyingPrice || 0) * (item.quantity || 1);
                     }
                 });
-                discount += (data.discount || 0)
+                totalDiscount += (data.discount || 0)
             }
         });
 
-        const profit = earnings - buyingCost - discount;
-        console.log(`Fetched ${count} orders with total earnings: ${earnings}, buying cost: ${buyingCost}, profit: ${profit}, discount: ${discount}`);
         const expenses = await getExpensesReport(start.toDate().toLocaleString(), end.toDate().toLocaleString());
         expenses.forEach((expense) => {
             expense.data.forEach((data) => {
                 totalExpense += data.amount
             })
         })
+
+        const totalProfit = totalEarnings - (buyingCost + totalDiscount + totalExpense);
+        console.log(`Fetched ${totalOrderCount} orders with total earnings: ${totalEarnings}, buying cost: ${buyingCost}, profit: ${totalProfit}, discount: ${totalDiscount}, expense: ${totalExpense}`);
+
         return {
-            totalOrders: count,
-            totalEarnings: earnings.toFixed(2),
-            totalBuyingCost: buyingCost.toFixed(2),
-            totalProfit: profit.toFixed(2),
-            totalDiscount: discount.toFixed(2),
+            totalOrders: totalOrderCount,
+            totalEarnings: totalEarnings,
+            totalBuyingCost: buyingCost,
+            totalProfit: totalProfit,
+            totalDiscount: totalDiscount,
             totalExpense: totalExpense
         };
     } catch (e) {
@@ -694,7 +696,6 @@ export const getCashReport = async (from: string, to: string): Promise<CashFlowR
                 totalExpense += data.amount
             })
         })
-        console.log(map)
         return {
             report: map,
             totalExpense: totalExpense

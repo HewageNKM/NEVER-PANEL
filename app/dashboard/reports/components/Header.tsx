@@ -243,7 +243,7 @@ const Header = () => {
                         isLoading={isLoading}
                         startDate={new Date(selectedYear, selectedMonth, 1, 0, 0, 0).toLocaleString()}
                         endDate={new Date(selectedYear, selectedMonth + 1, 0, 23, 59, 59).toLocaleString()}
-                        title={'Profit'}
+                        title={'Profit(Fee Exl)'}
                         value={totalProfit}
                     />
                     <HeaderCard
