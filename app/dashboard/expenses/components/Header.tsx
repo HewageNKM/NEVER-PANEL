@@ -144,7 +144,7 @@ const Header = () => {
                                 <MenuItem value="communication"
                                           disabled={selectedType == "expense"}>Communication</MenuItem>
                                 <MenuItem value="food" disabled={selectedType == "utility"}>Food</MenuItem>
-                                <MenuItem disabled={selectedType == "promotions"}>Promotions</MenuItem>
+                                <MenuItem disabled={selectedType == "promotions"} value={"promotions"}>Promotions</MenuItem>
                                 <MenuItem value="other">Other</MenuItem>
                             </Select>
                         </FormControl>

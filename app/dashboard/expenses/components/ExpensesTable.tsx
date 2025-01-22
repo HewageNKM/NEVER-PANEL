@@ -104,7 +104,6 @@ const ExpensesTable = () => {
                                         display: "flex",
                                         gap: 1
                                     }}>
-                                        <Button variant={"contained"} color={"primary"} size={'small'}>Edit</Button>
                                         <Button variant={"contained"} color={"error"} size={"small"} onClick={()=>onDelete(expense.id)}>Delete</Button>
                                     </Box>
                                 </TableCell>
