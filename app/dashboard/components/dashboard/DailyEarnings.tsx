@@ -8,6 +8,7 @@ import {getDailyOverview} from "@/actions/reportsAction"; // Ensure the correct 
 const DailyEarnings = () => {
     const [totalEarnings, setTotalEarnings] = useState(0);
     const [totalProfit, setTotalProfit] = useState(0);
+    const [totalDiscount, setTotalDiscount] = useState(0)
     const [invoiceCount, setInvoiceCount] = useState(0);
     const [loading, setLoading] = useState(true);
     const {currentUser} = useAppSelector(state => state.authSlice);
@@ -24,6 +25,7 @@ const DailyEarnings = () => {
             setTotalEarnings(overview.totalEarnings);
             setTotalProfit(overview.totalProfit);
             setInvoiceCount(overview.totalOrders);
+            setTotalDiscount(overview.totalDiscount)
         } catch (error) {
             console.error("Error fetching daily earnings:", error.message, error.stack);
         } finally {
@@ -32,7 +34,7 @@ const DailyEarnings = () => {
     };
     return (
         <DashboardCard
-            title="Daily Earnings"
+            title={`Daily Summery(${invoiceCount}) *Fee Excl*`}
         >
             {loading ? (
                 <Box sx={{display: "flex", justifyContent: "center", alignItems: "center", height: "100px"}}>
@@ -51,14 +53,17 @@ const DailyEarnings = () => {
                         gap: 3,
                         flexDirection: "column"
                     }}>
-                        <Typography variant="h4" fontWeight="700" mt="-20px">
-                            <span>Total Sale: </span> LKR {totalEarnings.toLocaleString()}
+                        <Typography variant="h4" fontWeight="600" mt="-20px">
+                            <span>Sale: </span> LKR {totalEarnings.toFixed(2)}
                         </Typography>
-                        <Typography variant="h4" fontWeight="700" mt="-20px">
-                            <span>Profit: </span> LKR {totalProfit.toLocaleString()}
+                        <Typography variant="h4" fontWeight="600" mt="-20px">
+                            <span>Discount: </span> -LKR {totalDiscount.toFixed(2)}
                         </Typography>
-                        <Typography variant="h4" fontWeight="700" mt="-20px">
-                            <span>Invoices: </span> {invoiceCount}
+                        <Typography variant="h4" fontWeight="600" mt="-20px">
+                            <span>Net Sale:</span> LKR {(totalEarnings-totalDiscount).toFixed(2)}
+                        </Typography>
+                        <Typography variant="h4" fontWeight="600" mt="-20px">
+                            <span>Profit: </span> LKR {totalProfit.toFixed(2)}
                         </Typography>
                     </Box>
                 </Box>
