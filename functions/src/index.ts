@@ -125,6 +125,7 @@ export const onPaymentStatusUpdates = functions.firestore
 
         const { paymentMethod, paymentStatus, items, customer } = orderData;
         const paymentMethodLower = paymentMethod.toLowerCase();
+        const paymentStatusLower = paymentStatus.toLowerCase();
 
         // Skip if paymentMethod is not IPG or COD
         if (paymentMethodLower !== PaymentMethod.IPG.toLowerCase() && paymentMethodLower !== PaymentMethod.COD.toLowerCase()) {
@@ -132,9 +133,8 @@ export const onPaymentStatusUpdates = functions.firestore
             return null;
         }
 
-        const paymentStatusLower = paymentStatus.toLowerCase();
+        // Calculate total and address
         const total = calculateTotal(items);
-
         const address = customer.address + " " + customer.city + "," + (customer?.zip || "");
         const templateData = {
             name: customer.name,
@@ -146,6 +146,7 @@ export const onPaymentStatusUpdates = functions.firestore
         };
 
         try {
+            // Function to send notifications
             const sendNotifications = async (additionalTemplateData?: any) => {
                 await Promise.all([
                     sendEmail(customer.email.trim().toLowerCase(), "orderConfirmed", { ...templateData, ...additionalTemplateData }),
@@ -169,19 +170,19 @@ export const onPaymentStatusUpdates = functions.firestore
                     paymentStatusLower === PaymentStatus.Paid.toLowerCase() &&
                     previousPaymentStatusLower === PaymentStatus.Pending.toLowerCase()
                 ) {
-                    // Send order confirmation and admin notifications
                     await sendNotifications();
                     await sendAdminSMS(adminNotifySMS(orderId));
                     await sendAdminEmail("adminOrderNotify", templateData);
                     console.log(`Order confirmation sent for PayHere order ${orderId}`);
                 }
-            }
-
-            if (!previousOrderData && paymentMethodLower === PaymentMethod.COD.toLowerCase() && paymentStatusLower === PaymentStatus.Pending.toLowerCase()) {
-                await sendNotifications();
-                await sendAdminSMS(adminNotifySMS(orderId));
-                await sendAdminEmail("adminOrderNotify", templateData);
-                console.log(`Notification sent for COD pending order ${orderId}`);
+            } else {
+                // Process new COD orders with Pending status
+                if (paymentMethodLower === PaymentMethod.COD.toLowerCase() && paymentStatusLower === PaymentStatus.Pending.toLowerCase()) {
+                    await sendNotifications();
+                    await sendAdminSMS(adminNotifySMS(orderId));
+                    await sendAdminEmail("adminOrderNotify", templateData);
+                    console.log(`Notification sent for new COD pending order ${orderId}`);
+                }
             }
         } catch (error) {
             console.error(`Error processing order ${orderId}:`, error);
@@ -189,6 +190,7 @@ export const onPaymentStatusUpdates = functions.firestore
 
         return null;
     });
+
 
 /**
  * Tracking Updates
@@ -203,6 +205,7 @@ export const onTrackingUpdates = functions.firestore
         const newTracking = newOrderData.tracking;
         const previousTracking = previousOrderData.tracking;
 
+        // If there is no new tracking data or no status, exit early
         if (!newTracking || !newTracking.status) {
             console.log(`No tracking data found for order ${orderId}.`);
             return null;
@@ -211,38 +214,44 @@ export const onTrackingUpdates = functions.firestore
         const newTrackingStatus = newTracking.status.toLowerCase();
         const previousTrackingStatus = previousTracking?.status?.toLowerCase();
 
-        if (!previousTracking || newTrackingStatus !== previousTrackingStatus) {
-            const customerPhone = newOrderData.customer.phone.trim();
+        // Exit if the tracking status remains unchanged
+        if (previousTracking && newTrackingStatus === previousTrackingStatus) {
+            console.log(`Tracking status for order ${orderId} remains unchanged (${newTrackingStatus}).`);
+            return null;
+        }
 
-            try {
-                const sendNotifications = async (status: string) => {
-                    await Promise.all([
-                        sendSMS(
-                            customerPhone,
-                            orderTrackingUpdateSMS(
-                                newOrderData.customer.name,
-                                orderId,
-                                status,
-                                newTracking.trackingNumber,
-                                newTracking.trackingUrl
-                            )
-                        ),
-                    ]);
-                    console.log(`Notifications sent for order ${orderId} with status ${status}.`);
-                };
+        const customerPhone = newOrderData.customer.phone.trim();
 
-                switch (newTrackingStatus) {
-                    case orderStatus.SHIPPED.toLowerCase():
-                    case orderStatus.CANCELLED.toLowerCase():
-                        await sendNotifications(newTracking.status);
-                        break;
-                    default:
-                        console.log(`No matching status for notifications in order ${orderId}`);
-                        break;
-                }
-            } catch (error) {
-                console.error(`Error processing tracking update for order ${orderId}:`, error);
+        try {
+            // Function to send SMS notifications
+            const sendNotifications = async (status: string) => {
+                await Promise.all([
+                    sendSMS(
+                        customerPhone,
+                        orderTrackingUpdateSMS(
+                            newOrderData.customer.name,
+                            orderId,
+                            status,
+                            newTracking.trackingNumber,
+                            newTracking.trackingUrl
+                        )
+                    ),
+                ]);
+                console.log(`Notifications sent for order ${orderId} with status ${status}.`);
+            };
+
+            // Handle specific statuses
+            switch (newTrackingStatus) {
+                case orderStatus.SHIPPED.toLowerCase():
+                case orderStatus.CANCELLED.toLowerCase():
+                    await sendNotifications(newTracking.status);
+                    break;
+                default:
+                    console.log(`No matching status for notifications in order ${orderId}`);
+                    break;
             }
+        } catch (error) {
+            console.error(`Error processing tracking update for order ${orderId}:`, error);
         }
 
         return null;
