@@ -168,7 +168,8 @@ export const onPaymentStatusUpdates = functions.firestore
 
                 if (
                     paymentStatusLower === PaymentStatus.Paid.toLowerCase() &&
-                    previousPaymentStatusLower === PaymentStatus.Pending.toLowerCase()
+                    previousPaymentStatusLower === PaymentStatus.Pending.toLowerCase() &&
+                    paymentMethodLower === PaymentMethod.IPG.toLowerCase()
                 ) {
                     await sendNotifications();
                     await sendAdminSMS(adminNotifySMS(orderId));
