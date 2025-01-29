@@ -12,6 +12,7 @@ import {getOrdersByDate} from "@/actions/ordersActions";
 import PaymentTable from "@/app/dashboard/orders/components/PaymentTable";
 import PaymentMethodForm from "@/app/dashboard/orders/components/PaymentMethodForm";
 import {PaymentMethod} from "@/interfaces";
+import {paymentStatusList} from "@/constant";
 
 const OrdersHeader = () => {
     const dispatch = useAppDispatch();
@@ -126,13 +127,32 @@ const OrdersHeader = () => {
                 <Stack direction="row" spacing={5} alignItems="center" justifyContent="space-between" py={2}
                        flexWrap={"wrap"}>
                     <Stack direction="row" spacing={2} alignItems="center">
+                        <FormControl variant="outlined" size="small">
+                            <InputLabel id="Status-label">Status</InputLabel>
+                            <Select
+                                placeholder={"Status"}
+                                labelId="Status-label"
+                                label="Status"
+                                defaultValue="all" // Ensure a default value is set
+                            >
+                                <MenuItem value={"all"} key="all">All</MenuItem>
+                                {paymentStatusList.map((status) => (
+                                    <MenuItem
+                                        key={status.id}
+                                        value={status.value}
+                                    >
+                                        {status.name}
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
                         {/* Filter Dropdown */}
                         <FormControl variant="outlined" size="small">
-                            <InputLabel id="filter-label">Filter</InputLabel>
+                            <InputLabel id="Tracking-label">Track</InputLabel>
                             <Select
-                                placeholder={"Filter"}
-                                labelId="filter-label"
-                                label="Filter"
+                                placeholder={"Track"}
+                                labelId="Track-label"
+                                label="Track"
                                 defaultValue="all" // Ensure a default value is set
                             >
                                 <MenuItem value={"all"} key="all">All</MenuItem>
