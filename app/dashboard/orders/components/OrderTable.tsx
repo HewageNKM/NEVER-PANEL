@@ -20,11 +20,12 @@ import {getOrders, setPage, setSelectedOrder, setSize} from '@/lib/ordersSlice/o
 import {IoInformationCircle} from "react-icons/io5";
 import EmptyState from "@/app/components/EmptyState";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
-import {Customer, OrderItem, Tracking} from "@/interfaces";
+import {Customer, Order, OrderItem, Tracking} from "@/interfaces";
 import CustomerFormDialog from "@/app/dashboard/orders/components/CustomerFormDialog";
 import ItemsFormDialog from "@/app/dashboard/orders/components/ItemsFormDialog";
 import TrackingFormDialog from "@/app/dashboard/orders/components/TrackingFormDialog";
 import PaymentStatusFormDialog from "@/app/dashboard/orders/components/PaymentStatusFormDialog";
+import PaymentSummeryForm from "@/app/dashboard/orders/components/PaymentSummeryForm";
 
 const OrderTable = () => {
     const {orders, size, selectedPage, isLoading} = useAppSelector(state => state.ordersSlice);
@@ -41,6 +42,8 @@ const OrderTable = () => {
 
     const [showPaymentStatusForm, setShowPaymentStatusForm] = useState(false)
     const [paymentStatus, setPaymentStatus] = useState(null)
+
+    const [showPaymentSummery, setShowPaymentSummery] = useState(false)
 
     const dispatch = useAppDispatch();
 
@@ -64,13 +67,12 @@ const OrderTable = () => {
                         <TableRow>
                             <TableCell>Order ID</TableCell>
                             <TableCell>Customer</TableCell>
-                            <TableCell>Payment Method</TableCell>
+                            <TableCell>Method</TableCell>
                             <TableCell>Total</TableCell>
-                            <TableCell>Payment Status</TableCell>
-                            <TableCell>Discount</TableCell>
+                            <TableCell>Status</TableCell>
                             <TableCell>Items</TableCell>
                             <TableCell>From</TableCell>
-                            <TableCell>Status</TableCell>
+                            <TableCell>Tracking</TableCell>
                             <TableCell>Created At</TableCell>
                         </TableRow>
                     </TableHead>
@@ -100,26 +102,33 @@ const OrderTable = () => {
                                 ) : "Not Available"}</TableCell>
                                 <TableCell>{order.paymentMethod}</TableCell>
                                 <TableCell>
-                                    LKR {order.items.reduce(
-                                    (sum, item) =>
-                                        sum + item.price * item.quantity,
-                                    0
-                                ) - (order?.discount | 0)}
-                                </TableCell>
-                                <TableCell>
                                     <Box>
-                                        <Typography>{order.paymentStatus}</Typography>
+                                        <Typography>
+                                            LKR {order.items.reduce(
+                                            (sum, item) =>
+                                                sum + item.price * item.quantity,
+                                            0
+                                        ) - (order?.discount | 0)}
+                                        </Typography>
                                         <IconButton onClick={() => {
-                                            setPaymentStatus(order.paymentStatus)
-                                            setShowPaymentStatusForm(true)
                                             dispatch(setSelectedOrder(order))
+                                            setShowPaymentSummery(true)
                                         }}>
                                             <IoInformationCircle color={"blue"} size={25}/>
                                         </IconButton>
                                     </Box>
                                 </TableCell>
                                 <TableCell>
-                                    LKR {order?.discount | 0}
+                                    <Box>
+                                        <Typography>{order.paymentStatus}</Typography>
+                                        <IconButton onClick={() => {
+                                            setPaymentStatus(order?.paymentStatus)
+                                            setShowPaymentStatusForm(true)
+                                            dispatch(setSelectedOrder(order))
+                                        }}>
+                                            <IoInformationCircle color={"blue"} size={25}/>
+                                        </IconButton>
+                                    </Box>
                                 </TableCell>
                                 <TableCell>
                                     <Stack direction={"row"} justifyItems={"center"} alignItems={"center"}>
@@ -157,12 +166,12 @@ const OrderTable = () => {
                                                 <IconButton
                                                     disabled={order.paymentStatus.toLowerCase() == "failed"}
                                                     onClick={() => {
-                                                    setTracking(order.tracking)
-                                                    setShowTrackingForm(true)
-                                                    dispatch(setSelectedOrder(order))
-                                                }}>
-                                                    {order.paymentStatus.toLowerCase() !== "failed"  && (
-                                                    <IoInformationCircle color={"blue"} size={25}/>)}
+                                                        setTracking(order.tracking)
+                                                        setShowTrackingForm(true)
+                                                        dispatch(setSelectedOrder(order))
+                                                    }}>
+                                                    {order.paymentStatus.toLowerCase() !== "failed" && (
+                                                        <IoInformationCircle color={"blue"} size={25}/>)}
                                                 </IconButton>
                                             </Box>)
                                     )}
@@ -221,11 +230,15 @@ const OrderTable = () => {
                 dispatch(setSelectedOrder(null))
             }}
             />
-            <PaymentStatusFormDialog showForm={paymentStatus} onClose={()=>{
+            <PaymentStatusFormDialog showForm={showPaymentStatusForm} onClose={() => {
                 setPaymentStatus(null)
                 setShowPaymentStatusForm(false)
                 dispatch(setSelectedOrder(null))
             }} initialStatus={paymentStatus}/>
+            <PaymentSummeryForm showForm={showPaymentSummery} onClose={() => {
+                setShowPaymentSummery(false)
+                dispatch(setSelectedOrder(null))
+            }}/>
         </Stack>
     );
 };

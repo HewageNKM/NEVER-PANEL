@@ -560,16 +560,16 @@ export const getOrdersByDate = async (date: string) => {
         querySnapshot.forEach(doc => {
             orders.push({
                 ...doc.data(),
-                createdAt: doc.data().createdAt.toDate().toLocaleString(),
-                updatedAt: doc.data().updatedAt.toDate().toLocaleString(),
+                createdAt: doc.data()?.createdAt?.toDate().toLocaleString(),
+                updatedAt: doc.data()?.updatedAt?.toDate().toLocaleString(),
                 customer: doc.data().customer ? {
                     ...doc.data().customer,
-                    createdAt: doc.data().customer.createdAt.toDate().toLocaleString(),
-                    updatedAt: doc.data().customer.updatedAt.toDate().toLocaleString(),
+                    createdAt: doc.data().customer?.createdAt?.toDate().toLocaleString(),
+                    updatedAt: doc.data().customer?.updatedAt?.toDate().toLocaleString(),
                 } : null,
                 tracking: doc.data().tracking ? {
                     ...doc.data().tracking,
-                    updatedAt: doc.data().tracking.updatedAt.toDate().toLocaleString(),
+                    updatedAt: doc.data()?.tracking?.updatedAt?.toDate().toLocaleString(),
                 } : null
             } as Order);
         });

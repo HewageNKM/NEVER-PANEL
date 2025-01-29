@@ -3,7 +3,7 @@ import {Box, Button, FormControl, IconButton, InputLabel, MenuItem, Select, Stac
 import Typography from "@mui/material/Typography";
 import {IoAdd, IoRefreshCircle} from "react-icons/io5";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
-import {getOrders, setOrders, setSelectedPayment} from "@/lib/ordersSlice/ordersSlice";
+import {getOrders, setLoading, setOrders, setSelectedPayment} from "@/lib/ordersSlice/ordersSlice";
 import {getAlgoliaClient} from "@/lib/middleware";
 import {DatePicker} from '@mui/x-date-pickers/DatePicker';
 import {LocalizationProvider} from '@mui/x-date-pickers';
@@ -20,6 +20,7 @@ const OrdersHeader = () => {
 
     const onSearch = async (evt) => {
         try {
+            dispatch(setLoading(true))
             evt.preventDefault();
             const search = evt.target.search.value;
             const client = getAlgoliaClient();
@@ -38,10 +39,13 @@ const OrdersHeader = () => {
             dispatch(setOrders(orders))
         } catch (e) {
             console.error(e)
+        } finally {
+            dispatch(setLoading(false))
         }
     }
     const onDatePick = async (date) => {
         try {
+            dispatch(setLoading(true))
             if (date) {
                 const d = date.toDate().toLocaleString()
                 const orders = await getOrdersByDate(d);
@@ -49,6 +53,8 @@ const OrdersHeader = () => {
             }
         } catch (e) {
             console.error(e)
+        } finally {
+            dispatch(setLoading(false))
         }
     }
     return (
@@ -102,7 +108,7 @@ const OrdersHeader = () => {
                         </IconButton>
                     </Stack>
                     <Stack>
-                        <PaymentTable onClick={(payment:PaymentMethod)=>{
+                        <PaymentTable onClick={(payment: PaymentMethod) => {
                             dispatch(setSelectedPayment(payment))
                             setShowPaymentMethodForm(true)
                         }}/>
@@ -168,7 +174,7 @@ const OrdersHeader = () => {
                 showPaymentMethodForm={showPaymentMethodForm}
                 onClose={() => {
                     setShowPaymentMethodForm(false)
-                   dispatch(setSelectedPayment(null))
+                    dispatch(setSelectedPayment(null))
                 }}
             />)}
         </Stack>
