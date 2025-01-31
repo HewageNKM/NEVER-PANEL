@@ -30,6 +30,7 @@ utils/.env.development
 
 # vercel
 .vercel
+.idea
 
 # typescript
 *.tsbuildinfo
