@@ -73,7 +73,7 @@ const SalesOverview = () => {
                 ordersRef,
                 where("createdAt", ">=", startTimestamp),
                 where("createdAt", "<=", endTimestamp),
-                where("paymentStatus", "==", "Paid")
+                where("paymentStatus", "in", ["Paid","Pending"])
             );
 
             const querySnapshot = await getDocs(ordersQuery);
