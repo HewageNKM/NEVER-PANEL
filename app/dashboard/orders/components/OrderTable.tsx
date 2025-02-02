@@ -20,7 +20,7 @@ import {getOrders, setPage, setSelectedOrder, setSize} from '@/lib/ordersSlice/o
 import {IoInformationCircle} from "react-icons/io5";
 import EmptyState from "@/app/components/EmptyState";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
-import {Customer, Order, OrderItem, Tracking} from "@/interfaces";
+import {Customer, OrderItem, Tracking} from "@/interfaces";
 import CustomerFormDialog from "@/app/dashboard/orders/components/CustomerFormDialog";
 import ItemsFormDialog from "@/app/dashboard/orders/components/ItemsFormDialog";
 import TrackingFormDialog from "@/app/dashboard/orders/components/TrackingFormDialog";
@@ -49,15 +49,14 @@ const OrderTable = () => {
 
     useEffect(() => {
         if (currentUser) {
-            setTimeout(() => {
-                dispatch(getOrders({size, page: selectedPage}));
-            }, 1000);
+            dispatch(getOrders({size, page: selectedPage}));
         }
     }, [currentUser, selectedPage, size, loading, dispatch]);
+
     return (
         <Stack direction={"column"} gap={5}>
             <TableContainer component={Paper} sx={{
-                position: "relative"
+                position: "relative",
             }}>
                 <Typography variant="h6" component="div" sx={{padding: 2}}>
                     Orders

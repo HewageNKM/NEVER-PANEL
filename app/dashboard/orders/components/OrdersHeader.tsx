@@ -1,9 +1,16 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Box, Button, FormControl, IconButton, InputLabel, MenuItem, Select, Stack, TextField} from '@mui/material';
 import Typography from "@mui/material/Typography";
 import {IoAdd, IoRefreshCircle} from "react-icons/io5";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
-import {getOrders, setLoading, setOrders, setSelectedPayment} from "@/lib/ordersSlice/ordersSlice";
+import {
+    getOrders,
+    setLoading,
+    setOrders,
+    setSelectedFilterStatus,
+    setSelectedFilterTracking,
+    setSelectedPayment
+} from "@/lib/ordersSlice/ordersSlice";
 import {getAlgoliaClient} from "@/lib/middleware";
 import {DatePicker} from '@mui/x-date-pickers/DatePicker';
 import {LocalizationProvider} from '@mui/x-date-pickers';
@@ -16,7 +23,8 @@ import {paymentStatusList} from "@/constant";
 
 const OrdersHeader = () => {
     const dispatch = useAppDispatch();
-    const {selectedPage, size} = useAppSelector(state => state.ordersSlice);
+    const {currentUser} = useAppSelector(state => state.authSlice);
+    const {selectedPage, size,selectedFilterStatus,selectedFilterTracking} = useAppSelector(state => state.ordersSlice);
     const [showPaymentMethodForm, setShowPaymentMethodForm] = useState(false)
 
     const onSearch = async (evt) => {
@@ -58,6 +66,12 @@ const OrdersHeader = () => {
             dispatch(setLoading(false))
         }
     }
+
+    useEffect(() => {
+        if (currentUser) {
+            dispatch(getOrders({size, page: selectedPage}))
+        }
+    }, [currentUser,selectedFilterTracking,selectedFilterStatus]);
     return (
         <Stack direction="column" spacing={2} alignItems="start" flexWrap={"wrap"} justifyContent="space-between" p={2}>
             <Stack sx={{
@@ -133,7 +147,9 @@ const OrdersHeader = () => {
                                 placeholder={"Status"}
                                 labelId="Status-label"
                                 label="Status"
-                                defaultValue="all" // Ensure a default value is set
+                                value={selectedFilterStatus}
+                                onChange={(e) => dispatch(setSelectedFilterStatus(e.target.value))}
+                                defaultValue="all"
                             >
                                 <MenuItem value={"all"} key="all">All</MenuItem>
                                 {paymentStatusList.map((status) => (
@@ -153,10 +169,12 @@ const OrdersHeader = () => {
                                 placeholder={"Track"}
                                 labelId="Track-label"
                                 label="Track"
+                                value={selectedFilterTracking}
+                                onChange={(e) => dispatch(setSelectedFilterTracking(e.target.value))}
                                 defaultValue="all" // Ensure a default value is set
                             >
                                 <MenuItem value={"all"} key="all">All</MenuItem>
-                                <MenuItem value="pending">Pending</MenuItem>
+                                <MenuItem value="processing">Processing</MenuItem>
                                 <MenuItem value="shipped">Shipped</MenuItem>
                                 <MenuItem value="complete">Complete</MenuItem>
                             </Select>

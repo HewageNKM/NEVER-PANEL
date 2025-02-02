@@ -14,19 +14,23 @@ interface OrdersSlice {
     selectedOrder: Order | null;
     selectedCustomer: Customer | null;
     selectedTracking: Tracking | null;
+    selectedFilterStatus: string;
+    selectedFilterTracking: string;
 }
 
 const initialState: OrdersSlice = {
     selectedPayment: null,
     isPaymentLoading: false,
-    payments:[],
+    payments: [],
     orders: [],
     isLoading: false,
     selectedPage: 1,
     size: 20,
     selectedOrder: null,
     selectedCustomer: null,
-    selectedTracking: null
+    selectedTracking: null,
+    selectedFilterStatus: "all",
+    selectedFilterTracking: "all"
 }
 
 const ordersSlice = createSlice({
@@ -56,6 +60,12 @@ const ordersSlice = createSlice({
         },
         setSelectedPayment: (state, action: PayloadAction<PaymentMethod | null>) => {
             state.selectedPayment = action.payload;
+        },
+        setSelectedFilterStatus: (state, action: PayloadAction<string>) => {
+            state.selectedFilterStatus = action.payload;
+        },
+        setSelectedFilterTracking: (state, action: PayloadAction<string>) => {
+            state.selectedFilterTracking = action.payload;
         }
     },
     extraReducers: (builder) => {
@@ -65,9 +75,47 @@ const ordersSlice = createSlice({
         builder.addCase(getOrders.fulfilled, (state, action) => {
             state.orders = action.payload;
             state.isLoading = false;
+            const ordersAction = action.payload;
+            let orders: Order[] = []
+
+            switch (state.selectedFilterStatus.toLowerCase()) {
+                case "paid":
+                    orders.push(...ordersAction.filter((order: Order) => order.paymentStatus.toLowerCase() === "paid"))
+                    break;
+                case "pending":
+                    orders.push(...ordersAction.filter((order: Order) => order.paymentStatus.toLowerCase() === "pending"))
+                    break;
+                case "failed":
+                    orders.push(...ordersAction.filter((order: Order) => order.paymentStatus.toLowerCase() === "failed"))
+                    break;
+                case "refunded":
+                    orders.push(...ordersAction.filter((order: Order) => order.paymentStatus.toLowerCase() === "refunded"))
+                    break;
+                default:
+                    orders = ordersAction;
+                    break;
+            }
+
+            switch (state.selectedFilterTracking.toLowerCase()) {
+                case "processing":
+                    orders = orders.filter((order: Order) => (order.from.toLowerCase() === "website" && order.tracking === null))
+                    break;
+                case "shipped":
+                    orders = orders.filter((order: Order) => order.tracking?.status.toLowerCase() === "shipped")
+                    break;
+                case "cancelled":
+                    orders = orders.filter((order: Order) => order.tracking?.status.toLowerCase() === "cancelled")
+                    break;
+                case "complete":
+                    orders = orders.filter((order: Order) => (order.from.toLowerCase() === "store" || order.tracking?.status.toLowerCase() === "complete"))
+                    break;
+                default:
+                    break;
+            }
+            state.orders = orders;
         }).addCase(getPayments.pending, (state) => {
             state.isLoading = true;
-        }).addCase(getPayments.fulfilled, (state,action) => {
+        }).addCase(getPayments.fulfilled, (state, action) => {
             state.isLoading = false;
             state.payments = action.payload;
         })
@@ -84,7 +132,7 @@ export const getOrders = createAsyncThunk("orders/getOrders", async ({size, page
         return thunkAPI.rejectWithValue(error.message);
     }
 });
-export const getPayments = createAsyncThunk("orders/getPayments", async (arg,thunkAPI) => {
+export const getPayments = createAsyncThunk("orders/getPayments", async (arg, thunkAPI) => {
     try {
         return await getAllPaymentMethod();
     } catch (error: any) {
@@ -98,8 +146,8 @@ export const {
     setPage,
     setLoading,
     setSelectedOrder,
-    setSelectedCustomer,
-    setSelectedTracking,
+    setSelectedFilterStatus,
+    setSelectedFilterTracking,
     setSelectedPayment
 } = ordersSlice.actions;
 export default ordersSlice.reducer;
