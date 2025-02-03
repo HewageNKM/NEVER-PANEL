@@ -14,12 +14,14 @@ const SidebarItems = ({ toggleMobileSidebar }: any) => {
       <List sx={{ pt: 0 }} className="sidebarNav" component="div">
         {Menuitems.map((item) => {
           // {/********SubHeader**********/}
-          if (item.subheader) {
-            return <NavGroup item={item} key={item.subheader} />;
+          if (item.subHeader !== undefined) {
+              console.log("Group"+item.subHeader)
+            return <NavGroup item={item} key={item.subHeader} />;
 
             // {/********If Sub Menu**********/}
             /* eslint no-else-return: "off" */
           } else {
+              console.log(item)
             return (
               <NavItem
                 item={item}

@@ -6,6 +6,7 @@ import {useDispatch} from "react-redux";
 import {clearUser} from "@/lib/authSlice/authSlice";
 import {useRouter} from "next/navigation";
 import {auth} from "@/firebase/firebaseClient";
+import {IoPowerOutline} from "react-icons/io5";
 
 const Profile = () => {
     const [anchorEl2, setAnchorEl2] = useState(null);
@@ -43,14 +44,7 @@ const Profile = () => {
                 }}
                 onClick={handleClick2}
             >
-                <Avatar
-                    src="/images/profile/user-1.jpg"
-                    alt="image"
-                    sx={{
-                        width: 35,
-                        height: 35,
-                    }}
-                />
+              <IoPowerOutline size={30} color={"black"}/>
             </IconButton>
             {/* ------------------------------------------- */}
             {/* Message Dropdown */}
@@ -69,20 +63,13 @@ const Profile = () => {
                     },
                 }}
             >
-                <MenuItem>
-                    <ListItemIcon>
-                        <IconUser width={20}/>
-                    </ListItemIcon>
-                    <ListItemText>My Profile</ListItemText>
-                </MenuItem>
                 <Box mt={1} py={1} px={2}>
                     <Button
-                        variant="outlined"
                         onClick={handleLogout}
                         color="primary"
                         fullWidth
                     >
-                        Logout
+                        Proceed to Logout
                     </Button>
                 </Box>
             </Menu>

@@ -3,8 +3,8 @@ import PropTypes from 'prop-types';
 import { ListSubheader, styled, Theme } from '@mui/material';
 
 type NavGroup = {
-  navlabel?: boolean;
-  subheader?: string;
+  navLabel?: boolean;
+  subHeader?: string;
 };
 
 interface ItemType {
@@ -24,7 +24,7 @@ const NavGroup = ({ item }: ItemType) => {
     }),
   );
   return (
-    <ListSubheaderStyle>{item.subheader}</ListSubheaderStyle>
+    <ListSubheaderStyle>{item.subHeader}</ListSubheaderStyle>
   );
 };
 
