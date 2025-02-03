@@ -101,6 +101,11 @@ const TrackingFormDialog = ({
         }
     };
     const onClose = () => {
+        setFormData({
+            partner: "",
+            trackingNumber: "",
+            trackingUrl: "",
+        });
         onFormClose();
     }
     return (
@@ -194,7 +199,7 @@ const TrackingFormDialog = ({
             </DialogContent>
             <DialogActions>
                 <Button
-                    disabled={isLoading}
+                    disabled={isLoading || (status.toLowerCase() === selectedOrder?.tracking?.status.toLowerCase())}
                     className={"disabled:bg-opacity-60 disabled:cursor-not-allowed"}
                     variant="contained"
                     color="primary"
