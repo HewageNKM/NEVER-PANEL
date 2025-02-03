@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {Order, Tracking} from "@/interfaces";
 import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
@@ -10,7 +10,6 @@ import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import {Button, Grid, MenuItem, Select, TextField} from "@mui/material";
 import {orderStatus} from "@/constant";
-import {Timestamp} from "@firebase/firestore";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import {updateAOrder} from "@/actions/ordersActions";
 import {getOrders} from "@/lib/ordersSlice/ordersSlice";
@@ -101,8 +100,18 @@ const TrackingFormDialog = ({
         }
     };
     const onClose = () => {
+        setFormData({
+            partner: "",
+            trackingNumber: "",
+            trackingUrl: "",
+        });
         onFormClose();
     }
+
+    useEffect(() => {
+        setStatus(tracking?.status as orderStatus);
+    }, [tracking])
+
     return (
         <Dialog open={showForm} onClose={onClose} maxWidth="sm" fullWidth>
             <DialogTitle>
@@ -194,7 +203,7 @@ const TrackingFormDialog = ({
             </DialogContent>
             <DialogActions>
                 <Button
-                    disabled={isLoading}
+                    disabled={(status?.toString()?.toLowerCase() === selectedOrder?.tracking?.status?.toLowerCase()) || isLoading}
                     className={"disabled:bg-opacity-60 disabled:cursor-not-allowed"}
                     variant="contained"
                     color="primary"
