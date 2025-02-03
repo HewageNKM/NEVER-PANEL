@@ -74,7 +74,6 @@ const ordersSlice = createSlice({
         })
         builder.addCase(getOrders.fulfilled, (state, action) => {
             state.orders = action.payload;
-            state.isLoading = false;
             const ordersAction = action.payload;
             let orders: Order[] = []
 
@@ -113,10 +112,11 @@ const ordersSlice = createSlice({
                     break;
             }
             state.orders = orders;
-        }).addCase(getPayments.pending, (state) => {
-            state.isLoading = true;
-        }).addCase(getPayments.fulfilled, (state, action) => {
             state.isLoading = false;
+        }).addCase(getPayments.pending, (state) => {
+            state.isPaymentLoading = true;
+        }).addCase(getPayments.fulfilled, (state, action) => {
+            state.isPaymentLoading = false;
             state.payments = action.payload;
         })
     }

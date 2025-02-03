@@ -9,7 +9,7 @@ import SaleReport from "@/app/dashboard/reports/components/SaleReport";
 import {getCashReport, getExpenseReport, getMonthlyOverview, getSalesReport, getStocksReport} from "@/actions/reportsAction";
 import StockReport from "@/app/dashboard/reports/components/StockReport";
 import {SalesReport} from "@/interfaces";
-import CashReport from "@/app/dashboard/reports/components/CashReport";
+import CashStatementReport from "@/app/dashboard/reports/components/CashStatementReport";
 import ExpenseReport from "@/app/dashboard/reports/components/ExpenseReport";
 
 const Header = () => {
@@ -283,7 +283,7 @@ const Header = () => {
                                 </MenuItem>
                                 <MenuItem value={"sale"}>Sale</MenuItem>
                                 <MenuItem value={"stock"}>Stock</MenuItem>
-                                <MenuItem value={"cash"}>Cash</MenuItem>
+                                <MenuItem value={"cash"}>Statement</MenuItem>
                                 <MenuItem value={"expense"}>Expense</MenuItem>
                             </Select>
                         </Box>
@@ -332,7 +332,7 @@ const Header = () => {
                 return `${startDateString} - ${endDateString}`
             }}/>
             <StockReport show={showStockReport} setShow={() => setShowStockReport(false)} stocks={stocks}/>
-            <CashReport setShow={() => setShowCashReport(false)} cash={cash} show={showCashReport} date={() => {
+            <CashStatementReport setShow={() => setShowCashReport(false)} cash={cash} show={showCashReport} date={() => {
                 const startDate = fromDate?.toDate();
                 startDate?.setHours(0, 0, 0);  // Set time to 00:00:00
 

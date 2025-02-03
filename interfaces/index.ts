@@ -15,6 +15,7 @@ export interface User {
 export interface PaymentMethod{
     paymentId: string;
     name: string;
+    description: string;
     fee:number,
     status: "Active" | "Inactive";
     available: string[];

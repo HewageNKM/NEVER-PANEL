@@ -57,11 +57,32 @@ const OrderTable = () => {
         <Stack direction={"column"} gap={5}>
             <TableContainer component={Paper} sx={{
                 position: "relative",
+                borderRadius: 2,
+                boxShadow: 2,
+                overflow: "hidden"
             }}>
                 <Typography variant="h6" component="div" sx={{padding: 2}}>
                     Orders
                 </Typography>
-                <Table>
+                <Table
+                    sx={{
+                        minWidth: 650,
+                        "& thead": {
+                            backgroundColor: "#f5f5f5",
+                            "& th": {
+                                fontWeight: "bold",
+                                textTransform: "uppercase",
+                                fontSize: "0.875rem"
+                            }
+                        },
+                        "& tbody tr:nth-of-type(odd)": {
+                            backgroundColor: "#fafafa"
+                        },
+                        "& tbody tr:hover": {
+                            backgroundColor: "#f0f0f0"
+                        }
+                    }}
+                >
                     <TableHead>
                         <TableRow>
                             <TableCell>Order ID</TableCell>

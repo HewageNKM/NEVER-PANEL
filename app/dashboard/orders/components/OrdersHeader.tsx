@@ -16,8 +16,8 @@ import {DatePicker} from '@mui/x-date-pickers/DatePicker';
 import {LocalizationProvider} from '@mui/x-date-pickers';
 import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
 import {getOrdersByDate} from "@/actions/ordersActions";
-import PaymentTable from "@/app/dashboard/orders/components/PaymentTable";
-import PaymentMethodForm from "@/app/dashboard/orders/components/PaymentMethodForm";
+import PaymentTable from "@/app/dashboard/paymentAndShipping/components/PaymentTable";
+import PaymentMethodForm from "@/app/dashboard/paymentAndShipping/components/PaymentMethodForm";
 import {PaymentMethod} from "@/interfaces";
 import {paymentStatusList} from "@/constant";
 
@@ -25,7 +25,6 @@ const OrdersHeader = () => {
     const dispatch = useAppDispatch();
     const {currentUser} = useAppSelector(state => state.authSlice);
     const {selectedPage, size,selectedFilterStatus,selectedFilterTracking} = useAppSelector(state => state.ordersSlice);
-    const [showPaymentMethodForm, setShowPaymentMethodForm] = useState(false)
 
     const onSearch = async (evt) => {
         try {
@@ -74,62 +73,6 @@ const OrdersHeader = () => {
     }, [currentUser,selectedFilterTracking,selectedFilterStatus]);
     return (
         <Stack direction="column" spacing={2} alignItems="start" flexWrap={"wrap"} justifyContent="space-between" p={2}>
-            <Stack sx={{
-                width: "100%",
-                display: "flex",
-            }}>
-                <Stack
-                    sx={{
-                        width: "100%",
-                        display: "flex",
-                        gap: 2
-                    }}
-                >
-                    <Stack
-                        sx={{
-                            display: "flex",
-                            gap: 2,
-                            width: "100%",
-                            flexDirection: "row",
-                            justifyContent: "space-between"
-                        }}
-                    >
-                        <Box
-                            display={"flex"}
-                            flexDirection={"row"}
-                            justifyItems={"center"}
-                            alignItems={"center"}
-                            gap={2}
-                        >
-                            <Typography
-                                variant={"h5"}
-                            >
-                                Payment Methods
-                            </Typography>
-                            <IconButton
-                            >
-                                <IoRefreshCircle
-                                    size={30}
-                                />
-                            </IconButton>
-                        </Box>
-                        <IconButton
-                            onClick={() => setShowPaymentMethodForm(true)}
-                        >
-                            <IoAdd
-                                size={30}
-                                color={"#000"}
-                            />
-                        </IconButton>
-                    </Stack>
-                    <Stack>
-                        <PaymentTable onClick={(payment: PaymentMethod) => {
-                            dispatch(setSelectedPayment(payment))
-                            setShowPaymentMethodForm(true)
-                        }}/>
-                    </Stack>
-                </Stack>
-            </Stack>
             <Stack>
                 <Stack>
                     <Typography
@@ -208,13 +151,6 @@ const OrdersHeader = () => {
                     </LocalizationProvider>
                 </Stack>
             </Stack>
-            {showPaymentMethodForm && (<PaymentMethodForm
-                showPaymentMethodForm={showPaymentMethodForm}
-                onClose={() => {
-                    setShowPaymentMethodForm(false)
-                    dispatch(setSelectedPayment(null))
-                }}
-            />)}
         </Stack>
     );
 };

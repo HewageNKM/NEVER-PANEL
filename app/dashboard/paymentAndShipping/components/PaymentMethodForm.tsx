@@ -3,7 +3,16 @@ import Dialog from "@mui/material/Dialog";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import Button from "@mui/material/Button";
-import {Box, Checkbox, DialogActions, FormControlLabel, Switch, TextField, Typography} from "@mui/material";
+import {
+    Box,
+    Checkbox,
+    DialogActions,
+    FormControlLabel,
+    Switch,
+    TextareaAutosize,
+    TextField,
+    Typography
+} from "@mui/material";
 import {PaymentMethod} from "@/interfaces";
 import {createPaymentMethod, updatePaymentMethod} from "@/actions/paymentMethodAction";
 import {useDispatch, useSelector} from "react-redux";
@@ -46,6 +55,7 @@ const PaymentMethodForm = ({
                 const name = e.target.name.value.toString().toUpperCase();
                 const fee = Number.parseFloat(e.target.fee.value);
                 const status = e.target.status.checked ? "Active" : "Inactive";
+                const description = e.target.description.value.toString();
 
                 const updatedPaymentMethod: PaymentMethod = {
                     paymentId: id,
@@ -53,6 +63,7 @@ const PaymentMethodForm = ({
                     fee,
                     available,
                     status,
+                    description,
                     createdAt: selectedPayment.createdAt,
                     updatedAt: new Date().toISOString(),
                 };
@@ -89,7 +100,7 @@ const PaymentMethodForm = ({
         return "pm-" + Math.floor(100 + Math.random() * 900);
     }
     return (
-        <Dialog open={showPaymentMethodForm} onClose={onClose} maxWidth="md">
+        <Dialog open={showPaymentMethodForm} onClose={onClose} fullWidth>
             <DialogTitle>Payment Method Details</DialogTitle>
             <form onSubmit={handleSubmit}>
                 <DialogContent>
@@ -106,7 +117,7 @@ const PaymentMethodForm = ({
                     <Box mb={2}>
                         <TextField
                             name="name"
-                            label="Payment Method Name"
+                            label="Method Name"
                             placeholder="CASH, CARD, etc."
                             variant="outlined"
                             size="small"
@@ -114,6 +125,22 @@ const PaymentMethodForm = ({
                             fullWidth
                             disabled={isLoading}
                             required
+                        />
+                    </Box>
+                    <Box mb={2}>
+                        <TextareaAutosize
+                            minRows={5}
+                            style={{
+                                padding: "5px",
+                                width: "100%",
+                            }}
+                            name="description"
+                            placeholder="description"
+                            variant="outlined"
+                            size="small"
+                            defaultValue={selectedPayment?.description}
+                            fullWidth
+                            disabled={isLoading}
                         />
                     </Box>
                     <Box mb={2}>
