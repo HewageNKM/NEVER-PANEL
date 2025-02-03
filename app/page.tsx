@@ -5,45 +5,50 @@ import PageContainer from "@/app/dashboard/components/container/PageContainer";
 import Logo from "@/app/dashboard/layout/shared/logo/Logo";
 import AuthLogin from "./components/AuthLogin";
 import {authenticateUser} from "@/actions/authAction";
-import {useAppDispatch, useAppSelector} from "@/lib/hooks";
+import {useAppDispatch} from "@/lib/hooks";
 import {useRouter} from "next/navigation";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
-import {setUser} from "@/lib/authSlice/authSlice";
-import {useEffect} from "react";
+import {setLoading, setUser} from "@/lib/authSlice/authSlice";
+import {useEffect, useState} from "react";
 import {User} from "@/interfaces";
-import {setLoading} from "@/lib/authSlice/authSlice";
 
 const Login = () => {
     const dispatch = useAppDispatch();
     const router = useRouter();
-
-    const {loading, currentUser} = useAppSelector(state => state.authSlice);
-
+    const [isLoading, setIsLoading] = useState(true)
     const onFormSubmit = async (evt: any) => {
         evt.preventDefault();
-       dispatch(setLoading(true));
+        dispatch(setLoading(true));
         try {
             const email: string = evt.target.email.value;
             const password: string = evt.target.password.value;
-            const user:User = await authenticateUser(email, password);
-            if (user.role === "ADMIN"){
+            const user: User = await authenticateUser(email, password);
+            if (user.role === "ADMIN") {
                 dispatch(setUser(user))
+                window.localStorage.setItem("nvrUser", JSON.stringify(user));
                 router.replace("/dashboard");
-            }else {
+            } else {
                 alert("You are not authorized to access this page")
             }
         } catch (e: any) {
             console.log(e);
-        }finally {
+        } finally {
             dispatch(setLoading(false));
         }
     };
 
     useEffect(() => {
-        if (currentUser) {
-            router.replace("/dashboard")
+        try {
+            const user = window.localStorage.getItem("nvrUser");
+            if (user) {
+                router.replace("/dashboard");
+            }
+        } catch (e) {
+            console.log(e);
+        } finally {
+            setIsLoading(false);
         }
-    }, [currentUser]);
+    }, []);
 
     return (
         <PageContainer title="Login" description="this is Login page">
@@ -109,7 +114,7 @@ const Login = () => {
                         </Card>
                     </Grid>
                 </Grid>
-                {loading && <ComponentsLoader title="Loading User" position={"fixed"}/>}
+                {isLoading && <ComponentsLoader title="Loading User" position={"fixed"}/>}
             </Box>
         </PageContainer>
     );

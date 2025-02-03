@@ -14,8 +14,7 @@ const NotFound = () => {
                 <Box mb={2}> {/* Add margin to space out the elements */}
                     <Image src={"/images/backgrounds/404-error-idea.gif"} height={300} width={300} alt={"404"}/>
                 </Box>
-                <Typography variant="h1">Page Not Fo
-                    und</Typography>
+                <Typography variant="h1">Page Not Found</Typography>
                 <Typography variant="subtitle2">Sorry, but the page you were trying to view does not exist.</Typography>
             </Box>
             <Link href={"/"}><Typography variant="body1">Go Back</Typography></Link>

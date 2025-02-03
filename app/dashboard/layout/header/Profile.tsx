@@ -21,7 +21,7 @@ const Profile = () => {
     const handleLogout = async () => {
         try {
             await auth.signOut();
-            window.localStorage.removeItem("neverPanelUser");
+            window.localStorage.removeItem("nvrUser");
             dispatch(clearUser());
             router.replace("/");
         } catch (e: any) {

@@ -2,7 +2,6 @@
 import {baselightTheme} from "@/utils/theme/DefaultColors";
 import {ThemeProvider} from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
-import GlobalProvider from "@/components/GlobalProvider";
 import StoreProvider from "@/components/StoreProvider";
 
 export default function RootLayout({
@@ -14,13 +13,10 @@ export default function RootLayout({
         <html lang="en">
         <body>
         <StoreProvider>
-            <GlobalProvider>
-                <ThemeProvider theme={baselightTheme}>
-                    {/* CssBaseline kickstart an elegant, consistent, and simple baseline to build upon. */}
-                    <CssBaseline/>
-                    {children}
-                </ThemeProvider>
-            </GlobalProvider>
+            <ThemeProvider theme={baselightTheme}>
+                <CssBaseline/>
+                {children}
+            </ThemeProvider>
         </StoreProvider>
         </body>
         </html>

@@ -5,10 +5,11 @@ import {setUser} from '@/lib/authSlice/authSlice';
 import {onAuthStateChanged} from "@firebase/auth";
 import {auth} from "@/firebase/firebaseClient";
 import {checkUser} from "@/actions/authAction";
-
+import {useRouter} from "next/navigation";
 
 const GlobalProvider = ({children}: { children: ReactNode }) => {
     const dispatch = useDispatch();
+    const router = useRouter();
     useEffect(() => {
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -16,16 +17,27 @@ const GlobalProvider = ({children}: { children: ReactNode }) => {
                     const token = await user.getIdToken();
                     const newVar = await checkUser(user.uid, token);
                     if (newVar) {
+                        console.log("User found");
+                        window.localStorage.setItem("nvrUser", JSON.stringify(newVar));
                         dispatch(setUser(newVar));
                     } else {
                         dispatch(setUser(null));
+                        console.error("User not found");
+                        window.localStorage.removeItem("nvrUser");
+                        router.replace("/unauthorized");
                     }
                 } catch (e) {
                     dispatch(setUser(null));
+                    console.log("Error fetching user", e);
                     console.error(e);
+                    window.localStorage.removeItem("nvrUser");
+                    router.replace("/unauthorized");
                 }
             } else {
+                console.log("No user found");
+                window.localStorage.removeItem("nvrUser");
                 dispatch(setUser(null));
+                router.replace("/unauthorized");
             }
         })
     }, [])

@@ -11,7 +11,7 @@ import {
     setSelectedFilterTracking,
     setSelectedPayment
 } from "@/lib/ordersSlice/ordersSlice";
-import {getAlgoliaClient} from "@/lib/middleware";
+import {getAlgoliaClient} from "@/lib/algoliaConfig";
 import {DatePicker} from '@mui/x-date-pickers/DatePicker';
 import {LocalizationProvider} from '@mui/x-date-pickers';
 import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";

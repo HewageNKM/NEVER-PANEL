@@ -1,8 +1,24 @@
-import { NextResponse } from 'next/server';
+import {NextResponse} from 'next/server';
 
-export function middleware(req:Request) {
+export async function middleware(req: Request) {
     const origin = req.headers.get('origin');
 
+    // Define allowed origins
+    const allowedOrigins = ['https://admin.neverbe.lk'];
+
+    // Handle CORS for all requests
+    if (req.method === 'OPTIONS') {
+        return new NextResponse(null, {
+            status: 204,
+            headers: {
+                'Access-Control-Allow-Origin': origin && allowedOrigins.includes(origin) ? origin : '*',
+                'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE',
+                'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+            },
+        });
+    }
+
+    // Same-origin request handling
     if (!origin) {
         // No Origin header indicates a same-origin request
         console.log('Allowed: Same-origin request');

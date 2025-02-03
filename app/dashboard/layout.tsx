@@ -3,6 +3,7 @@ import { styled, Container, Box } from "@mui/material";
 import React, { useState } from "react";
 import Header from "./layout/header/Header";
 import Sidebar from "./layout/sidebar/Sidebar";
+import GlobalProvider from "@/components/GlobalProvider";
 
 
 const MainWrapper = styled("div")(() => ({
@@ -34,41 +35,43 @@ export default function RootLayout({
   const [isSidebarOpen, setSidebarOpen] = useState(true);
   const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   return (
-    <MainWrapper className="mainwrapper">
-      {/* ------------------------------------------- */}
-      {/* Sidebar */}
-      {/* ------------------------------------------- */}
-      <Sidebar
-        isSidebarOpen={isSidebarOpen}
-        isMobileSidebarOpen={isMobileSidebarOpen}
-        onSidebarClose={() => setMobileSidebarOpen(false)}
-      />
-      {/* ------------------------------------------- */}
-      {/* Main Wrapper */}
-      {/* ------------------------------------------- */}
-      <PageWrapper className="page-wrapper">
-        {/* ------------------------------------------- */}
-        {/* OrdersHeader */}
-        {/* ------------------------------------------- */}
-        <Header toggleMobileSidebar={() => setMobileSidebarOpen(true)} />
-        {/* ------------------------------------------- */}
-        {/* PageContent */}
-        {/* ------------------------------------------- */}
-        <Container
-          sx={{
-            paddingTop: "20px",
-            maxWidth: "1200px",
-          }}
-        >
-          {/* ------------------------------------------- */}
-          {/* Page Page */}
-          {/* ------------------------------------------- */}
-          <Box sx={{ minHeight: "calc(100vh - 170px)" }}>{children}</Box>
-          {/* ------------------------------------------- */}
-          {/* End Page */}
-          {/* ------------------------------------------- */}
-        </Container>
-      </PageWrapper>
-    </MainWrapper>
+      <GlobalProvider>
+          <MainWrapper className="mainwrapper">
+              {/* ------------------------------------------- */}
+              {/* Sidebar */}
+              {/* ------------------------------------------- */}
+              <Sidebar
+                  isSidebarOpen={isSidebarOpen}
+                  isMobileSidebarOpen={isMobileSidebarOpen}
+                  onSidebarClose={() => setMobileSidebarOpen(false)}
+              />
+              {/* ------------------------------------------- */}
+              {/* Main Wrapper */}
+              {/* ------------------------------------------- */}
+              <PageWrapper className="page-wrapper">
+                  {/* ------------------------------------------- */}
+                  {/* OrdersHeader */}
+                  {/* ------------------------------------------- */}
+                  <Header toggleMobileSidebar={() => setMobileSidebarOpen(true)} />
+                  {/* ------------------------------------------- */}
+                  {/* PageContent */}
+                  {/* ------------------------------------------- */}
+                  <Container
+                      sx={{
+                          paddingTop: "20px",
+                          maxWidth: "1200px",
+                      }}
+                  >
+                      {/* ------------------------------------------- */}
+                      {/* Page Page */}
+                      {/* ------------------------------------------- */}
+                      <Box sx={{ minHeight: "calc(100vh - 170px)" }}>{children}</Box>
+                      {/* ------------------------------------------- */}
+                      {/* End Page */}
+                      {/* ------------------------------------------- */}
+                  </Container>
+              </PageWrapper>
+          </MainWrapper>
+      </GlobalProvider>
   );
 }

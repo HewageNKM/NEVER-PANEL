@@ -11,7 +11,7 @@ import {
     setShowEditingForm
 } from "@/lib/inventorySlice/inventorySlice";
 import AddIcon from "@mui/icons-material/Add";
-import {getAlgoliaClient} from "@/lib/middleware";
+import {getAlgoliaClient} from "@/lib/algoliaConfig";
 
 const Header = () => {
     const dispatch = useAppDispatch();
