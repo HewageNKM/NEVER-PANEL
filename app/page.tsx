@@ -8,7 +8,7 @@ import {authenticateUser} from "@/actions/authAction";
 import {useAppDispatch} from "@/lib/hooks";
 import {useRouter} from "next/navigation";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
-import {setLoading, setUser} from "@/lib/authSlice/authSlice";
+import {setUser} from "@/lib/authSlice/authSlice";
 import {useEffect, useState} from "react";
 import {User} from "@/interfaces";
 
@@ -18,7 +18,7 @@ const Login = () => {
     const [isLoading, setIsLoading] = useState(true)
     const onFormSubmit = async (evt: any) => {
         evt.preventDefault();
-        dispatch(setLoading(true));
+        setIsLoading(true);
         try {
             const email: string = evt.target.email.value;
             const password: string = evt.target.password.value;
@@ -33,7 +33,7 @@ const Login = () => {
         } catch (e: any) {
             console.log(e);
         } finally {
-            dispatch(setLoading(false));
+            setIsLoading(false);
         }
     };
 
