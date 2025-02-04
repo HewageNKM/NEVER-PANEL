@@ -23,7 +23,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import {Img, Item, Size, Variant} from "@/interfaces";
 import Image from "next/image";
 import {IoCloudUpload, IoPencil, IoTrashBin} from "react-icons/io5";
-import {generateId} from "@/utils/genarateIds";
+import {generateId} from "@/utils/Generate";
 import {updateAItem, uploadAFile} from "@/actions/inventoryActions";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
 

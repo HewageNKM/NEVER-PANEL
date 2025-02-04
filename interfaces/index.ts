@@ -7,8 +7,7 @@ export interface User {
     username: string;
     email: string;
     role: string;
-    imageUrl: string;
-    status: "Active" | "Inactive";
+    status: "Active" | "Inactive" | "Pending";
 
     createdAt: Timestamp | string;
     updatedAt: Timestamp | string;

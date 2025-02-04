@@ -11,7 +11,7 @@ import {IoCloudUpload} from "react-icons/io5";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import {setItems, setSelectedItem, setShowEditingForm} from "@/lib/inventorySlice/inventorySlice";
 import {Item} from "@/interfaces";
-import {generateId} from "@/utils/genarateIds";
+import {generateId} from "@/utils/Generate";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
 import {addAItem, deleteAFile, updateAItem, uploadAFile} from '@/actions/inventoryActions';
 import Image from "next/image";

@@ -1,5 +1,5 @@
 "use client";
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
     Box,
     IconButton,
@@ -16,24 +16,47 @@ import {
     TableRow,
     Typography
 } from "@mui/material";
-import {IoPencil, IoTrash} from "react-icons/io5";
+import {IoAdd, IoPencil, IoTrash} from "react-icons/io5";
 import EmptyState from "@/app/components/EmptyState";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import {User} from "@/interfaces";
 import {getAllUsers, setSelectedPage, setSelectedSize, setSelectedUser} from '@/lib/usersSlice/usersSlice';
+import UserForm from "@/app/dashboard/users/components/UserForm";
+import {deleteUserById} from "@/actions/usersAction";
 
 const UserTable = () => {
-    const {users, loading, selectedPage, selectedSize,selectedRole,selectedStatus} = useAppSelector(state => state.usersSlice);
+    const {
+        users,
+        loading,
+        selectedPage,
+        selectedSize,
+        selectedRole,
+        selectedStatus,
+        selectedUser
+    } = useAppSelector(state => state.usersSlice);
     const {currentUser} = useAppSelector(state => state.authSlice);
+    const [showUserForm, setShowUserForm] = useState(false)
     const dispatch = useAppDispatch();
 
     useEffect(() => {
         if (currentUser) {
             dispatch(getAllUsers({size: selectedSize, page: selectedPage}));
         }
-    }, [currentUser, selectedSize, selectedPage,selectedRole,selectedStatus]);
+    }, [currentUser, selectedSize, selectedPage, selectedRole, selectedStatus]);
 
+    const onDelete = async (userId: string) => {
+        try {
+            const res = confirm("Are you sure you want to delete this user?");
+            if (res) {
+                await deleteUserById(userId);
+                setTimeout(() => {
+                    dispatch(getAllUsers({size: selectedSize, page: selectedPage}));
+                }, 2000);            }
+        } catch (e) {
+            console.error(e);
+        }
+    }
     return (
         <Stack direction={"column"} gap={5}>
             <TableContainer component={Paper} sx={{
@@ -42,9 +65,17 @@ const UserTable = () => {
                 boxShadow: 2,
                 overflow: "hidden"
             }}>
-                <Typography variant="h6" component="div" sx={{padding: 2}}>
-                    Orders
-                </Typography>
+                <Box flexDirection={"row"} display={"flex"} justifyContent={"space-between"} alignItems={"center"}>
+                    <Typography variant="h6" component="div" sx={{padding: 2}}>
+                        Orders
+                    </Typography>
+                    <IconButton
+                        onClick={() => setShowUserForm(true)}
+                        color={"primary"}
+                    >
+                        <IoAdd size={25}/>
+                    </IconButton>
+                </Box>
                 <Table
                     sx={{
                         minWidth: 650,
@@ -88,12 +119,17 @@ const UserTable = () => {
                                 <TableCell>{user.updatedAt}</TableCell>
                                 <TableCell>
                                     <Box flexDirection={"row"} display={"flex"} gap={1}>
-                                        <IconButton onClick={() => dispatch(setSelectedUser(user))}
-                                        color={"primary"}
+                                        <IconButton onClick={() => {
+                                            dispatch(setSelectedUser(user))
+                                            setShowUserForm(true)
+                                        }}
+                                                    color={"primary"}
                                         >
                                             <IoPencil size={25}/>
                                         </IconButton>
-                                        <IconButton color={"error"}>
+                                        <IconButton color={"error"}
+                                                    onClick={() => onDelete(user.userId)}
+                                        >
                                             <IoTrash size={25}/>
                                         </IconButton>
                                     </Box>
@@ -130,6 +166,16 @@ const UserTable = () => {
                 <Pagination count={10} variant="outlined" shape="rounded"
                             onChange={(event, page) => dispatch(setSelectedPage(page))}/>
             </Box>
+            {showUserForm && (
+                <UserForm
+                    user={selectedUser}
+                    showForm={showUserForm}
+                    onClose={() => {
+                        setShowUserForm(false)
+                        dispatch(setSelectedUser(null))
+                    }}
+                />
+            )}
         </Stack>
     );
 };

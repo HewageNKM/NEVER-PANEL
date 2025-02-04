@@ -2,7 +2,7 @@ import axios from "axios";
 import {getToken} from "@/firebase/firebaseClient";
 import {User} from "@/interfaces";
 
-export const getUsers = async (page:number,size:number) => {
+export const getUsers = async (page: number, size: number) => {
     try {
         const token = await getToken();
         const response = await axios({
@@ -17,17 +17,19 @@ export const getUsers = async (page:number,size:number) => {
         throw error;
     }
 }
-
-export const getUserById = async (id: string) => {
+export const addNewUser = async (data: User) => {
     try {
         const token = await getToken();
-        axios({
-            url: `/api/v1/users/${id}`,
-            method: "GET",
+        const response = await axios({
+            url: `/api/v1/users`,
+            method: "POST",
             headers: {
-                Authorization: `Bearer ${token}`
-            }
-        })
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            data: JSON.stringify(data)
+        });
+        return response.data;
     } catch (error: any) {
         throw error;
     }

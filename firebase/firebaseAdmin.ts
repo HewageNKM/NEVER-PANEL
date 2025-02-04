@@ -12,6 +12,7 @@ import {
 } from "@/interfaces";
 import {uuidv4} from "@firebase/util";
 import {Timestamp} from "firebase-admin/firestore";
+import {generateRandomPassword} from "@/utils/Generate";
 
 // Initialize Firebase Admin if not already initialized
 if (!admin.apps.length) {
@@ -870,15 +871,139 @@ export const getUsers = async (pageNumber: number = 1, size: number = 20) => {
                 updatedAt: doc.data().updatedAt.toDate().toLocaleString(),
             } as User);
         });
+        const listUsersResult = await admin.auth().listUsers();
+        const nonAnonymousUsers = listUsersResult.users.filter(user => user.providerData.length > 0);
+        console.log(`Fetched ${nonAnonymousUsers.length} users`);
 
+        // Remove users that exist same mail in the users collection
+        const uniqueUsers = nonAnonymousUsers.filter(user => !users.some(u => u.email === user.email));
+        console.log(`Fetched ${uniqueUsers.length} unique users`);
+
+        // add to users array
+        uniqueUsers.forEach(user => {
+            users.push({
+                userId: user.uid,
+                role: "Pending",
+                status: "Pending",
+                email: user.email,
+                username: user.displayName,
+                createdAt: user.metadata.creationTime?.toLocaleString(),
+                updatedAt: user.metadata.lastSignInTime?.toLocaleString(),
+            } as User)
+        })
         console.log(`Fetched ${users.length} users on page ${pageNumber}`);
         return users;
-
     } catch (error: any) {
         console.error(error);
         throw error
     }
 };
+
+export const deleteUser = async (userId: string) => {
+    try {
+        console.log(`Deleting user with ID: ${userId}`);
+        await admin.auth().deleteUser(userId);
+        const writeResult = await adminFirestore.collection('users').doc(userId).delete();
+        console.log(`User deleted successfully: ${writeResult.writeTime}`);
+        return writeResult.writeTime;
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+}
+
+export const addNewUser = async (user: User) => {
+    try {
+        console.log("Adding new user:", user.userId);
+        const password = generateRandomPassword(8);
+
+        // Start transaction
+        const result = await adminFirestore.runTransaction(async (transaction) => {
+            // Create Firebase Auth User
+            const userRecord = await admin.auth().createUser({
+                email: user.email,
+                displayName: user.username,
+                emailVerified: false,
+                password: password,
+                disabled: user.status === 'Inactive',
+            });
+
+            console.log(`User created successfully: ${userRecord.uid}`);
+
+            // Prepare Firestore User Document
+            const userDoc = {
+                ...user,
+                userId: userRecord.uid,
+                createdAt: admin.firestore.Timestamp.fromDate(new Date(user.createdAt)),
+                updatedAt: admin.firestore.Timestamp.fromDate(new Date(user.updatedAt)),
+            };
+
+            // Add user to Firestore inside transaction
+            transaction.set(adminFirestore.collection("users").doc(userRecord.uid), userDoc);
+            return userRecord.uid;
+        });
+
+        console.log(`User added successfully: ${result}`);
+
+        // Send Password Email outside of the transaction (since Firestore doesn't support email sending within transactions)
+        console.log("Sending Password to email:", user.email);
+        console.log("Template:", "passwordSend");
+
+        await adminFirestore.collection("mail").add({
+            to: user.email,
+            template: {
+                name: "passwordSend",
+                data: {
+                    email: user.email,
+                    password: password,
+                    name: user.username,
+                },
+            },
+        });
+
+        return result;
+    } catch (e) {
+        console.error("Error creating user:", e);
+        throw e;
+    }
+};
+export const updateUser = async (user: User) => {
+    const userRef = adminFirestore.collection("users").doc(user.userId);
+
+    try {
+        console.log(`Updating user with ID: ${user.userId}`);
+
+        const result = await adminFirestore.runTransaction(async (transaction) => {
+            // Fetch the existing user document
+            const userDoc = await transaction.get(userRef);
+            if (!userDoc.exists) {
+                throw new Error(`User with ID ${user.userId} does not exist.`);
+            }
+
+            // Update Firebase Authentication User
+            await admin.auth().updateUser(user.userId, {
+                displayName: user.username,
+                disabled: user.status === "Inactive",
+            });
+
+            // Update Firestore User Document
+            transaction.set(userRef, {
+                ...user,
+                createdAt: admin.firestore.Timestamp.fromDate(new Date(user.createdAt)), // Preserve original createdAt
+                updatedAt: admin.firestore.Timestamp.fromDate(new Date(user.updatedAt)), // Set updatedAt to current timestamp
+            }, { merge: true });
+
+            return user.userId;
+        });
+
+        console.log(`User updated successfully: ${result}`);
+        return result;
+    } catch (e) {
+        console.error("Error updating user:", e);
+        throw e;
+    }
+};
+
 export const getUserById = async (userId: string) => {
     try {
         const user = await adminFirestore.collection('users').doc(userId).get();
