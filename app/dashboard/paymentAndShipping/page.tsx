@@ -5,7 +5,6 @@ import PageContainer from "@/app/dashboard/components/container/PageContainer";
 
 import React from 'react';
 import Header from "@/app/dashboard/paymentAndShipping/components/Header";
-import PaymentTable from "@/app/dashboard/paymentAndShipping/components/PaymentTable";
 
 const Page = () => {
     return (
@@ -20,7 +19,7 @@ const Page = () => {
                         gap: 3
                     }}
                 >
-                    <Header />
+                    <Header/>
                 </Stack>
             </DashboardCard>
         </PageContainer>

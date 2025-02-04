@@ -1,17 +1,18 @@
-import React, {useState} from "react";
-import {Avatar, Box, Button, IconButton, ListItemIcon, ListItemText, Menu, MenuItem,} from "@mui/material";
-
-import {IconUser} from "@tabler/icons-react";
+"use client";
+import React, {useEffect, useState} from "react";
+import {Box, Button, IconButton, Menu, Stack, Typography,} from "@mui/material";
 import {useDispatch} from "react-redux";
 import {clearUser} from "@/lib/authSlice/authSlice";
 import {useRouter} from "next/navigation";
 import {auth} from "@/firebase/firebaseClient";
 import {IoPowerOutline} from "react-icons/io5";
+import {User} from "@/interfaces";
 
 const Profile = () => {
     const [anchorEl2, setAnchorEl2] = useState(null);
     const dispatch = useDispatch();
     const router = useRouter();
+    const [user, setUser] = useState<null|User>(null);
 
     const handleClick2 = (event: any) => {
         setAnchorEl2(event.currentTarget);
@@ -29,23 +30,34 @@ const Profile = () => {
             console.error(e)
         }
     }
+    useEffect(() => {
+        const user = window.localStorage.getItem("nvrUser");
+        if (user) {
+            setUser(JSON.parse(user));
+        }
+    }, []);
     return (
         <Box>
-            <IconButton
-                size="large"
-                aria-label="show 11 new notifications"
-                color="inherit"
-                aria-controls="msgs-menu"
-                aria-haspopup="true"
-                sx={{
-                    ...(typeof anchorEl2 === "object" && {
-                        color: "primary.main",
-                    }),
-                }}
-                onClick={handleClick2}
-            >
-              <IoPowerOutline size={30} color={"black"}/>
-            </IconButton>
+            <Stack flexDirection="row" alignItems="center">
+                <Typography variant="h6" color="secondary">
+                    {user?.username || "User"}
+                </Typography>
+                <IconButton
+                    size="large"
+                    aria-label="show 11 new notifications"
+                    color="inherit"
+                    aria-controls="msgs-menu"
+                    aria-haspopup="true"
+                    sx={{
+                        ...(typeof anchorEl2 === "object" && {
+                            color: "primary.main",
+                        }),
+                    }}
+                    onClick={handleClick2}
+                >
+                    <IoPowerOutline size={30} color={"black"}/>
+                </IconButton>
+            </Stack>
             {/* ------------------------------------------- */}
             {/* Message Dropdown */}
             {/* ------------------------------------------- */}
@@ -59,7 +71,7 @@ const Profile = () => {
                 transformOrigin={{horizontal: "right", vertical: "top"}}
                 sx={{
                     "& .MuiMenu-paper": {
-                        width: "200px",
+                        width: "100px",
                     },
                 }}
             >
@@ -67,9 +79,10 @@ const Profile = () => {
                     <Button
                         onClick={handleLogout}
                         color="primary"
+                        variant={"outlined"}
                         fullWidth
                     >
-                        Proceed to Logout
+                        Logout
                     </Button>
                 </Box>
             </Menu>

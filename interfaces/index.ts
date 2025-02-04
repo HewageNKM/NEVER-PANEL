@@ -3,6 +3,7 @@ import {firestore} from "firebase-admin";
 import Timestamp = firestore.Timestamp;
 
 export interface User {
+    userId: string;
     username: string;
     email: string;
     role: string;
