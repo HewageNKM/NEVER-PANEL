@@ -7,7 +7,8 @@ import {
     Order,
     PaymentMethod,
     SalesReport,
-    StocksReport
+    StocksReport,
+    User
 } from "@/interfaces";
 import {uuidv4} from "@firebase/util";
 import {Timestamp} from "firebase-admin/firestore";
@@ -851,7 +852,33 @@ export const getExpensesReport = async (from: string, to: string) => {
         throw e;
     }
 };
+export const getUsers = async (pageNumber: number = 1, size: number = 20) => {
+    try {
+        const offset = (pageNumber - 1) * size;
 
+        // Fetch users with pagination
+        const usersSnapshot = await adminFirestore.collection('users')
+            .limit(size)
+            .offset(offset)
+            .get();
+
+        const users: User[] = [];
+        usersSnapshot.forEach(doc => {
+            users.push({
+                ...doc.data(),
+                createdAt: doc.data().createdAt.toDate().toLocaleString(),
+                updatedAt: doc.data().updatedAt.toDate().toLocaleString(),
+            } as User);
+        });
+
+        console.log(`Fetched ${users.length} users on page ${pageNumber}`);
+        return users;
+
+    } catch (error: any) {
+        console.error(error);
+        throw error
+    }
+};
 export const getUserById = async (userId: string) => {
     try {
         const user = await adminFirestore.collection('users').doc(userId).get();
