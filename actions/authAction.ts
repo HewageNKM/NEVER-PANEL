@@ -8,7 +8,7 @@ export const authenticateUser = async (email: string, password: string) => {
         const token = await getToken()
         const response = await axios({
             method: 'GET',
-            url: `/api/v1/users/${credential.user.uid}`,
+            url: `/api/v1/users/login/${credential.user.uid}`,
             headers: {
                 Authorization: `Bearer ${token}`
             },
@@ -23,12 +23,11 @@ export const checkUser = async (uid:string,token:string) => {
     try {
         const response = await axios({
             method: 'GET',
-            url: `/api/v1/users/${uid}`,
+            url: `/api/v1/users/login/${uid}`,
             headers: {
                 Authorization: `Bearer ${token}`
             }
         });
-
         return response.data;
     }catch (e) {
         throw new Error(e.message);

@@ -1,5 +1,5 @@
 import {createSlice} from '@reduxjs/toolkit';
-import {User} from "@firebase/auth";
+import {User} from "@/interfaces";
 
 interface Interface {
     currentUser: User | null;

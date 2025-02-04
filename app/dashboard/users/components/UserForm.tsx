@@ -7,11 +7,11 @@ import DialogActions from "@mui/material/DialogActions";
 import {User} from "@/interfaces";
 import {addNewUser, updateUserById} from "@/actions/usersAction";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
-import { getAllUsers } from '@/lib/usersSlice/usersSlice';
+import {getAllUsers} from '@/lib/usersSlice/usersSlice';
 
 const UserForm = ({showForm, onClose, user}: { showForm: boolean, onClose: () => void, user: User | null }) => {
     const [isLoading, setIsLoading] = useState(false)
-
+    const {currentUser} = useAppSelector(state => state.authSlice);
 
     const [status, setStatus] = useState(user?.status)
     const [role, setRole] = useState(user?.role)
@@ -21,7 +21,7 @@ const UserForm = ({showForm, onClose, user}: { showForm: boolean, onClose: () =>
 
 
     const dispatch = useAppDispatch();
-    const {selectedSize,selectedPage} = useAppSelector(state => state.usersSlice);
+    const {selectedSize, selectedPage} = useAppSelector(state => state.usersSlice);
     const handleSubmit = async (evt) => {
         try {
             setIsLoading(true);
@@ -31,7 +31,7 @@ const UserForm = ({showForm, onClose, user}: { showForm: boolean, onClose: () =>
             const email: string = evt.target.email.value.toString();
             const status: string = evt.target.status.value.toString();
             const role: string = evt.target.role.value.toString().toUpperCase();
-            const usr:User ={
+            const usr: User = {
                 userId,
                 username,
                 email,
@@ -126,6 +126,11 @@ const UserForm = ({showForm, onClose, user}: { showForm: boolean, onClose: () =>
                                     defaultValue={role?.toLowerCase() || "user"}>
                                     <MenuItem value={"admin"}>Admin</MenuItem>
                                     <MenuItem value={"user"}>User</MenuItem>
+                                    <MenuItem value={"owner"}
+                                              disabled={
+                                                  currentUser?.role !== "OWNER"
+                                              }
+                                    >Owner</MenuItem>
                                 </Select>
                             </FormControl>
                         </Stack>

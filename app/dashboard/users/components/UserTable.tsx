@@ -119,7 +119,9 @@ const UserTable = () => {
                                 <TableCell>{user.updatedAt}</TableCell>
                                 <TableCell>
                                     <Box flexDirection={"row"} display={"flex"} gap={1}>
-                                        <IconButton onClick={() => {
+                                        <IconButton
+                                            disabled={currentUser?.role != "OWNER" && user.role == "OWNER"}
+                                            onClick={() => {
                                             dispatch(setSelectedUser(user))
                                             setShowUserForm(true)
                                         }}
@@ -128,6 +130,7 @@ const UserTable = () => {
                                             <IoPencil size={25}/>
                                         </IconButton>
                                         <IconButton color={"error"}
+                                                    disabled={(currentUser?.userId === user.userId) || (currentUser?.role != "OWNER" && user.role == "OWNER")}
                                                     onClick={() => onDelete(user.userId)}
                                         >
                                             <IoTrash size={25}/>

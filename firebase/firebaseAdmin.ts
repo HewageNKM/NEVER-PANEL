@@ -901,6 +901,17 @@ export const getUsers = async (pageNumber: number = 1, size: number = 20) => {
 
 export const deleteUser = async (userId: string) => {
     try {
+        const user = await adminFirestore.collection('users').doc(userId).get()
+        if (!user.exists) {
+            console.warn(`User with ID ${userId} not found`);
+            return null;
+        }
+
+        if (user?.data()?.role === 'OWNER') {
+            console.warn(`Cannot delete user with role ${user?.data()?.role}`);
+            throw new Error(`Cannot delete user with role ${user?.data()?.role}`);
+        }
+
         console.log(`Deleting user with ID: ${userId}`);
         await admin.auth().deleteUser(userId);
         const writeResult = await adminFirestore.collection('users').doc(userId).delete();
@@ -991,7 +1002,7 @@ export const updateUser = async (user: User) => {
                 ...user,
                 createdAt: admin.firestore.Timestamp.fromDate(new Date(user.createdAt)), // Preserve original createdAt
                 updatedAt: admin.firestore.Timestamp.fromDate(new Date(user.updatedAt)), // Set updatedAt to current timestamp
-            }, { merge: true });
+            }, {merge: true});
 
             return user.userId;
         });
@@ -1018,6 +1029,22 @@ export const getUserById = async (userId: string) => {
     }
 }
 
+export const loginUser = async (userId: string) => {
+    try {
+        console.log(`Logging in user with ID: ${userId}`);
+        const user = await admin.auth().getUser(userId);
+        const documentSnapshot = await adminFirestore.collection('users').where("userId", "==", user.uid).where("status", "==", "Active").limit(1).get();
+        if (documentSnapshot.empty) {
+            console.warn(`User with ID ${userId} not found`);
+            throw new Error(`User with ID ${userId} not found`);
+        }
+        return documentSnapshot.docs[0].data();
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+}
+
 export const authorizeRequest = async (req: any) => {
     try {
         const authHeader = req.headers.get("authorization");
@@ -1032,10 +1059,22 @@ export const authorizeRequest = async (req: any) => {
                 console.warn("Authorization Failed!");
                 return false;
             } else {
-                if (user.role === 'ADMIN') {
-                    console.log("Authorization Success!");
-                    return true;
+                if (user.status === 'Inactive') {
+                    console.log("User is inactive!");
+                    console.warn("Authorization Failed!");
+                    return false;
+                } else if (user.status === 'Active') {
+                    console.log("User is active!");
+                    if (user.role === 'ADMIN' || user.role === 'OWNER') {
+                        console.log("User is Admin!");
+                        return true;
+                    } else {
+                        console.log("User is not Admin!");
+                        console.warn("Authorization Failed!");
+                        return false;
+                    }
                 } else {
+                    console.log("User is pending!");
                     console.warn("Authorization Failed!");
                     return false;
                 }

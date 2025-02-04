@@ -24,13 +24,9 @@ const Login = () => {
             const email: string = evt.target.email.value;
             const password: string = evt.target.password.value;
             const user: User = await authenticateUser(email, password);
-            if (user.role === "ADMIN") {
-                dispatch(setUser(user))
-                window.localStorage.setItem("nvrUser", JSON.stringify(user));
-                router.replace("/dashboard");
-            } else {
-                alert("You are not authorized to access this page")
-            }
+            dispatch(setUser(user))
+            window.localStorage.setItem("nvrUser", JSON.stringify(user));
+            router.replace("/dashboard");
         } catch (e: any) {
             console.log(e);
         } finally {
