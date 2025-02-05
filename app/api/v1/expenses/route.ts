@@ -45,3 +45,4 @@ export const GET = async (req: Request) => {
         return NextResponse.json({message: 'Error getting expenses', error: error.message}, {status: 500});
     }
 }
+export const dynamic = "force-dynamic";
