@@ -12,7 +12,7 @@ import {
 } from "@/interfaces";
 import {uuidv4} from "@firebase/util";
 import {Timestamp} from "firebase-admin/firestore";
-import {generateRandomPassword} from "@/utils/Generate";
+import {generateRandomPassword, hashPassword} from "@/utils/Generate";
 
 // Initialize Firebase Admin if not already initialized
 if (!admin.apps.length) {
@@ -944,6 +944,7 @@ export const addNewUser = async (user: User) => {
             // Prepare Firestore User Document
             const userDoc = {
                 ...user,
+                password: hashPassword(password),
                 userId: userRecord.uid,
                 createdAt: admin.firestore.Timestamp.fromDate(new Date(user.createdAt)),
                 updatedAt: admin.firestore.Timestamp.fromDate(new Date(user.updatedAt)),
@@ -991,18 +992,44 @@ export const updateUser = async (user: User) => {
                 throw new Error(`User with ID ${user.userId} does not exist.`);
             }
 
-            // Update Firebase Authentication User
-            await admin.auth().updateUser(user.userId, {
+            let updateData = {
                 displayName: user.username,
                 disabled: user.status === "Inactive",
-            });
+            }
+            if (user?.password) {
+                const currentPasswordHash = hashPassword(user.currentPassword);
+                if (currentPasswordHash !== userDoc.data()?.password) {
+                    throw new Error("Current password does not match");
+                }
 
+                updateData = {
+                    ...updateData,
+                    password: user?.password
+                }
+                console.log("Updating password for user:", user.userId);
+            }
+            // Update Firebase Authentication User
+            await admin.auth().updateUser(user.userId, updateData);
+
+            let updatedUser = {
+                userId: user.userId,
+                email: user.email,
+                username: user.username,
+                role: user.role,
+                status: user.status,
+                createdAt: admin.firestore.Timestamp.fromDate(new Date(user.createdAt)),
+                updatedAt: admin.firestore.Timestamp.fromDate(new Date(user.updatedAt)),
+            }
+
+            if (user?.password) {
+                updatedUser = {
+                    ...updatedUser,
+                    password: hashPassword(user.password)
+                }
+                console.log("Password updated in Firestore successfully for user:", user.userId);
+            }
             // Update Firestore User Document
-            transaction.set(userRef, {
-                ...user,
-                createdAt: admin.firestore.Timestamp.fromDate(new Date(user.createdAt)), // Preserve original createdAt
-                updatedAt: admin.firestore.Timestamp.fromDate(new Date(user.updatedAt)), // Set updatedAt to current timestamp
-            }, {merge: true});
+            transaction.set(userRef, updatedUser, {merge: true});
 
             return user.userId;
         });
@@ -1022,7 +1049,12 @@ export const getUserById = async (userId: string) => {
             console.warn(`User with ID ${userId} not found`);
             return null;
         }
-        return user.data();
+        return {
+            ...user.data(),
+            createdAt: user.data()?.createdAt.toDate().toLocaleString(),
+            updatedAt: user.data()?.updatedAt.toDate().toLocaleString(),
+        } as User;
+
     } catch (error: any) {
         console.error(error);
         throw error
@@ -1038,7 +1070,11 @@ export const loginUser = async (userId: string) => {
             console.warn(`User with ID ${userId} not found`);
             throw new Error(`User with ID ${userId} not found`);
         }
-        return documentSnapshot.docs[0].data();
+        return {
+            ...documentSnapshot.docs[0].data(),
+            createdAt: documentSnapshot.docs[0].data().createdAt.toDate().toLocaleString(),
+            updatedAt: documentSnapshot.docs[0].data().updatedAt.toDate().toLocaleString(),
+        } as User;
     } catch (e) {
         console.error(e);
         throw e;

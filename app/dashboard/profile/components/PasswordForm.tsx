@@ -2,6 +2,10 @@ import React, {useState} from 'react';
 import {useAppSelector} from "@/lib/hooks";
 import {Box, Button, FormControl, IconButton, InputAdornment, Stack, TextField} from "@mui/material";
 import {IoEye, IoEyeOff} from "react-icons/io5";
+import {User} from "@/interfaces";
+import {updateUserById} from "@/actions/usersAction";
+import {sendPasswordResetEmail} from "@firebase/auth";
+import {auth} from "@/firebase/firebaseClient";
 
 const PasswordForm = () => {
     const {currentUser} = useAppSelector(state => state.authSlice);
@@ -13,14 +17,32 @@ const PasswordForm = () => {
     const onUpdate = async (evt) => {
         try {
             evt.preventDefault();
-            console.log("Updating password");
+            const currentPassword = evt.target.currentPassword.value.toString();
+            const newPassword = evt.target.newPassword.value.toString();
+            const confirmPassword = evt.target.confirmedPassword.value.toString();
+
+            if (newPassword !== confirmPassword) {
+                console.log("Passwords do not match");
+                return;
+            }
+
+            const newUser: User = {
+                ...currentUser,
+                password: newPassword,
+                currentPassword,
+                updatedAt: new Date().toISOString(),
+            }
+            await updateUserById(newUser);
+            evt.target.reset();
         } catch (e) {
             console.log(e);
         }
     }
-    const setPasswordResetLink = async () => {
+    const sentPasswordResetLink = async () => {
         try {
-            console.log("Setting password reset link");
+            const res = confirm("Are you sure you want to reset password?");
+            if (!res) return;
+            if (currentUser?.email) await sendPasswordResetEmail(auth, currentUser?.email);
         } catch (e) {
             console.log(e);
         }
@@ -45,15 +67,31 @@ const PasswordForm = () => {
                     }}
                 >
                     {[
-                        {label: "Current Password", show: showCurrentPassword, setShow: setShowCurrentPassword},
-                        {label: "New Password", show: showNewPassword, setShow: setShowNewPassword},
-                        {label: "Confirm Password", show: showConfirmPassword, setShow: setShowConfirmPassword},
-                    ].map(({label, show, setShow}, index) => (
+                        {
+                            label: "Current Password",
+                            show: showCurrentPassword,
+                            setShow: setShowCurrentPassword,
+                            name: "currentPassword"
+                        },
+                        {
+                            label: "New Password",
+                            show: showNewPassword,
+                            setShow: setShowNewPassword,
+                            name: "newPassword"
+                        },
+                        {
+                            label: "Confirm Password",
+                            show: showConfirmPassword,
+                            setShow: setShowConfirmPassword,
+                            name: "confirmedPassword"
+                        },
+                    ].map(({label, show, setShow, name}, index) => (
                         <FormControl key={index} sx={{width: "100%", maxWidth: 300}}>
                             <TextField
                                 required
                                 type={show ? "text" : "password"}
                                 label={label}
+                                name={name}
                                 variant="outlined"
                                 fullWidth
                                 inputProps={{
@@ -79,7 +117,7 @@ const PasswordForm = () => {
                 </Stack>
             </form>
             <Box>
-                <Button onClick={() => setPasswordResetLink}>
+                <Button onClick={() => sentPasswordResetLink()}>
                     Or reset by link?
                 </Button>
             </Box>

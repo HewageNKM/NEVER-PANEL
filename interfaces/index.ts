@@ -7,6 +7,8 @@ export interface User {
     username: string;
     email: string;
     role: string;
+    password?: string;
+    currentPassword?: string;
     status: "Active" | "Inactive" | "Pending";
 
     createdAt: Timestamp | string;
