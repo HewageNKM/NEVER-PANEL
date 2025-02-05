@@ -501,6 +501,7 @@ export const getOverview = async (start: Timestamp, end: Timestamp) => {
         })
 
         const totalProfit = totalEarnings - (buyingCost + totalDiscount + totalExpense);
+        totalEarnings = totalEarnings - totalDiscount
         console.log(`Fetched ${totalOrderCount} orders with total earnings: ${totalEarnings}, buying cost: ${buyingCost}, profit: ${totalProfit}, discount: ${totalDiscount}, expense: ${totalExpense}`);
 
         return {

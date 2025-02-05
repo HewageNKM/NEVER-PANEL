@@ -1,5 +1,4 @@
 import crypto from 'crypto';
-import {createHash} from "node:crypto";
 
 export const generateId = (type: string, name: string) => {
     switch (type) {
@@ -17,7 +16,7 @@ export const generateRandomPassword = (length = 12) => {
 }
 
 export const hashPassword = (password: string): string => {
-    const hash = createHash("sha256"); // Use a secure algorithm like SHA-256
+    const hash = crypto.createHash("sha256"); // Use a secure algorithm like SHA-256
     hash.update(password); // Add the password to the hash
     return hash.digest("hex"); // Return the hashed password as a hexadecimal string
 };

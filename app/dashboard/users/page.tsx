@@ -6,15 +6,6 @@ import {styled} from '@mui/material/styles';
 import Header from "@/app/dashboard/users/components/Header";
 import UserTable from "@/app/dashboard/users/components/UserTable";
 
-
-const Item = styled(Paper)(({theme}) => ({
-    ...theme.typography.body1,
-    textAlign: 'center',
-    color: theme.palette.text.secondary,
-    height: 60,
-    lineHeight: '60px',
-}));
-
 const Shadow = () => {
     return (
         <PageContainer title="Users" description="Users Management">

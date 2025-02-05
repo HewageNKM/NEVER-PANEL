@@ -57,10 +57,7 @@ const DailyEarnings = () => {
                             <span>Sale: </span> LKR {totalEarnings.toFixed(2)}
                         </Typography>
                         <Typography variant="h4" fontWeight="600" mt="-20px">
-                            <span>Discount: </span> -LKR {totalDiscount.toFixed(2)}
-                        </Typography>
-                        <Typography variant="h4" fontWeight="600" mt="-20px">
-                            <span>Net Sale:</span> LKR {(totalEarnings-totalDiscount).toFixed(2)}
+                            <span>Discount: </span> LKR {totalDiscount.toFixed(2)}
                         </Typography>
                         <Typography variant="h4" fontWeight="600" mt="-20px">
                             <span>Profit: </span> LKR {totalProfit.toFixed(2)}
