@@ -1,6 +1,6 @@
 "use client"
 import axios from "axios";
-import {auth, getToken} from "@/firebase/firebaseClient";
+import {getToken} from "@/firebase/firebaseClient";
 import {Item} from "@/interfaces";
 
 export const fetchInventory = async (size: number, page: number) => {
@@ -88,7 +88,7 @@ export const uploadAFile = async (file: File, path: string) => {
         throw new Error(e.response.data.message)
     }
 }
-export const deleteAItem = async (itemId:string) => {
+export const deleteAItem = async (itemId: string) => {
     try {
         const token = await getToken()
         const response = await axios({
@@ -102,12 +102,29 @@ export const deleteAItem = async (itemId:string) => {
         throw new Error(e.response.data.message)
     }
 }
-export const deleteAFile = async (path:string) => {
+export const deleteAFile = async (path: string) => {
     try {
         const token = await getToken()
         const response = await axios({
             method: 'DELETE',
             url: `/api/v1/storage?path=${path}`,
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+
+        return response.data;
+    } catch (e) {
+        throw new Error(e.response.data.message)
+    }
+}
+
+export const getPopularItems = async (size: number) => {
+    try {
+        const token = await getToken()
+        const response = await axios({
+            method: 'GET',
+            url: `/api/v1/inventory/popular?size=${size}`,
             headers: {
                 Authorization: `Bearer ${token}`
             }

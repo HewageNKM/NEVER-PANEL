@@ -6,6 +6,7 @@ import {
     Item,
     Order,
     PaymentMethod,
+    PopularItem,
     SalesReport,
     StocksReport,
     User
@@ -302,6 +303,39 @@ export const deleteItemById = async (itemId: string) => {
     }
 };
 
+export const getPopularItems = async (limit: number = 10) => {
+    try {
+        console.log('Fetching popular items');
+        const orders = await adminFirestore.collection('orders').where('paymentStatus', '==', 'Paid').get();
+        const itemsMap = new Map<string, number>();
+        orders.forEach((doc) => {
+            const order = doc.data() as Order;
+            order.items.forEach((item) => {
+                const count = itemsMap.get(item.itemId) || 0;
+                itemsMap.set(item.itemId, count + item.quantity);
+            });
+        });
+        console.log(`Fetched ${itemsMap.size} items sold`);
+        const itemIds = Array.from(itemsMap.keys());
+        const itemDocs = await Promise.all(itemIds.map((itemId) => adminFirestore.collection('inventory').doc(itemId).get()));
+        const popularItem: PopularItem[] = itemDocs.map((doc) => {
+            const item = doc.data() as Item;
+            return {
+                item: {
+                    ...item,
+                    createdAt: item.createdAt.toDate().toLocaleString(),
+                    updatedAt: item.updatedAt.toDate().toLocaleString(),
+                },
+                soldCount: itemsMap.get(item.itemId) || 0,
+            };
+        });
+        console.log(`Fetched ${popularItem.length} popular items`);
+        popularItem.sort((a, b) => b.soldCount - a.soldCount);
+        return popularItem.slice(0, limit);
+    } catch (e) {
+        throw e
+    }
+}
 export const getSaleReport = async (fromDate: string, toDate: string) => {
     try {
         console.log(`Fetching sales data from ${fromDate} to ${toDate}`);
