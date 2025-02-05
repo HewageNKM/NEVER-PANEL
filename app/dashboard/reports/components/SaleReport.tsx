@@ -183,16 +183,31 @@ const SaleReport: React.FC<SaleReportProps> = ({show, setShow, sales, date}) => 
                                     </React.Fragment>
                                 );
                             })}
+                            <TableRow style={{fontWeight: "bold", backgroundColor: "#f5f5f5"}}>
+                                <TableCell
+                                    colSpan={7}
+                                    align="right"
+                                    style={{color: "#ff0020", fontSize: "1.1em"}}
+                                >
+                                    Total Discount
+                                </TableCell>
+                                <TableCell
+                                    colSpan={4}
+                                    style={{textAlign: "center", color: "#ff0000", fontSize: "1.1em"}}
+                                >
+                                    -{(sales?.totalDiscount || 0).toFixed(2)}
+                                </TableCell>
+                            </TableRow>
                             <TableRow style={{fontWeight: "bold", backgroundColor: "#e0e0e0"}}>
                                 <TableCell
                                     colSpan={7}
                                     align="right"
-                                    style={{textTransform: "uppercase", color: "#d32f2f", fontSize: "1.1em"}}
+                                    style={{textTransform: "uppercase", color: "#000000", fontSize: "1.1em"}}
                                 >
                                     Totals
                                 </TableCell>
                                 <TableCell>{totalQuantity}</TableCell>
-                                <TableCell>{totalSales.toFixed(2)}</TableCell>
+                                <TableCell>{(totalSales-(sales?.totalDiscount || 0)).toFixed(2)}</TableCell>
                                 <TableCell>{totalCost.toFixed(2)}</TableCell>
                                 <TableCell>{(totalProfit - (sales?.totalDiscount || 0)).toFixed(2)}</TableCell>
                             </TableRow>
@@ -209,21 +224,6 @@ const SaleReport: React.FC<SaleReportProps> = ({show, setShow, sales, date}) => 
                                     style={{textAlign: "center", color: "#3f51b5", fontSize: "1.1em"}}
                                 >
                                     {sales?.totalOrders || 0}
-                                </TableCell>
-                            </TableRow>
-                            <TableRow style={{fontWeight: "bold", backgroundColor: "#f5f5f5"}}>
-                                <TableCell
-                                    colSpan={7}
-                                    align="right"
-                                    style={{color: "#3f51b5", fontSize: "1.1em"}}
-                                >
-                                    Total Discount
-                                </TableCell>
-                                <TableCell
-                                    colSpan={4}
-                                    style={{textAlign: "center", color: "#3f51b5", fontSize: "1.1em"}}
-                                >
-                                    {(sales?.totalDiscount || 0).toFixed(2)}
                                 </TableCell>
                             </TableRow>
                         </TableBody>
