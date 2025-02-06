@@ -16,7 +16,7 @@ import {CircularProgress, Typography} from "@mui/material";
 import {collection, limit, onSnapshot, orderBy, query, where} from "@firebase/firestore";
 import {db} from "@/firebase/firebaseClient";
 import {Order} from "@/interfaces";
-import {useSnackbar} from "@/components/SnackBarContext";
+import {useSnackbar} from "@/contexts/SnackBarContext";
 
 const RecentTransactions = () => {
     const [orders, setOrders] = useState<Order[]>([]);
@@ -38,7 +38,7 @@ const RecentTransactions = () => {
             return () => unsubscribe();
         } catch (e) {
             console.error(e);
-            showNotification(error.message, "error");
+            showNotification(e.message, "error");
         }
     }, []);
 

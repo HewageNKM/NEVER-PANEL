@@ -6,7 +6,7 @@ import dynamic from "next/dynamic";
 import {collection, getDocs, query, Timestamp, where} from "@firebase/firestore";
 import {db} from "@/firebase/firebaseClient";
 import {useAppSelector} from "@/lib/hooks";
-import {useSnackbar} from "@/components/SnackBarContext";
+import {useSnackbar} from "@/contexts/SnackBarContext";
 
 const Chart = dynamic(() => import("react-apexcharts"), {ssr: false});
 

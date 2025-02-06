@@ -15,7 +15,8 @@ import {deleteAItem} from "@/actions/inventoryActions";
 import {getInventoryItems} from "@/lib/inventorySlice/inventorySlice";
 import {useRouter} from "next/navigation";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
-import {useSnackbar} from "@/components/SnackBarContext";
+import {useSnackbar} from "@/contexts/SnackBarContext";
+import {useConfirmationDialog} from "@/contexts/ConfirmationDialogContext";
 
 const ItemCard = ({item, onEdit}: { item: Item, onEdit: any }) => {
     const [showConfirmedDialog, setShowConfirmedDialog] = useState(false);
@@ -24,28 +25,41 @@ const ItemCard = ({item, onEdit}: { item: Item, onEdit: any }) => {
     const dispatch = useAppDispatch();
     const router = useRouter();
     const {showNotification} = useSnackbar();
+    const {showConfirmation} = useConfirmationDialog();
 
     const deleteItem = async () => {
-        try {
-            setIsLoading(true);
-            setShowConfirmedDialog(false);
-            await deleteAItem(item.itemId);
-        } catch (e: any) {
-            console.error(e)
-            showNotification(e.message,"error")
-        } finally {
-            setIsLoading(false);
-            dispatch(getInventoryItems({size: size, page: page}))
-        }
+        showConfirmation({
+            title: "Delete Item",
+            message: "Are you sure you want to delete this item? This action cannot be undone and will also delete all associated variants and files with immediate effect.",
+            onSuccess: async () => {
+                try {
+                    setIsLoading(true);
+                    setShowConfirmedDialog(false);
+                    await deleteAItem(item.itemId);
+                } catch (e: any) {
+                    console.error(e)
+                    showNotification(e.message, "error")
+                } finally {
+                    setIsLoading(false);
+                    dispatch(getInventoryItems({size: size, page: page}))
+                }
+            }
+        })
     };
 
-
+    const editItem = () => {
+        showConfirmation({
+            title: "Edit Item",
+            message: "Editing an item has serious consequences. Are you sure you want to edit this item?",
+            onSuccess: async () => onEdit()
+        })
+    }
     return (
         <Card
             sx={{
                 position: "relative",
                 maxWidth: 170,
-                minWidth:170,
+                minWidth: 170,
                 borderRadius: 2,
                 boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.1)",
                 transition: "transform 0.2s ease",
@@ -104,7 +118,8 @@ const ItemCard = ({item, onEdit}: { item: Item, onEdit: any }) => {
                             color: "text.primary",
                         }}
                     >
-                        Selling: LKR {Math.round((item.sellingPrice - (item.discount * item.sellingPrice / 100)) / 10) * 10}
+                        Selling:
+                        LKR {Math.round((item.sellingPrice - (item.discount * item.sellingPrice / 100)) / 10) * 10}
                     </Typography>
                     <Typography
                         sx={{
@@ -116,10 +131,10 @@ const ItemCard = ({item, onEdit}: { item: Item, onEdit: any }) => {
                     </Typography>
                 </Box>
                 <Box mt={3}>
-                    <Typography sx={{ color: item.status === "Active" ? "green" : "red" }}>
+                    <Typography sx={{color: item.status === "Active" ? "green" : "red"}}>
                         Status: {item.status}
                     </Typography>
-                    <Typography sx={{ color: item.listing === "Active" ? "green" : "red" }}>
+                    <Typography sx={{color: item.listing === "Active" ? "green" : "red"}}>
                         Listings: {item.listing}
                     </Typography>
                 </Box>
@@ -180,7 +195,8 @@ const ItemCard = ({item, onEdit}: { item: Item, onEdit: any }) => {
                 </Typography>
             </Box>
             <CardActions sx={{justifyContent: "space-between", px: 2, pb: 2}}>
-                <Button variant="text" color="primary" size="small" startIcon={<IoPencil size={18}/>} onClick={onEdit}>
+                <Button variant="text" color="primary" size="small" startIcon={<IoPencil size={18}/>}
+                        onClick={() => editItem()}>
                     Edit
                 </Button>
                 <Button disabled onClick={() => setShowConfirmedDialog(true)} variant="text" color="error" size="small"

@@ -4,7 +4,7 @@ import DashboardCard from "../shared/DashboardCard";
 import {useEffect, useState} from "react";
 import {useAppSelector} from "@/lib/hooks";
 import {getDailyOverview} from "@/actions/reportsAction";
-import {useSnackbar} from "@/components/SnackBarContext"; // Ensure the correct path to your interfaces
+import {useSnackbar} from "@/contexts/SnackBarContext"; // Ensure the correct path to your interfaces
 
 const DailyEarnings = () => {
     const [totalEarnings, setTotalEarnings] = useState(0);

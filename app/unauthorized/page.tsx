@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from "next/link";
 
 const Page = () => {
     return (
@@ -25,7 +26,7 @@ const Page = () => {
                 }}>
                     You don&apos;t have permission to access this page.
                 </p>
-                <a href="/"
+                <Link href="/"
                    style={{
                           color: "#fff",
                           backgroundColor: "#333",
@@ -37,7 +38,7 @@ const Page = () => {
                    }}
                 >
                     Go to Login
-                </a>
+                </Link>
             </div>
         </main>
     );

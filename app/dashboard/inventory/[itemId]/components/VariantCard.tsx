@@ -10,7 +10,7 @@ import {setItem, setSelectedVariant, setShowEditingForm} from "@/lib/itemDetails
 import {useAppSelector} from "@/lib/hooks";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
 import {deleteAFile, updateAItem} from "@/actions/inventoryActions";
-import {useSnackbar} from "@/components/SnackBarContext";
+import {useSnackbar} from "@/contexts/SnackBarContext";
 
 const VariantCard = ({variant}: { variant: Variant }) => {
     const {item} = useAppSelector(state => state.itemDetailsSlice);

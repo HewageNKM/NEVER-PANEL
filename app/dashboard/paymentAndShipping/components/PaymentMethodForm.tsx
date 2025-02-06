@@ -18,7 +18,7 @@ import {createPaymentMethod, updatePaymentMethod} from "@/actions/paymentMethodA
 import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch, RootState} from "@/lib/store";
 import { getPayments } from "@/lib/ordersSlice/ordersSlice";
-import {useSnackbar} from "@/components/SnackBarContext";
+import {useSnackbar} from "@/contexts/SnackBarContext";
 
 const PaymentMethodForm = ({
 

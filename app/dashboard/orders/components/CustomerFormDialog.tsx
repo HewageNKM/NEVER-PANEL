@@ -14,7 +14,7 @@ import CardActions from "@mui/material/CardActions";
 import {updateAOrder} from "@/actions/ordersActions";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import {getOrders} from "@/lib/ordersSlice/ordersSlice";
-import { useSnackbar } from '@/components/SnackBarContext';
+import { useSnackbar } from '@/contexts/SnackBarContext';
 
 const CustomerFormDialog = ({customer, showForm, onClose}: {
     customer: Customer | null,

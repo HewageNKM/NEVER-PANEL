@@ -11,7 +11,7 @@ import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { Order } from "@/interfaces";
 import { updateAOrder } from "@/actions/ordersActions";
 import { getOrders } from "@/lib/ordersSlice/ordersSlice";
-import {useSnackbar} from "@/components/SnackBarContext";
+import {useSnackbar} from "@/contexts/SnackBarContext";
 
 const PaymentStatusFormDialog = ({ initialStatus, showForm, onClose }: {
     initialStatus: string;

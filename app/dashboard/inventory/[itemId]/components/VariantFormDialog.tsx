@@ -26,7 +26,7 @@ import {IoCloudUpload, IoPencil, IoTrashBin} from "react-icons/io5";
 import {generateId} from "@/utils/Generate";
 import {deleteAFile, updateAItem, uploadAFile} from "@/actions/inventoryActions";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
-import {useSnackbar} from "@/components/SnackBarContext";
+import {useSnackbar} from "@/contexts/SnackBarContext";
 
 const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',

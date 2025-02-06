@@ -20,7 +20,7 @@ import PaymentTable from "@/app/dashboard/paymentAndShipping/components/PaymentT
 import PaymentMethodForm from "@/app/dashboard/paymentAndShipping/components/PaymentMethodForm";
 import {PaymentMethod} from "@/interfaces";
 import {paymentStatusList} from "@/constant";
-import {useSnackbar} from "@/components/SnackBarContext";
+import {useSnackbar} from "@/contexts/SnackBarContext";
 
 const OrdersHeader = () => {
     const dispatch = useAppDispatch();

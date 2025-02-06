@@ -24,7 +24,8 @@ import {User} from "@/interfaces";
 import {getAllUsers, setSelectedPage, setSelectedSize, setSelectedUser} from '@/lib/usersSlice/usersSlice';
 import UserForm from "@/app/dashboard/users/components/UserForm";
 import {deleteUserById} from "@/actions/usersAction";
-import {useSnackbar} from "@/components/SnackBarContext";
+import {useSnackbar} from "@/contexts/SnackBarContext";
+import {useConfirmationDialog} from "@/contexts/ConfirmationDialogContext";
 
 const UserTable = () => {
     const {
@@ -40,6 +41,7 @@ const UserTable = () => {
     const [showUserForm, setShowUserForm] = useState(false)
     const dispatch = useAppDispatch();
     const {showNotification} = useSnackbar();
+    const {showConfirmation} = useConfirmationDialog();
 
     useEffect(() => {
         if (currentUser) {
@@ -48,17 +50,32 @@ const UserTable = () => {
     }, [currentUser, selectedSize, selectedPage, selectedRole, selectedStatus]);
 
     const onDelete = async (userId: string) => {
-        try {
-            const res = confirm("Are you sure you want to delete this user?");
-            if (res) {
-                await deleteUserById(userId);
-                setTimeout(() => {
-                    dispatch(getAllUsers({size: selectedSize, page: selectedPage}));
-                }, 2000);            }
-        } catch (e) {
-            console.error(e);
-            showNotification(e.message, "error");
-        }
+        showConfirmation({
+            title: "Delete User",
+            message: "Deleting an user has serious consequences. Are you sure you want to delete this user?",
+            onSuccess: async () => {
+                try {
+                    await deleteUserById(userId);
+                    await deleteUserById(userId);
+                    setTimeout(() => {
+                        dispatch(getAllUsers({size: selectedSize, page: selectedPage}));
+                    }, 2000);
+                } catch (e) {
+                    console.error(e);
+                    showNotification(e.message, "error");
+                }
+            }
+        });
+    }
+    const onEdit = (user:User) => {
+        showConfirmation({
+            title: "Edit User",
+            message: "Editing an user has serious consequences. Are you sure you want to edit this user?",
+            onSuccess: async () => {
+                dispatch(setSelectedUser(user))
+                setShowUserForm(true)
+            }
+        })
     }
     return (
         <Stack direction={"column"} gap={5}>
@@ -124,11 +141,8 @@ const UserTable = () => {
                                     <Box flexDirection={"row"} display={"flex"} gap={1}>
                                         <IconButton
                                             disabled={currentUser?.role != "OWNER" && user.role == "OWNER"}
-                                            onClick={() => {
-                                            dispatch(setSelectedUser(user))
-                                            setShowUserForm(true)
-                                        }}
-                                                    color={"primary"}
+                                            onClick={() => onEdit(user)}
+                                            color={"primary"}
                                         >
                                             <IoPencil size={25}/>
                                         </IconButton>

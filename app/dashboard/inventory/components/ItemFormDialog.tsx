@@ -15,7 +15,7 @@ import {generateId} from "@/utils/Generate";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
 import {addAItem, deleteAFile, updateAItem, uploadAFile} from '@/actions/inventoryActions';
 import Image from "next/image";
-import {useSnackbar} from "@/components/SnackBarContext";
+import {useSnackbar} from "@/contexts/SnackBarContext";
 
 const ItemFormDialog = () => {
     const dispatch = useAppDispatch();

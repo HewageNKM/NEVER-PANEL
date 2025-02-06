@@ -7,12 +7,14 @@ import {useRouter} from "next/navigation";
 import {auth} from "@/firebase/firebaseClient";
 import {IoPowerOutline} from "react-icons/io5";
 import {User} from "@/interfaces";
+import {useSnackbar} from "@/contexts/SnackBarContext";
 
 const Profile = () => {
     const [anchorEl2, setAnchorEl2] = useState(null);
     const dispatch = useDispatch();
     const router = useRouter();
     const [user, setUser] = useState<null|User>(null);
+    const {showNotification} = useSnackbar();
 
     const handleClick2 = (event: any) => {
         setAnchorEl2(event.currentTarget);
@@ -27,6 +29,7 @@ const Profile = () => {
             dispatch(clearUser());
             router.replace("/");
         } catch (e: any) {
+            showNotification(e.message, "error");
             console.error(e)
         }
     }

@@ -3,7 +3,8 @@ import {baselightTheme} from "@/utils/theme/DefaultColors";
 import {ThemeProvider} from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 import StoreProvider from "@/components/StoreProvider";
-import { SnackbarProvider } from "@/components/SnackBarContext";
+import { SnackbarProvider } from "@/contexts/SnackBarContext";
+import {ConfirmationDialogProvider} from "@/contexts/ConfirmationDialogContext";
 
 export default function RootLayout({
                                        children,
@@ -15,10 +16,12 @@ export default function RootLayout({
         <body>
         <StoreProvider>
             <SnackbarProvider>
-                <ThemeProvider theme={baselightTheme}>
-                    <CssBaseline/>
-                    {children}
-                </ThemeProvider>
+                <ConfirmationDialogProvider>
+                    <ThemeProvider theme={baselightTheme}>
+                        <CssBaseline/>
+                        {children}
+                    </ThemeProvider>
+                </ConfirmationDialogProvider>
             </SnackbarProvider>
         </StoreProvider>
         </body>

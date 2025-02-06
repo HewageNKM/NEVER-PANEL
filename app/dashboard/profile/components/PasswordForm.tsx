@@ -6,7 +6,8 @@ import {User} from "@/interfaces";
 import {updateUserById} from "@/actions/usersAction";
 import {sendPasswordResetEmail} from "@firebase/auth";
 import {auth} from "@/firebase/firebaseClient";
-import {useSnackbar} from "@/components/SnackBarContext";
+import {useSnackbar} from "@/contexts/SnackBarContext";
+import {useConfirmationDialog} from "@/contexts/ConfirmationDialogContext";
 
 const PasswordForm = () => {
     const {currentUser} = useAppSelector(state => state.authSlice);
@@ -15,42 +16,62 @@ const PasswordForm = () => {
     const [showCurrentPassword, setShowCurrentPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false)
     const {showNotification} = useSnackbar();
+    const {showConfirmation} = useConfirmationDialog();
 
     const onUpdate = async (evt) => {
-        try {
-            evt.preventDefault();
-            setIsLoading(true);
-            const currentPassword = evt.target.currentPassword.value.toString();
-            const newPassword = evt.target.newPassword.value.toString();
-            const confirmPassword = evt.target.confirmedPassword.value.toString();
+        evt.preventDefault();
+        setIsLoading(true);
+        showConfirmation({
+            title: "Update Password",
+            message: "This action take an immediate effect. Are you sure you want to update your password?",
+            onSuccess: async () => {
+                try {
+                    const currentPassword = evt.target.currentPassword.value.toString();
+                    const newPassword = evt.target.newPassword.value.toString();
+                    const confirmPassword = evt.target.confirmedPassword.value.toString();
 
-            if (newPassword !== confirmPassword) {
-                showNotification("Passwords do not match", "warning");
-                return;
-            }
+                    if (newPassword !== confirmPassword) {
+                        showNotification("Passwords do not match", "warning");
+                        return;
+                    }
 
-            const newUser: User = {
-                ...currentUser,
-                password: newPassword,
-                currentPassword,
-                updatedAt: new Date().toISOString(),
+                    const newUser: User = {
+                        ...currentUser,
+                        password: newPassword,
+                        currentPassword,
+                        updatedAt: new Date().toISOString(),
+                    }
+                    await updateUserById(newUser);
+                    evt.target.reset();
+                    showNotification("Password updated successfully", "success");
+                } catch (e) {
+                    console.log(e);
+                    showNotification(e.message, "error");
+                } finally {
+                    setIsLoading(false);
+                }
+            },
+            onClose: () => {
             }
-            await updateUserById(newUser);
-            evt.target.reset();
-            showNotification("Password updated successfully", "success");
-        } catch (e) {
-            console.log(e);
-            showNotification(e.message, "error");
-        }finally {
-            setIsLoading(false);
-        }
+        })
     }
     const sentPasswordResetLink = async () => {
         try {
-            const res = confirm("Are you sure you want to reset password?");
-            if (!res) return;
-            if (currentUser?.email) await sendPasswordResetEmail(auth, currentUser?.email);
-            showNotification("Password reset link sent successfully", "success");
+            showConfirmation({
+                title: "Reset Password",
+                message: "Are you sure you want to reset your password? A reset link will be sent to your email.",
+                onSuccess: async () => {
+                    try {
+                        if (currentUser?.email) await sendPasswordResetEmail(auth, currentUser?.email);
+                        showNotification("Password reset link sent successfully", "success");
+                    } catch (e) {
+                        console.log(e);
+                        showNotification(e.message, "error");
+                    }
+                },
+                onClose: () => {
+                }
+            })
         } catch (e) {
             console.log(e);
             showNotification(e.message, "error");

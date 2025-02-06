@@ -11,7 +11,7 @@ import ComponentsLoader from "@/app/components/ComponentsLoader";
 import {setUser} from "@/lib/authSlice/authSlice";
 import {useEffect, useState} from "react";
 import {User} from "@/interfaces";
-import {useSnackbar} from "@/components/SnackBarContext";
+import {useSnackbar} from "@/contexts/SnackBarContext";
 
 const Login = () => {
     const dispatch = useAppDispatch();

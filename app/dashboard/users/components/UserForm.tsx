@@ -8,7 +8,7 @@ import {User} from "@/interfaces";
 import {addNewUser, updateUserById} from "@/actions/usersAction";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import {getAllUsers} from '@/lib/usersSlice/usersSlice';
-import {useSnackbar} from "@/components/SnackBarContext";
+import {useSnackbar} from "@/contexts/SnackBarContext";
 
 const UserForm = ({showForm, onClose, user}: { showForm: boolean, onClose: () => void, user: User | null }) => {
     const [isLoading, setIsLoading] = useState(false)

@@ -20,7 +20,7 @@ import dayjs from "dayjs";
 import { addNewExpense, getAllExpenses, getAllExpensesByDate } from "@/actions/expenseAction";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { setExpenses, setSelectedFilterFor, setSelectedFilterType } from "@/lib/expensesSlice/expensesSlice";
-import {useSnackbar} from "@/components/SnackBarContext";
+import {useSnackbar} from "@/contexts/SnackBarContext";
 
 const Header = () => {
     const dispatch = useAppDispatch();

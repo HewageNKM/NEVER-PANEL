@@ -11,7 +11,7 @@ import StockReport from "@/app/dashboard/reports/components/StockReport";
 import {SalesReport} from "@/interfaces";
 import CashStatementReport from "@/app/dashboard/reports/components/CashStatementReport";
 import ExpenseReport from "@/app/dashboard/reports/components/ExpenseReport";
-import {useSnackbar} from "@/components/SnackBarContext";
+import {useSnackbar} from "@/contexts/SnackBarContext";
 
 const Header = () => {
     const [fromDate, setFromDate] = useState(null);

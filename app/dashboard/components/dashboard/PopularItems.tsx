@@ -6,7 +6,7 @@ import {getPopularItems} from "@/actions/inventoryActions";
 import DashboardCard from "@/app/dashboard/components/shared/DashboardCard";
 import PopularItemCard from "@/app/dashboard/components/dashboard/PopularItemCard";
 import {IoRefresh} from "react-icons/io5";
-import {useSnackbar} from "@/components/SnackBarContext";
+import {useSnackbar} from "@/contexts/SnackBarContext";
 
 const PopularItems = () => {
     const [items, setItems] = useState<PopularItem[] | null>([])
@@ -26,7 +26,7 @@ const PopularItems = () => {
             setItems(items);
         } catch (e) {
             console.error(e);
-            showNotification(error.message, "error");
+            showNotification(e.message, "error");
         } finally {
             setIsLoading(false);
         }
