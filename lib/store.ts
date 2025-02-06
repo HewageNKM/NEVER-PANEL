@@ -5,6 +5,7 @@ import itemDetailsSlice from "@/lib/itemDetailsSlice/itemDetailsSlice";
 import ordersSlice from "@/lib/ordersSlice/ordersSlice";
 import expensesSlice from './expensesSlice/expensesSlice';
 import usersSlice from "@/lib/usersSlice/usersSlice";
+import emailAndSMSSlice from "@/lib/emailAndSMSSlice/emailSMSSlice";
 
 export const makeStore = () => {
     return configureStore({
@@ -14,7 +15,8 @@ export const makeStore = () => {
             itemDetailsSlice,
             ordersSlice,
             expensesSlice,
-            usersSlice
+            usersSlice,
+            emailAndSMSSlice
         },
     })
 }

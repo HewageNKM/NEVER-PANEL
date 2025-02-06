@@ -31,5 +31,7 @@ export const sendEmail = async (email: Email) => {
             data: JSON.stringify(email)
         });
         return response.data;
+    } catch (e) {
+        throw new Error(e.response ? e.response.data.message : e.message);
     }
 }
