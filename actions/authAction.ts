@@ -15,7 +15,9 @@ export const authenticateUser = async (email: string, password: string) => {
         });
         return response.data;
     }catch (e) {
-        throw new Error(e.message);
+        throw new Error(
+            e.response ? e.response.data.message : e.message
+        );
     }
 }
 
@@ -30,7 +32,9 @@ export const checkUser = async (uid:string,token:string) => {
         });
         return response.data;
     }catch (e) {
-        throw new Error(e.message);
+        throw new Error(
+            e.response ? e.response.data.message : e.message
+        );
     }
 }
 

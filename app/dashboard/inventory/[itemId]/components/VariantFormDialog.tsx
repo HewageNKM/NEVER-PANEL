@@ -24,8 +24,9 @@ import {Img, Item, Size, Variant} from "@/interfaces";
 import Image from "next/image";
 import {IoCloudUpload, IoPencil, IoTrashBin} from "react-icons/io5";
 import {generateId} from "@/utils/Generate";
-import {updateAItem, uploadAFile} from "@/actions/inventoryActions";
+import {deleteAFile, updateAItem, uploadAFile} from "@/actions/inventoryActions";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
+import {useSnackbar} from "@/components/SnackBarContext";
 
 const VisuallyHiddenInput = styled('input')({
     clip: 'rect(0 0 0 0)',
@@ -42,10 +43,12 @@ const VisuallyHiddenInput = styled('input')({
 const VariantFormDialog = () => {
     const {item, showEditingForm, selectedVariant} = useAppSelector(state => state.itemDetailsSlice);
     const dispatch = useAppDispatch();
+    const {showNotification} = useSnackbar();
     const [isLoading, setIsLoading] = useState(false)
 
     const [sizes, setSizes] = useState<Size[]>([] as Size[]);
     const [images, setImages] = useState([] as Img[])
+    const [deletePendingImages, setDeletePendingImages] = useState<string[]>([])
 
     const [selectedSize, setSelectedSize] = useState<string>("none");
     const [stock, setStock] = useState(0)
@@ -92,11 +95,27 @@ const VariantFormDialog = () => {
 
             const name = evt.target.variantName.value;
 
+            const id = generateId("variant", "");
+
+            //if newImages exist, upload them
+            const uploadedImages = [] as Img[];
+            if (newImages?.length > 0) {
+                for (const image of newImages) {
+                    const uploadedImage = await uploadAFile(image, `inventory/${item?.itemId}/${selectedVariant?.variantId || id}`);
+                    uploadedImages.push(uploadedImage);
+                }
+            }
+
+            for (const image of deletePendingImages){
+                await deleteAFile(`inventory/${item?.itemId}/${selectedVariant?.variantId}/${image}`);
+            }
+
             if (selectedVariant) {
+                const updatedImages = [...images, ...uploadedImages];
                 const updatedVariant: Variant = {
                     variantId: selectedVariant?.variantId,
                     variantName: name.toLowerCase(),
-                    images: selectedVariant?.images,
+                    images: updatedImages,
                     sizes: sizes
                 }
                 const updatedItem: Item = {
@@ -107,18 +126,11 @@ const VariantFormDialog = () => {
                 dispatch(setItem(updatedItem));
                 evt.target.reset();
                 clear();
+                showNotification("Variant updated successfully", "success")
             } else {
 
                 if (newImages?.length === 0 || !newImages) {
                     throw new Error("Please add at least one  image")
-                }
-
-                const id = generateId("variant", "");
-                const uploadedImages = [] as Img[];
-
-                for (const image of newImages) {
-                    const uploadedImage = await uploadAFile(image, `inventory/${item.itemId}/${id}`);
-                    uploadedImages.push(uploadedImage);
                 }
 
                 const newVariant: Variant = {
@@ -137,22 +149,49 @@ const VariantFormDialog = () => {
                 dispatch(setItem(updatedItem));
                 evt.target.reset();
                 clear();
+                showNotification("Variant added successfully", "success")
             }
         } catch (e) {
             console.error(e)
+            showNotification(e.message, "error")
         } finally {
             setIsLoading(false)
         }
     };
+    const addNewImage = (e) => {
+        try {
+            if (e.target.files.length === 0) {
+                return
+            }
+            // validate 4mb size each file and remove if it exceeds
+            const files = Array.from(e.target.files).filter(file => file.size <= 4194304)
+            setNewImages(prevState => [...prevState, ...files])
+        } catch (e) {
+            showNotification(e.message, "error")
+            console.error(e)
+        }
+    }
     const clear = () => {
         dispatch(setShowEditingForm(false));
         dispatch(setSelectedVariant(null));
         setSizes([] as Size[]);
         setImages([] as Img[]);
         setNewImages([] as File[]);
+        setDeletePendingImages([])
         setSelectedSize("none");
         setStock(0);
     }
+
+    const deleteUploadImage = async (name: string) => {
+        try {
+            setImages(prevState => prevState.filter(image => image.file !== name))
+            setDeletePendingImages(prevState => [...prevState, name])
+        } catch (e) {
+            console.error(e)
+            showNotification(e.message, "error")
+        }
+    }
+
     return (
         <Dialog open={showEditingForm} onClose={() => dispatch(setShowEditingForm(false))}>
             <DialogTitle>Add/Edit Variant</DialogTitle>
@@ -182,6 +221,9 @@ const VariantFormDialog = () => {
                                         sx={{minWidth: 120, mr: 2}} // Ensure a consistent width for each item
                                     >
                                         <Image src={image.url} alt={image.file} width={100} height={100}/>
+                                        <Button color={"error"} onClick={() => deleteUploadImage(image.file)}>
+                                            <IoTrashBin/>
+                                        </Button>
                                     </Stack>
                                 ))}
                                 {newImages?.map((image, index) => (
@@ -210,7 +252,6 @@ const VariantFormDialog = () => {
                                 role={undefined}
                                 variant="contained"
                                 tabIndex={-1}
-                                disabled={selectedVariant}
                                 startIcon={<IoCloudUpload/>}
                             >
                                 Upload files
@@ -218,8 +259,7 @@ const VariantFormDialog = () => {
                                     name={"images"}
                                     accept={"image/*"}
                                     type="file"
-                                    onChange={(e) => setNewImages(prevState => [...prevState, e.target.files[0]])}
-                                    disabled={selectedVariant}
+                                    onChange={(e) => addNewImage(e)}
                                 />
                             </Button>
                         </Box>

@@ -11,6 +11,7 @@ import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { Order } from "@/interfaces";
 import { updateAOrder } from "@/actions/ordersActions";
 import { getOrders } from "@/lib/ordersSlice/ordersSlice";
+import {useSnackbar} from "@/components/SnackBarContext";
 
 const PaymentStatusFormDialog = ({ initialStatus, showForm, onClose }: {
     initialStatus: string;
@@ -19,6 +20,7 @@ const PaymentStatusFormDialog = ({ initialStatus, showForm, onClose }: {
 }) => {
     const { selectedPage, size, selectedOrder } = useAppSelector(state => state.ordersSlice);
     const dispatch = useAppDispatch();
+    const {showNotification} = useSnackbar();
 
     const [selectedStatus, setSelectedStatus] = useState(initialStatus);
     const [isLoading, setIsLoading] = useState(false);
@@ -33,8 +35,10 @@ const PaymentStatusFormDialog = ({ initialStatus, showForm, onClose }: {
             };
             await updateAOrder(updatedOrder);
             dispatch(getOrders({ size, page: selectedPage }));
+            showNotification("Payment status updated successfully", "success");
         } catch (e) {
             console.error(e);
+            showNotification(e.message, "error");
         } finally {
             setIsLoading(false);
             onClose();

@@ -10,12 +10,15 @@ import {setItem, setSelectedVariant, setShowEditingForm} from "@/lib/itemDetails
 import {useAppSelector} from "@/lib/hooks";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
 import {deleteAFile, updateAItem} from "@/actions/inventoryActions";
+import {useSnackbar} from "@/components/SnackBarContext";
 
 const VariantCard = ({variant}: { variant: Variant }) => {
     const {item} = useAppSelector(state => state.itemDetailsSlice);
     const [isExpanded, setIsExpanded] = useState(false);
     const [showConfirmedDialog, setShowConfirmedDialog] = useState(false)
     const dispatch = useDispatch();
+    const {showNotification} = useSnackbar();
+
 
     const toggleExpand = () => {
         setIsExpanded((prev) => !prev);
@@ -42,7 +45,9 @@ const VariantCard = ({variant}: { variant: Variant }) => {
 
             await updateAItem(updatedItem)
             dispatch(setItem(updatedItem))
+            showNotification("Variant deleted successfully","success")
         } catch (e: any) {
+            showNotification(e.message,"error")
             console.error(e)
         }
     };

@@ -20,6 +20,7 @@ import dayjs from "dayjs";
 import { addNewExpense, getAllExpenses, getAllExpensesByDate } from "@/actions/expenseAction";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { setExpenses, setSelectedFilterFor, setSelectedFilterType } from "@/lib/expensesSlice/expensesSlice";
+import {useSnackbar} from "@/components/SnackBarContext";
 
 const Header = () => {
     const dispatch = useAppDispatch();
@@ -28,6 +29,7 @@ const Header = () => {
     const [selectedFor, setSelectedFor] = useState("food");
     const [isLoading, setIsLoading] = useState(false);
     const [selectedDateTime, setSelectedDateTime] = useState(dayjs());
+    const {showNotification} = useSnackbar();
 
     const onSubmit = async (evt) => {
         evt.preventDefault();
@@ -45,7 +47,9 @@ const Header = () => {
             await addNewExpense(newExpense);
             evt.target.reset();
             dispatch(setExpenses(await getAllExpenses(page, size)));
+            showNotification("Expense added successfully", "success");
         } catch (e) {
+            showNotification(e.message, "error");
             console.error(e);
         } finally {
             setIsLoading(false);

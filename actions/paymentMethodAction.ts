@@ -14,7 +14,9 @@ export const getAllPaymentMethod = async () => {
         });
         return response.data;
     } catch (e) {
-        throw e;
+        throw new Error(
+            e.response ? e.response.data.message : e.message
+        )
     }
 }
 
@@ -32,7 +34,9 @@ export const createPaymentMethod = async (paymentMethod: PaymentMethod) => {
         });
         return response.data;
     } catch (e) {
-        throw e;
+        throw new Error(
+            e.response ? e.response.data.message : e.message
+        )
     }
 }
 
@@ -49,6 +53,8 @@ export const updatePaymentMethod = async (paymentMethod: PaymentMethod) => {
             data: JSON.stringify(paymentMethod)
         });
     }catch (e) {
-        throw e;
+        throw new Error(
+            e.response ? e.response.data.message : e.message
+        )
     }
 }

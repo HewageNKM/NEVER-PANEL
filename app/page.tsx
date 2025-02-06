@@ -11,11 +11,13 @@ import ComponentsLoader from "@/app/components/ComponentsLoader";
 import {setUser} from "@/lib/authSlice/authSlice";
 import {useEffect, useState} from "react";
 import {User} from "@/interfaces";
+import {useSnackbar} from "@/components/SnackBarContext";
 
 const Login = () => {
     const dispatch = useAppDispatch();
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(true)
+    const {showNotification} = useSnackbar();
 
     const onFormSubmit = async (evt: any) => {
         evt.preventDefault();
@@ -29,6 +31,7 @@ const Login = () => {
             router.replace("/dashboard");
         } catch (e: any) {
             console.log(e);
+            showNotification(e.message, "error");
         } finally {
             setIsLoading(false);
         }
@@ -42,6 +45,7 @@ const Login = () => {
             }
         } catch (e) {
             console.log(e);
+            showNotification(e.message, "error");
         } finally {
             setIsLoading(false);
         }

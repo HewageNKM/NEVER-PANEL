@@ -20,12 +20,14 @@ import { setExpenses, setPage, setSize } from '@/lib/expensesSlice/expensesSlice
 import { deleteExpenseById, getAllExpenses } from "@/actions/expenseAction";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
 import EmptyState from "@/app/components/EmptyState";
+import {useSnackbar} from "@/components/SnackBarContext";
 
 const ExpensesTable = () => {
     const dispatch = useAppDispatch();
     const { page, size, expenses, selectedFilterType, selectedFilterFor } = useAppSelector(state => state.expensesSlice);
     const { currentUser } = useAppSelector(state => state.authSlice);
     const [isLoading, setIsLoading] = useState(false);
+    const {showNotification} = useSnackbar();
 
     useEffect(() => {
         if (currentUser) {
@@ -39,6 +41,7 @@ const ExpensesTable = () => {
             const exps = await getAllExpenses(page, size);
             dispatch(setExpenses(exps));
         } catch (e) {
+            showNotification(e.message, "error");
             console.error(e);
         } finally {
             setIsLoading(false);
@@ -53,8 +56,10 @@ const ExpensesTable = () => {
             setIsLoading(true);
             await deleteExpenseById(id);
             await fetchExpenses();
+            showNotification("Expense deleted successfully", "success");
         } catch (e) {
             console.error(e);
+            showNotification(e.message, "error");
         } finally {
             setIsLoading(false);
         }

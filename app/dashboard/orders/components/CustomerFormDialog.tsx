@@ -14,6 +14,7 @@ import CardActions from "@mui/material/CardActions";
 import {updateAOrder} from "@/actions/ordersActions";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import {getOrders} from "@/lib/ordersSlice/ordersSlice";
+import { useSnackbar } from '@/components/SnackBarContext';
 
 const CustomerFormDialog = ({customer, showForm, onClose}: {
     customer: Customer | null,
@@ -24,6 +25,7 @@ const CustomerFormDialog = ({customer, showForm, onClose}: {
     const [editableCustomer, setEditableCustomer] = useState<Customer | null>(customer);
     const [isLoading, setIsLoading] = useState(false)
     const {selectedOrder} = useAppSelector(state => state.ordersSlice);
+    const {showNotification} = useSnackbar();
 
     const {selectedPage, size} = useAppSelector(state => state.ordersSlice);
     const dispatch = useAppDispatch();
@@ -52,8 +54,10 @@ const CustomerFormDialog = ({customer, showForm, onClose}: {
             await updateAOrder(updatedOrder);
             onClose();
             dispatch(getOrders({size, page: selectedPage}))
+            showNotification("Customer update successfully","success")
         } catch (e) {
             console.log(e);
+            showNotification(e.message,"error")
         } finally {
             setIsLoading(false);
         }

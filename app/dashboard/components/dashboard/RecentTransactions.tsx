@@ -16,25 +16,30 @@ import {CircularProgress, Typography} from "@mui/material";
 import {collection, limit, onSnapshot, orderBy, query, where} from "@firebase/firestore";
 import {db} from "@/firebase/firebaseClient";
 import {Order} from "@/interfaces";
+import {useSnackbar} from "@/components/SnackBarContext";
 
 const RecentTransactions = () => {
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
-
+    const {showNotification} = useSnackbar();
     useEffect(() => {
-        const ordersRef = collection(db, "orders");
-        const ordersQuery = query(ordersRef, where("paymentStatus", "==", "Paid"), orderBy("createdAt", "desc"), limit(6));
+        try {
+            const ordersRef = collection(db, "orders");
+            const ordersQuery = query(ordersRef, where("paymentStatus", "==", "Paid"), orderBy("createdAt", "desc"), limit(6));
 
-        const unsubscribe = onSnapshot(ordersQuery, (snapshot) => {
-            const ordersData = snapshot.docs.map((doc) => ({
-                ...doc.data(),
-                createdAt: doc.data().createdAt.toDate().toLocaleString(),
-            }));
-            setOrders(ordersData);
-            setLoading(false);
-        });
-
-        return () => unsubscribe();
+            const unsubscribe = onSnapshot(ordersQuery, (snapshot) => {
+                const ordersData = snapshot.docs.map((doc) => ({
+                    ...doc.data(),
+                    createdAt: doc.data().createdAt.toDate().toLocaleString(),
+                }));
+                setOrders(ordersData);
+                setLoading(false);
+            });
+            return () => unsubscribe();
+        } catch (e) {
+            console.error(e);
+            showNotification(error.message, "error");
+        }
     }, []);
 
     return (
@@ -90,11 +95,12 @@ const RecentTransactions = () => {
                                     Total:
                                     LKR {order.items.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)}
                                 </Typography>
-                                <Typography  variant="body2">
+                                <Typography variant="body2">
                                     Discount: LKR {(order?.discount || 0).toFixed(2)}
                                 </Typography>
-                                <Typography  variant="h6">
-                                    Subtotal: LKR {order.items.reduce((sum, item) => sum + item.price * item.quantity, 0) - (order?.discount | 0)}
+                                <Typography variant="h6">
+                                    Subtotal:
+                                    LKR {order.items.reduce((sum, item) => sum + item.price * item.quantity, 0) - (order?.discount | 0)}
                                 </Typography>
                             </TimelineContent>
                         </TimelineItem>

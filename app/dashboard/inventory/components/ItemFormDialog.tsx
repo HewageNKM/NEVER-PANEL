@@ -15,6 +15,7 @@ import {generateId} from "@/utils/Generate";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
 import {addAItem, deleteAFile, updateAItem, uploadAFile} from '@/actions/inventoryActions';
 import Image from "next/image";
+import {useSnackbar} from "@/components/SnackBarContext";
 
 const ItemFormDialog = () => {
     const dispatch = useAppDispatch();
@@ -23,6 +24,7 @@ const ItemFormDialog = () => {
     const [newImage, setNewImage] = useState(null)
     const [discount, setDiscount] = useState(0)
     const [sellingPrice, setSellingPrice] = useState(0)
+    const {showNotification} = useSnackbar();
     const [marketPrice, setMarketPrice] = useState(0)
 
     const [selectedGenders, setSelectedGenders] = useState<string[]>(item?.genders || []);
@@ -119,14 +121,17 @@ const ItemFormDialog = () => {
                 await updateAItem(newItem);
                 closeForm()
                 updateItems(newItem)
+                showNotification("Item updated successfully","success")
             } else {
                 await addAItem(newItem)
                 closeForm()
                 updateItems(newItem)
+                showNotification("Item added successfully","success")
             }
             evt.target.reset()
         } catch (e: any) {
             console.log(e)
+            showNotification(e.message,"error")
         } finally {
             setIsLoading(false)
         }

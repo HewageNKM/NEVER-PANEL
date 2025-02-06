@@ -13,6 +13,7 @@ import {orderStatus} from "@/constant";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import {updateAOrder} from "@/actions/ordersActions";
 import {getOrders} from "@/lib/ordersSlice/ordersSlice";
+import {useSnackbar} from "@/components/SnackBarContext";
 
 const TrackingFormDialog = ({
                                 tracking,
@@ -31,6 +32,8 @@ const TrackingFormDialog = ({
     const [isLoading, setIsLoading] = useState(false);
     const {selectedOrder} = useAppSelector(state => state.ordersSlice);
     const [status, setStatus] = useState(tracking?.status as orderStatus);
+    const {showNotification} = useSnackbar();
+
 
     const dispatch = useAppDispatch();
     const {selectedPage, size} = useAppSelector(state => state.ordersSlice);
@@ -57,15 +60,17 @@ const TrackingFormDialog = ({
             try {
                 await updateAOrder(updatedOrder);
                 dispatch(getOrders({size, page: selectedPage}))
+                showNotification("Tracking information updated successfully", "success");
             } catch (e) {
                 console.log(e);
+                showNotification(e.message, "error");
             } finally {
                 setIsLoading(false);
                 onFormClose();
             }
         } else {
             if (!formData.partner || !formData.trackingNumber || !formData.trackingUrl) {
-                alert("All fields are required");
+                showNotification("Please fill all fields", "warning");
                 return;
             }
 
@@ -91,8 +96,10 @@ const TrackingFormDialog = ({
                     trackingUrl: "",
                 });
                 dispatch(getOrders({size, page: selectedPage}))
+                showNotification("Tracking information added successfully", "success");
             } catch (e) {
                 console.log(e);
+                showNotification(e.message, "error");
             } finally {
                 setIsLoading(false);
                 onFormClose();

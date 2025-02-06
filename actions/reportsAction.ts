@@ -15,7 +15,9 @@ export const getMonthlyOverview = async (from: string, to: string) => {
         );
         return res.data;
     } catch (e) {
-        throw e;
+        throw new Error(
+            e.response ? e.response.data.message : e.message
+        )
     }
 }
 export const getSalesReport = async (from:string, to:string) => {
@@ -29,7 +31,9 @@ export const getSalesReport = async (from:string, to:string) => {
             }
         });
     }catch (e){
-        throw e;
+        throw new Error(
+            e.response ? e.response.data.message : e.message
+        )
     }
 }
 export const getDailyOverview = async () => {
@@ -46,7 +50,9 @@ export const getDailyOverview = async () => {
         );
         return res.data;
     } catch (e) {
-        throw e;
+        throw new Error(
+            e.response ? e.response.data.message : e.message
+        )
     }
 }
 export const getStocksReport = async () => {
@@ -63,7 +69,9 @@ export const getStocksReport = async () => {
         );
         return res.data;
     } catch (e) {
-        throw e;
+        throw new Error(
+            e.response ? e.response.data.message : e.message
+        )
     }
 }
 
@@ -80,7 +88,9 @@ export const getCashReport = async (from: string, to: string) => {
             }
         );
     } catch (e) {
-        throw e;
+        throw new Error(
+            e.response ? e.response.data.message : e.message
+        )
     }
 }
 
@@ -98,6 +108,8 @@ export const getExpenseReport = async (from: string, to: string) => {
         );
         return res.data;
     } catch (e) {
-        throw e;
+        throw new Error(
+            e.response ? e.response.data.message : e.message
+        )
     }
 }

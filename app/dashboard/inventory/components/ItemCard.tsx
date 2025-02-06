@@ -15,6 +15,7 @@ import {deleteAItem} from "@/actions/inventoryActions";
 import {getInventoryItems} from "@/lib/inventorySlice/inventorySlice";
 import {useRouter} from "next/navigation";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
+import {useSnackbar} from "@/components/SnackBarContext";
 
 const ItemCard = ({item, onEdit}: { item: Item, onEdit: any }) => {
     const [showConfirmedDialog, setShowConfirmedDialog] = useState(false);
@@ -22,6 +23,7 @@ const ItemCard = ({item, onEdit}: { item: Item, onEdit: any }) => {
     const [isLoading, setIsLoading] = useState(false);
     const dispatch = useAppDispatch();
     const router = useRouter();
+    const {showNotification} = useSnackbar();
 
     const deleteItem = async () => {
         try {
@@ -30,6 +32,7 @@ const ItemCard = ({item, onEdit}: { item: Item, onEdit: any }) => {
             await deleteAItem(item.itemId);
         } catch (e: any) {
             console.error(e)
+            showNotification(e.message,"error")
         } finally {
             setIsLoading(false);
             dispatch(getInventoryItems({size: size, page: page}))

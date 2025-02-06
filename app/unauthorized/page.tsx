@@ -1,19 +1,46 @@
-import Link from "next/link";
+import React from 'react';
 
-export default function UnauthorizedPage() {
+const Page = () => {
     return (
-        <main className="flex min-h-screen items-center justify-center bg-gray-100 p-4">
-            <div className="bg-white shadow-lg rounded-2xl p-6 text-center max-w-md">
-                <h1 className="text-3xl font-bold text-red-600">Unauthorized</h1>
-                <p className="text-gray-600 mt-2">
+        <main style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "100vh",
+            backgroundColor: "#f4f7f6"
+        }}>
+            <div style={{
+                textAlign: "center",
+                padding: "2rem",
+            }}>
+                <h1 style={{
+                    color: "#ff0000",
+                    fontSize: "2rem",
+                    fontWeight: "bold"
+                }}>Unauthorized</h1>
+                <p style={{
+                    color: "#333",
+                    fontSize: "1.2rem",
+                    fontWeight: "bold"
+                }}>
                     You don&apos;t have permission to access this page.
                 </p>
-                <Link href="/">
-                    <button className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-                        Go to Login
-                    </button>
-                </Link>
+                <a href="/"
+                   style={{
+                          color: "#fff",
+                          backgroundColor: "#333",
+                          padding: "0.5rem 1rem",
+                          borderRadius: "0.5rem",
+                          textDecoration: "none",
+                          display: "inline-block",
+                          marginTop: "1rem"
+                   }}
+                >
+                    Go to Login
+                </a>
             </div>
         </main>
     );
-}
+};
+
+export default Page;

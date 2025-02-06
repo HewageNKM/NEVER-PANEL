@@ -3,7 +3,8 @@ import {Box, CircularProgress, Typography} from "@mui/material";
 import DashboardCard from "../shared/DashboardCard";
 import {useEffect, useState} from "react";
 import {useAppSelector} from "@/lib/hooks";
-import {getDailyOverview} from "@/actions/reportsAction"; // Ensure the correct path to your interfaces
+import {getDailyOverview} from "@/actions/reportsAction";
+import {useSnackbar} from "@/components/SnackBarContext"; // Ensure the correct path to your interfaces
 
 const DailyEarnings = () => {
     const [totalEarnings, setTotalEarnings] = useState(0);
@@ -12,6 +13,7 @@ const DailyEarnings = () => {
     const [invoiceCount, setInvoiceCount] = useState(0);
     const [loading, setLoading] = useState(true);
     const {currentUser} = useAppSelector(state => state.authSlice);
+    const {showNotification} = useSnackbar();
 
     useEffect(() => {
         if (currentUser) {
@@ -27,7 +29,8 @@ const DailyEarnings = () => {
             setInvoiceCount(overview.totalOrders);
             setTotalDiscount(overview.totalDiscount)
         } catch (error) {
-            console.error("Error fetching daily earnings:", error.message, error.stack);
+            console.error(error);
+            showNotification(error.message, "error");
         } finally {
             setLoading(false);
         }

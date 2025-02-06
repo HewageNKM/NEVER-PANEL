@@ -24,6 +24,7 @@ import {User} from "@/interfaces";
 import {getAllUsers, setSelectedPage, setSelectedSize, setSelectedUser} from '@/lib/usersSlice/usersSlice';
 import UserForm from "@/app/dashboard/users/components/UserForm";
 import {deleteUserById} from "@/actions/usersAction";
+import {useSnackbar} from "@/components/SnackBarContext";
 
 const UserTable = () => {
     const {
@@ -38,6 +39,7 @@ const UserTable = () => {
     const {currentUser} = useAppSelector(state => state.authSlice);
     const [showUserForm, setShowUserForm] = useState(false)
     const dispatch = useAppDispatch();
+    const {showNotification} = useSnackbar();
 
     useEffect(() => {
         if (currentUser) {
@@ -55,6 +57,7 @@ const UserTable = () => {
                 }, 2000);            }
         } catch (e) {
             console.error(e);
+            showNotification(e.message, "error");
         }
     }
     return (

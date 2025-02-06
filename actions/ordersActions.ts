@@ -14,7 +14,9 @@ export const fetchOrders = async (page: number, size: number) => {
         });
         return response.data;
     } catch (e) {
-        throw e;
+        throw new Error(
+            e.response ? e.response.data.message : e.message
+        )
     }
 }
 
@@ -30,7 +32,9 @@ export const getOrdersByDate = async (date:string) => {
         });
         return response.data;
     }catch (e) {
-        throw e;
+        throw new Error(
+            e.response ? e.response.data.message : e.message
+        )
     }
 }
 
@@ -46,7 +50,10 @@ export const updateAOrder = async (order: Order) => {
             },
             data: JSON.stringify(order)
         });
+        return response.data;
     } catch (e) {
-        throw e;
+        throw new Error(
+            e.response ? e.response.data.message : e.message
+        )
     }
 }

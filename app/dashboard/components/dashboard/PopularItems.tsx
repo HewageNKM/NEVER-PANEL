@@ -1,17 +1,18 @@
 import {PopularItem} from "@/interfaces";
-import {Box, CircularProgress, Grid, IconButton, Stack, Typography,} from "@mui/material";
+import {Box, CircularProgress, Grid, IconButton, Typography,} from "@mui/material";
 import {useEffect, useState} from "react";
 import {useAppSelector} from "@/lib/hooks";
 import {getPopularItems} from "@/actions/inventoryActions";
 import DashboardCard from "@/app/dashboard/components/shared/DashboardCard";
 import PopularItemCard from "@/app/dashboard/components/dashboard/PopularItemCard";
 import {IoRefresh} from "react-icons/io5";
+import {useSnackbar} from "@/components/SnackBarContext";
 
 const PopularItems = () => {
     const [items, setItems] = useState<PopularItem[] | null>([])
     const [isLoading, setIsLoading] = useState(true);
     const {currentUser} = useAppSelector(state => state.authSlice);
-
+    const {showNotification} = useSnackbar();
     useEffect(() => {
         if (currentUser) {
             fetchPopularItems();
@@ -25,6 +26,7 @@ const PopularItems = () => {
             setItems(items);
         } catch (e) {
             console.error(e);
+            showNotification(error.message, "error");
         } finally {
             setIsLoading(false);
         }
@@ -58,7 +60,7 @@ const PopularItems = () => {
                         alignItems="center"
                         height="100px"
                     >
-                        <CircularProgress />
+                        <CircularProgress/>
                     </Box>
                 ) : (
                     <Grid container spacing={2}>
@@ -68,7 +70,7 @@ const PopularItems = () => {
                                 xs={6} sm={4} md={3} // Adjust grid columns per screen size
                                 key={item.item.itemId}
                             >
-                                <PopularItemCard item={item} />
+                                <PopularItemCard item={item}/>
                             </Grid>
                         ))}
                     </Grid>

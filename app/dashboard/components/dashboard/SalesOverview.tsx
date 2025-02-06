@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import {collection, getDocs, query, Timestamp, where} from "@firebase/firestore";
 import {db} from "@/firebase/firebaseClient";
 import {useAppSelector} from "@/lib/hooks";
+import {useSnackbar} from "@/components/SnackBarContext";
 
 const Chart = dynamic(() => import("react-apexcharts"), {ssr: false});
 
@@ -15,7 +16,7 @@ const SalesOverview = () => {
     const [months, setMonths] = useState<string[]>(Array.from({length: 12}, (_, i) =>
         new Date(0, i).toLocaleString("default", {month: "short"})
     ));
-
+    const {showNotification} = useSnackbar();
     const {currentUser} = useAppSelector(state => state.authSlice);
 
     // Chart colors
@@ -101,7 +102,8 @@ const SalesOverview = () => {
             );
             setMonths(monthLabels);
         } catch (error) {
-            console.error("Error fetching sales data:", error.message);
+            console.error(error);
+            showNotification(error.message, "error");
         } finally {
             setLoading(false);
         }

@@ -6,23 +6,26 @@ import {User} from "@/interfaces";
 import {updateUserById} from "@/actions/usersAction";
 import {sendPasswordResetEmail} from "@firebase/auth";
 import {auth} from "@/firebase/firebaseClient";
+import {useSnackbar} from "@/components/SnackBarContext";
 
 const PasswordForm = () => {
     const {currentUser} = useAppSelector(state => state.authSlice);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-
+    const [isLoading, setIsLoading] = useState(false)
+    const {showNotification} = useSnackbar();
 
     const onUpdate = async (evt) => {
         try {
             evt.preventDefault();
+            setIsLoading(true);
             const currentPassword = evt.target.currentPassword.value.toString();
             const newPassword = evt.target.newPassword.value.toString();
             const confirmPassword = evt.target.confirmedPassword.value.toString();
 
             if (newPassword !== confirmPassword) {
-                console.log("Passwords do not match");
+                showNotification("Passwords do not match", "warning");
                 return;
             }
 
@@ -34,8 +37,12 @@ const PasswordForm = () => {
             }
             await updateUserById(newUser);
             evt.target.reset();
+            showNotification("Password updated successfully", "success");
         } catch (e) {
             console.log(e);
+            showNotification(e.message, "error");
+        }finally {
+            setIsLoading(false);
         }
     }
     const sentPasswordResetLink = async () => {
@@ -43,8 +50,10 @@ const PasswordForm = () => {
             const res = confirm("Are you sure you want to reset password?");
             if (!res) return;
             if (currentUser?.email) await sendPasswordResetEmail(auth, currentUser?.email);
+            showNotification("Password reset link sent successfully", "success");
         } catch (e) {
             console.log(e);
+            showNotification(e.message, "error");
         }
     }
     return (
@@ -88,6 +97,7 @@ const PasswordForm = () => {
                     ].map(({label, show, setShow, name}, index) => (
                         <FormControl key={index} sx={{width: "100%", maxWidth: 300}}>
                             <TextField
+                                disabled={isLoading}
                                 required
                                 type={show ? "text" : "password"}
                                 label={label}

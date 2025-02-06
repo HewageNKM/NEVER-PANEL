@@ -13,8 +13,10 @@ export const getUsers = async (page: number, size: number) => {
             }
         });
         return response.data;
-    } catch (error: any) {
-        throw error;
+    } catch (e) {
+        throw new Error(
+            e.response ? e.response.data.message : e.message
+        )
     }
 }
 export const addNewUser = async (data: User) => {
@@ -30,8 +32,10 @@ export const addNewUser = async (data: User) => {
             data: JSON.stringify(data)
         });
         return response.data;
-    } catch (error: any) {
-        throw error;
+    } catch (e) {
+        throw new Error(
+            e.response ? e.response.data.message : e.message
+        )
     }
 }
 
@@ -45,8 +49,10 @@ export const deleteUserById = async (id: string) => {
                 Authorization: `Bearer ${token}`
             }
         })
-    } catch (error: any) {
-        throw error;
+    } catch (e) {
+        throw new Error(
+            e.response ? e.response.data.message : e.message
+        )
     }
 }
 
@@ -61,7 +67,9 @@ export const updateUserById = async (data: User) => {
             },
             data: JSON.stringify(data)
         })
-    } catch (error: any) {
-        throw error;
+    } catch (e) {
+        throw new Error(
+            e.response ? e.response.data.message : e.message
+        )
     }
 }

@@ -11,6 +11,7 @@ import StockReport from "@/app/dashboard/reports/components/StockReport";
 import {SalesReport} from "@/interfaces";
 import CashStatementReport from "@/app/dashboard/reports/components/CashStatementReport";
 import ExpenseReport from "@/app/dashboard/reports/components/ExpenseReport";
+import {useSnackbar} from "@/components/SnackBarContext";
 
 const Header = () => {
     const [fromDate, setFromDate] = useState(null);
@@ -35,6 +36,8 @@ const Header = () => {
     const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth())
     const [expenses, setExpenses] = useState(null)
     const [showExpenseReport, setShowExpenseReport] = useState(false)
+    const {showNotification} = useSnackbar();
+
 
     const [years, setYears] = useState([])
     const months = [
@@ -120,6 +123,7 @@ const Header = () => {
                 alert("Please select a type and date range");
             }
         } catch (e) {
+            showNotification(e.message, "error");
             console.log(e);
         } finally {
             setIsReportLoading(false);
@@ -153,6 +157,7 @@ const Header = () => {
             setTotalExpenses(overview.totalExpense | 0);
         } catch (error) {
             console.error("Error fetching daily earnings:", error.message, error.stack);
+            showNotification(error.message, "error");
         } finally {
             setIsLoading(false);
         }

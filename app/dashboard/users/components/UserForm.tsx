@@ -8,10 +8,12 @@ import {User} from "@/interfaces";
 import {addNewUser, updateUserById} from "@/actions/usersAction";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import {getAllUsers} from '@/lib/usersSlice/usersSlice';
+import {useSnackbar} from "@/components/SnackBarContext";
 
 const UserForm = ({showForm, onClose, user}: { showForm: boolean, onClose: () => void, user: User | null }) => {
     const [isLoading, setIsLoading] = useState(false)
     const {currentUser} = useAppSelector(state => state.authSlice);
+    const {showNotification} = useSnackbar();
 
     const [status, setStatus] = useState(user?.status)
     const [role, setRole] = useState(user?.role)
@@ -42,9 +44,11 @@ const UserForm = ({showForm, onClose, user}: { showForm: boolean, onClose: () =>
             }
             if (userId === "Auto Generated") {
                 await addNewUser(usr);
+                showNotification("User created successfully", "success");
             } else {
                 console.log(usr)
                 await updateUserById(usr);
+                showNotification("User updated successfully", "success");
             }
             setTimeout(() => {
                 dispatch(getAllUsers({size: selectedSize, page: selectedPage}));
@@ -52,6 +56,7 @@ const UserForm = ({showForm, onClose, user}: { showForm: boolean, onClose: () =>
             onClose();
         } catch (e) {
             console.error(e);
+            showNotification(e.message, "error");
         } finally {
             setIsLoading(false);
         }

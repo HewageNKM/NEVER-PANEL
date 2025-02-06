@@ -20,12 +20,13 @@ import PaymentTable from "@/app/dashboard/paymentAndShipping/components/PaymentT
 import PaymentMethodForm from "@/app/dashboard/paymentAndShipping/components/PaymentMethodForm";
 import {PaymentMethod} from "@/interfaces";
 import {paymentStatusList} from "@/constant";
+import {useSnackbar} from "@/components/SnackBarContext";
 
 const OrdersHeader = () => {
     const dispatch = useAppDispatch();
     const {currentUser} = useAppSelector(state => state.authSlice);
     const {selectedPage, size,selectedFilterStatus,selectedFilterTracking} = useAppSelector(state => state.ordersSlice);
-
+    const {showNotification} = useSnackbar();
     const onSearch = async (evt) => {
         try {
             dispatch(setLoading(true))
@@ -46,6 +47,7 @@ const OrdersHeader = () => {
             })
             dispatch(setOrders(orders))
         } catch (e) {
+            showNotification(e.message, "error")
             console.error(e)
         } finally {
             dispatch(setLoading(false))
@@ -61,6 +63,7 @@ const OrdersHeader = () => {
             }
         } catch (e) {
             console.error(e)
+            showNotification(e.message, "error")
         } finally {
             dispatch(setLoading(false))
         }

@@ -16,7 +16,9 @@ export const fetchInventory = async (size: number, page: number) => {
 
         return response.data;
     } catch (e) {
-        throw new Error(e.response.data.message)
+        throw new Error(
+            e.response ? e.response.data.message : e.message
+        )
     }
 }
 export const fetchAItem = async (itemId: string) => {
@@ -31,7 +33,9 @@ export const fetchAItem = async (itemId: string) => {
         });
         return response.data;
     } catch (e) {
-        throw new Error(e.response.data.message)
+        throw new Error(
+            e.response ? e.response.data.message : e.message
+        )
     }
 }
 export const updateAItem = async (item: Item) => {
@@ -47,7 +51,9 @@ export const updateAItem = async (item: Item) => {
             data: JSON.stringify(item)
         })
     } catch (e) {
-        throw new Error(e.response.data.message)
+        throw new Error(
+            e.response ? e.response.data.message : e.message
+        )
     }
 }
 
@@ -64,7 +70,9 @@ export const addAItem = async (item: Item) => {
             data: JSON.stringify(item)
         })
     } catch (e) {
-        throw new Error(e.response.data.message)
+        throw new Error(
+            e.response ? e.response.data.message : e.message
+        )
     }
 }
 export const uploadAFile = async (file: File, path: string) => {
@@ -85,7 +93,9 @@ export const uploadAFile = async (file: File, path: string) => {
 
         return response.data;
     } catch (e) {
-        throw new Error(e.response.data.message)
+        throw new Error(
+            e.response ? e.response.data.message : e.message
+        )
     }
 }
 export const deleteAItem = async (itemId: string) => {
@@ -99,7 +109,9 @@ export const deleteAItem = async (itemId: string) => {
             }
         });
     } catch (e) {
-        throw new Error(e.response.data.message)
+        throw new Error(
+            e.response ? e.response.data.message : e.message
+        )
     }
 }
 export const deleteAFile = async (path: string) => {
@@ -115,7 +127,9 @@ export const deleteAFile = async (path: string) => {
 
         return response.data;
     } catch (e) {
-        throw new Error(e.response.data.message)
+        throw new Error(
+            e.response ? e.response.data.message : e.message
+        )
     }
 }
 
@@ -132,6 +146,8 @@ export const getPopularItems = async (size: number) => {
 
         return response.data;
     } catch (e) {
-        throw new Error(e.response.data.message)
+        throw new Error(
+            e.response ? e.response.data.message : e.message
+        )
     }
 }

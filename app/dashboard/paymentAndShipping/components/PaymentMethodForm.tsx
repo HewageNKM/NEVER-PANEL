@@ -18,6 +18,7 @@ import {createPaymentMethod, updatePaymentMethod} from "@/actions/paymentMethodA
 import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch, RootState} from "@/lib/store";
 import { getPayments } from "@/lib/ordersSlice/ordersSlice";
+import {useSnackbar} from "@/components/SnackBarContext";
 
 const PaymentMethodForm = ({
 
@@ -31,6 +32,7 @@ const PaymentMethodForm = ({
     const [available, setAvailable] = useState<string[]>([]);
     const {selectedPayment} = useSelector((state:RootState) => state.ordersSlice);
     const [isLoading, setIsLoading] = useState(false)
+    const {showNotification} = useSnackbar();
 
     useEffect(() => {
         // Initialize available selections based on the passed paymentMethod
@@ -69,6 +71,7 @@ const PaymentMethodForm = ({
                 };
                 await updatePaymentMethod(updatedPaymentMethod);
                 onClose();
+                showNotification("Payment method updated successfully", "success");
             }else {
                 console.log("Creating new payment method");
                 const id = e.target.id.value.toString().toLowerCase();
@@ -87,10 +90,12 @@ const PaymentMethodForm = ({
                 };
                 await createPaymentMethod(newPaymentMethod);
                 onClose();
+                showNotification("Payment method created successfully", "success");
             }
             dispatch(getPayments());
         }catch (e) {
             console.error(e)
+            showNotification(e.message, "error")
         }finally {
             setIsLoading(false)
         }

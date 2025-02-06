@@ -16,7 +16,9 @@ export const addNewExpense = async (expense: Expense) => {
         });
         return response.data;
     } catch (e) {
-        throw e
+        throw new Error(
+            e.response ? e.response.data.message : e.message
+        )
     }
 }
 
@@ -32,7 +34,9 @@ export const getAllExpenses = async (page: number, size: number) => {
         });
         return response.data;
     } catch (e) {
-        throw e;
+        throw new Error(
+            e.response ? e.response.data.message : e.message
+        )
     }
 }
 export const getAllExpensesByDate = async (from: string, to: string) => {
@@ -47,7 +51,9 @@ export const getAllExpensesByDate = async (from: string, to: string) => {
         });
         return response.data;
     } catch (e) {
-        throw e;
+        throw new Error(
+            e.response ? e.response.data.message : e.message
+        )
     }
 }
 export const deleteExpenseById = async (id: string) => {
@@ -62,6 +68,8 @@ export const deleteExpenseById = async (id: string) => {
         });
         return response.data;
     } catch (e) {
-        throw e;
+        throw new Error(
+            e.response ? e.response.data.message : e.message
+        )
     }
 }
