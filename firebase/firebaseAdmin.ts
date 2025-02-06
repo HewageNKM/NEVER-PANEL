@@ -1,6 +1,7 @@
 import admin, {credential} from 'firebase-admin';
 import {
     CashFlowReport,
+    Email,
     Expense,
     ExpensesReport,
     Item,
@@ -1176,7 +1177,45 @@ export const getAllPaymentMethods = async () => {
         throw e;
     }
 }
-
+export const fetchAllEmails = async (page:number,size:number) => {
+    try {
+        const offset = (page - 1) * size;
+        console.log('Fetching all emails');
+        const users = await adminFirestore.collection('mail')
+            .limit(size)
+            .offset(offset)
+            .get();
+        const emails: Email[] = [];
+        users.forEach(doc => {
+            emails.push(
+                {
+                    ...doc.data(),
+                    time: doc.data()?.delivery?.endTime?.toDate()?.toLocaleString(),
+                    status: doc.data()?.delivery?.state,
+                } as Email
+            );
+        });
+        return emails;
+    } catch (e) {
+        throw e;
+    }
+}
+export const sendEmail = async (email: Email) => {
+    try {
+        console.log('Sending email:', email.to);
+        await adminFirestore.collection('mail').add({
+            to: email.to,
+            message:{
+                subject: email.message?.subject,
+                html: email.message?.html,
+            },
+        });
+        console.log(`Email sent successfully`);
+    } catch (e) {
+        console.error(e);
+        throw e;
+    }
+}
 export const addNewPaymentMethod = async (PaymentMethod: PaymentMethod) => {
     try {
         console.log('Creating new payment method:', PaymentMethod.paymentId);

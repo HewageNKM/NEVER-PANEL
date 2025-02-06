@@ -15,6 +15,21 @@ export interface User {
     updatedAt: Timestamp | string;
 }
 
+export interface Email {
+    to: string;
+    message?:{
+        subject: string;
+        text: string;
+        html: string;
+    }
+    template?: {
+        name: string;
+        data: {};
+    }
+    status?: string;
+    time?:string;
+}
+
 export interface PopularItem {
     item: Item
     soldCount: number
