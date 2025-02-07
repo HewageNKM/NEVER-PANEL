@@ -3,7 +3,7 @@ import axios from "axios";
 import {getToken} from "@/firebase/firebaseClient";
 import {Item} from "@/interfaces";
 
-export const fetchInventory = async (size: number, page: number) => {
+export const fetchInventoryAction = async (size: number, page: number) => {
     try {
         const token = await getToken()
         const response = await axios({
@@ -21,7 +21,7 @@ export const fetchInventory = async (size: number, page: number) => {
         )
     }
 }
-export const fetchAItem = async (itemId: string) => {
+export const fetchAItemAction = async (itemId: string) => {
     try {
         const token = await getToken()
         const response = await axios({
@@ -38,7 +38,7 @@ export const fetchAItem = async (itemId: string) => {
         )
     }
 }
-export const updateAItem = async (item: Item) => {
+export const updateAItemAction = async (item: Item) => {
     try {
         const token = await getToken()
         const response = await axios({
@@ -75,7 +75,7 @@ export const addAItem = async (item: Item) => {
         )
     }
 }
-export const uploadAFile = async (file: File, path: string) => {
+export const uploadAFileAction = async (file: File, path: string) => {
     try {
         const token = await getToken()
         const formData = new FormData();
@@ -98,7 +98,7 @@ export const uploadAFile = async (file: File, path: string) => {
         )
     }
 }
-export const deleteAItem = async (itemId: string) => {
+export const deleteAItemAction = async (itemId: string) => {
     try {
         const token = await getToken()
         const response = await axios({
@@ -114,7 +114,7 @@ export const deleteAItem = async (itemId: string) => {
         )
     }
 }
-export const deleteAFile = async (path: string) => {
+export const deleteAFileAction = async (path: string) => {
     try {
         const token = await getToken()
         const response = await axios({
@@ -133,7 +133,7 @@ export const deleteAFile = async (path: string) => {
     }
 }
 
-export const getPopularItems = async (size: number) => {
+export const getPopularItemsAction = async (size: number) => {
     try {
         const token = await getToken()
         const response = await axios({

@@ -17,7 +17,7 @@ import {
 } from "@mui/material";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import {setExpenses, setPage, setSize} from '@/lib/expensesSlice/expensesSlice';
-import {deleteExpenseById, getAllExpenses} from "@/actions/expenseAction";
+import {deleteExpenseByIdAction, getAllExpensesAction} from "@/actions/expenseActions";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
 import EmptyState from "@/app/components/EmptyState";
 import {useSnackbar} from "@/contexts/SnackBarContext";
@@ -41,7 +41,7 @@ const ExpensesTable = () => {
     const fetchExpenses = async () => {
         try {
             setIsLoading(true);
-            const exps = await getAllExpenses(page, size);
+            const exps = await getAllExpensesAction(page, size);
             dispatch(setExpenses(exps));
         } catch (e) {
             showNotification(e.message, "error");
@@ -58,7 +58,7 @@ const ExpensesTable = () => {
             onSuccess: async () => {
                 try {
                     setIsLoading(true);
-                    await deleteExpenseById(id);
+                    await deleteExpenseByIdAction(id);
                     await fetchExpenses();
                     showNotification("Expense deleted successfully", "success");
                 } catch (e) {

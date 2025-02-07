@@ -3,7 +3,7 @@ import {useAppSelector} from "@/lib/hooks";
 import {Box, Button, FormControl, IconButton, InputAdornment, Stack, TextField} from "@mui/material";
 import {IoEye, IoEyeOff} from "react-icons/io5";
 import {User} from "@/interfaces";
-import {updateUserById} from "@/actions/usersAction";
+import {updateUserByIdAction} from "@/actions/usersActions";
 import {sendPasswordResetEmail} from "@firebase/auth";
 import {auth} from "@/firebase/firebaseClient";
 import {useSnackbar} from "@/contexts/SnackBarContext";
@@ -41,7 +41,7 @@ const PasswordForm = () => {
                         currentPassword,
                         updatedAt: new Date().toISOString(),
                     }
-                    await updateUserById(newUser);
+                    await updateUserByIdAction(newUser);
                     evt.target.reset();
                     showNotification("Password updated successfully", "success");
                 } catch (e) {

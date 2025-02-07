@@ -13,7 +13,7 @@ import {setItems, setSelectedItem, setShowEditingForm} from "@/lib/inventorySlic
 import {Item} from "@/interfaces";
 import {generateId} from "@/utils/Generate";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
-import {addAItem, deleteAFile, updateAItem, uploadAFile} from '@/actions/inventoryActions';
+import {addAItem, deleteAFileAction, updateAItemAction, uploadAFileAction} from '@/actions/inventoryActions';
 import Image from "next/image";
 import {useSnackbar} from "@/contexts/SnackBarContext";
 
@@ -101,10 +101,10 @@ const ItemFormDialog = () => {
             }
             if (newImage) {
                 if (item) {
-                    await deleteAFile(`inventory/${item.itemId}/${item.thumbnail.file}`);
-                    newItem.thumbnail = await uploadAFile(newImage, `inventory/${itemId}`)
+                    await deleteAFileAction(`inventory/${item.itemId}/${item.thumbnail.file}`);
+                    newItem.thumbnail = await uploadAFileAction(newImage, `inventory/${itemId}`)
                 } else {
-                    newItem.thumbnail = await uploadAFile(newImage, `inventory/${itemId}`)
+                    newItem.thumbnail = await uploadAFileAction(newImage, `inventory/${itemId}`)
                 }
             } else {
                 if (item) {
@@ -118,7 +118,7 @@ const ItemFormDialog = () => {
             }
 
             if (item) {
-                await updateAItem(newItem);
+                await updateAItemAction(newItem);
                 closeForm()
                 updateItems(newItem)
                 showNotification("Item updated successfully","success")

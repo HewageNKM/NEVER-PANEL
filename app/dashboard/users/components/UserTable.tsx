@@ -23,7 +23,7 @@ import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import {User} from "@/interfaces";
 import {getAllUsers, setSelectedPage, setSelectedSize, setSelectedUser} from '@/lib/usersSlice/usersSlice';
 import UserForm from "@/app/dashboard/users/components/UserForm";
-import {deleteUserById} from "@/actions/usersAction";
+import {deleteUserByIdAction} from "@/actions/usersActions";
 import {useSnackbar} from "@/contexts/SnackBarContext";
 import {useConfirmationDialog} from "@/contexts/ConfirmationDialogContext";
 
@@ -55,8 +55,8 @@ const UserTable = () => {
             message: "Deleting an user has serious consequences. Are you sure you want to delete this user?",
             onSuccess: async () => {
                 try {
-                    await deleteUserById(userId);
-                    await deleteUserById(userId);
+                    await deleteUserByIdAction(userId);
+                    await deleteUserByIdAction(userId);
                     setTimeout(() => {
                         dispatch(getAllUsers({size: selectedSize, page: selectedPage}));
                     }, 2000);

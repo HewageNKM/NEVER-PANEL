@@ -11,7 +11,7 @@ import Typography from "@mui/material/Typography";
 import {Button, Grid, MenuItem, Select, TextField} from "@mui/material";
 import {orderStatus} from "@/constant";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
-import {updateAOrder} from "@/actions/ordersActions";
+import {updateAOrderAction} from "@/actions/ordersActions";
 import {getOrders} from "@/lib/ordersSlice/ordersSlice";
 import {useSnackbar} from "@/contexts/SnackBarContext";
 
@@ -58,7 +58,7 @@ const TrackingFormDialog = ({
             };
 
             try {
-                await updateAOrder(updatedOrder);
+                await updateAOrderAction(updatedOrder);
                 dispatch(getOrders({size, page: selectedPage}))
                 showNotification("Tracking information updated successfully", "success");
             } catch (e) {
@@ -89,7 +89,7 @@ const TrackingFormDialog = ({
 
             try {
                 setIsLoading(true);
-                await updateAOrder(updatedOrder);
+                await updateAOrderAction(updatedOrder);
                 setFormData({
                     partner: "",
                     trackingNumber: "",

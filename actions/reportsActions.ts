@@ -1,7 +1,7 @@
 import {auth, getToken} from "@/firebase/firebaseClient";
 import axios from "axios";
 
-export const getMonthlyOverview = async (from: string, to: string) => {
+export const getMonthlyOverviewAction = async (from: string, to: string) => {
     try {
         const token = await getToken()
         const res = await axios(
@@ -20,7 +20,7 @@ export const getMonthlyOverview = async (from: string, to: string) => {
         )
     }
 }
-export const getSalesReport = async (from:string, to:string) => {
+export const getSalesReportAction = async (from:string, to:string) => {
     try {
         const token = await getToken()
         return await axios({
@@ -36,7 +36,7 @@ export const getSalesReport = async (from:string, to:string) => {
         )
     }
 }
-export const getDailyOverview = async () => {
+export const getDailyOverviewAction = async () => {
     try {
         const token = await getToken()
         const res = await axios(
@@ -55,7 +55,7 @@ export const getDailyOverview = async () => {
         )
     }
 }
-export const getStocksReport = async () => {
+export const getStocksReportAction = async () => {
     try {
         const token = await getToken()
         const res = await axios(
@@ -75,7 +75,7 @@ export const getStocksReport = async () => {
     }
 }
 
-export const getCashReport = async (from: string, to: string) => {
+export const getCashReportAction = async (from: string, to: string) => {
     try {
         const token = await getToken()
         return axios(
@@ -94,7 +94,7 @@ export const getCashReport = async (from: string, to: string) => {
     }
 }
 
-export const getExpenseReport = async (from: string, to: string) => {
+export const getExpenseReportAction = async (from: string, to: string) => {
     try {
         const token = await getToken()
         const res = await axios(

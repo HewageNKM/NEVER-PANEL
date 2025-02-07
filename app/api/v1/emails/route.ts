@@ -1,6 +1,6 @@
 import {NextResponse} from "next/server";
 import {authorizeRequest, fetchAllEmails, sendEmail} from "@/firebase/firebaseAdmin";
-import {User} from "@/interfaces";
+import {Email} from "@/interfaces";
 
 export const GET = async (req: Request) => {
     try {
@@ -33,7 +33,7 @@ export const POST = async (req: Request) => {
             return NextResponse.json({message: 'Unauthorized'}, {status: 401});
         }
 
-        const body: User = await req.json();
+        const body: Email = await req.json();
         if (!body) {
             return NextResponse.json({message: 'Invalid request body'}, {status: 400});
         }

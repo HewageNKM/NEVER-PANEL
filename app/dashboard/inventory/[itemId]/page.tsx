@@ -7,7 +7,7 @@ import Hero from "@/app/dashboard/inventory/[itemId]/components/Hero";
 import Variants from "@/app/dashboard/inventory/[itemId]/components/Variants";
 import {useParams} from "next/navigation";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
-import {fetchAItem} from "@/actions/inventoryActions";
+import {fetchAItemAction} from "@/actions/inventoryActions";
 import VariantFormDialog from "@/app/dashboard/inventory/[itemId]/components/VariantFormDialog";
 import {setItem} from "@/lib/itemDetailsSlice/itemDetailsSlice";
 
@@ -20,7 +20,7 @@ const Page = () => {
 
     useEffect(() => {
         if (currentUser && !authLoading) {
-            fetchAItem(itemId).then((item) => {
+            fetchAItemAction(itemId).then((item) => {
                 setItem(item)
                 dispatch(setItem(item))
             }).catch((e) => {

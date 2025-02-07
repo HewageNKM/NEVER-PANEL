@@ -1,7 +1,7 @@
 import {Customer, Order, PaymentMethod, Tracking} from "@/interfaces";
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
-import {fetchOrders} from "@/actions/ordersActions";
-import {getAllPaymentMethod} from "@/actions/paymentMethodAction";
+import {fetchOrdersAction} from "@/actions/ordersActions";
+import {getAllPaymentMethodAction} from "@/actions/paymentMethodActions";
 
 interface OrdersSlice {
     orders: Order[]
@@ -127,14 +127,14 @@ export const getOrders = createAsyncThunk("orders/getOrders", async ({size, page
     page: number;
 }, thunkAPI) => {
     try {
-        return await fetchOrders(page, size);
+        return await fetchOrdersAction(page, size);
     } catch (error: any) {
         return thunkAPI.rejectWithValue(error.message);
     }
 });
 export const getPayments = createAsyncThunk("orders/getPayments", async (arg, thunkAPI) => {
     try {
-        return await getAllPaymentMethod();
+        return await getAllPaymentMethodAction();
     } catch (error: any) {
         return thunkAPI.rejectWithValue(error.message);
     }

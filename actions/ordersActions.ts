@@ -2,7 +2,7 @@ import {auth, getToken} from "@/firebase/firebaseClient";
 import axios from "axios";
 import {Order} from "@/interfaces";
 
-export const fetchOrders = async (page: number, size: number) => {
+export const fetchOrdersAction = async (page: number, size: number) => {
     try {
         const token = await getToken()
         const response = await axios({
@@ -20,7 +20,7 @@ export const fetchOrders = async (page: number, size: number) => {
     }
 }
 
-export const getOrdersByDate = async (date:string) => {
+export const getOrdersByDateAction = async (date:string) => {
     try {
         const token = await getToken()
         const response = await axios({
@@ -38,7 +38,7 @@ export const getOrdersByDate = async (date:string) => {
     }
 }
 
-export const updateAOrder = async (order: Order) => {
+export const updateAOrderAction = async (order: Order) => {
     try {
         const token = await getToken()
         const response = await axios({

@@ -1,6 +1,6 @@
 import {User} from "@/interfaces";
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
-import {getUsers} from "@/actions/usersAction";
+import {getUsersAction} from "@/actions/usersActions";
 
 interface UsersSlice {
     users: User[];
@@ -71,7 +71,7 @@ export const getAllUsers = createAsyncThunk("usersSlice/getAllUsers", async ({si
     page: number;
 }, thunkAPI) => {
     try {
-        return getUsers(page, size);
+        return getUsersAction(page, size);
     } catch (error: any) {
         return thunkAPI.rejectWithValue(error.message);
     }

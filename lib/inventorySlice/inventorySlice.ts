@@ -1,6 +1,6 @@
 import {Item} from "@/interfaces";
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
-import {fetchInventory} from "@/actions/inventoryActions";
+import {fetchInventoryAction} from "@/actions/inventoryActions";
 
 interface InventorySlice {
     items: Item[];
@@ -97,7 +97,7 @@ export const getInventoryItems = createAsyncThunk("inventory/fetchInventory", as
     page: number;
 }, thunkAPI) => {
     try {
-        return await fetchInventory(size, page);
+        return await fetchInventoryAction(size, page);
     } catch (error: any) {
         return thunkAPI.rejectWithValue(error.message);
     }

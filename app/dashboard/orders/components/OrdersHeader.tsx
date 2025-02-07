@@ -15,7 +15,7 @@ import {getAlgoliaClient} from "@/lib/algoliaConfig";
 import {DatePicker} from '@mui/x-date-pickers/DatePicker';
 import {LocalizationProvider} from '@mui/x-date-pickers';
 import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
-import {getOrdersByDate} from "@/actions/ordersActions";
+import {getOrdersByDateAction} from "@/actions/ordersActions";
 import PaymentTable from "@/app/dashboard/paymentAndShipping/components/PaymentTable";
 import PaymentMethodForm from "@/app/dashboard/paymentAndShipping/components/PaymentMethodForm";
 import {PaymentMethod} from "@/interfaces";
@@ -58,7 +58,7 @@ const OrdersHeader = () => {
             dispatch(setLoading(true))
             if (date) {
                 const d = date.toDate().toLocaleString()
-                const orders = await getOrdersByDate(d);
+                const orders = await getOrdersByDateAction(d);
                 dispatch(setOrders(orders))
             }
         } catch (e) {

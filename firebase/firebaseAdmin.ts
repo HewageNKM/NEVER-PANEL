@@ -1177,24 +1177,22 @@ export const getAllPaymentMethods = async () => {
         throw e;
     }
 }
-export const fetchAllEmails = async (page:number,size:number) => {
+
+export const fetchAllEmails = async (page: number, size: number) => {
     try {
         const offset = (page - 1) * size;
         console.log('Fetching all emails');
-        const users = await adminFirestore.collection('mail')
+        const emailDoc = await adminFirestore.collection('mail')
             .limit(size)
             .offset(offset)
+            .orderBy('delivery.endTime', 'desc')
             .get();
-        const emails: Email[] = [];
-        users.forEach(doc => {
-            emails.push(
-                {
-                    ...doc.data(),
-                    time: doc.data()?.delivery?.endTime?.toDate()?.toLocaleString(),
-                    status: doc.data()?.delivery?.state,
-                } as Email
-            );
-        });
+        const emails: Email[] = emailDoc.docs.map(doc => ({
+            emailId: doc.id,
+            ...doc.data(),
+            time: doc.data()?.delivery?.endTime?.toDate()?.toLocaleString(),
+            status: doc.data()?.delivery?.state,
+        }));
         return emails;
     } catch (e) {
         throw e;
@@ -1205,7 +1203,7 @@ export const sendEmail = async (email: Email) => {
         console.log('Sending email:', email.to);
         await adminFirestore.collection('mail').add({
             to: email.to,
-            message:{
+            message: {
                 subject: email.message?.subject,
                 html: email.message?.html,
             },
@@ -1213,6 +1211,16 @@ export const sendEmail = async (email: Email) => {
         console.log(`Email sent successfully`);
     } catch (e) {
         console.error(e);
+        throw e;
+    }
+}
+
+export const deleteEmail = async (emailId: string) => {
+    try {
+        console.log(`Deleting email with ID: ${emailId}`);
+        const result = await adminFirestore.collection('mail').doc(emailId).delete();
+        return result.writeTime;
+    } catch (e) {
         throw e;
     }
 }

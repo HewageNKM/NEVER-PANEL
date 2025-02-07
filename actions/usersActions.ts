@@ -2,7 +2,7 @@ import axios from "axios";
 import {getToken} from "@/firebase/firebaseClient";
 import {User} from "@/interfaces";
 
-export const getUsers = async (page: number, size: number) => {
+export const getUsersAction = async (page: number, size: number) => {
     try {
         const token = await getToken();
         const response = await axios({
@@ -19,7 +19,7 @@ export const getUsers = async (page: number, size: number) => {
         )
     }
 }
-export const addNewUser = async (data: User) => {
+export const addNewUserAction = async (data: User) => {
     try {
         const token = await getToken();
         const response = await axios({
@@ -39,7 +39,7 @@ export const addNewUser = async (data: User) => {
     }
 }
 
-export const deleteUserById = async (id: string) => {
+export const deleteUserByIdAction = async (id: string) => {
     try {
         const token = await getToken();
         axios({
@@ -56,7 +56,7 @@ export const deleteUserById = async (id: string) => {
     }
 }
 
-export const updateUserById = async (data: User) => {
+export const updateUserByIdAction = async (data: User) => {
     try {
         const token = await getToken();
         axios({

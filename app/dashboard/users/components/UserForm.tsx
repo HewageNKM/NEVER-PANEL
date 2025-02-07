@@ -5,7 +5,7 @@ import DialogContent from "@mui/material/DialogContent";
 import {Button, FormControl, InputLabel, MenuItem, Select, Stack, TextField} from "@mui/material";
 import DialogActions from "@mui/material/DialogActions";
 import {User} from "@/interfaces";
-import {addNewUser, updateUserById} from "@/actions/usersAction";
+import {addNewUserAction, updateUserByIdAction} from "@/actions/usersActions";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import {getAllUsers} from '@/lib/usersSlice/usersSlice';
 import {useSnackbar} from "@/contexts/SnackBarContext";
@@ -43,11 +43,11 @@ const UserForm = ({showForm, onClose, user}: { showForm: boolean, onClose: () =>
                 updatedAt: new Date().toISOString()
             }
             if (userId === "Auto Generated") {
-                await addNewUser(usr);
+                await addNewUserAction(usr);
                 showNotification("User created successfully", "success");
             } else {
                 console.log(usr)
-                await updateUserById(usr);
+                await updateUserByIdAction(usr);
                 showNotification("User updated successfully", "success");
             }
             setTimeout(() => {

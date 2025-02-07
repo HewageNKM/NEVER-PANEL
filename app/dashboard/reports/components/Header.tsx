@@ -6,7 +6,7 @@ import {LocalizationProvider} from '@mui/x-date-pickers';
 import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs';
 import {useAppSelector} from "@/lib/hooks";
 import SaleReport from "@/app/dashboard/reports/components/SaleReport";
-import {getCashReport, getExpenseReport, getMonthlyOverview, getSalesReport, getStocksReport} from "@/actions/reportsAction";
+import {getCashReportAction, getExpenseReportAction, getMonthlyOverviewAction, getSalesReportAction, getStocksReportAction} from "@/actions/reportsActions";
 import StockReport from "@/app/dashboard/reports/components/StockReport";
 import {SalesReport} from "@/interfaces";
 import CashStatementReport from "@/app/dashboard/reports/components/CashStatementReport";
@@ -74,7 +74,7 @@ const Header = () => {
                 console.log("Start Date: ", startDateString);
                 console.log("End Date: ", endDateString);
 
-                const response = await getSalesReport(startDateString, endDateString);
+                const response = await getSalesReportAction(startDateString, endDateString);
                 setSales({
                     data: response.data.data as SalesReport[],
                     totalDiscount: response.data.totalDiscount,
@@ -82,7 +82,7 @@ const Header = () => {
                 });
                 setShowSaleReport(true);
             } else if (selectedType == "stock") {
-                const report = await getStocksReport();
+                const report = await getStocksReportAction();
                 setStocks(report);
                 setShowStockReport(true);
             } else if (selectedType === "cash" && (toDate != null && fromDate != null)) {
@@ -99,7 +99,7 @@ const Header = () => {
                 console.log("Start Date: ", startDateString);
                 console.log("End Date: ", endDateString);
 
-                const response = await getCashReport(startDateString, endDateString);
+                const response = await getCashReportAction(startDateString, endDateString);
                 setCash(response.data);
                 setShowCashReport(true);
             } else if(selectedType === "expense" && (toDate != null && fromDate != null)){
@@ -116,7 +116,7 @@ const Header = () => {
                 console.log("Start Date: ", startDateString);
                 console.log("End Date: ", endDateString);
 
-                const response = await getExpenseReport(startDateString,endDateString);
+                const response = await getExpenseReportAction(startDateString,endDateString);
                 setExpenses(response);
                 setShowExpenseReport(true);
             }else {
@@ -147,7 +147,7 @@ const Header = () => {
                 totalProfit: number,
                 totalDiscount: number,
                 totalExpense: number,
-            } = await getMonthlyOverview(fromDate, toDate);
+            } = await getMonthlyOverviewAction(fromDate, toDate);
 
             setTotalSale(overview.totalEarnings | 0);
             setTotalProfit(overview.totalProfit | 0);

@@ -11,7 +11,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import {Stack} from "@mui/material";
 import Typography from "@mui/material/Typography";
 import CardActions from "@mui/material/CardActions";
-import {updateAOrder} from "@/actions/ordersActions";
+import {updateAOrderAction} from "@/actions/ordersActions";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import {getOrders} from "@/lib/ordersSlice/ordersSlice";
 import { useSnackbar } from '@/contexts/SnackBarContext';
@@ -51,7 +51,7 @@ const CustomerFormDialog = ({customer, showForm, onClose}: {
                     updatedAt: new Date().toISOString()
                 }
             }
-            await updateAOrder(updatedOrder);
+            await updateAOrderAction(updatedOrder);
             onClose();
             dispatch(getOrders({size, page: selectedPage}))
             showNotification("Customer update successfully","success")

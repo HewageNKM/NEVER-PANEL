@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
     Box,
     IconButton,
@@ -15,19 +15,23 @@ import {
     TableRow,
     Typography
 } from "@mui/material";
-import {IoAdd, IoRefreshOutline, IoTrash} from "react-icons/io5";
+import {IoPencilSharp, IoRefreshOutline, IoTrash} from "react-icons/io5";
 import EmptyState from "@/app/components/EmptyState";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import {getEmails, setPage, setSize} from '@/lib/emailAndSMSSlice/emailSMSSlice';
 import {useSnackbar} from "@/contexts/SnackBarContext";
-import {RefreshOutlined} from "@mui/icons-material";
+import EmailForm from './EmailForm';
+import {useConfirmationDialog} from "@/contexts/ConfirmationDialogContext";
+import {deleteEmailByIdAction} from "@/actions/emailAndSMSActions";
 
 const EmailTable = () => {
     const dispatch = useAppDispatch();
     const {emails, page, isLoading, size} = useAppSelector(state => state.emailAndSMSSlice);
     const {currentUser} = useAppSelector(state => state.authSlice);
     const {showNotification} = useSnackbar();
+    const {showConfirmation} = useConfirmationDialog();
+    const [showEmailForm, setShowEmailForm] = useState(false)
 
     const fetchEmails = async () => {
         try {
@@ -43,6 +47,22 @@ const EmailTable = () => {
         }
     }, [currentUser, page, size]);
 
+    const onDelete = (emailId: string) => {
+        showConfirmation({
+            title: "Delete Email",
+            message: "Deleting an email has serious consequences. Are you sure you want to delete this email?",
+            onSuccess: async () => {
+                try {
+                    await deleteEmailByIdAction(emailId);
+                    await fetchEmails();
+                    showNotification("Email deleted successfully", "success");
+                } catch (e) {
+                    console.error(e);
+                    showNotification(e.message, "error");
+                }
+            }
+        })
+    }
     return (
         <Stack direction={"column"} gap={5} mt={2}>
             <TableContainer component={Paper} sx={{
@@ -69,9 +89,10 @@ const EmailTable = () => {
                         </IconButton>
                     </Box>
                     <IconButton
+                        onClick={() => setShowEmailForm(true)}
                         color={"primary"}
                     >
-                        <IoAdd size={25}/>
+                        <IoPencilSharp size={25}/>
                     </IconButton>
                 </Box>
                 <Table
@@ -106,11 +127,12 @@ const EmailTable = () => {
                         {emails.map((email, index) => (
                             <TableRow key={index}>
                                 <TableCell>{email.to}</TableCell>
-                                <TableCell>{email?.message?.subject || email?.template?.name}}</TableCell>
+                                <TableCell>{email?.message?.subject || email?.template?.name}</TableCell>
                                 <TableCell>{email.status}</TableCell>
                                 <TableCell>{email.time}</TableCell>
                                 <TableCell>
                                     <IconButton
+                                        onClick={() => onDelete(email.emailId)}
                                         color={"error"}
                                     >
                                         <IoTrash size={25}/>
@@ -148,6 +170,11 @@ const EmailTable = () => {
                 <Pagination count={10} variant="outlined" shape="rounded"
                             onChange={(event, page) => dispatch(setPage(page))}/>
             </Box>
+            {showEmailForm && (
+                <EmailForm open={showEmailForm} onClose={() => {
+                    setShowEmailForm(false);
+                }}/>
+            )}
         </Stack>
     );
 };

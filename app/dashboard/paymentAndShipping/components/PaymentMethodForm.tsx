@@ -14,7 +14,7 @@ import {
     Typography
 } from "@mui/material";
 import {PaymentMethod} from "@/interfaces";
-import {createPaymentMethod, updatePaymentMethod} from "@/actions/paymentMethodAction";
+import {createPaymentMethodAction, updatePaymentMethodAction} from "@/actions/paymentMethodActions";
 import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch, RootState} from "@/lib/store";
 import { getPayments } from "@/lib/ordersSlice/ordersSlice";
@@ -69,7 +69,7 @@ const PaymentMethodForm = ({
                     createdAt: selectedPayment.createdAt,
                     updatedAt: new Date().toISOString(),
                 };
-                await updatePaymentMethod(updatedPaymentMethod);
+                await updatePaymentMethodAction(updatedPaymentMethod);
                 onClose();
                 showNotification("Payment method updated successfully", "success");
             }else {
@@ -88,7 +88,7 @@ const PaymentMethodForm = ({
                     createdAt: new Date().toISOString(),
                     updatedAt: new Date().toISOString(),
                 };
-                await createPaymentMethod(newPaymentMethod);
+                await createPaymentMethodAction(newPaymentMethod);
                 onClose();
                 showNotification("Payment method created successfully", "success");
             }

@@ -24,7 +24,7 @@ import {Img, Item, Size, Variant} from "@/interfaces";
 import Image from "next/image";
 import {IoCloudUpload, IoPencil, IoTrashBin} from "react-icons/io5";
 import {generateId} from "@/utils/Generate";
-import {deleteAFile, updateAItem, uploadAFile} from "@/actions/inventoryActions";
+import {deleteAFileAction, updateAItemAction, uploadAFileAction} from "@/actions/inventoryActions";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
 import {useSnackbar} from "@/contexts/SnackBarContext";
 
@@ -101,13 +101,13 @@ const VariantFormDialog = () => {
             const uploadedImages = [] as Img[];
             if (newImages?.length > 0) {
                 for (const image of newImages) {
-                    const uploadedImage = await uploadAFile(image, `inventory/${item?.itemId}/${selectedVariant?.variantId || id}`);
+                    const uploadedImage = await uploadAFileAction(image, `inventory/${item?.itemId}/${selectedVariant?.variantId || id}`);
                     uploadedImages.push(uploadedImage);
                 }
             }
 
             for (const image of deletePendingImages){
-                await deleteAFile(`inventory/${item?.itemId}/${selectedVariant?.variantId}/${image}`);
+                await deleteAFileAction(`inventory/${item?.itemId}/${selectedVariant?.variantId}/${image}`);
             }
 
             if (selectedVariant) {
@@ -122,7 +122,7 @@ const VariantFormDialog = () => {
                     ...item,
                     variants: item.variants.map(variant => variant.variantId === selectedVariant.variantId ? updatedVariant : variant)
                 }
-                await updateAItem(updatedItem)
+                await updateAItemAction(updatedItem)
                 dispatch(setItem(updatedItem));
                 evt.target.reset();
                 clear();
@@ -145,7 +145,7 @@ const VariantFormDialog = () => {
                         ...item.variants, newVariant]
                 }
 
-                await updateAItem(updatedItem)
+                await updateAItemAction(updatedItem)
                 dispatch(setItem(updatedItem));
                 evt.target.reset();
                 clear();

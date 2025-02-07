@@ -9,7 +9,7 @@ import CardActions from "@mui/material/CardActions";
 import { PaymentStatus } from "@/functions/src/constant";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { Order } from "@/interfaces";
-import { updateAOrder } from "@/actions/ordersActions";
+import { updateAOrderAction } from "@/actions/ordersActions";
 import { getOrders } from "@/lib/ordersSlice/ordersSlice";
 import {useSnackbar} from "@/contexts/SnackBarContext";
 
@@ -33,7 +33,7 @@ const PaymentStatusFormDialog = ({ initialStatus, showForm, onClose }: {
                 updatedAt: new Date().toISOString(),
                 paymentStatus: selectedStatus
             };
-            await updateAOrder(updatedOrder);
+            await updateAOrderAction(updatedOrder);
             dispatch(getOrders({ size, page: selectedPage }));
             showNotification("Payment status updated successfully", "success");
         } catch (e) {

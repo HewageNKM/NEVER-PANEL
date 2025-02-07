@@ -9,7 +9,7 @@ import {useDispatch} from "react-redux";
 import {setItem, setSelectedVariant, setShowEditingForm} from "@/lib/itemDetailsSlice/itemDetailsSlice";
 import {useAppSelector} from "@/lib/hooks";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
-import {deleteAFile, updateAItem} from "@/actions/inventoryActions";
+import {deleteAFileAction, updateAItemAction} from "@/actions/inventoryActions";
 import {useSnackbar} from "@/contexts/SnackBarContext";
 
 const VariantCard = ({variant}: { variant: Variant }) => {
@@ -40,10 +40,10 @@ const VariantCard = ({variant}: { variant: Variant }) => {
             const filteredVariants = item?.variants.filter(v => v.variantId !== variant.variantId)
             const updatedItem = {...item, variants: filteredVariants}
             for (const image of variant.images) {
-                await deleteAFile(`inventory/${item?.itemId}/${variant.variantId}/${image.file}`);
+                await deleteAFileAction(`inventory/${item?.itemId}/${variant.variantId}/${image.file}`);
             }
 
-            await updateAItem(updatedItem)
+            await updateAItemAction(updatedItem)
             dispatch(setItem(updatedItem))
             showNotification("Variant deleted successfully","success")
         } catch (e: any) {

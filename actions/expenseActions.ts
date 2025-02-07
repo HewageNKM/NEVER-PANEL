@@ -2,7 +2,7 @@ import axios from "axios";
 import {getToken} from "@/firebase/firebaseClient";
 import {Expense} from "@/interfaces";
 
-export const addNewExpense = async (expense: Expense) => {
+export const addNewExpenseAction = async (expense: Expense) => {
     try {
         const token = await getToken()
         const response = await axios({
@@ -22,7 +22,7 @@ export const addNewExpense = async (expense: Expense) => {
     }
 }
 
-export const getAllExpenses = async (page: number, size: number) => {
+export const getAllExpensesAction = async (page: number, size: number) => {
     try {
         const token = await getToken()
         const response = await axios({
@@ -39,7 +39,7 @@ export const getAllExpenses = async (page: number, size: number) => {
         )
     }
 }
-export const getAllExpensesByDate = async (from: string, to: string) => {
+export const getAllExpensesByDateAction = async (from: string, to: string) => {
     try {
         const token = await getToken()
         const response = await axios({
@@ -56,7 +56,7 @@ export const getAllExpensesByDate = async (from: string, to: string) => {
         )
     }
 }
-export const deleteExpenseById = async (id: string) => {
+export const deleteExpenseByIdAction = async (id: string) => {
     try {
         const token = await getToken()
         const response = await axios({

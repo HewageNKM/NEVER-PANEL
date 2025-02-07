@@ -3,7 +3,7 @@ import {Box, CircularProgress, Typography} from "@mui/material";
 import DashboardCard from "../shared/DashboardCard";
 import {useEffect, useState} from "react";
 import {useAppSelector} from "@/lib/hooks";
-import {getDailyOverview} from "@/actions/reportsAction";
+import {getDailyOverviewAction} from "@/actions/reportsActions";
 import {useSnackbar} from "@/contexts/SnackBarContext"; // Ensure the correct path to your interfaces
 
 const DailyEarnings = () => {
@@ -23,7 +23,7 @@ const DailyEarnings = () => {
 
     const fetchDailyEarnings = async () => {
         try {
-            const overview = await getDailyOverview();
+            const overview = await getDailyOverviewAction();
             setTotalEarnings(overview.totalEarnings);
             setTotalProfit(overview.totalProfit);
             setInvoiceCount(overview.totalOrders);

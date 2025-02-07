@@ -2,7 +2,7 @@ import {auth, getToken} from "@/firebase/firebaseClient";
 import axios from "axios";
 import {PaymentMethod} from "@/interfaces";
 
-export const getAllPaymentMethod = async () => {
+export const getAllPaymentMethodAction = async () => {
     try {
         const token = await getToken()
         let response = await axios({
@@ -20,7 +20,7 @@ export const getAllPaymentMethod = async () => {
     }
 }
 
-export const createPaymentMethod = async (paymentMethod: PaymentMethod) => {
+export const createPaymentMethodAction = async (paymentMethod: PaymentMethod) => {
     try {
         const token = await getToken()
         let response = await axios({
@@ -40,7 +40,7 @@ export const createPaymentMethod = async (paymentMethod: PaymentMethod) => {
     }
 }
 
-export const updatePaymentMethod = async (paymentMethod: PaymentMethod) => {
+export const updatePaymentMethodAction = async (paymentMethod: PaymentMethod) => {
     try {
         const token = await getToken()
         return axios({

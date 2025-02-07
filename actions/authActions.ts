@@ -2,7 +2,7 @@ import {auth, getToken} from "@/firebase/firebaseClient"
 import {signInWithEmailAndPassword} from "@firebase/auth"
 import axios from "axios";
 
-export const authenticateUser = async (email: string, password: string) => {
+export const authenticateUserAction = async (email: string, password: string) => {
     try {
         const credential = await signInWithEmailAndPassword(auth, email, password);
         const token = await getToken()
@@ -21,7 +21,7 @@ export const authenticateUser = async (email: string, password: string) => {
     }
 }
 
-export const checkUser = async (uid:string,token:string) => {
+export const checkUserAction = async (uid:string, token:string) => {
     try {
         const response = await axios({
             method: 'GET',

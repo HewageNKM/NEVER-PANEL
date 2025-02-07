@@ -11,7 +11,7 @@ import {IoPencil, IoTrashBin} from "react-icons/io5";
 import Box from '@mui/material/Box';
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
-import {deleteAItem} from "@/actions/inventoryActions";
+import {deleteAItemAction} from "@/actions/inventoryActions";
 import {getInventoryItems} from "@/lib/inventorySlice/inventorySlice";
 import {useRouter} from "next/navigation";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
@@ -35,7 +35,7 @@ const ItemCard = ({item, onEdit}: { item: Item, onEdit: any }) => {
                 try {
                     setIsLoading(true);
                     setShowConfirmedDialog(false);
-                    await deleteAItem(item.itemId);
+                    await deleteAItemAction(item.itemId);
                 } catch (e: any) {
                     console.error(e)
                     showNotification(e.message, "error")

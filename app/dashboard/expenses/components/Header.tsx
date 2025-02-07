@@ -17,7 +17,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateTimePicker, LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { IoSearchCircle } from "react-icons/io5";
 import dayjs from "dayjs";
-import { addNewExpense, getAllExpenses, getAllExpensesByDate } from "@/actions/expenseAction";
+import { addNewExpenseAction, getAllExpensesAction, getAllExpensesByDateAction } from "@/actions/expenseActions";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { setExpenses, setSelectedFilterFor, setSelectedFilterType } from "@/lib/expensesSlice/expensesSlice";
 import {useSnackbar} from "@/contexts/SnackBarContext";
@@ -44,9 +44,9 @@ const Header = () => {
                 amount: parseFloat(evt.target.amount.value),
                 createdAt: selectedDateTime.toDate().toISOString(),
             };
-            await addNewExpense(newExpense);
+            await addNewExpenseAction(newExpense);
             evt.target.reset();
-            dispatch(setExpenses(await getAllExpenses(page, size)));
+            dispatch(setExpenses(await getAllExpensesAction(page, size)));
             showNotification("Expense added successfully", "success");
         } catch (e) {
             showNotification(e.message, "error");

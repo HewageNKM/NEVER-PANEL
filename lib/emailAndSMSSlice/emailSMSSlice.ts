@@ -1,6 +1,6 @@
 import {Email} from "@/interfaces";
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
-import {getAllEmails} from "@/actions/emailAndSMSActon";
+import {getAllEmailsAction} from "@/actions/emailAndSMSActions";
 
 interface EmailSMSSlice {
     emails: Email[];
@@ -48,7 +48,7 @@ const emailSMSSlice = createSlice({
 })
 export const getEmails = createAsyncThunk('emailSMSSlice/getEmails', async (arg: { page: number, size: number},thunkAPI) => {
         try {
-            return await getAllEmails(arg.page, arg.size);
+            return await getAllEmailsAction(arg.page, arg.size);
         } catch (e) {
             return thunkAPI.rejectWithValue(e.response ? e.response.data.message : e.message);
         }

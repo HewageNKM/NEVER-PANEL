@@ -4,7 +4,7 @@ import {Box, Card, Grid, Stack, Typography,} from "@mui/material";
 import PageContainer from "@/app/dashboard/components/container/PageContainer";
 import Logo from "@/app/dashboard/layout/shared/logo/Logo";
 import AuthLogin from "./components/AuthLogin";
-import {authenticateUser} from "@/actions/authAction";
+import {authenticateUserAction} from "@/actions/authActions";
 import {useAppDispatch} from "@/lib/hooks";
 import {useRouter} from "next/navigation";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
@@ -25,7 +25,7 @@ const Login = () => {
         try {
             const email: string = evt.target.email.value;
             const password: string = evt.target.password.value;
-            const user: User = await authenticateUser(email, password);
+            const user: User = await authenticateUserAction(email, password);
             dispatch(setUser(user))
             window.localStorage.setItem("nvrUser", JSON.stringify(user));
             router.replace("/dashboard");

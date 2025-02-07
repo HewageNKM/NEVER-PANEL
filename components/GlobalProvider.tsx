@@ -4,7 +4,7 @@ import {useDispatch} from "react-redux";
 import {setUser} from '@/lib/authSlice/authSlice';
 import {onAuthStateChanged} from "@firebase/auth";
 import {auth} from "@/firebase/firebaseClient";
-import {checkUser} from "@/actions/authAction";
+import {checkUserAction} from "@/actions/authActions";
 import {useRouter} from "next/navigation";
 import {User} from "@/interfaces";
 
@@ -16,7 +16,7 @@ const GlobalProvider = ({children}: { children: ReactNode }) => {
             if (user) {
                 try {
                     const token = await user.getIdToken();
-                    const newVar:User = await checkUser(user.uid, token);
+                    const newVar:User = await checkUserAction(user.uid, token);
                     if (newVar) {
                         console.log("User found");
                         window.localStorage.setItem("nvrUser", JSON.stringify(newVar));

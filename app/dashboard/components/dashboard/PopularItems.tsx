@@ -2,7 +2,7 @@ import {PopularItem} from "@/interfaces";
 import {Box, CircularProgress, Grid, IconButton, Typography,} from "@mui/material";
 import {useEffect, useState} from "react";
 import {useAppSelector} from "@/lib/hooks";
-import {getPopularItems} from "@/actions/inventoryActions";
+import {getPopularItemsAction} from "@/actions/inventoryActions";
 import DashboardCard from "@/app/dashboard/components/shared/DashboardCard";
 import PopularItemCard from "@/app/dashboard/components/dashboard/PopularItemCard";
 import {IoRefresh} from "react-icons/io5";
@@ -22,7 +22,7 @@ const PopularItems = () => {
     const fetchPopularItems = async () => {
         try {
             setIsLoading(true);
-            const items: PopularItem[] = await getPopularItems(20);
+            const items: PopularItem[] = await getPopularItemsAction(20);
             setItems(items);
         } catch (e) {
             console.error(e);
