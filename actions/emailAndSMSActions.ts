@@ -1,6 +1,6 @@
 import {getToken} from "@/firebase/firebaseClient";
 import axios from "axios";
-import {Email} from "@/interfaces";
+import {Email, SMS} from "@/interfaces";
 
 export const getAllEmailsAction = async (page: number, size: number) => {
     try {
@@ -45,6 +45,26 @@ export const deleteEmailByIdAction = async (emailId: string) => {
             headers: {
                 Authorization: `Bearer ${token}`
             }
+        });
+        return response.data;
+    } catch (e) {
+        throw new Error(
+            e.response ? e.response.data.message : e.message
+        )
+    }
+}
+
+export const sendSMSAction = async (sms:SMS) => {
+    try {
+        const token = await getToken();
+        const response = await axios({
+            method: 'POST',
+            url: '/api/v1/sms',
+            data: JSON.stringify(sms),
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
         });
         return response.data;
     } catch (e) {

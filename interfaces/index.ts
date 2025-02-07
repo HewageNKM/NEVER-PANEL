@@ -15,10 +15,15 @@ export interface User {
     updatedAt: Timestamp | string;
 }
 
+export interface SMS {
+    to: string;
+    text: string;
+}
+
 export interface Email {
     emailId?: string;
     to: string;
-    message?:{
+    message?: {
         subject: string;
         text?: string;
         html?: string;
@@ -28,7 +33,7 @@ export interface Email {
         data: {};
     }
     status?: string;
-    time?:string;
+    time?: string;
 }
 
 export interface PopularItem {

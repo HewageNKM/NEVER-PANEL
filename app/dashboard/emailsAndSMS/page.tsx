@@ -6,6 +6,7 @@ import PageContainer from "@/app/dashboard/components/container/PageContainer";
 import React, {useState} from 'react';
 import Header from "@/app/dashboard/emailsAndSMS/components/Header";
 import EmailTable from "@/app/dashboard/emailsAndSMS/components/EmailTable";
+import SMSForm from "@/app/dashboard/emailsAndSMS/components/SMSForm";
 
 const Page = () => {
     const [formType, setFormType] = useState("email")
@@ -15,7 +16,7 @@ const Page = () => {
                 <Stack>
                     <Header formType={formType} setFormType={setFormType}/>
                     {formType === "email" && (<EmailTable/>)}
-                    {formType === "sms" && (<EmailTable/>)}
+                    {formType === "sms" && (<SMSForm/>)}
                 </Stack>
             </DashboardCard>
         </PageContainer>

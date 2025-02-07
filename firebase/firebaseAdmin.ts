@@ -9,12 +9,14 @@ import {
     PaymentMethod,
     PopularItem,
     SalesReport,
+    SMS,
     StocksReport,
     User
 } from "@/interfaces";
 import {uuidv4} from "@firebase/util";
 import {Timestamp} from "firebase-admin/firestore";
 import {generateRandomPassword, hashPassword} from "@/utils/Generate";
+import axios from "axios";
 
 // Initialize Firebase Admin if not already initialized
 if (!admin.apps.length) {
@@ -1238,7 +1240,26 @@ export const addNewPaymentMethod = async (PaymentMethod: PaymentMethod) => {
         throw e;
     }
 }
-
+export const sendTextMessage = async (sms: SMS) => {
+    try {
+        console.log('Sending SMS:', sms.to);
+        const apiKey = process.env.TEXTITBIZ_API_KEY;
+        console.log('API Key:', apiKey);
+        const response = await axios({
+            method: 'POST',
+            url: `https://api.textit.biz/`,
+            headers: {
+                Authorization: `Basic ${apiKey}`,
+                'Content-Type': 'application/json',
+                "Accept": "*/*"
+            },
+            data: JSON.stringify(sms)
+        });
+        return response.data;
+    } catch (e) {
+        throw e;
+    }
+}
 export const updatePaymentMethod = async (paymentMethod: PaymentMethod) => {
     try {
         console.log('Updating payment method:', paymentMethod.paymentId);
