@@ -39,12 +39,12 @@ export const getAllExpensesAction = async (page: number, size: number) => {
         )
     }
 }
-export const getAllExpensesByDateAction = async (from: string, to: string) => {
+export const getAllExpensesByDateAction = async (date:string) => {
     try {
         const token = await getToken()
         const response = await axios({
             method: 'GET',
-            url: `/api/v1/expenses?from=${from}&to=${to}`,
+            url: `/api/v1/expenses?date=${date}`,
             headers: {
                 Authorization: `Bearer ${token}`
             }

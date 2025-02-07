@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {
     Box,
-    Button,
+    Button, IconButton,
     MenuItem,
     Pagination,
     Paper,
@@ -22,6 +22,7 @@ import ComponentsLoader from "@/app/components/ComponentsLoader";
 import EmptyState from "@/app/components/EmptyState";
 import {useSnackbar} from "@/contexts/SnackBarContext";
 import {useConfirmationDialog} from "@/contexts/ConfirmationDialogContext";
+import {IoRefreshCircle, IoRefreshCircleOutline, IoRefreshOutline} from "react-icons/io5";
 
 const ExpensesTable = () => {
     const dispatch = useAppDispatch();
@@ -76,9 +77,23 @@ const ExpensesTable = () => {
         <Stack direction="column" gap={5}>
             <TableContainer component={Paper}
                             sx={{position: "relative", borderRadius: 2, boxShadow: 2, overflow: "hidden"}}>
-                <Typography variant="h6" component="div" sx={{padding: 2, fontWeight: "bold"}}>
-                    Expenses
-                </Typography>
+                <Box
+                    sx={{
+                        display: "flex",
+                        flexDirection: "row",
+                        alignItems: "center",
+                    }}
+                >
+                    <Typography variant="h6" component="div" sx={{padding: 2, fontWeight: "bold"}}>
+                        Expenses
+                    </Typography>
+                    <IconButton
+                        onClick={fetchExpenses}
+                        color={"primary"}
+                    >
+                        <IoRefreshOutline />
+                    </IconButton>
+                </Box>
                 <Table sx={{
                     minWidth: 650,
                     "& thead": {

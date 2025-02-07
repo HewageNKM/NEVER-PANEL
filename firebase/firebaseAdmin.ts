@@ -791,12 +791,20 @@ export const getAllExpenses = async (page: number, size: number) => {
     }
 }
 
-export const getAllExpensesByDate = async (from: string, to: string) => {
+export const getAllExpensesByDate = async (date:string) => {
     try {
-        const fromTimestamp = admin.firestore.Timestamp.fromDate(new Date(from));
-        const toTimestamp = admin.firestore.Timestamp.fromDate(new Date(to));
-        console.log(`Fetching expenses from ${from} to ${to}`);
-        const expenses = await adminFirestore.collection('expenses').where('createdAt', '>=', fromTimestamp).where('createdAt', '<=', toTimestamp)
+        console.log(`Fetching expenses on ${date}`);
+        const startDate = new Date(date);
+        startDate.setHours(0, 0);
+        const endDate = new Date(date);
+        endDate.setHours(23, 59);
+
+        const startTimestamp = Timestamp.fromDate(startDate);
+        const endTimestamp = Timestamp.fromDate(endDate);
+
+        const expenses = await adminFirestore.collection('expenses')
+            .where('createdAt', '>=', startTimestamp)
+            .where('createdAt', '<=', endTimestamp)
             .orderBy('createdAt', 'desc')
             .get();
         const expenseList: Expense[] = [];
@@ -809,7 +817,7 @@ export const getAllExpensesByDate = async (from: string, to: string) => {
             const data = doc.data() as Expense;
             expenseList.push({
                 ...data,
-                createdAt: data.createdAt.toDate().toLocaleString(),
+                createdAt: data?.createdAt?.toDate()?.toLocaleString(),
             });
         });
         console.log(`Fetched ${expenseList.length} expenses`);

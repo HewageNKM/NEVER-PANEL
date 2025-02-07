@@ -16,7 +16,7 @@ import {
     TableRow,
     Typography
 } from "@mui/material";
-import {IoAdd, IoPencil, IoTrash} from "react-icons/io5";
+import {IoAdd, IoPencil, IoRefreshCircle, IoRefreshOutline, IoTrash} from "react-icons/io5";
 import EmptyState from "@/app/components/EmptyState";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
@@ -86,9 +86,18 @@ const UserTable = () => {
                 overflow: "hidden"
             }}>
                 <Box flexDirection={"row"} display={"flex"} justifyContent={"space-between"} alignItems={"center"}>
-                    <Typography variant="h6" component="div" sx={{padding: 2}}>
-                        Orders
-                    </Typography>
+                    <Box
+                        display={"flex"}
+                        flexDirection={"row"}
+                        alignItems={"center"}
+                    >
+                        <Typography variant="h6" component="div" sx={{padding: 2}}>
+                            Users
+                        </Typography>
+                        <IconButton color={"primary"} onClick={() => dispatch(getAllUsers({page: selectedPage, size: selectedSize}))}>
+                            <IoRefreshOutline />
+                        </IconButton>
+                    </Box>
                     <IconButton
                         onClick={() => setShowUserForm(true)}
                         color={"primary"}

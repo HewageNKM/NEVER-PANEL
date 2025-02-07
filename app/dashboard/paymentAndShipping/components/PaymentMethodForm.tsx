@@ -89,6 +89,7 @@ const PaymentMethodForm = ({
                     updatedAt: new Date().toISOString(),
                 };
                 await createPaymentMethodAction(newPaymentMethod);
+                e.target.reset();
                 onClose();
                 showNotification("Payment method created successfully", "success");
             }

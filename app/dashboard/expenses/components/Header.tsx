@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, {useState} from "react";
 import {
     Box,
+    Button,
     FormControl,
     IconButton,
     Input,
@@ -11,20 +12,20 @@ import {
     TextareaAutosize,
     TextField,
     Typography,
-    Button,
 } from "@mui/material";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { DateTimePicker, LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
-import { IoSearchCircle } from "react-icons/io5";
+import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
+import {DatePicker, DateTimePicker, LocalizationProvider} from "@mui/x-date-pickers";
+import {IoSearchCircle} from "react-icons/io5";
 import dayjs from "dayjs";
-import { addNewExpenseAction, getAllExpensesAction, getAllExpensesByDateAction } from "@/actions/expenseActions";
-import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import { setExpenses, setSelectedFilterFor, setSelectedFilterType } from "@/lib/expensesSlice/expensesSlice";
+import {addNewExpenseAction, getAllExpensesAction, getAllExpensesByDateAction} from "@/actions/expenseActions";
+import {useAppDispatch, useAppSelector} from "@/lib/hooks";
+import {setExpenses, setSelectedFilterFor, setSelectedFilterType} from "@/lib/expensesSlice/expensesSlice";
 import {useSnackbar} from "@/contexts/SnackBarContext";
+import {setLoading} from "@/lib/ordersSlice/ordersSlice";
 
 const Header = () => {
     const dispatch = useAppDispatch();
-    const { page, size, selectedFilterFor, selectedFilterType } = useAppSelector(state => state.expensesSlice);
+    const {page, size, selectedFilterFor, selectedFilterType} = useAppSelector(state => state.expensesSlice);
     const [selectedType, setSelectedType] = useState("expense");
     const [selectedFor, setSelectedFor] = useState("food");
     const [isLoading, setIsLoading] = useState(false);
@@ -55,26 +56,41 @@ const Header = () => {
             setIsLoading(false);
         }
     };
+    const onDateSelect = async (date) => {
+        try {
+            dispatch(setLoading(true))
+            if (date) {
+                const d = date.toDate().toLocaleString()
+                const expenses = await getAllExpensesByDateAction(d)
+                dispatch(setExpenses(expenses))
+            }
+        } catch (e) {
+            console.error(e)
+            showNotification(e.message, "error")
+        } finally {
+            dispatch(setLoading(false))
+        }
 
+    }
     return (
-        <Stack sx={{ p: 3, gap: 4, width: "100%", bgcolor: "#f9f9f9", borderRadius: 2, boxShadow: 1 }}>
+        <Stack sx={{p: 3, gap: 4, width: "100%", bgcolor: "#f9f9f9", borderRadius: 2, boxShadow: 1}}>
             <Typography variant="h5" fontWeight="bold">Add Expense</Typography>
             <form onSubmit={onSubmit}>
-                <Stack spacing={3} direction={{ xs: "column", md: "row" }}>
-                        <FormControl variant="outlined" size="medium">
-                            <InputLabel id="type-label">Type</InputLabel>
-                            <Select
-                                disabled={isLoading}
-                                required
-                                labelId="type-label"
-                                label={"Type"}
-                                value={selectedType}
-                                onChange={(e) => setSelectedType(e.target.value)}
-                            >
-                                <MenuItem value="expense">Expense</MenuItem>
-                                <MenuItem value="utility">Utility</MenuItem>
-                            </Select>
-                        </FormControl>
+                <Stack spacing={3} direction={{xs: "column", md: "row"}}>
+                    <FormControl variant="outlined" size="medium">
+                        <InputLabel id="type-label">Type</InputLabel>
+                        <Select
+                            disabled={isLoading}
+                            required
+                            labelId="type-label"
+                            label={"Type"}
+                            value={selectedType}
+                            onChange={(e) => setSelectedType(e.target.value)}
+                        >
+                            <MenuItem value="expense">Expense</MenuItem>
+                            <MenuItem value="utility">Utility</MenuItem>
+                        </Select>
+                    </FormControl>
                     <FormControl variant="outlined" size="medium">
                         <InputLabel id="for-label">For</InputLabel>
                         <Select
@@ -97,7 +113,7 @@ const Header = () => {
                             <MenuItem value="other">Other</MenuItem>
                         </Select>
                     </FormControl>
-                    <TextField disabled={isLoading} label="Amount" type="number" name="amount" required />
+                    <TextField disabled={isLoading} label="Amount" type="number" name="amount" required/>
                     <Box>
                         <LocalizationProvider dateAdapter={AdapterDayjs}>
                             <DateTimePicker
@@ -114,7 +130,14 @@ const Header = () => {
                     minRows={5}
                     name="note"
                     placeholder="Note"
-                    style={{ width: "100%", padding: "10px", fontSize: "1rem", borderRadius: "5px", border: "1px solid #ccc", marginTop:"10px" }}
+                    style={{
+                        width: "100%",
+                        padding: "10px",
+                        fontSize: "1rem",
+                        borderRadius: "5px",
+                        border: "1px solid #ccc",
+                        marginTop: "10px"
+                    }}
                 />
                 <Box
                     sx={{
@@ -124,11 +147,13 @@ const Header = () => {
                         mt: 1,
                     }}
                 >
-                    <Button type="submit" variant="contained" color="primary" disabled={isLoading} sx={{ mt: 2 }}>Add Expense</Button>
+                    <Button type="submit" variant="contained" color="primary" disabled={isLoading} sx={{mt: 2}}>Add
+                        Expense</Button>
                 </Box>
             </form>
             <Typography variant="h6">Filters</Typography>
-            <Stack direction={{ xs: "column", md: "row" }} flexWrap={"wrap"} justifyItems={"start"} justifyContent={"start"} gap={3}>
+            <Stack direction={{xs: "column", md: "row"}} flexWrap={"wrap"} justifyItems={"start"}
+                   justifyContent={"start"} gap={3}>
                 <FormControl variant="outlined" size="medium">
                     <InputLabel id="type-label">Type</InputLabel>
                     <Select
@@ -168,12 +193,9 @@ const Header = () => {
                     </Select>
                 </FormControl>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker label="Filter by Date" renderInput={(params) => <TextField {...params} fullWidth />} />
+                    <DatePicker label="Filter by Date" renderInput={(params) => <TextField {...params} fullWidth/>}
+                                onChange={(date) => onDateSelect(date)}/>
                 </LocalizationProvider>
-                <Box sx={{ display: "flex", alignItems: "center", minWidth: "300px" }}>
-                    <Input placeholder="Search" fullWidth/>
-                    <IconButton><IoSearchCircle size={30} color="blue" /></IconButton>
-                </Box>
             </Stack>
         </Stack>
     );

@@ -1,6 +1,6 @@
 import React from 'react';
-import {Box, Button, MenuItem, Select, TextField, Typography} from "@mui/material";
-import {IoSearch} from "react-icons/io5";
+import {Box, Button, IconButton, MenuItem, Select, TextField, Typography} from "@mui/material";
+import {IoSearch, IoSearchCircle} from "react-icons/io5";
 import {sortInventoryOptions, types} from "@/constant";
 import {useAppDispatch} from "@/lib/hooks";
 import {
@@ -46,7 +46,7 @@ const Header = () => {
                 <form onSubmit={searchInventory}>
                     <Box display={"flex"} flexDirection={"row"} gap={1}>
                         <TextField size={"small"} variant={"outlined"} label={"Search"} name="search"/>
-                        <Button type={"submit"} startIcon={<IoSearch/>}/>
+                        <Button type={"submit"} startIcon={ <IoSearchCircle size={30}/>}/>
                     </Box>
                 </form>
                 <Box display="flex" flexWrap={"wrap"} flexDirection="row" gap={2} justifyItems={"start"}

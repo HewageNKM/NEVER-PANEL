@@ -1,5 +1,6 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
+    Box,
     IconButton,
     Paper,
     Stack,
@@ -11,20 +12,22 @@ import {
     TableRow,
     Typography
 } from "@mui/material";
-import {IoPencil} from "react-icons/io5";
+import {IoAdd, IoPencil, IoRefreshOutline} from "react-icons/io5";
 import EmptyState from "@/app/components/EmptyState";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
 import {PaymentMethod} from "@/interfaces";
 import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch, RootState} from "@/lib/store";
-import {getPayments} from '@/lib/ordersSlice/ordersSlice';
+import {getPayments, setSelectedPayment} from '@/lib/ordersSlice/ordersSlice';
 import {useConfirmationDialog} from "@/contexts/ConfirmationDialogContext";
+import PaymentMethodForm from "@/app/dashboard/paymentAndShipping/components/PaymentMethodForm";
 
-const PaymentTable = ({onClick}: { onClick: (payment: PaymentMethod) => void }) => {
+const PaymentTable = () => {
     const dispatch: AppDispatch = useDispatch();
     const {payments, isPaymentLoading} = useSelector((state: RootState) => state.ordersSlice);
     const {currentUser} = useSelector((state: RootState) => state.authSlice);
     const {showConfirmation} = useConfirmationDialog();
+    const [showPaymentMethodForm, setShowPaymentMethodForm] = useState(false)
 
     useEffect(() => {
         if (currentUser) {
@@ -38,7 +41,8 @@ const PaymentTable = ({onClick}: { onClick: (payment: PaymentMethod) => void }) 
             title: "Edit Payment Method",
             message: "Editing a payment method has some serious consequences. Are you sure you want to edit this payment method?",
             onSuccess: () => {
-                onClick(payment);
+                dispatch(setSelectedPayment(payment))
+                setShowPaymentMethodForm(true)
             }
         })
     }
@@ -46,10 +50,39 @@ const PaymentTable = ({onClick}: { onClick: (payment: PaymentMethod) => void }) 
     return (
         <Stack>
             <TableContainer component={Paper} sx={{position: "relative", borderRadius: 2, overflow: "hidden"}}>
-                <Typography variant="h6" component="div"
-                            sx={{padding: 2, fontWeight: "bold", borderBottom: "1px solid #ddd"}}>
-                    Payment Methods
-                </Typography>
+                <Stack
+                    sx={{
+                        display: "flex",
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        alignItems: "center"
+                    }}
+                >
+                    <Box
+                        sx={{
+                            display: "flex",
+                            flexDirection: "row",
+                            alignItems: "center"
+                        }}
+                    >
+                        <Typography variant="h6" component="div"
+                                    sx={{padding: 2, fontWeight: "bold", borderBottom: "1px solid #ddd"}}>
+                            Payment Methods
+                        </Typography>
+                        <IconButton
+                            color={"primary"}
+                            onClick={() => dispatch(getPayments())}
+                        >
+                            <IoRefreshOutline/>
+                        </IconButton>
+                    </Box>
+                    <IconButton
+                        onClick={() => setShowPaymentMethodForm(true)}
+                        color={"primary"}
+                    >
+                        <IoAdd/>
+                    </IconButton>
+                </Stack>
                 <Table sx={{minWidth: 800}}>
                     <TableHead>
                         <TableRow sx={{backgroundColor: "#f4f6f8"}}>
@@ -95,6 +128,13 @@ const PaymentTable = ({onClick}: { onClick: (payment: PaymentMethod) => void }) 
                     <ComponentsLoader position={"absolute"} title={"Loading payment methods"}/>
                 )}
             </TableContainer>
+            {showPaymentMethodForm && (<PaymentMethodForm
+                showPaymentMethodForm={showPaymentMethodForm}
+                onClose={() => {
+                    setShowPaymentMethodForm(false)
+                    dispatch(setSelectedPayment(null))
+                }}
+            />)}
         </Stack>
     );
 };

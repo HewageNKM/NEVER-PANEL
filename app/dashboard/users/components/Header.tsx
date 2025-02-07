@@ -80,25 +80,6 @@ const Header = () => {
                             </Select>
                         </FormControl>
                     </Stack>
-                    <Stack direction="row" spacing={1} alignItems="center" flexWrap={"wrap"}>
-                        {/* Search TextField */}
-                        <form onSubmit={onSearch}>
-                            <Stack gap={2} display={"flex"} direction={"row"} flexWrap={"wrap"}>
-                                <TextField
-                                    variant="outlined"
-                                    size="small"
-                                    placeholder="Search user..."
-                                    name={"search"}
-                                />
-                                <Button type={"submit"} variant="contained" color="primary">
-                                    Search
-                                </Button>
-                            </Stack>
-                        </form>
-                        <IconButton onClick={() => dispatch(getAllUsers({page: selectedPage, size: selectedSize}))}>
-                            <IoRefreshCircle size={30}/>
-                        </IconButton>
-                    </Stack>
                 </Stack>
             </Stack>
         </Stack>

@@ -17,7 +17,7 @@ import {
 } from "@mui/material";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import {getOrders, setPage, setSelectedOrder, setSize} from '@/lib/ordersSlice/ordersSlice';
-import {IoInformationCircle} from "react-icons/io5";
+import {IoInformationCircle, IoRefreshOutline} from "react-icons/io5";
 import EmptyState from "@/app/components/EmptyState";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
 import {Customer, OrderItem, Tracking} from "@/interfaces";
@@ -61,9 +61,22 @@ const OrderTable = () => {
                 boxShadow: 2,
                 overflow: "hidden"
             }}>
-                <Typography variant="h6" component="div" sx={{padding: 2}}>
-                    Orders
-                </Typography>
+                <Box
+                    sx={{
+                        display: "flex",
+                        flexDirection: "row",
+                        alignItems: "center"
+                    }}
+                >
+                    <Typography variant="h6" component="div" sx={{padding: 2}}>
+                        Orders
+                    </Typography>
+                    <IconButton
+                        color={"primary"}
+                        onClick={() => dispatch(getOrders({size, page: selectedPage}))}>
+                        <IoRefreshOutline />
+                    </IconButton>
+                </Box>
                 <Table
                     sx={{
                         minWidth: 650,

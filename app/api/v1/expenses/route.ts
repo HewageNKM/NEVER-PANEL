@@ -29,13 +29,12 @@ export const GET = async (req: Request) => {
         const  url = new  URL(req.url);
         const page = Number.parseInt(<string>url.searchParams.get('page'));
         const size = Number.parseInt(<string>url.searchParams.get('size'));
-        const from = <string>url.searchParams.get('from')
-        const to = <string>url.searchParams.get('to')
+        const date = <string>url.searchParams.get('date')
         if(page && size) {
             const allExpenses = await getAllExpenses(page, size);
             return NextResponse.json(allExpenses);
-        }else if(from && to){
-            let allExpenses = await getAllExpensesByDate(from, to);
+        }else if(date){
+            const allExpenses = await getAllExpensesByDate(date);
             return NextResponse.json(allExpenses);
         }
         const allExpenses = await getAllExpenses(page, size);
