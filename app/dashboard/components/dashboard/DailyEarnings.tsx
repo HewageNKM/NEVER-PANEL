@@ -11,6 +11,7 @@ const DailyEarnings = () => {
     const [totalProfit, setTotalProfit] = useState(0);
     const [totalDiscount, setTotalDiscount] = useState(0)
     const [invoiceCount, setInvoiceCount] = useState(0);
+    const [totalExpense, setTotalExpense] = useState(0)
     const [loading, setLoading] = useState(true);
     const {currentUser} = useAppSelector(state => state.authSlice);
     const {showNotification} = useSnackbar();
@@ -28,6 +29,7 @@ const DailyEarnings = () => {
             setTotalProfit(overview.totalProfit);
             setInvoiceCount(overview.totalOrders);
             setTotalDiscount(overview.totalDiscount)
+            setTotalExpense(overview.totalExpense)
         } catch (error) {
             console.error(error);
             showNotification(error.message, "error");
@@ -61,6 +63,9 @@ const DailyEarnings = () => {
                         </Typography>
                         <Typography variant="h4" fontWeight="600" mt="-20px">
                             <span>Discount: </span> LKR {totalDiscount.toFixed(2)}
+                        </Typography>
+                        <Typography variant="h4" fontWeight="600" mt="-20px">
+                            <span>Expense: </span> LKR {totalExpense.toFixed(2)}
                         </Typography>
                         <Typography variant="h4" fontWeight="600" mt="-20px">
                             <span>Profit: </span> LKR {totalProfit.toFixed(2)}
