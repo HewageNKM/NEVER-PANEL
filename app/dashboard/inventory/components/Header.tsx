@@ -44,9 +44,11 @@ const Header = () => {
                 flexWrap={"wrap"}
             >
                 <form onSubmit={searchInventory}>
-                    <Box display={"flex"} flexDirection={"row"} gap={1}>
+                    <Box display={"flex"} flexDirection={"row"} gap={1} alignItems={"center"}>
                         <TextField size={"small"} variant={"outlined"} label={"Search"} name="search"/>
-                        <Button type={"submit"} startIcon={ <IoSearchCircle size={30}/>}/>
+                        <IconButton type={"submit"} color={"primary"}>
+                            <IoSearchCircle size={30}/>
+                        </IconButton>
                     </Box>
                 </form>
                 <Box display="flex" flexWrap={"wrap"} flexDirection="row" gap={2} justifyItems={"start"}

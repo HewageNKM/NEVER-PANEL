@@ -7,6 +7,7 @@ import DashboardCard from "@/app/dashboard/components/shared/DashboardCard";
 import PopularItemCard from "@/app/dashboard/components/dashboard/PopularItemCard";
 import {IoRefresh} from "react-icons/io5";
 import {useSnackbar} from "@/contexts/SnackBarContext";
+import EmptyState from "@/app/components/EmptyState";
 
 const PopularItems = () => {
     const [items, setItems] = useState<PopularItem[] | null>([])
@@ -75,7 +76,7 @@ const PopularItems = () => {
     const fetchPopularItems = async () => {
         try {
             setIsLoading(true);
-            const items: PopularItem[] = await getPopularItemsAction(20,selectedMonth);
+            const items: PopularItem[] = await getPopularItemsAction(20, selectedMonth);
             setItems(items);
         } catch (e) {
             console.error(e);
@@ -154,7 +155,12 @@ const PopularItems = () => {
                         ))}
                     </Grid>
                 )}
-
+                {!isLoading && items?.length === 0 && (
+                    <EmptyState
+                        title={"No Popular Items"}
+                        subtitle={"No popular items found for the selected month"}
+                    />
+                )}
             </Grid>
         </DashboardCard>
     );

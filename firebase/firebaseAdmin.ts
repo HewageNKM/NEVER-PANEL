@@ -18,7 +18,6 @@ import {Timestamp} from "firebase-admin/firestore";
 import {generateRandomPassword, hashPassword} from "@/utils/Generate";
 import axios from "axios";
 
-// Initialize Firebase Admin if not already initialized
 if (!admin.apps.length) {
     admin.initializeApp({
         credential: credential.cert({
@@ -29,13 +28,11 @@ if (!admin.apps.length) {
     });
 }
 
-// Firebase services instances
 const adminFirestore = admin.firestore();
 const adminAuth = admin.auth();
 const adminStorageBucket = admin.storage().bucket(process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET);
 
 
-// Get paginated orders, excluding 'Pending' orders with 'PayHere' as payment method
 export const getOrders = async (pageNumber: number = 1, size: number = 20) => {
     try {
         const offset = (pageNumber - 1) * size;
@@ -75,7 +72,6 @@ export const getOrders = async (pageNumber: number = 1, size: number = 20) => {
     }
 };
 
-// Get paginated inventory items
 export const getInventoryItems = async (pageNumber: number = 1, size: number = 20) => {
     try {
         const offset = (pageNumber - 1) * size;
@@ -105,7 +101,6 @@ export const getInventoryItems = async (pageNumber: number = 1, size: number = 2
     }
 };
 
-// Fetch a single order by ID
 export const getOrder = async (orderId: string) => {
     try {
         const orderDoc = await adminFirestore.collection('orders').doc(orderId).get();
@@ -134,7 +129,6 @@ export const getOrder = async (orderId: string) => {
     }
 };
 
-// Fetch a single inventory item by ID
 export const getItemById = async (itemId: string) => {
     try {
         const itemDoc = await adminFirestore.collection('inventory').doc(itemId).get();
@@ -156,7 +150,6 @@ export const getItemById = async (itemId: string) => {
     }
 };
 
-// Update an order, updating timestamps and nested tracking info
 export const updateOrder = async (order: Order) => {
     const updatedOrder: Order = {
         ...order,
@@ -184,7 +177,6 @@ export const updateOrder = async (order: Order) => {
     }
 };
 
-// Save an item to the inventory
 export const saveToInventory = async (item: Item) => {
     try {
         await adminFirestore.collection("inventory").doc(item.itemId).set({
@@ -200,7 +192,6 @@ export const saveToInventory = async (item: Item) => {
     }
 };
 
-// Update an existing item in the inventory
 export const updateItem = async (item: Item) => {
     try {
         await adminFirestore.collection("inventory").doc(item.itemId).set({
@@ -228,7 +219,6 @@ export const updateItem = async (item: Item) => {
     }
 };
 
-// Upload a file to Firebase Storage
 export const uploadFile = async (file: File, path: string) => {
     try {
         const customFileName = `${file.name}`;
@@ -309,7 +299,6 @@ export const deleteItemById = async (itemId: string) => {
 export const getPopularItems = async (limit: number = 10, month: number) => {
     try {
         const date = new Date();
-        const month = date.getMonth(); // Ensure you define `month`
         const startDay = new Date(date.getFullYear(), month, 1);
         const endDay = new Date(date.getFullYear(), month + 1, 0);
 

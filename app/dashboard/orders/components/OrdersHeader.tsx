@@ -130,7 +130,7 @@ const OrdersHeader = () => {
                     <Stack direction="row" spacing={1} alignItems="center" flexWrap={"wrap"}>
                         {/* Search TextField */}
                         <form onSubmit={onSearch}>
-                            <Stack display={"flex"} direction={"row"} flexWrap={"wrap"}>
+                            <Stack display={"flex"} direction={"row"} flexWrap={"wrap"} alignItems={"center"}>
                                 <TextField
                                     variant="outlined"
                                     size="small"
