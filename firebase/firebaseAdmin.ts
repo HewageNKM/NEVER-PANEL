@@ -306,10 +306,28 @@ export const deleteItemById = async (itemId: string) => {
     }
 };
 
-export const getPopularItems = async (limit: number = 10) => {
+export const getPopularItems = async (limit: number = 10, month: number) => {
     try {
-        console.log('Fetching popular items');
-        const orders = await adminFirestore.collection('orders').where('paymentStatus', '==', 'Paid').get();
+        const date = new Date();
+        const month = date.getMonth(); // Ensure you define `month`
+        const startDay = new Date(date.getFullYear(), month, 1);
+        const endDay = new Date(date.getFullYear(), month + 1, 0);
+
+        startDay.setHours(0, 0, 0);
+        endDay.setHours(23, 59, 59);
+
+        console.log(`Fetching popular items from ${startDay} to ${endDay}`);
+
+        const startTimestamp = admin.firestore.Timestamp.fromDate(startDay);
+        const endTimestamp = admin.firestore.Timestamp.fromDate(endDay);
+
+        const orders = await adminFirestore.collection('orders')
+            .where('paymentStatus', '==', 'Paid')
+            .where('createdAt', '>=', startTimestamp)
+            .where('createdAt', '<=', endTimestamp)
+            .get();
+
+        console.log(`Fetched ${orders.size} orders`);
         const itemsMap = new Map<string, number>();
         orders.forEach((doc) => {
             const order = doc.data() as Order;
@@ -791,7 +809,7 @@ export const getAllExpenses = async (page: number, size: number) => {
     }
 }
 
-export const getAllExpensesByDate = async (date:string) => {
+export const getAllExpensesByDate = async (date: string) => {
     try {
         console.log(`Fetching expenses on ${date}`);
         const startDate = new Date(date);

@@ -9,7 +9,8 @@ export const GET = async (req: Request) => {
             return NextResponse.json({message: 'Unauthorized'}, {status: 401});
         }
         const size = Number.parseInt(new URLSearchParams(req.url).get('size') || "10");
-        const items = await getPopularItems(size);
+        const month = Number.parseInt(new URLSearchParams(req.url).get('month') || "0");
+        const items = await getPopularItems(size,month);
         return NextResponse.json(items);
     } catch (error: any) {
         console.error(error);

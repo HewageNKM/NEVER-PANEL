@@ -133,12 +133,12 @@ export const deleteAFileAction = async (path: string) => {
     }
 }
 
-export const getPopularItemsAction = async (size: number) => {
+export const getPopularItemsAction = async (size: number,month:number) => {
     try {
         const token = await getToken()
         const response = await axios({
             method: 'GET',
-            url: `/api/v1/inventory/popular?size=${size}`,
+            url: `/api/v1/inventory/popular?size=${size}&month=${month}`,
             headers: {
                 Authorization: `Bearer ${token}`
             }
