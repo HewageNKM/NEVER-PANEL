@@ -34,7 +34,7 @@ import ComponentsLoader from "@/app/components/ComponentsLoader";
 import EmptyState from "@/app/components/EmptyState";
 import {useSnackbar} from "@/contexts/SnackBarContext";
 import {useConfirmationDialog} from "@/contexts/ConfirmationDialogContext";
-import {IoRefreshOutline} from "react-icons/io5";
+import {IoAdd, IoRefreshOutline} from "react-icons/io5";
 import {DatePicker, LocalizationProvider} from "@mui/x-date-pickers";
 import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
 import ExpenseForm from './ExpenseForm';
@@ -172,23 +172,39 @@ const ExpensesTable = () => {
             </Stack>
             <TableContainer component={Paper}
                             sx={{position: "relative", borderRadius: 2, boxShadow: 2, overflow: "hidden"}}>
-                <Box
-                    sx={{
-                        display: "flex",
-                        flexDirection: "row",
-                        alignItems: "center",
-                    }}
+                <Stack
+                    direction={"row"}
+                    justifyContent={"space-between"}
+                    alignItems={"center"}
+                    padding={2}
+                    gap={2}
                 >
-                    <Typography variant="h6" component="div" sx={{padding: 2, fontWeight: "bold"}}>
-                        Expenses
-                    </Typography>
-                    <IconButton
-                        onClick={fetchExpenses}
-                        color={"primary"}
+                    <Box
+                        sx={{
+                            display: "flex",
+                            flexDirection: "row",
+                            alignItems: "center",
+                        }}
                     >
-                        <IoRefreshOutline/>
-                    </IconButton>
-                </Box>
+                        <Typography variant="h6" component="div" sx={{padding: 2, fontWeight: "bold"}}>
+                            Expenses
+                        </Typography>
+                        <IconButton
+                            onClick={fetchExpenses}
+                            color={"primary"}
+                        >
+                            <IoRefreshOutline/>
+                        </IconButton>
+                    </Box>
+                    <Box>
+                        <IconButton
+                            onClick={() => setShowExpenseForm(true)}
+                            color={"primary"}
+                        >
+                            <IoAdd />
+                        </IconButton>
+                    </Box>
+                </Stack>
                 <Table sx={{
                     minWidth: 650,
                     "& thead": {
