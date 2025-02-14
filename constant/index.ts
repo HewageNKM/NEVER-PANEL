@@ -120,7 +120,13 @@ export enum paymentStatus {
     FAILED = "Failed",
     REFUNDED = "Refunded",
 }
-
+export enum smsTemplates {
+    orderConfirmation =  "Hi [Name], thank you for shopping at NEVERBE! Your order #[Order ID] has been confirmed! We will process your order as soon as possible.",
+    orderShipped = "Dear [Name],\n\n Your order #[Order ID] has been shipped. Tracking Number: [Tracking Number], Tracking URL: [Tracking Url]",
+    orderCancelled = "Dear [Name],\n\n Your order #[Order ID] has been cancelled. If you have any questions, please contact us.",
+    orderStatusUpdate = "Dear [Name],\n\n Your order #[Order ID] status has been updated to [Status].",
+    orderStatus = "Dear [Name], your order #[Order ID] status is currently [Payment Status]. If you have any questions, please contact us.",
+}
 export enum paymentMethods {
     PAYHERE = "PAYHERE",
     COD = "COD",

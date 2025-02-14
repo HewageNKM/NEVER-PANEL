@@ -1,9 +1,10 @@
 import React, {useState} from 'react';
-import {FormControl, Stack, TextareaAutosize, TextField, Typography} from "@mui/material";
+import {FormControl, InputLabel, MenuItem, Select, Stack, TextareaAutosize, TextField, Typography} from "@mui/material";
 import Button from "@mui/material/Button";
 import {useSnackbar} from "@/contexts/SnackBarContext";
 import {sendSMSAction} from "@/actions/emailAndSMSActions";
 import {SMS} from "@/interfaces";
+import {smsTemplates} from "@/constant";
 
 const SmsForm = () => {
     const {showNotification} = useSnackbar();
@@ -16,7 +17,7 @@ const SmsForm = () => {
             setIsLoading(true);
             evt.preventDefault();
             const to = evt.target.to.value.toString().trim();
-            const newSms:SMS = {
+            const newSms: SMS = {
                 to: to,
                 text: message
             }
@@ -33,8 +34,8 @@ const SmsForm = () => {
         }
     }
     const onMessageChange = (message: string) => {
-        if (!/^[a-zA-Z0-9.,!?'"@#&()\-][a-zA-Z0-9.,!?'"@#&()\-_\s]{1,150}$/.test(message)) {
-            setError("Message should be between 1 and 150 characters and only contain alphanumeric characters and ,.!?'\"@#&()-")
+        if (!/^[^\s][\s\S]{0,149}$/.test(message)) {
+            setError("Message should be between 1 and 150 characters.")
         } else {
             setError(null)
         }
@@ -47,7 +48,30 @@ const SmsForm = () => {
         >
             <Typography variant={"h5"}>Compose SMS</Typography>
             <form onSubmit={onSMSFormSubmit}>
-                <Stack spacing={2}>
+
+                <Stack spacing={2} padding={2}>
+                    <FormControl>
+                        <InputLabel id={"sms-template"}>Template</InputLabel>
+                        <Select variant={"outlined"} fullWidth
+                                value={message}
+                                onChange={(evt) => setMessage(evt.target.value)}
+                                id={"sms-template"}
+                                required
+                                defaultValue={message}
+                                label={"Template"}
+                        >
+                            <MenuItem value={smsTemplates.orderConfirmation}>Order Confirmed</MenuItem>
+                            <MenuItem value={smsTemplates.orderShipped}>Order Shipped</MenuItem>
+                            <MenuItem value={smsTemplates.orderCancelled}>Order Cancelled</MenuItem>
+                            <MenuItem value={smsTemplates.orderStatus}>
+                                Order Status
+                            </MenuItem>
+                            <MenuItem value={smsTemplates.orderStatusUpdate}>
+                                Order Status Update
+                            </MenuItem>
+                            <MenuItem value={""}>Empty</MenuItem>
+                        </Select>
+                    </FormControl>
                     <FormControl>
                         <TextField
                             disabled={isLoading}
