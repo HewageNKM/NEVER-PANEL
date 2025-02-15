@@ -210,7 +210,7 @@ const TrackingFormDialog = ({
             </DialogContent>
             <DialogActions>
                 <Button
-                    disabled={(status?.toString()?.toLowerCase() !== selectedOrder?.tracking?.status?.toLowerCase()) || isLoading}
+                    disabled={isLoading}
                     className={"disabled:bg-opacity-60 disabled:cursor-not-allowed"}
                     variant="contained"
                     color="primary"
