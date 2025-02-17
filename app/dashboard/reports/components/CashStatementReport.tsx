@@ -11,17 +11,19 @@ import Button from "@mui/material/Button";
 import { CashFlowReport } from "@/interfaces";
 import { Stack, Typography } from "@mui/material";
 
-const CashStatementReport = ({ setShow, cash, show, date }: { setShow: () => void, cash: { report: CashFlowReport[], totalExpense: number }, show: boolean, date: () => string }) => {
+const CashStatementReport = ({ setShow, cash, show, date }: { setShow: () => void, cash: {
+        materialCost: number;
+        report: CashFlowReport[], totalExpense: number }, show: boolean, date: () => string }) => {
     const totalCash = cash?.report?.reduce((sum, report) => sum + report.total, 0);
 
     return (
         <Dialog open={show} fullWidth>
             <DialogContent>
                 <Stack>
-                    <Typography variant="h4" sx={{ textAlign: "center", mb: 2, color: "primary.main", fontWeight: "bold" }}>
+                    <Typography variant="h4" sx={{ textAlign: "center", mb: 2, fontWeight: "bold" }}>
                         Cash Report
                     </Typography>
-                    <Typography variant="h6" sx={{ textAlign: "center", mb: 2, color: "primary.main" }}>
+                    <Typography variant="h6" sx={{ textAlign: "center", mb: 2 }}>
                         Date: {date()}
                     </Typography>
                 </Stack>
@@ -37,8 +39,8 @@ const CashStatementReport = ({ setShow, cash, show, date }: { setShow: () => voi
                         {cash?.report?.length > 0 ? (
                             cash.report.map((report, index) => (
                                 <TableRow key={index}>
-                                    <TableCell sx={{ textTransform: "capitalize", fontSize: "1rem" }}>{report.method}</TableCell>
-                                    <TableCell align="right" sx={{ fontSize: "1rem" }}>{report?.fee?.toFixed(2)}</TableCell>
+                                    <TableCell sx={{ textTransform: "uppercase", fontSize: "1rem" }}>{report.method}</TableCell>
+                                    <TableCell align="right" sx={{ fontSize: "1rem" }}>{report?.fee?.toFixed(2)}%</TableCell>
                                     <TableCell align="right" sx={{ fontSize: "1rem" }}>{report?.total?.toFixed(2)}</TableCell>
                                 </TableRow>
                             ))
@@ -53,7 +55,7 @@ const CashStatementReport = ({ setShow, cash, show, date }: { setShow: () => voi
                             <>
                                 <TableRow sx={{ backgroundColor: "grey.200" }}>
                                     <TableCell colSpan={2} align="right" sx={{ fontWeight: "bold", fontSize: "1.1rem" }}>
-                                        Total Cash
+                                        Generated Cash
                                     </TableCell>
                                     <TableCell align="right" sx={{ fontWeight: "bold", fontSize: "1.1rem" }}>
                                         {totalCash?.toFixed(2)}
@@ -69,10 +71,26 @@ const CashStatementReport = ({ setShow, cash, show, date }: { setShow: () => voi
                                 </TableRow>
                                 <TableRow sx={{ backgroundColor: "grey.300" }}>
                                     <TableCell colSpan={2} align="right" sx={{ fontWeight: "bold", fontSize: "1.1rem" }}>
-                                        Net Cash
+                                        Running Cash
                                     </TableCell>
                                     <TableCell align="right" sx={{ fontWeight: "bold", fontSize: "1.1rem" }}>
                                         {(totalCash - cash?.totalExpense)?.toFixed(2)}
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow sx={{ backgroundColor: "grey.300" }}>
+                                    <TableCell colSpan={2} align="right" sx={{ fontWeight: "bold", fontSize: "1.1rem",color: "error.main"  }}>
+                                        Material Cost
+                                    </TableCell>
+                                    <TableCell align="right" sx={{ fontWeight: "bold", fontSize: "1.1rem",color: "error.main"  }}>
+                                        -{(cash?.materialCost || 0)?.toFixed(2)}
+                                    </TableCell>
+                                </TableRow>
+                                <TableRow sx={{ backgroundColor: "grey.300" }}>
+                                    <TableCell colSpan={2} align="right" sx={{ fontWeight: "bold", fontSize: "1.1rem", color:"success.main" }}>
+                                        Running Profit
+                                    </TableCell>
+                                    <TableCell align="right" sx={{ fontWeight: "bold", fontSize: "1.1rem",color:"success.main" }}>
+                                        {(totalCash - cash?.totalExpense - (cash?.materialCost || 0))?.toFixed(2)}
                                     </TableCell>
                                 </TableRow>
                             </>

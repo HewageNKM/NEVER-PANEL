@@ -23,7 +23,6 @@ const StockReport = ({
     const headerStyles = {
         fontWeight: "bold",
         textTransform: "uppercase",
-        color: "#3f51b5",
         fontSize: "1.1em",
     };
 
@@ -31,7 +30,7 @@ const StockReport = ({
         <Dialog open={show} fullScreen>
             <DialogContent>
                 <Stack>
-                    <h2 style={{ textAlign: "center", marginBottom: "20px", color: "#3f51b5", fontSize: "1.8rem" }}>
+                    <h2 style={{ textAlign: "center", marginBottom: "20px", fontSize: "1.8rem" }}>
                         Stock Report
                     </h2>
                 </Stack>

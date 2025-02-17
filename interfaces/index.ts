@@ -97,6 +97,8 @@ export interface Order {
     items: OrderItem[],
     paymentStatus: string,
     paymentMethod: string,
+    shippingFee?: number,
+    fee?: number,
     customer: Customer,
     discount: number,
     from: string,

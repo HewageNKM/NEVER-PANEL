@@ -30,7 +30,6 @@ const ExpenseReport = ({
                         variant="h4"
                         align="center"
                         gutterBottom
-                        sx={{ color: "#3f51b5" }}
                     >
                         Expense Report
                     </Typography>
@@ -38,7 +37,6 @@ const ExpenseReport = ({
                         variant="h6"
                         align="center"
                         gutterBottom
-                        sx={{ color: "#3f51b5" }}
                     >
                         Date: {date()}
                     </Typography>

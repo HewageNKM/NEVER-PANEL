@@ -34,10 +34,10 @@ const SaleReport: React.FC<SaleReportProps> = ({show, setShow, sales, date}) => 
         <Dialog open={show} fullScreen>
             <DialogContent>
                 <Stack>
-                    <h2 style={{textAlign: "center", marginBottom: "20px", color: "#3f51b5", fontSize: "1.8rem"}}>
+                    <h2 style={{textAlign: "center", marginBottom: "20px", fontSize: "1.8rem"}}>
                         Sales Report
                     </h2>
-                    <h4 style={{textAlign: "center", marginBottom: "20px", color: "#3f51b5", fontSize: "1rem"}}>
+                    <h4 style={{textAlign: "center", marginBottom: "20px", fontSize: "1rem"}}>
                         Date: {date()}
                     </h4>
                 </Stack>

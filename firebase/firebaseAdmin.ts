@@ -680,7 +680,7 @@ export const getStockReport = async (): Promise<StocksReport[]> => {
     }
 }
 
-export const getCashReport = async (from: string, to: string): Promise<CashFlowReport[]> => {
+export const getCashReport = async (from: string, to: string): Promise<CashFlowReport> => {
     try {
         const startOfMonth = new Date(from);
         const endOfMonth = new Date(to);
@@ -688,65 +688,87 @@ export const getCashReport = async (from: string, to: string): Promise<CashFlowR
         const startTimestamp = Timestamp.fromDate(startOfMonth);
         const endTimestamp = Timestamp.fromDate(endOfMonth);
 
+        // Fetch orders
         const orders = adminFirestore
             .collection('orders')
             .where('createdAt', '>=', startTimestamp)
             .where('createdAt', '<=', endTimestamp)
             .where('paymentStatus', '==', 'Paid');
-        let paymentMethods = await adminFirestore.collection("paymentMethods").get()
 
-
+        const paymentMethods = await adminFirestore.collection("paymentMethods").get();
         const querySnapshot = await orders.get();
+
         if (querySnapshot.empty) {
             console.log('No orders found');
-            return [];
+            return { report: [], totalExpense: 0, materialCost: 0 };
         }
         console.log(`Fetched ${querySnapshot.size} orders`);
 
         const paymentSummary: { [method: string]: { total: number, fee: number } } = {};
+        let materialCost = 0;
 
-        querySnapshot.forEach((doc) => {
+        // Fetch inventory prices for all items in one query
+        const inventorySnapshot = await adminFirestore.collection('inventory').get();
+        const inventoryMap = new Map<string, number>();
+
+        inventorySnapshot.forEach((doc) => {
+            const data = doc.data();
+            inventoryMap.set(data.itemId, data.buyingPrice);
+        });
+
+        for (const doc of querySnapshot.docs) {
             const order = doc.data() as Order;
-            const {paymentMethod, items} = order;
+            const { paymentMethod, items } = order;
 
             const itemTotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
-            const discountAmount = order?.discount | 0;
+            const discountAmount = order?.discount || 0;
             const orderTotal = itemTotal - discountAmount;
 
+            // Determine payment method and fee
             let normalizedMethod: CashFlowReport["method"] = "unknown";
-            let fee = 0
+            let fee = 0;
             for (const method of paymentMethods.docs) {
                 if (method.data().name.toLowerCase() === paymentMethod.toLowerCase()) {
                     normalizedMethod = method.data().name.toLowerCase();
-                    fee = Number.parseFloat(method.data().fee)
+                    fee = Number.parseFloat(method.data().fee);
                     break;
                 }
             }
 
             if (!paymentSummary[normalizedMethod]) {
-                paymentSummary[normalizedMethod] = {total: 0, fee: 0};
+                paymentSummary[normalizedMethod] = { total: 0, fee: 0 };
             }
-
             paymentSummary[normalizedMethod].fee = fee;
             paymentSummary[normalizedMethod].total += orderTotal - (fee * orderTotal / 100);
-        });
 
-        const map = Object.keys(paymentSummary).map((method) => ({
+            // Calculate material cost
+            for (const item of items) {
+                const buyingPrice = inventoryMap.get(item.itemId) || 0;
+                materialCost += buyingPrice * item.quantity;
+            }
+        }
+
+        // Convert payment summary to array format
+        const report = Object.keys(paymentSummary).map((method) => ({
             method: method as CashFlowReport["method"],
             fee: paymentSummary[method].fee,
             total: paymentSummary[method].total,
         }));
-        let totalExpense = 0
+
+        // Fetch total expenses
+        let totalExpense = 0;
         const expensesReport = await getExpensesReport(from, to);
         expensesReport.forEach((expense) => {
             expense.data.forEach((data) => {
-                totalExpense += data.amount
-            })
-        })
+                totalExpense += data.amount;
+            });
+        });
+
         return {
-            report: map,
-            totalExpense: totalExpense
-        }
+            report,
+            totalExpense,
+            materialCost
+        };
     } catch (e) {
         console.error(e);
         throw new Error(e.message);
