@@ -48,6 +48,7 @@ const ExpenseForm = ({open, onClose}: { open: boolean, onClose: () => void }) =>
             evt.target.reset();
             dispatch(getAllExpenses({page, size}));
             showNotification("Expense added successfully", "success");
+            onClose();
         } catch (e) {
             showNotification(e.message, "error");
             console.error(e);
@@ -70,7 +71,11 @@ const ExpenseForm = ({open, onClose}: { open: boolean, onClose: () => void }) =>
                     }}
                 >
                     <form onSubmit={onSubmit}>
-                        <Stack spacing={3} direction={{xs: "column", md: "row"}}>
+                        <Stack spacing={3} sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 3,
+                        }}>
                             <FormControl variant="outlined" size="medium">
                                 <InputLabel id="type-label">Type</InputLabel>
                                 <Select
@@ -145,8 +150,8 @@ const ExpenseForm = ({open, onClose}: { open: boolean, onClose: () => void }) =>
                         >
                         </Box>
                         <DialogActions>
-                            <Button onClick={onClose}>Cancel</Button>
-                            <Button type="submit" disabled={isLoading}>Add</Button>
+                            <Button variant={"outlined"} onClick={onClose}>Cancel</Button>
+                            <Button variant={"contained"} type="submit" disabled={isLoading}>Add</Button>
                         </DialogActions>
                     </form>
                 </Stack>

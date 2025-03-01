@@ -51,18 +51,19 @@ const PaymentStatusFormDialog = ({ initialStatus, showForm, onClose }: {
 
     return (
         <Dialog open={showForm} onClose={onClose} maxWidth="xs" fullWidth>
-            <DialogTitle sx={{ fontWeight: "bold", textAlign: "center", backgroundColor: "#f5f5f5", p: 2 }}>
+            <DialogTitle sx={{ fontWeight: "bold", textAlign: "center", p: 2 }}>
                 Payment Status
             </DialogTitle>
             <DialogContent sx={{ p: 3 }}>
                 <Stack direction="column" spacing={3}>
                     <FormControl fullWidth>
                         <Select
+                            size={"small"}
                             labelId="payment-status-label"
                             value={selectedStatus}
                             onChange={(evt) => setSelectedStatus(evt.target.value as PaymentStatus)}
                             sx={{
-                                py: 1.5,
+                                py: 1,
                                 borderRadius: "8px",
                                 "& .MuiOutlinedInput-notchedOutline": {
                                     borderColor: "#ccc",
@@ -90,8 +91,8 @@ const PaymentStatusFormDialog = ({ initialStatus, showForm, onClose }: {
 
                 <CardActions sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 3 }}>
                     <Button
-                        variant="outlined"
                         color="primary"
+                        variant="contained"
                         disabled={isLoading}
                         onClick={onClose}
                         sx={{
@@ -104,16 +105,13 @@ const PaymentStatusFormDialog = ({ initialStatus, showForm, onClose }: {
                         Close
                     </Button>
                     <Button
-                        variant="contained"
-                        color="secondary"
+                        variant="outlined"
+                        color="primary"
                         onClick={updatePaymentStatus}
                         disabled={
                             selectedStatus === selectedOrder?.paymentStatus || isLoading
                         }
                         sx={{
-                            minWidth: 100,
-                            py: 1,
-                            borderRadius: "8px",
                             "&:disabled": { opacity: 0.6, cursor: "not-allowed" }
                         }}
                     >
