@@ -178,54 +178,91 @@ export const updateOrder = async (order: Order) => {
 };
 
 export const saveToInventory = async (item: Item) => {
+    const itemRef = adminFirestore.collection("inventory").doc(item.itemId);
+
     try {
-        await adminFirestore.collection("inventory").doc(item.itemId).set({
-            ...item,
-            updatedAt: admin.firestore.Timestamp.fromDate(new Date(item.createdAt)),
-            createdAt: admin.firestore.Timestamp.fromDate(new Date(item.updatedAt)),
-        }, {merge: true});
+        // Start a transaction
+        await adminFirestore.runTransaction(async (transaction) => {
+            // Fetch the current document in the transaction
+            const doc = await transaction.get(itemRef);
+
+            // If you want to perform some checks on the existing data, you can add them here
+            if (doc.exists) {
+                // Proceed with updating or setting the new item data
+                transaction.set(itemRef, {
+                    ...item,
+                    updatedAt: admin.firestore.Timestamp.fromDate(new Date(item.updatedAt)),
+                    createdAt: admin.firestore.Timestamp.fromDate(new Date(item.createdAt)),
+                }, { merge: true });
+            } else {
+                throw new Error(`Item with ID ${item.itemId} does not exist`);
+            }
+        });
 
         console.log(`Item with ID ${item.itemId} saved to inventory`);
     } catch (error: any) {
         console.error(error);
-        throw error
+        throw error;
     }
 };
+
 
 export const updateItem = async (item: Item) => {
-    try {
-        await adminFirestore.collection("inventory").doc(item.itemId).set({
-            manufacturer: item.manufacturer,
-            name: item.name,
-            genders: item.genders,
-            description: item.description,
-            sellingPrice: item.sellingPrice,
-            buyingPrice: item.buyingPrice,
-            itemId: item.itemId,
-            brand: item.brand,
-            status: item.status,
-            thumbnail: item.thumbnail,
-            type: item.type,
-            discount: item.discount,
-            variants: item.variants,
-            listing: item.listing,
-            updatedAt: admin.firestore.Timestamp.fromDate(new Date(item.updatedAt)),
-        }, {merge: true});
+    const itemRef = admin.firestore().collection("inventory").doc(item.itemId);
 
-        console.log(`Item with ID ${item.itemId} updated in inventory`);
+    try {
+        // Start a transaction
+        await admin.firestore().runTransaction(async (transaction) => {
+            // Fetch the current document in the transaction
+            const doc = await transaction.get(itemRef);
+
+            if (!doc.exists) {
+                throw new Error(`Item with ID ${item.itemId} not found`);
+            }
+
+            // Create an object with the fields to update
+            const itemData = {
+                manufacturer: item.manufacturer,
+                name: item.name,
+                genders: item.genders,
+                description: item.description,
+                sellingPrice: item.sellingPrice,
+                buyingPrice: item.buyingPrice,
+                itemId: item.itemId,
+                brand: item.brand,
+                status: item.status,
+                thumbnail: item.thumbnail,
+                type: item.type,
+                discount: item.discount,
+                variants: item.variants,
+                listing: item.listing,
+                updatedAt: admin.firestore.Timestamp.fromDate(new Date(item.updatedAt)),
+            };
+
+            // Update the item data in Firestore
+            transaction.set(itemRef, itemData, { merge: true });
+        });
+
+        console.log(`Item with ID ${item.itemId} updated in inventory successfully.`);
     } catch (error: any) {
-        console.error(error);
-        throw error
+        console.error(`Failed to update item with ID ${item.itemId}:`, error);
+        throw error; // Rethrow the error to propagate it
     }
 };
+
+
 
 export const uploadFile = async (file: File, path: string) => {
     try {
+        // Generate a custom file name and construct file path
         const customFileName = `${file.name}`;
         const filePath = `${path}/${customFileName}`;
         const fileRef = adminStorageBucket.file(filePath);
+
+        // Convert the file to a buffer
         const buffer = await file.arrayBuffer();
 
+        // Upload the file to Firebase Storage
         await fileRef.save(Buffer.from(buffer), {
             metadata: {
                 contentType: file.type,
@@ -233,66 +270,100 @@ export const uploadFile = async (file: File, path: string) => {
             },
         });
 
+        // Make the file publicly accessible
         await fileRef.makePublic();
 
-        console.log(`File uploaded successfully to ${filePath}`);
+        // Log the upload details
+        console.log(`File uploaded successfully: ${customFileName}`);
+        console.log(`File path: ${filePath}`);
+        console.log(`File size: ${file.size} bytes`);
+
+        // Return file details
         return {
             file: customFileName,
             url: `https://storage.googleapis.com/${adminStorageBucket.name}/${fileRef.name}`,
         };
 
     } catch (error: any) {
-        console.error(error);
-        throw error
+        console.error(`Error uploading file: ${file.name}`, error);
+        throw error;
     }
 };
 
 // Delete a file from Firebase Storage
 export const deleteFiles = async (path: string) => {
     try {
-        await adminStorageBucket.file(path).delete();
-        console.log(`File at ${path} deleted successfully`);
-    } catch (error: any) {
-        if (error.code === 404) {
+        // Check if the file exists before attempting deletion
+        const file = adminStorageBucket.file(path);
+        const [exists] = await file.exists();
+
+        if (!exists) {
             console.log(`File at ${path} does not exist. Skipping deletion.`);
             return;
         }
-        console.error(error);
+
+        // Proceed to delete the file
+        await file.delete();
+        console.log(`File at ${path} deleted successfully`);
+
+    } catch (error: any) {
+        // Specific error for file not found
+        if (error.code === 404) {
+            console.log(`File at ${path} not found in storage. Skipping deletion.`);
+            return;
+        }
+
+        // Log other types of errors
+        console.error(`Error deleting file at ${path}:`, error);
         throw error;
     }
 };
 
 export const deleteItemById = async (itemId: string) => {
     console.log(`[START] Deleting item with ID: ${itemId}`);
+
     try {
-        // Step 1: Log the start of file deletion
-        console.log(`[INFO] Retrieving files from storage for item ID: ${itemId}`);
-        const [files] = await adminStorageBucket.getFiles({prefix: `inventory/${itemId}/`});
+        return await adminFirestore.runTransaction(async (transaction) => {
+            // Step 1: Log the start of file deletion
+            console.log(`[INFO] Retrieving files from storage for item ID: ${itemId}`);
+            const [files] = await adminStorageBucket.getFiles({ prefix: `inventory/${itemId}/` });
 
-        if (files.length === 0) {
-            console.log(`[INFO] No files found for item ID: ${itemId}`);
-        } else {
-            console.log(`[INFO] Found ${files.length} files for item ID: ${itemId}. Starting deletion.`);
-        }
+            if (files.length === 0) {
+                console.log(`[INFO] No files found for item ID: ${itemId}`);
+            } else {
+                console.log(`[INFO] Found ${files.length} files for item ID: ${itemId}. Starting deletion.`);
+            }
 
-        // Step 2: Log each file being deleted
-        const deletePromises = files.map(async (file) => {
-            console.log(`[INFO] Deleting file: ${file.name}`);
-            await file.delete();
+            // Step 2: Log each file being deleted and delete them
+            const deletePromises = files.map(async (file) => {
+                console.log(`[INFO] Deleting file: ${file.name}`);
+                await file.delete();
+            });
+
+            // Delete files in parallel
+            await Promise.all(deletePromises);
+            console.log(`[SUCCESS] All files for item ID: ${itemId} deleted successfully`);
+
+            // Step 3: Log Firestore document deletion and delete it
+            console.log(`[INFO] Deleting Firestore document for item ID: ${itemId}`);
+            const itemRef = adminFirestore.collection('inventory').doc(itemId);
+
+            // Check if the document exists before attempting to delete it
+            const itemDoc = await transaction.get(itemRef);
+            if (!itemDoc.exists) {
+                throw new Error(`Item with ID ${itemId} not found in Firestore.`);
+            }
+
+            // Proceed with the deletion in the transaction
+            transaction.delete(itemRef);
+            console.log(`[SUCCESS] Firestore document for item ID: ${itemId} deleted successfully`);
+
+            console.log(`[END] Successfully deleted item with ID: ${itemId} and associated files`);
+            return { itemId, deletedAt: new Date() };
         });
-
-        await Promise.all(deletePromises);
-        console.log(`[SUCCESS] All files for item ID: ${itemId} deleted successfully`);
-
-        // Step 3: Log Firestore document deletion
-        console.log(`[INFO] Deleting Firestore document for item ID: ${itemId}`);
-        await adminFirestore.collection('inventory').doc(itemId).delete();
-        console.log(`[SUCCESS] Firestore document for item ID: ${itemId} deleted successfully`);
-
-        console.log(`[END] Successfully deleted item with ID: ${itemId} and associated files`);
     } catch (error: any) {
-        console.error(error);
-        throw error
+        console.error(`[ERROR] Error deleting item with ID: ${itemId}:`, error);
+        throw error;
     }
 };
 
@@ -700,7 +771,7 @@ export const getCashReport = async (from: string, to: string): Promise<CashFlowR
 
         if (querySnapshot.empty) {
             console.log('No orders found');
-            return { report: [], totalExpense: 0, materialCost: 0 };
+            return {report: [], totalExpense: 0, materialCost: 0};
         }
         console.log(`Fetched ${querySnapshot.size} orders`);
 
@@ -718,7 +789,7 @@ export const getCashReport = async (from: string, to: string): Promise<CashFlowR
 
         for (const doc of querySnapshot.docs) {
             const order = doc.data() as Order;
-            const { paymentMethod, items } = order;
+            const {paymentMethod, items} = order;
 
             const itemTotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
             const discountAmount = order?.discount || 0;
@@ -736,7 +807,7 @@ export const getCashReport = async (from: string, to: string): Promise<CashFlowR
             }
 
             if (!paymentSummary[normalizedMethod]) {
-                paymentSummary[normalizedMethod] = { total: 0, fee: 0 };
+                paymentSummary[normalizedMethod] = {total: 0, fee: 0};
             }
             paymentSummary[normalizedMethod].fee = fee;
             paymentSummary[normalizedMethod].total += orderTotal - (fee * orderTotal / 100);
@@ -778,17 +849,30 @@ export const getCashReport = async (from: string, to: string): Promise<CashFlowR
 export const addNewExpense = async (expense: Expense) => {
     try {
         console.log('Adding new expense:', expense.id);
-        const result = await adminFirestore.collection('expenses').doc(expense.id).set({
-            ...expense,
-            createdAt: admin.firestore.Timestamp.fromDate(new Date(expense.createdAt)),
+
+        return await adminFirestore.runTransaction(async (transaction) => {
+            const expenseRef = adminFirestore.collection('expenses').doc(expense.id);
+
+            // Check if the expense ID already exists
+            const expenseDoc = await transaction.get(expenseRef);
+            if (expenseDoc.exists) {
+                throw new Error(`Expense with ID ${expense.id} already exists`);
+            }
+
+            // Add new expense
+            transaction.set(expenseRef, {
+                ...expense,
+                createdAt: admin.firestore.Timestamp.fromDate(new Date(expense.createdAt)),
+            });
+
+            console.log(`Expense added successfully: ${expense.id}`);
+            return { id: expense.id, createdAt: new Date() };
         });
-        console.log(`Expense added successfully: ${result.writeTime}`);
-        return result.writeTime;
     } catch (e) {
-        console.error(e)
-        throw e
+        console.error("Error adding new expense:", e);
+        throw e;
     }
-}
+};
 
 export const getAllExpenses = async (page: number, size: number) => {
     try {
@@ -859,15 +943,28 @@ export const getAllExpensesByDate = async (date: string) => {
 
 export const deleteExpenseById = async (id: string) => {
     try {
-        console.log(`Deleting expense with ID: ${id}`);
-        const result = await adminFirestore.collection('expenses').doc(id).delete();
-        console.log(`Expense deleted successfully: ${result.writeTime}`);
-        return result.writeTime;
+        console.log(`Attempting to delete expense with ID: ${id}`);
+
+        return await adminFirestore.runTransaction(async (transaction) => {
+            const expenseRef = adminFirestore.collection('expenses').doc(id);
+            const expenseDoc = await transaction.get(expenseRef);
+
+            if (!expenseDoc.exists) {
+                console.warn(`Expense with ID ${id} not found`);
+                return null;
+            }
+
+            console.log(`Deleting expense with ID: ${id}`);
+            transaction.delete(expenseRef);
+
+            console.log(`Expense deleted successfully: ${id}`);
+            return { id, deletedAt: new Date() };
+        });
     } catch (e) {
-        console.error(e)
-        throw e
+        console.error("Error deleting expense:", e);
+        throw e;
     }
-}
+};
 
 export const getExpensesReport = async (from: string, to: string) => {
     try {
@@ -976,27 +1073,37 @@ export const getUsers = async (pageNumber: number = 1, size: number = 20) => {
 
 export const deleteUser = async (userId: string) => {
     try {
-        const user = await adminFirestore.collection('users').doc(userId).get()
-        if (!user.exists) {
-            console.warn(`User with ID ${userId} not found`);
-            return null;
-        }
+        console.log(`Attempting to delete user with ID: ${userId}`);
 
-        if (user?.data()?.role === 'OWNER') {
-            console.warn(`Cannot delete user with role ${user?.data()?.role}`);
-            throw new Error(`Cannot delete user with role ${user?.data()?.role}`);
-        }
+        return await adminFirestore.runTransaction(async (transaction) => {
+            const userRef = adminFirestore.collection("users").doc(userId);
+            const userDoc = await transaction.get(userRef);
 
-        console.log(`Deleting user with ID: ${userId}`);
-        await admin.auth().deleteUser(userId);
-        const writeResult = await adminFirestore.collection('users').doc(userId).delete();
-        console.log(`User deleted successfully: ${writeResult.writeTime}`);
-        return writeResult.writeTime;
+            if (!userDoc.exists) {
+                console.warn(`User with ID ${userId} not found`);
+                return null;
+            }
+
+            const userData = userDoc.data();
+            if (userData?.role === "OWNER") {
+                console.warn(`Cannot delete user with role ${userData.role}`);
+                throw new Error(`Cannot delete user with role ${userData.role}`);
+            }
+
+            console.log(`Deleting Firebase Auth user: ${userId}`);
+            await admin.auth().deleteUser(userId);
+
+            console.log(`Deleting Firestore user document: ${userId}`);
+            transaction.delete(userRef);
+
+            console.log(`User deleted successfully: ${userId}`);
+            return { id: userId, deletedAt: new Date() };
+        });
     } catch (e) {
-        console.error(e);
+        console.error("Error deleting user:", e);
         throw e;
     }
-}
+};
 
 export const addNewUser = async (user: User) => {
     try {
@@ -1297,17 +1404,124 @@ export const sendTextMessage = async (sms: SMS) => {
         throw e;
     }
 }
-export const updatePaymentMethod = async (paymentMethod: PaymentMethod) => {
+
+export const addABanner = async ({ file, url }: { file: string; url: string }) => {
     try {
-        console.log('Updating payment method:', paymentMethod.paymentId);
-        let writeResultPromise = await adminFirestore.collection('paymentMethods').doc(paymentMethod.paymentId).set({
-            ...paymentMethod,
-            createdAt: admin.firestore.Timestamp.fromDate(new Date(paymentMethod.createdAt)),
-            updatedAt: admin.firestore.Timestamp.fromDate(new Date(paymentMethod.updatedAt)),
-        }, {merge: true});
-        console.log(`Payment method updated successfully: ${paymentMethod.paymentId}`);
-        return writeResultPromise;
+        console.log("Adding new banner:", file);
+
+        let newId: string;
+        let attempts = 0;
+        const maxAttempts = 5; // Prevent infinite loops
+
+        while (attempts < maxAttempts) {
+            newId = `s${Math.random().toString(36).substring(2, 6)}`;
+            const bannerRef = adminFirestore.collection("sliders").doc(newId);
+
+            try {
+                await adminFirestore.runTransaction(async (transaction) => {
+                    const doc = await transaction.get(bannerRef);
+                    if (doc.exists) {
+                        throw new Error("ID conflict, retrying...");
+                    }
+
+                    transaction.set(bannerRef, {
+                        id: newId,
+                        fileName: file,
+                        url: url,
+                        createdAt: admin.firestore.Timestamp.fromDate(new Date()),
+                    });
+                });
+
+                console.log("Banner added with ID:", newId);
+                return newId; // Return the successful ID
+            } catch (error) {
+                console.warn(`Attempt ${attempts + 1}: ${error.message}`);
+                attempts++;
+            }
+        }
+
+        throw new Error("Failed to generate a unique ID after multiple attempts.");
     } catch (e) {
-        throw e
+        console.error("Error adding banner:", e);
+        throw e;
+    }
+};
+
+
+export const deleteBanner = async (id: string) => {
+    try {
+        console.log(`Attempting to delete banner with ID: ${id}`);
+
+        return await adminFirestore.runTransaction(async (transaction) => {
+            const bannerRef = adminFirestore.collection("sliders").doc(id);
+            const doc = await transaction.get(bannerRef);
+
+            if (!doc.exists) {
+                console.warn(`Banner with ID ${id} not found`);
+                return null;
+            }
+
+            const fileName: string = doc.data()?.fileName;
+            console.log(`Deleting banner file: ${fileName}`);
+
+            // Delete associated file
+            await deleteFiles("sliders/" + fileName);
+
+            // Delete Firestore document inside the transaction
+            transaction.delete(bannerRef);
+
+            console.log(`Banner ${fileName} deleted successfully`);
+            return { id, deletedAt: new Date() };
+        });
+    } catch (e) {
+        console.error("Error deleting banner:", e);
+        throw e;
+    }
+};
+
+export const getAllBanners = async () => {
+    try {
+        console.log('Fetching all banners');
+        const banners = await adminFirestore.collection('sliders').get();
+        const bannerList: object[] = [];
+        banners.forEach(doc => {
+            bannerList.push({
+                ...doc.data(),
+                createdAt: doc.data()?.createdAt?.toDate()?.toLocaleString(),
+            });
+        });
+        return bannerList;
+    } catch (e) {
+        throw e;
     }
 }
+export const updatePaymentMethod = async (paymentMethod: PaymentMethod) => {
+    try {
+        console.log("Updating payment method:", paymentMethod.paymentId);
+
+        return await adminFirestore.runTransaction(async (transaction) => {
+            const paymentRef = adminFirestore.collection("paymentMethods").doc(paymentMethod.paymentId);
+            const doc = await transaction.get(paymentRef);
+
+            if (!doc.exists) {
+                throw new Error(`Payment method with ID ${paymentMethod.paymentId} not found`);
+            }
+
+            transaction.set(
+                paymentRef,
+                {
+                    ...paymentMethod,
+                    createdAt:admin.firestore.Timestamp.fromDate(new Date(paymentMethod.createdAt)),
+                    updatedAt:admin.firestore.Timestamp.fromDate(new Date(paymentMethod.updatedAt)),
+                },
+                { merge: true }
+            );
+
+            console.log(`Payment method updated successfully: ${paymentMethod.paymentId}`);
+            return { id: paymentMethod.paymentId, updatedAt: new Date() };
+        });
+    } catch (e) {
+        console.error("Error updating payment method:", e);
+        throw e;
+    }
+};
