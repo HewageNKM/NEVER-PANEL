@@ -1,5 +1,5 @@
 import React, {useEffect} from 'react';
-import {IconButton, Stack} from "@mui/material";
+import {Box, Breadcrumbs, IconButton, Stack, Typography} from "@mui/material";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
 import BannerCard from "@/app/dashboard/websiteSettings/banner/components/BannerCard";
@@ -7,6 +7,7 @@ import {getBanners} from "@/lib/bannersSlice/bannersSlice";
 import {useSnackbar} from "@/contexts/SnackBarContext";
 import EmptyState from "@/app/components/EmptyState";
 import {IoRefreshOutline} from "react-icons/io5";
+import Link from "next/link";
 
 const Header = () => {
     const {banners, isLoading} = useAppSelector(state => state.bannersSlice);
@@ -40,6 +41,12 @@ const Header = () => {
                 gap: 3,
             }}
         >
+            <Breadcrumbs aria-label="breadcrumb" sx={{ marginBottom: 2 }}>
+                <Link color="inherit" href="/dashboard/websiteSettings">
+                    Settings
+                </Link>
+                <Typography color="text.primary">Banner</Typography>
+            </Breadcrumbs>
             <IconButton color={"primary"} onClick={fetchBanners}>
                 <IoRefreshOutline size={30}/>
             </IconButton>
