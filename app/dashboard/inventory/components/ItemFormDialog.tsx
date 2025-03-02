@@ -67,6 +67,7 @@ const ItemFormDialog = () => {
 
     useEffect(() => {
         if (item) {
+            setDiscount(item?.discount || 0)
             setSelectedGenders(item?.genders || [])
             setSellingPrice(item.sellingPrice || 0);
             setMarketPrice(item.marketPrice || 0)
@@ -349,7 +350,7 @@ const ItemFormDialog = () => {
                                         <TextField
                                             disabled
                                             label="Discounted Price"
-                                            value={(sellingPrice - (sellingPrice * discount / 100)).toFixed(2)}
+                                            value={discountedPrice}
                                             type="number"
                                             fullWidth
                                             required
