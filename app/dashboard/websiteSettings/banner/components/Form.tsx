@@ -115,7 +115,7 @@ const Form = () => {
                     >
                         <input
                             type="file"
-                            accept="image/*"
+                            accept="image/png, image/jpeg, image/jpg"
                             hidden
                             onChange={(e) => handleFileChange(e.target.files[0])}
                             id="upload-button"
@@ -132,9 +132,25 @@ const Form = () => {
                                 <img src={imagePreview} alt="Preview"
                                      style={{maxWidth: "100%", maxHeight: "100%", borderRadius: "10px"}}/>
                             ) : (
-                                <Typography variant="body2" color="gray">
-                                    {isLoading ? "Uploading..." : "Drag & Drop or Click"}
-                                </Typography>
+                                <Box
+                                    sx={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        gap: 1,
+                                    }}
+                                >
+                                    <Typography variant="body2" color="gray">
+                                        {isLoading ? "Uploading..." : "Drag & Drop or Click"}
+                                    </Typography>
+                                    <Typography variant="body2" color="gray">
+                                        {!selectedFile && "1200 x 628px"}
+                                    </Typography>
+                                    <Typography variant="body2" color="gray">
+                                        {!selectedFile && "*.png, *.jpg, *.jpeg"}
+                                    </Typography>
+                                </Box>
                             )}
                         </label>
                     </Box>
