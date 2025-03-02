@@ -152,6 +152,7 @@ const ItemFormDialog = () => {
     const closeForm = () => {
         dispatch(setShowEditingForm(false))
         dispatch(setSelectedItem(null))
+        setDiscount(0)
         setSelectedGenders([])
         setIsLoading(false)
         setNewImage(null)
