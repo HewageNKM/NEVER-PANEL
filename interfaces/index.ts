@@ -65,6 +65,7 @@ export interface Item {
     genders: string[],
     buyingPrice: number,
     sellingPrice: number,
+    marketPrice: number,
     discount: number,
     listing: "Active" | "Inactive",
     status: "Active" | "Inactive",

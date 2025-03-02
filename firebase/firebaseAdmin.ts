@@ -222,6 +222,7 @@ export const updateItem = async (item: Item) => {
 
             // Create an object with the fields to update
             const itemData = {
+                marketPrice: item.marketPrice,
                 manufacturer: item.manufacturer,
                 name: item.name,
                 genders: item.genders,

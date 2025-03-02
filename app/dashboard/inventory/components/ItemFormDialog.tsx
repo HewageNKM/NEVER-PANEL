@@ -5,7 +5,18 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import TextField from '@mui/material/TextField';
-import {Box, Checkbox, FormControlLabel, Grid, MenuItem, Select, styled, Switch, Typography} from "@mui/material";
+import {
+    Box,
+    Checkbox,
+    FormControlLabel,
+    Grid,
+    MenuItem,
+    Select,
+    Stack,
+    styled,
+    Switch,
+    Typography
+} from "@mui/material";
 import {genders, types} from "@/constant";
 import {IoCloudUpload} from "react-icons/io5";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
@@ -25,6 +36,7 @@ const ItemFormDialog = () => {
     const [discount, setDiscount] = useState(0)
     const [sellingPrice, setSellingPrice] = useState(0)
     const {showNotification} = useSnackbar();
+    const [discountedPrice, setDiscountedPrice] = useState(0)
     const [marketPrice, setMarketPrice] = useState(0)
 
     const [selectedGenders, setSelectedGenders] = useState<string[]>(item?.genders || []);
@@ -50,15 +62,14 @@ const ItemFormDialog = () => {
     };
 
     useEffect(() => {
-        const discount = ((marketPrice - sellingPrice) / marketPrice) * 100
-        setDiscount(discount.toFixed(2) as number)
-    }, [sellingPrice, marketPrice])
+        setDiscountedPrice((sellingPrice - (sellingPrice * discount / 100)).toFixed(2))
+    }, [discount])
 
     useEffect(() => {
         if (item) {
             setSelectedGenders(item?.genders || [])
-            setSellingPrice(Math.round((item.sellingPrice - (item.discount * item.sellingPrice / 100)) / 10) * 10);
-            setMarketPrice(item.sellingPrice)
+            setSellingPrice(item.sellingPrice || 0);
+            setMarketPrice(item.marketPrice || 0)
         }
     }, [item]);
     const onFormSubmit = async (evt: any) => {
@@ -82,6 +93,7 @@ const ItemFormDialog = () => {
             }
 
             const newItem: Item = {
+                marketPrice: Number.parseInt(marketPrice),
                 description: description,
                 listing: listing,
                 genders: selectedGenders,
@@ -315,72 +327,115 @@ const ItemFormDialog = () => {
                                             }}
                                         />
                                     </Grid>
-                                    <Grid item xs={12} md={4}>
+                                    <Grid item>
                                         <TextField
                                             name="discount"
-                                            disabled
                                             label="Discount"
                                             value={discount}
                                             type="number"
                                             fullWidth
                                             required
+                                            onChange={(evt)=>{
+                                                setDiscount(evt.target.value as number)
+                                            }}
                                             margin="normal"
                                             InputProps={{
                                                 endAdornment: <span>%</span>
                                             }}
                                         />
                                     </Grid>
+                                    <Grid item>
+                                        <TextField
+                                            disabled
+                                            label="Discounted Price"
+                                            value={(sellingPrice - (sellingPrice * discount / 100)).toFixed(2)}
+                                            type="number"
+                                            fullWidth
+                                            required
+                                            margin="normal"
+                                            InputProps={{
+                                                endAdornment: <span>LKR</span>
+                                            }}
+                                        />
+                                    </Grid>
                                 </Grid>
                             </Box>
                         </Box>
-                        <Typography variant="subtitle1" gutterBottom>
-                            Genders
-                        </Typography>
-                        <Box display="flex" gap={2} mb={2}>
-                            {genders.map((gender) => (
-                                <FormControlLabel
-                                    key={gender.value}
-                                    control={
-                                        <Checkbox
-                                            checked={selectedGenders.includes(gender.value)}
-                                            onChange={() => toggleGenderSelection(gender.value)}
-                                        />
-                                    }
-                                    label={gender.name}
-                                />
-                            ))}
-                        </Box>
-                        <Box display="flex" alignItems="center" mb={1}>
-                            <FormControlLabel
-                                name="status"
-                                control={<Switch defaultChecked={item?.status === "Active"}/>}
-                                label="Status"
-                                labelPlacement="start"
+                        <Stack
+                            sx={{
+                                display: "flex",
+                                flexDirection: "column",
+                                justifyContent:"flex-start",
+                                gap: 2,
+                            }}
+                        >
+                            <Typography
+                                variant={"subtitle1"}
+                            >
+                                Status Details
+                            </Typography>
+                            <Stack
                                 sx={{
-                                    marginRight: 2,
-                                    ".MuiFormControlLabel-label": {
-                                        fontWeight: 500,
-                                        fontSize: "1rem",
-                                    },
+                                    display: "flex",
+                                    flexDirection: "row",
+                                    justifyContent: "flex-start",
+                                    gap: 2,
                                 }}
-                            />
-                        </Box>
-                        <Box display="flex" alignItems="center" mb={2}>
-                            <FormControlLabel
-                                name="listOnWeb"
-                                control={<Switch defaultChecked={item?.listing === "Active"}/>}
-                                label="List on Website"
-                                labelPlacement="start"
-                                sx={{
-                                    marginRight: 2,
-                                    ".MuiFormControlLabel-label": {
-                                        fontWeight: 500,
-                                        fontSize: "1rem",
-                                    },
-                                }}
-                            />
-                        </Box>
-
+                            >
+                                <Box display="flex" alignItems="center">
+                                    <FormControlLabel
+                                        name="status"
+                                        control={<Switch defaultChecked={item?.status === "Active"}/>}
+                                        label="Status"
+                                        labelPlacement="start"
+                                        sx={{
+                                            ".MuiFormControlLabel-label": {
+                                                fontSize: "1rem",
+                                            },
+                                        }}
+                                    />
+                                </Box>
+                                <Box display="flex" alignItems="center">
+                                    <FormControlLabel
+                                        name="listOnWeb"
+                                        control={<Switch defaultChecked={item?.listing === "Active"}/>}
+                                        label="Website"
+                                        labelPlacement="start"
+                                        sx={{
+                                            ".MuiFormControlLabel-label": {
+                                                fontSize: "1rem",
+                                            },
+                                        }}
+                                    />
+                                </Box>
+                            </Stack>
+                        </Stack>
+                        <Stack
+                            sx={{
+                                mt: 2,
+                                display: "flex",
+                                flexDirection: "column",
+                                justifyContent: "flex-start",
+                            }}
+                        >
+                            <Typography variant="subtitle1" gutterBottom>
+                                Tagging Details
+                            </Typography>
+                            <Box display="flex" gap={2} mb={2}>
+                                {genders.map((gender) => (
+                                    <FormControlLabel
+                                        key={gender.value}
+                                        control={
+                                            <Checkbox
+                                                checked={selectedGenders.includes(gender.value)}
+                                                onChange={() => toggleGenderSelection(gender.value)}
+                                            />
+                                        }
+                                        label={gender.name}
+                                    />
+                                ))}
+                            </Box>
+                        </Stack>
                     </DialogContent>
                     <DialogActions>
                         <Button variant="contained" type={"button"} color="primary" onClick={() => closeForm()}>
