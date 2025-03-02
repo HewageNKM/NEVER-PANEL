@@ -141,7 +141,7 @@ const OrderTable = () => {
                                             (sum, item) =>
                                                 sum + item.price * item.quantity,
                                             0
-                                        ) - (order?.discount | 0)}
+                                        ) - (order?.discount || 0) + (order?.fee || 0) + (order?.shippingFee || 0)}
                                         </Typography>
                                         <IconButton onClick={() => {
                                             dispatch(setSelectedOrder(order))

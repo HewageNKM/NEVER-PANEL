@@ -604,6 +604,8 @@ export const getOverview = async (start: Timestamp, end: Timestamp) => {
                         buyingCost += (inventoryData.buyingPrice || 0) * (item.quantity || 1);
                     }
                 });
+                totalEarnings += (data?.fee || 0)
+                totalEarnings += (data?.shippingFee || 0)
                 totalDiscount += (data.discount || 0)
             }
         });
@@ -791,7 +793,7 @@ export const getCashReport = async (from: string, to: string): Promise<CashFlowR
             const order = doc.data() as Order;
             const {paymentMethod, items} = order;
 
-            const itemTotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
+            const itemTotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0) + (order?.fee || 0) + (order?.shippingFee || 0);
             const discountAmount = order?.discount || 0;
             const orderTotal = itemTotal - discountAmount;
 
