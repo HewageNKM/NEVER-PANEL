@@ -82,7 +82,9 @@ const PaymentSummeryForm = ({ showForm, onClose }: { showForm: boolean; onClose:
                                     selectedOrder.paymentReceived.map((payment) => (
                                         <TableRow key={payment.id} sx={{ "&:nth-of-type(odd)": { backgroundColor: "#fcfcfc" } }}>
                                             <TableCell>{payment.id}</TableCell>
-                                            <TableCell>{payment.paymentMethod}</TableCell>
+                                            <TableCell sx={{
+                                                textTransform: "uppercase"
+                                            }}>{payment.paymentMethod}</TableCell>
                                             <TableCell>{payment?.cardNumber || "N/A"}</TableCell>
                                             <TableCell sx={{ textAlign: "right" }}>LKR {payment.amount}</TableCell>
                                         </TableRow>

@@ -1,4 +1,4 @@
-import {auth, getToken} from "@/firebase/firebaseClient";
+import {getToken} from "@/firebase/firebaseClient";
 import axios from "axios";
 import {Order} from "@/interfaces";
 
@@ -20,7 +20,7 @@ export const fetchOrdersAction = async (page: number, size: number) => {
     }
 }
 
-export const getOrdersByDateAction = async (date:string) => {
+export const getOrdersByDateAction = async (date: string) => {
     try {
         const token = await getToken()
         const response = await axios({
@@ -31,7 +31,7 @@ export const getOrdersByDateAction = async (date:string) => {
             }
         });
         return response.data;
-    }catch (e) {
+    } catch (e) {
         throw new Error(
             e.response ? e.response.data.message : e.message
         )
@@ -49,6 +49,24 @@ export const updateAOrderAction = async (order: Order) => {
                 "Content-Type": "application/json"
             },
             data: JSON.stringify(order)
+        });
+        return response.data;
+    } catch (e) {
+        throw new Error(
+            e.response ? e.response.data.message : e.message
+        )
+    }
+}
+
+export const deleteOrderAction = async (id: string) => {
+    try {
+        const token = await getToken();
+        const response = await axios({
+            method: 'DELETE',
+            url: `/api/v1/orders/${id}`,
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
         });
         return response.data;
     } catch (e) {
