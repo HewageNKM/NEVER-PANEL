@@ -655,6 +655,16 @@ export const getDailyOverview = async () => {
         throw new Error(error.message);
     }
 }
+export const deleteOrder = async (orderId: string) => {
+    try {
+        console.log(`Deleting order with ID: ${orderId}`);
+        await adminFirestore.collection('orders').doc(orderId).delete();
+        console.log(`Order with ID ${orderId} deleted successfully`);
+    } catch (error: any) {
+        console.error(error);
+        throw error;
+    }
+}
 export const getOrdersByDate = async (date: string) => {
     try {
         console.log(`Fetching orders on ${date}`);

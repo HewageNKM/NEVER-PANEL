@@ -17,7 +17,7 @@ import {
 } from "@mui/material";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import {getOrders, setPage, setSelectedOrder, setSize} from '@/lib/ordersSlice/ordersSlice';
-import {IoInformationCircle, IoRefreshOutline} from "react-icons/io5";
+import {IoInformationCircle, IoRefreshOutline, IoTrash} from "react-icons/io5";
 import EmptyState from "@/app/components/EmptyState";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
 import {Customer, OrderItem, Tracking} from "@/interfaces";
@@ -26,10 +26,15 @@ import ItemsFormDialog from "@/app/dashboard/orders/components/ItemsFormDialog";
 import TrackingFormDialog from "@/app/dashboard/orders/components/TrackingFormDialog";
 import PaymentStatusFormDialog from "@/app/dashboard/orders/components/PaymentStatusFormDialog";
 import PaymentSummeryForm from "@/app/dashboard/orders/components/PaymentSummeryForm";
+import {useConfirmationDialog} from "@/contexts/ConfirmationDialogContext";
+import {deleteOrderAction} from "@/actions/ordersActions";
+import {useSnackbar} from "@/contexts/SnackBarContext";
 
 const OrderTable = () => {
     const {orders, size, selectedPage, isLoading} = useAppSelector(state => state.ordersSlice);
     const {currentUser, loading} = useAppSelector(state => state.authSlice);
+    const {showConfirmation} = useConfirmationDialog();
+    const {showNotification} = useSnackbar();
 
     const [customer, setCustomer] = useState<Customer | null>(null)
     const [showCustomerForm, setShowCustomerForm] = useState(false)
@@ -53,6 +58,21 @@ const OrderTable = () => {
         }
     }, [currentUser, selectedPage, size, loading, dispatch]);
 
+    const deleteOrder = (id:string) => {
+        showConfirmation({
+            title: "Delete Order",
+            message: "Are you sure you want to delete this order?",
+            onClose: () => {},
+            onSuccess: async () => {
+                try {
+                    await deleteOrderAction(id)
+                    dispatch(getOrders({size, page: selectedPage}))
+                }catch (e) {
+                   showNotification(e.message, "error")
+                }
+            }
+        })
+    }
     return (
         <Stack direction={"column"} gap={5}>
             <TableContainer component={Paper} sx={{
@@ -107,6 +127,7 @@ const OrderTable = () => {
                             <TableCell>From</TableCell>
                             <TableCell>Tracking</TableCell>
                             <TableCell>Created At</TableCell>
+                            <TableCell>Action</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -132,11 +153,15 @@ const OrderTable = () => {
                                             <IoInformationCircle color={"blue"} size={25}/>
                                         </IconButton>
                                     </Box>
-                                ) : "Not Available"}</TableCell>
+                                ) : "N/A"}</TableCell>
                                 <TableCell>{order.paymentMethod}</TableCell>
                                 <TableCell>
                                     <Box>
-                                        <Typography>
+                                        <Typography
+                                            sx={{
+                                                textTransform:"uppercase"
+                                            }}
+                                        >
                                             LKR {order.items.reduce(
                                             (sum, item) =>
                                                 sum + item.price * item.quantity,
@@ -211,6 +236,11 @@ const OrderTable = () => {
                                 </TableCell>
                                 <TableCell>
                                     {order.createdAt}
+                                </TableCell>
+                                <TableCell>
+                                    <IconButton onClick={() => deleteOrder(order.orderId)}>
+                                        <IoTrash color={"red"} size={25}/>
+                                    </IconButton>
                                 </TableCell>
                             </TableRow>
                         ))}
