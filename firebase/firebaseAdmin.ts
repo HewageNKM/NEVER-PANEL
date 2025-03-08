@@ -780,7 +780,7 @@ export const getCashReport = async (from: string, to: string): Promise<CashFlowR
 
         if (querySnapshot.empty) {
             console.log('No orders found');
-            return {report: [], totalExpense: 0, materialCost: 0};
+            return { report: [], totalExpense: 0, materialCost: 0 };
         }
         console.log(`Fetched ${querySnapshot.size} orders`);
 
@@ -798,28 +798,52 @@ export const getCashReport = async (from: string, to: string): Promise<CashFlowR
 
         for (const doc of querySnapshot.docs) {
             const order = doc.data() as Order;
-            const {paymentMethod, items} = order;
+            const { paymentMethod, items } = order;
 
             const itemTotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0) + (order?.fee || 0) + (order?.shippingFee || 0);
             const discountAmount = order?.discount || 0;
             const orderTotal = itemTotal - discountAmount;
 
-            // Determine payment method and fee
-            let normalizedMethod: CashFlowReport["method"] = "unknown";
-            let fee = 0;
-            for (const method of paymentMethods.docs) {
-                if (method.data().name.toLowerCase() === paymentMethod.toLowerCase()) {
-                    normalizedMethod = method.data().name.toLowerCase();
-                    fee = Number.parseFloat(method.data().fee);
-                    break;
-                }
-            }
+            if (paymentMethod.toLowerCase() === "mixed" && order.paymentReceived) {
+                for (const payment of order.paymentReceived) {
+                    let normalizedMethod = "unknown";
+                    let feePercentage = 0;
 
-            if (!paymentSummary[normalizedMethod]) {
-                paymentSummary[normalizedMethod] = {total: 0, fee: 0};
+                    for (const method of paymentMethods.docs) {
+                        if (method.data().name.toLowerCase() === payment.paymentMethod.toLowerCase()) {
+                            normalizedMethod = method.data().name.toLowerCase();
+                            feePercentage = Number.parseFloat(method.data().fee);
+                            break;
+                        }
+                    }
+
+                    if (!paymentSummary[normalizedMethod]) {
+                        paymentSummary[normalizedMethod] = { total: 0, fee: 0 };
+                    }
+
+                    const paymentAmount = payment.amount;
+                    const feeAmount = (feePercentage * paymentAmount) / 100;
+                    paymentSummary[normalizedMethod].total += paymentAmount - feeAmount;
+                    paymentSummary[normalizedMethod].fee = feePercentage;
+                }
+            } else {
+                let normalizedMethod: CashFlowReport["method"] = "unknown";
+                let feePercentage = 0;
+
+                for (const method of paymentMethods.docs) {
+                    if (method.data().name.toLowerCase() === paymentMethod.toLowerCase()) {
+                        normalizedMethod = method.data().name.toLowerCase();
+                        feePercentage = Number.parseFloat(method.data().fee);
+                        break;
+                    }
+                }
+
+                if (!paymentSummary[normalizedMethod]) {
+                    paymentSummary[normalizedMethod] = { total: 0, fee: 0 };
+                }
+                paymentSummary[normalizedMethod].total += orderTotal - (feePercentage * orderTotal / 100);
+                paymentSummary[normalizedMethod].fee = feePercentage;
             }
-            paymentSummary[normalizedMethod].fee = fee;
-            paymentSummary[normalizedMethod].total += orderTotal - (fee * orderTotal / 100);
 
             // Calculate material cost
             for (const item of items) {
