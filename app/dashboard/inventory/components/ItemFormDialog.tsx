@@ -62,7 +62,7 @@ const ItemFormDialog = () => {
     };
 
     useEffect(() => {
-        setDiscountedPrice((sellingPrice - (sellingPrice * discount / 100)).toFixed(2))
+        setDiscountedPrice((Math.round((sellingPrice - (sellingPrice * discount / 100)) / 10) * 10).toFixed(2));
     }, [discount])
 
     useEffect(() => {

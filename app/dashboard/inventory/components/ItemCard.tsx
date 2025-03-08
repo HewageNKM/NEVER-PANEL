@@ -109,7 +109,7 @@ const ItemCard = ({item, onEdit}: { item: Item, onEdit: any }) => {
                             color: "text.primary",
                         }}
                     >
-                        Buying: LKR {item.buyingPrice}
+                        Buying: LKR {(item.buyingPrice).toFixed(2)}
                     </Typography>
                     <Typography
                         sx={{
@@ -119,7 +119,7 @@ const ItemCard = ({item, onEdit}: { item: Item, onEdit: any }) => {
                         }}
                     >
                         Selling:
-                        LKR {Math.round((item.sellingPrice - (item.discount * item.sellingPrice / 100)) / 10) * 10}
+                        LKR {(Math.round((item.sellingPrice - (item.discount * item.sellingPrice / 100)) / 10) * 10).toFixed(2)}
                     </Typography>
                     <Typography
                         sx={{
@@ -127,7 +127,7 @@ const ItemCard = ({item, onEdit}: { item: Item, onEdit: any }) => {
                             fontSize: "0.9rem",
                         }}
                     >
-                        Discount: {item.discount.toFixed(0)}%
+                        Discount: {item.discount.toFixed(2)}%
                     </Typography>
                 </Box>
                 <Box mt={3}>
