@@ -103,12 +103,19 @@ export interface Order {
     customer: Customer,
     discount: number,
     from: string,
+    paymentReceived?: Payment[],
 
     tracking: Tracking | null,
     createdAt: Timestamp | string,
     updatedAt: Timestamp | string,
 }
 
+export interface Payment{
+    amount: number,
+    paymentMethod: string,
+    id: string,
+    cardNumber: string,
+}
 export interface ExpensesReport {
     type: "expenses" | "utility"
     data: { for: string, amount: number }[]
