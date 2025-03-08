@@ -21,7 +21,7 @@ const CashStatementReport = ({ setShow, cash, show, date }: { setShow: () => voi
             <DialogContent>
                 <Stack>
                     <Typography variant="h4" sx={{ textAlign: "center", mb: 2, fontWeight: "bold" }}>
-                        Cash Report
+                        Cash Statement Report
                     </Typography>
                     <Typography variant="h6" sx={{ textAlign: "center", mb: 2 }}>
                         Date: {date()}

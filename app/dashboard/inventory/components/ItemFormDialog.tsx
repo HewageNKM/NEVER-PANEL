@@ -157,6 +157,9 @@ const ItemFormDialog = () => {
         setSelectedGenders([])
         setIsLoading(false)
         setNewImage(null)
+        setSellingPrice(0)
+        setMarketPrice(0)
+        setDiscountedPrice(0)
     }
     const updateItems = (newItem: Item) => {
         const updatedItems = items?.map((item: Item) => {

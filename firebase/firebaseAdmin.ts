@@ -181,25 +181,21 @@ export const saveToInventory = async (item: Item) => {
     const itemRef = adminFirestore.collection("inventory").doc(item.itemId);
 
     try {
-        // Start a transaction
         await adminFirestore.runTransaction(async (transaction) => {
-            // Fetch the current document in the transaction
             const doc = await transaction.get(itemRef);
 
-            // If you want to perform some checks on the existing data, you can add them here
             if (doc.exists) {
-                // Proceed with updating or setting the new item data
-                transaction.set(itemRef, {
-                    ...item,
-                    updatedAt: admin.firestore.Timestamp.fromDate(new Date(item.updatedAt)),
-                    createdAt: admin.firestore.Timestamp.fromDate(new Date(item.createdAt)),
-                }, { merge: true });
-            } else {
-                throw new Error(`Item with ID ${item.itemId} does not exist`);
+                throw new Error(`Item with ID ${item.itemId} already exists in inventory`);
             }
+
+            transaction.set(itemRef, {
+                ...item,
+                createdAt: admin.firestore.Timestamp.fromDate(new Date(item.createdAt)),
+                updatedAt: admin.firestore.Timestamp.fromDate(new Date(item.updatedAt)),
+            });
         });
 
-        console.log(`Item with ID ${item.itemId} saved to inventory`);
+        console.log(`Item with ID ${item.itemId} created in inventory`);
     } catch (error: any) {
         console.error(error);
         throw error;
