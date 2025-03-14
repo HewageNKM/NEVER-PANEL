@@ -241,7 +241,7 @@ const ExpensesTable = () => {
                                 <TableCell sx={{textTransform: "capitalize"}}>{expense.type}</TableCell>
                                 <TableCell sx={{textTransform: "capitalize"}}>{expense.for}</TableCell>
                                 <TableCell>LKR {expense.amount}</TableCell>
-                                <TableCell>{expense.note || "No Note"}</TableCell>
+                                <TableCell>{expense.note || "N/A"}</TableCell>
                                 <TableCell>{expense.createdAt}</TableCell>
                                 <TableCell>
                                     <Button variant="contained" color="error" size="small"

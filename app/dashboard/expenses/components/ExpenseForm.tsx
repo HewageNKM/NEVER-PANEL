@@ -130,6 +130,7 @@ const ExpenseForm = ({open, onClose}: { open: boolean, onClose: () => void }) =>
                         <TextareaAutosize
                             minRows={5}
                             name="note"
+                            disabled={isLoading}
                             placeholder="Note"
                             style={{
                                 width: "100%",
