@@ -199,7 +199,7 @@ const ItemCard = ({item, onEdit}: { item: Item, onEdit: any }) => {
                         onClick={() => editItem()}>
                     Edit
                 </Button>
-                <Button disabled onClick={() => setShowConfirmedDialog(true)} variant="text" color="error" size="small"
+                <Button onClick={() => setShowConfirmedDialog(true)} variant="text" color="error" size="small"
                         startIcon={<IoTrashBin size={18}/>}>
                     Delete
                 </Button>
