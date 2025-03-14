@@ -57,6 +57,7 @@ const ItemCard = ({item, onEdit}: { item: Item, onEdit: any }) => {
     return (
         <Card
             sx={{
+                cursor: "pointer",
                 position: "relative",
                 maxWidth: 170,
                 minWidth: 170,
