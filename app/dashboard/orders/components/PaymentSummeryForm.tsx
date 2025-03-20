@@ -29,7 +29,7 @@ const PaymentSummeryForm = ({ showForm, onClose }: { showForm: boolean; onClose:
                                 <TableRow>
                                     <TableCell>Total</TableCell>
                                     <TableCell sx={{ textAlign: "right" }}>
-                                        LKR {selectedOrder?.items.reduce((acc, item) => acc + item.price, 0)}
+                                        LKR {selectedOrder?.items.reduce((acc, item) => acc + (item.price*item.quantity), 0)}
                                     </TableCell>
                                 </TableRow>
                                 <TableRow>
@@ -53,7 +53,7 @@ const PaymentSummeryForm = ({ showForm, onClose }: { showForm: boolean; onClose:
                                 <TableRow sx={{ backgroundColor: "#f9f9f9", fontWeight: "bold" }}>
                                     <TableCell>Sub Total</TableCell>
                                     <TableCell sx={{ textAlign: "right", fontWeight: "bold" }}>
-                                        LKR {selectedOrder?.items.reduce((acc, item) => acc + item.price, 0) +
+                                        LKR {selectedOrder?.items.reduce((acc, item) => acc + (item.price*item.quantity), 0) +
                                         (selectedOrder?.shippingFee || 0) +
                                         (selectedOrder?.fee || 0) -
                                         (selectedOrder?.discount || 0)}
