@@ -37,7 +37,7 @@ const PopularItemCard = ({ item }: { item: PopularItem }) => {
                         variant="body2"
                         sx={{ color: "text.secondary", fontSize: "0.8rem", mt: 0.5 }}
                     >
-                        LKR {Math.round(item.item.sellingPrice - (item.item.sellingPrice * item.item.discount / 100)).toFixed(2)}
+                        LKR {Math.round((item.item.sellingPrice - (item.item.sellingPrice * item.item.discount / 100)) / 10) * 10}
                     </Typography>
                     <Box
                         sx={{
