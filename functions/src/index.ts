@@ -123,7 +123,7 @@ export const onPaymentStatusUpdates = functions.firestore
 
         if (!orderData) return null;
 
-        const { paymentMethod, paymentStatus, items, customer } = orderData;
+        const {paymentMethod, paymentStatus, items, customer, discount} = orderData;
         const paymentMethodLower = paymentMethod.toLowerCase();
         const paymentStatusLower = paymentStatus.toLowerCase();
 
@@ -134,22 +134,27 @@ export const onPaymentStatusUpdates = functions.firestore
         }
 
         // Calculate total and address
-        const total = calculateTotal(items);
-        const address = customer.address + " " + customer.city + "," + (customer?.zip || "");
+        const subTotal = calculateTotal(items);
+        const total = subTotal + (orderData?.fee || 0) + (orderData?.shippingFee || 0) - (orderData?.discount || 0);
+        const address = customer.address + " " + customer.city + " " + (customer?.zip || "") + " " + (customer?.phone || "");
         const templateData = {
             name: customer.name,
             address: address,
             orderId: orderId.toUpperCase(),
             items,
             total,
+            fee:orderData.fee,
+            shippingFee:orderData.shippingFee,
             paymentMethod,
+            subTotal,
+            discount,
         };
 
         try {
             // Function to send notifications
             const sendNotifications = async (additionalTemplateData?: any) => {
                 await Promise.all([
-                    sendEmail(customer.email.trim().toLowerCase(), "orderConfirmed", { ...templateData, ...additionalTemplateData }),
+                    sendEmail(customer.email.trim().toLowerCase(), "orderConfirmed", {...templateData, ...additionalTemplateData}),
                     sendSMS(
                         customer.phone,
                         getOrderStatusSMS(customer.name, orderId, paymentMethod, paymentStatus)
