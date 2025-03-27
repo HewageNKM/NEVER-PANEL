@@ -34,7 +34,9 @@ const SMSSection = () => {
             setIsLoading(true);
             evt.preventDefault();
             const to = evt.target.to.value.toString().trim();
+            const id = `SM-${window.crypto.randomUUID().replace("-", "").substring(0, 5)}`.toLowerCase();
             const newSms: SMS = {
+                id:id,
                 to: to,
                 text: message,
                 sentAt: new Date().toISOString()
