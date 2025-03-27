@@ -6,10 +6,10 @@ import PageContainer from "@/app/dashboard/components/container/PageContainer";
 import React from 'react';
 import PaymentTable from "@/app/dashboard/paymentAndShipping/components/PaymentTable";
 
-const Page = () => {
+const Banner = () => {
     return (
         <PageContainer title="Payment & Shipping" description="Manage Payments and Shipping Method">
-            <DashboardCard title="Payment & Shipping Page">
+            <DashboardCard title="Payment & Shipping Banner">
                 <Stack
                     sx={{
                         position: "relative",

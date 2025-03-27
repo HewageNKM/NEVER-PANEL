@@ -6,10 +6,10 @@ import {Stack} from "@mui/material";
 import Header from '../profile/components/Header';
 import PasswordForm from './components/PasswordForm';
 
-const Page = () => {
+const Banner = () => {
     return (
         <PageContainer title="Profile" description="Manage user profile">
-            <DashboardCard title="Profile Page">
+            <DashboardCard title="Profile Banner">
                 <Stack
                     sx={{
                         position: "relative",

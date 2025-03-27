@@ -5,10 +5,10 @@ import {Stack} from "@mui/material";
 import PageContainer from "@/app/dashboard/components/container/PageContainer";
 import ExpensesTable from "@/app/dashboard/expenses/components/ExpensesTable";
 
-const Page = () => {
+const Banner = () => {
     return (
         <PageContainer title="Expenses" description="Expenses Management">
-            <DashboardCard title="Expenses Page">
+            <DashboardCard title="Expenses Banner">
                 <Stack sx={{
                     position: "relative",
                     padding: 1,
