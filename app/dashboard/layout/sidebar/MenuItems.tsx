@@ -69,9 +69,9 @@ const Menuitems = [
     },
     {
         id: uniqueId(),
-        title: "Website Settings",
+        title: "Website",
         icon: IconList,
-        href: "/dashboard/websiteSettings",
+        href: "/dashboard/website",
     },
     {
         id: uniqueId(),
