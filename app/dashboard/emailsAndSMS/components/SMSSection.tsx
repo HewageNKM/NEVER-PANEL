@@ -29,7 +29,6 @@ import EmptyState from "@/app/components/EmptyState";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import {getSMS, setSMSPage, setSMSSize} from "@/lib/emailAndSMSSlice/emailSMSSlice";
-import EmailForm from "@/app/dashboard/emailsAndSMS/components/EmailForm";
 
 const SMSSection = () => {
     const {showNotification} = useSnackbar();
@@ -247,7 +246,7 @@ const SMSSection = () => {
                     justifyContent="center"
                     alignItems="center"
                 >
-                    <Select variant="outlined" size="small" defaultValue={emailSize}
+                    <Select variant="outlined" size="small" defaultValue={smsSize}
                             onChange={(event) => dispatch(setSMSSize(Number.parseInt(event.target.value)))}>
                         <MenuItem value={10}>10</MenuItem>
                         <MenuItem value={20}>20</MenuItem>
@@ -257,11 +256,6 @@ const SMSSection = () => {
                     <Pagination count={10} variant="outlined" shape="rounded"
                                 onChange={(event, page) => dispatch(setSMSPage(page))}/>
                 </Box>
-                {showEmailForm && (
-                    <EmailForm open={showEmailForm} onClose={() => {
-                        setShowEmailForm(false);
-                    }}/>
-                )}
             </Box>
         </Stack>
     );
