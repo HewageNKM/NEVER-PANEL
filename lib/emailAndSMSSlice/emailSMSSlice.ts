@@ -51,7 +51,14 @@ const emailSMSSlice = createSlice({
         });
         builder.addCase(getEmails.rejected, (state, action) => {
             state.isEmailsLoading = false;
-        });
+        }).addCase(getSMS.pending, (state, action) => {
+            state.isSMSLoading = true;
+        }).addCase(getSMS.fulfilled, (state, action) => {
+            state.sms = action.payload;
+            state.isSMSLoading = false;
+        }).addCase(getSMS.rejected, (state, action) => {
+            state.isSMSLoading = false;
+        })
     }
 })
 export const getEmails = createAsyncThunk('emailSMSSlice/getEmails', async (arg: {

@@ -1,11 +1,20 @@
 import React, {useState} from 'react';
 import {
     Box,
-    FormControl, IconButton,
+    FormControl,
+    IconButton,
     InputLabel,
-    MenuItem, Paper,
+    MenuItem,
+    Pagination,
+    Paper,
     Select,
-    Stack, Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+    Stack,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
     TextareaAutosize,
     TextField,
     Typography
@@ -15,15 +24,16 @@ import {useSnackbar} from "@/contexts/SnackBarContext";
 import {sendSMSAction} from "@/actions/emailAndSMSActions";
 import {SMS} from "@/interfaces";
 import {smsTemplates} from "@/constant";
-import {IoPencilSharp, IoRefreshOutline, IoTrash} from "react-icons/io5";
+import {IoRefreshOutline} from "react-icons/io5";
 import EmptyState from "@/app/components/EmptyState";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
-import {getSMS} from "@/lib/emailAndSMSSlice/emailSMSSlice";
+import {getSMS, setSMSPage, setSMSSize} from "@/lib/emailAndSMSSlice/emailSMSSlice";
+import EmailForm from "@/app/dashboard/emailsAndSMS/components/EmailForm";
 
 const SMSSection = () => {
     const {showNotification} = useSnackbar();
-    const {sms,smsPage,smsSize,isSMSLoading} = useAppSelector(state => state.emailAndSMSSlice);
+    const {sms, smsPage, smsSize, isSMSLoading} = useAppSelector(state => state.emailAndSMSSlice);
     const dispatch = useAppDispatch();
     const [message, setMessage] = useState("")
     const [error, setError] = useState<null | string>(null)
@@ -36,7 +46,7 @@ const SMSSection = () => {
             const to = evt.target.to.value.toString().trim();
             const id = `SM-${window.crypto.randomUUID().replace("-", "").substring(0, 5)}`.toLowerCase();
             const newSms: SMS = {
-                id:id,
+                id: id,
                 to: to,
                 text: message,
                 sentAt: new Date().toISOString()
@@ -46,7 +56,7 @@ const SMSSection = () => {
             setMessage("");
             setError(null);
             showNotification("SMS sent successfully", "success");
-            dispatch(getSMS({size:smsSize, page:smsPage}));
+            dispatch(getSMS({size: smsSize, page: smsPage}));
         } catch (e) {
             console.error(e);
             showNotification(e.message, "error");
@@ -57,8 +67,8 @@ const SMSSection = () => {
 
     const fetchSMS = async () => {
         try {
-            dispatch(getSMS({size:smsSize, page:smsPage}));
-        }catch (e) {
+            dispatch(getSMS({size: smsSize, page: smsPage}));
+        } catch (e) {
             console.error(e);
             showNotification(e.message, "error");
         }
@@ -142,7 +152,8 @@ const SMSSection = () => {
                             />
                         </FormControl>
                         {error && <Typography variant={"caption"} fontWeight={800} color={"error"}>{error}</Typography>}
-                        <Button disabled={error !== null || isLoading} variant={"contained"} type="submit">Send SMS</Button>
+                        <Button disabled={error !== null || isLoading} variant={"contained"} type="submit">Send
+                            SMS</Button>
                     </Stack>
                 </form>
             </Box>
@@ -228,6 +239,29 @@ const SMSSection = () => {
                         <ComponentsLoader position={"absolute"} title={"Loading sms"}/>
                     )}
                 </TableContainer>
+                <Box
+                    mt={2}
+                    gap={1}
+                    display="flex"
+                    flexDirection="row"
+                    justifyContent="center"
+                    alignItems="center"
+                >
+                    <Select variant="outlined" size="small" defaultValue={emailSize}
+                            onChange={(event) => dispatch(setSMSSize(Number.parseInt(event.target.value)))}>
+                        <MenuItem value={10}>10</MenuItem>
+                        <MenuItem value={20}>20</MenuItem>
+                        <MenuItem value={50}>50</MenuItem>
+                        <MenuItem value={100}>100</MenuItem>
+                    </Select>
+                    <Pagination count={10} variant="outlined" shape="rounded"
+                                onChange={(event, page) => dispatch(setSMSPage(page))}/>
+                </Box>
+                {showEmailForm && (
+                    <EmailForm open={showEmailForm} onClose={() => {
+                        setShowEmailForm(false);
+                    }}/>
+                )}
             </Box>
         </Stack>
     );
