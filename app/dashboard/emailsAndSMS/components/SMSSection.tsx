@@ -20,6 +20,7 @@ import EmptyState from "@/app/components/EmptyState";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import {getSMS} from "@/lib/emailAndSMSSlice/emailSMSSlice";
+import {getSMSId} from "@/utils/Generate";
 
 const SMSSection = () => {
     const {showNotification} = useSnackbar();
@@ -34,7 +35,9 @@ const SMSSection = () => {
             setIsLoading(true);
             evt.preventDefault();
             const to = evt.target.to.value.toString().trim();
+            const id = getSMSId()
             const newSms: SMS = {
+                id:id,
                 to: to,
                 text: message,
                 sentAt: new Date().toISOString()

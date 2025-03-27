@@ -1429,9 +1429,7 @@ export const sendTextMessage = async (sms: SMS) => {
             },
             data: JSON.stringify(sms)
         });
-        const smsId = getSMSId();
         await adminFirestore.collection('sms').doc(smsId).set({
-            id: smsId,
             ...sms,
             createdAt: admin.firestore.Timestamp.fromDate(new Date(sms.sentAt)),
         });
