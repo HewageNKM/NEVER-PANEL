@@ -601,8 +601,6 @@ export const getOverview = async (start: Timestamp, end: Timestamp) => {
                         buyingCost += (inventoryData.buyingPrice || 0) * (item.quantity || 1);
                     }
                 });
-                totalEarnings += (data?.fee || 0)
-                totalEarnings += (data?.shippingFee || 0)
                 totalDiscount += (data.discount || 0)
             }
         });
