@@ -5,10 +5,10 @@ import {Stack} from "@mui/material";
 import PageContainer from "@/app/dashboard/components/container/PageContainer";
 import Header from "@/app/dashboard/reports/components/Header";
 
-const Banner = () => {
+const Page = () => {
     return (
         <PageContainer title="Reports" description="Reports Management">
-            <DashboardCard title="Reports Banner">
+            <DashboardCard title="Reports Page">
                 <Stack sx={{
                     position: "relative",
                     padding: 1,

@@ -20,7 +20,7 @@ import ItemFormDialog from "@/app/dashboard/inventory/components/ItemFormDialog"
 import ComponentsLoader from "@/app/components/ComponentsLoader";
 
 
-const Banner = () => {
+const Page = () => {
     const dispatch = useAppDispatch();
     const {
         items,
@@ -49,7 +49,7 @@ const Banner = () => {
 
     return (
         <PageContainer title="Inventory" description="Products Management">
-            <DashboardCard title="Inventory Banner">
+            <DashboardCard title="Inventory Page">
                 <Stack sx={{
                     position: "relative",
                     padding: 1,

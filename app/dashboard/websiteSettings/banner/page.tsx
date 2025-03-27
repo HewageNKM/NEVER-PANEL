@@ -1,25 +1,25 @@
 "use client"
+import React from 'react';
 import DashboardCard from "@/app/dashboard/components/shared/DashboardCard";
 import {Stack} from "@mui/material";
 import PageContainer from "@/app/dashboard/components/container/PageContainer";
-
-import React from 'react';
-import PaymentTable from "@/app/dashboard/paymentAndShipping/components/PaymentTable";
+import Header from "@/app/dashboard/websiteSettings/banner/components/Header";
+import Form from "@/app/dashboard/websiteSettings/banner/components/Form";
 
 const Page = () => {
     return (
-        <PageContainer title="Payment & Shipping" description="Manage Payments and Shipping Method">
-            <DashboardCard title="Payment & Shipping Page">
+        <PageContainer title="Banners Setting" description="Manage Banners Setting">
+            <DashboardCard title="Banners Page">
                 <Stack
                     sx={{
-                        position: "relative",
-                        padding: 1,
+                        width: "100%",
                         display: "flex",
                         flexDirection: "column",
-                        gap: 3
+                        gap: 3,
                     }}
                 >
-                    <PaymentTable/>
+                    <Header />
+                    <Form />
                 </Stack>
             </DashboardCard>
         </PageContainer>

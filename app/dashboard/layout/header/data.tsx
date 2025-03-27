@@ -143,7 +143,7 @@ const appsLink = [
 const pageLinks = [
   {
     href: '/pricing',
-    title: 'Pricing Banner'
+    title: 'Pricing Page'
   },
   {
     href: '/auth/login',
@@ -155,7 +155,7 @@ const pageLinks = [
   },
   {
     href: '/404',
-    title: '404 Error Banner'
+    title: '404 Error Page'
   },
   {
     href: '/apps/notes',

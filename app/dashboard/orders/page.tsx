@@ -8,7 +8,7 @@ import OrderTable from "@/app/dashboard/orders/components/OrderTable";
 const Orders = () => {
     return (
         <PageContainer title="Orders" description="OrdersTable Management">
-            <DashboardCard title="Order Banner">
+            <DashboardCard title="Order Page">
                 <Stack sx={{
                     position: "relative",
                     padding: 1,
