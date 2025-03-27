@@ -15,7 +15,7 @@ import {
 } from "@/interfaces";
 import {uuidv4} from "@firebase/util";
 import {Timestamp} from "firebase-admin/firestore";
-import {generateRandomPassword, hashPassword} from "@/utils/Generate";
+import {generateRandomPassword, getSMSId, hashPassword} from "@/utils/Generate";
 import axios from "axios";
 
 if (!admin.apps.length) {
@@ -237,7 +237,7 @@ export const updateItem = async (item: Item) => {
             };
 
             // Update the item data in Firestore
-            transaction.set(itemRef, itemData, { merge: true });
+            transaction.set(itemRef, itemData, {merge: true});
         });
 
         console.log(`Item with ID ${item.itemId} updated in inventory successfully.`);
@@ -246,7 +246,6 @@ export const updateItem = async (item: Item) => {
         throw error; // Rethrow the error to propagate it
     }
 };
-
 
 
 export const uploadFile = async (file: File, path: string) => {
@@ -323,7 +322,7 @@ export const deleteItemById = async (itemId: string) => {
         return await adminFirestore.runTransaction(async (transaction) => {
             // Step 1: Log the start of file deletion
             console.log(`[INFO] Retrieving files from storage for item ID: ${itemId}`);
-            const [files] = await adminStorageBucket.getFiles({ prefix: `inventory/${itemId}/` });
+            const [files] = await adminStorageBucket.getFiles({prefix: `inventory/${itemId}/`});
 
             if (files.length === 0) {
                 console.log(`[INFO] No files found for item ID: ${itemId}`);
@@ -356,7 +355,7 @@ export const deleteItemById = async (itemId: string) => {
             console.log(`[SUCCESS] Firestore document for item ID: ${itemId} deleted successfully`);
 
             console.log(`[END] Successfully deleted item with ID: ${itemId} and associated files`);
-            return { itemId, deletedAt: new Date() };
+            return {itemId, deletedAt: new Date()};
         });
     } catch (error: any) {
         console.error(`[ERROR] Error deleting item with ID: ${itemId}:`, error);
@@ -778,7 +777,7 @@ export const getCashReport = async (from: string, to: string): Promise<CashFlowR
 
         if (querySnapshot.empty) {
             console.log('No orders found');
-            return { report: [], totalExpense: 0, materialCost: 0 };
+            return {report: [], totalExpense: 0, materialCost: 0};
         }
         console.log(`Fetched ${querySnapshot.size} orders`);
 
@@ -796,7 +795,7 @@ export const getCashReport = async (from: string, to: string): Promise<CashFlowR
 
         for (const doc of querySnapshot.docs) {
             const order = doc.data() as Order;
-            const { paymentMethod, items } = order;
+            const {paymentMethod, items} = order;
 
             const itemTotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0) + (order?.fee || 0) + (order?.shippingFee || 0);
             const discountAmount = order?.discount || 0;
@@ -816,7 +815,7 @@ export const getCashReport = async (from: string, to: string): Promise<CashFlowR
                     }
 
                     if (!paymentSummary[normalizedMethod]) {
-                        paymentSummary[normalizedMethod] = { total: 0, fee: 0 };
+                        paymentSummary[normalizedMethod] = {total: 0, fee: 0};
                     }
 
                     const paymentAmount = payment.amount;
@@ -837,7 +836,7 @@ export const getCashReport = async (from: string, to: string): Promise<CashFlowR
                 }
 
                 if (!paymentSummary[normalizedMethod]) {
-                    paymentSummary[normalizedMethod] = { total: 0, fee: 0 };
+                    paymentSummary[normalizedMethod] = {total: 0, fee: 0};
                 }
                 paymentSummary[normalizedMethod].total += orderTotal - (feePercentage * orderTotal / 100);
                 paymentSummary[normalizedMethod].fee = feePercentage;
@@ -897,7 +896,7 @@ export const addNewExpense = async (expense: Expense) => {
             });
 
             console.log(`Expense added successfully: ${expense.id}`);
-            return { id: expense.id, createdAt: new Date() };
+            return {id: expense.id, createdAt: new Date()};
         });
     } catch (e) {
         console.error("Error adding new expense:", e);
@@ -989,7 +988,7 @@ export const deleteExpenseById = async (id: string) => {
             transaction.delete(expenseRef);
 
             console.log(`Expense deleted successfully: ${id}`);
-            return { id, deletedAt: new Date() };
+            return {id, deletedAt: new Date()};
         });
     } catch (e) {
         console.error("Error deleting expense:", e);
@@ -1128,7 +1127,7 @@ export const deleteUser = async (userId: string) => {
             transaction.delete(userRef);
 
             console.log(`User deleted successfully: ${userId}`);
-            return { id: userId, deletedAt: new Date() };
+            return {id: userId, deletedAt: new Date()};
         });
     } catch (e) {
         console.error("Error deleting user:", e);
@@ -1430,13 +1429,39 @@ export const sendTextMessage = async (sms: SMS) => {
             },
             data: JSON.stringify(sms)
         });
+        const smsId = getSMSId();
+        await adminFirestore.collection('sms').doc(smsId).set({
+            id: smsId,
+            ...sms,
+            createdAt: admin.firestore.Timestamp.fromDate(new Date(sms.sentAt)),
+        });
         return response.data;
     } catch (e) {
         throw e;
     }
 }
-
-export const addABanner = async ({ file, url }: { file: string; url: string }) => {
+export const getSMS = async (page: number, size: number) => {
+    try {
+        const offset = (page - 1) * size;
+        console.log('Fetching all SMS');
+        const smsQuery = await adminFirestore.collection('sms')
+            .limit(size)
+            .offset(offset)
+            .orderBy('createdAt', 'desc')
+            .get();
+        const smsList: SMS[] = [];
+        smsQuery.forEach(doc => {
+            smsList.push({
+                ...doc.data(),
+                sentAt: doc.data()?.createdAt?.toDate()?.toLocaleString(),
+            } as SMS);
+        });
+        return smsList;
+    } catch (e) {
+        throw e;
+    }
+}
+export const addABanner = async ({file, url}: { file: string; url: string }) => {
     try {
         console.log("Adding new banner:", file);
 
@@ -1502,7 +1527,7 @@ export const deleteBanner = async (id: string) => {
             transaction.delete(bannerRef);
 
             console.log(`Banner ${fileName} deleted successfully`);
-            return { id, deletedAt: new Date() };
+            return {id, deletedAt: new Date()};
         });
     } catch (e) {
         console.error("Error deleting banner:", e);
@@ -1542,14 +1567,14 @@ export const updatePaymentMethod = async (paymentMethod: PaymentMethod) => {
                 paymentRef,
                 {
                     ...paymentMethod,
-                    createdAt:admin.firestore.Timestamp.fromDate(new Date(paymentMethod.createdAt)),
-                    updatedAt:admin.firestore.Timestamp.fromDate(new Date(paymentMethod.updatedAt)),
+                    createdAt: admin.firestore.Timestamp.fromDate(new Date(paymentMethod.createdAt)),
+                    updatedAt: admin.firestore.Timestamp.fromDate(new Date(paymentMethod.updatedAt)),
                 },
-                { merge: true }
+                {merge: true}
             );
 
             console.log(`Payment method updated successfully: ${paymentMethod.paymentId}`);
-            return { id: paymentMethod.paymentId, updatedAt: new Date() };
+            return {id: paymentMethod.paymentId, updatedAt: new Date()};
         });
     } catch (e) {
         console.error("Error updating payment method:", e);

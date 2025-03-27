@@ -20,3 +20,7 @@ export const hashPassword = (password: string): string => {
     hash.update(password); // Add the password to the hash
     return hash.digest("hex"); // Return the hashed password as a hexadecimal string
 };
+
+export const getSMSId = () => {
+    return `SM-${window.crypto.randomUUID().replace("-", "").substring(0, 5)}`.toLowerCase();
+}

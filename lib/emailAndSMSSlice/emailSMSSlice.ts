@@ -1,52 +1,63 @@
-import {Email} from "@/interfaces";
+import {Email, SMS} from "@/interfaces";
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
-import {getAllEmailsAction} from "@/actions/emailAndSMSActions";
+import {getAllEmailsAction, getAllSMSAction} from "@/actions/emailAndSMSActions";
 
 interface EmailSMSSlice {
     emails: Email[];
-    isLoading: boolean;
-    page: number;
-    size: number;
+    isEmailsLoading: boolean;
+    emailPage: number;
+    emailSize: number;
+    isSMSLoading: boolean;
+    smsPage: number;
+    smsSize: number;
+    sms: SMS[];
 }
 
 const initialState: EmailSMSSlice = {
     emails: [],
-    isLoading: false,
-    page: 0,
-    size: 20
+    isEmailsLoading: false,
+    emailPage: 0,
+    emailSize: 20,
+    isSMSLoading: false,
+    smsPage: 0,
+    smsSize: 20,
+    sms: []
 }
 
 const emailSMSSlice = createSlice({
     name: 'emailSMSSlice',
     initialState,
     reducers: {
-        setEmails: (state, action) => {
-            state.emails = action.payload;
+        setEmailsPage: (state, action) => {
+            state.emailPage = action.payload;
         },
-        setLoading: (state, action) => {
-            state.isLoading = action.payload;
+        setEmailsSize: (state, action) => {
+            state.emailSize = action.payload;
         },
-        setPage: (state, action) => {
-            state.page = action.payload;
+        setSMSPage: (state, action) => {
+            state.smsPage = action.payload;
         },
-        setSize: (state, action) => {
-            state.size = action.payload;
-        },
+        setSMSSize: (state, action) => {
+            state.smsSize = action.payload;
+        }
     },
     extraReducers: builder => {
         builder.addCase(getEmails.pending, (state, action) => {
-            state.isLoading = true;
+            state.isEmailsLoading = true;
         });
         builder.addCase(getEmails.fulfilled, (state, action) => {
             state.emails = action.payload;
-            state.isLoading = false;
+            state.isEmailsLoading = false;
         });
         builder.addCase(getEmails.rejected, (state, action) => {
-            state.isLoading = false;
+            state.isEmailsLoading = false;
         });
     }
 })
-export const getEmails = createAsyncThunk('emailSMSSlice/getEmails', async (arg: { page: number, size: number},thunkAPI) => {
+export const getEmails = createAsyncThunk('emailSMSSlice/getEmails', async (arg: {
+        page: number,
+        size: number
+    }, thunkAPI) => {
         try {
             return await getAllEmailsAction(arg.page, arg.size);
         } catch (e) {
@@ -54,5 +65,15 @@ export const getEmails = createAsyncThunk('emailSMSSlice/getEmails', async (arg:
         }
     }
 )
-export const {setEmails, setLoading, setPage, setSize} = emailSMSSlice.actions;
+export const getSMS = createAsyncThunk('emailSMSSlice/getSMS', async (arg: {
+    page: number,
+    size: number
+}, thunkAPI) => {
+    try {
+        return await getAllSMSAction(arg.page, arg.size);
+    } catch (e) {
+        return thunkAPI.rejectWithValue(e.response ? e.response.data.message : e.message);
+    }
+})
+export const {setEmailsPage, setEmailsSize,setSMSPage,setSMSSize} = emailSMSSlice.actions;
 export default emailSMSSlice.reducer;

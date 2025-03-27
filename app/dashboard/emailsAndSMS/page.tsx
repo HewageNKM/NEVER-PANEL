@@ -6,7 +6,7 @@ import PageContainer from "@/app/dashboard/components/container/PageContainer";
 import React, {useState} from 'react';
 import Header from "@/app/dashboard/emailsAndSMS/components/Header";
 import EmailTable from "@/app/dashboard/emailsAndSMS/components/EmailTable";
-import SMSForm from "@/app/dashboard/emailsAndSMS/components/SMSForm";
+import SMSForm from "@/app/dashboard/emailsAndSMS/components/SMSSection";
 
 const Page = () => {
     const [formType, setFormType] = useState("email")

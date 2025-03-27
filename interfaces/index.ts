@@ -16,8 +16,10 @@ export interface User {
 }
 
 export interface SMS {
+    id?: string;
     to: string;
     text: string;
+    sentAt: string;
 }
 
 export interface Email {

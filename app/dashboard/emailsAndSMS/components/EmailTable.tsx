@@ -19,7 +19,7 @@ import {IoPencilSharp, IoRefreshOutline, IoTrash} from "react-icons/io5";
 import EmptyState from "@/app/components/EmptyState";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
-import {getEmails, setPage, setSize} from '@/lib/emailAndSMSSlice/emailSMSSlice';
+import {getEmails, setEmailsPage, setEmailsSize} from '@/lib/emailAndSMSSlice/emailSMSSlice';
 import {useSnackbar} from "@/contexts/SnackBarContext";
 import EmailForm from './EmailForm';
 import {useConfirmationDialog} from "@/contexts/ConfirmationDialogContext";
@@ -27,7 +27,7 @@ import {deleteEmailByIdAction} from "@/actions/emailAndSMSActions";
 
 const EmailTable = () => {
     const dispatch = useAppDispatch();
-    const {emails, page, isLoading, size} = useAppSelector(state => state.emailAndSMSSlice);
+    const {emails,isEmailsLoading,emailPage,emailSize} = useAppSelector(state => state.emailAndSMSSlice);
     const {currentUser} = useAppSelector(state => state.authSlice);
     const {showNotification} = useSnackbar();
     const {showConfirmation} = useConfirmationDialog();
@@ -35,7 +35,7 @@ const EmailTable = () => {
 
     const fetchEmails = async () => {
         try {
-            dispatch(getEmails({size, page}));
+            dispatch(getEmails({size:emailSize, page:emailPage}));
         } catch (e) {
             console.error(e);
             showNotification(e.message, "error");
@@ -45,7 +45,7 @@ const EmailTable = () => {
         if (currentUser) {
             fetchEmails();
         }
-    }, [currentUser, page, size]);
+    }, [currentUser, emailPage, emailSize]);
 
     const onDelete = (emailId: string) => {
         showConfirmation({
@@ -142,13 +142,13 @@ const EmailTable = () => {
                         ))}
                     </TableBody>
                 </Table>
-                {(emails.length === 0 && !isLoading) && (
+                {(emails.length === 0 && !isEmailsLoading) && (
                     <EmptyState
                         title={"No emails"}
                         subtitle={"No emails available."}
                     />
                 )}
-                {isLoading && (
+                {isEmailsLoading && (
                     <ComponentsLoader position={"absolute"} title={"Loading Emails"}/>
                 )}
             </TableContainer>
@@ -160,15 +160,15 @@ const EmailTable = () => {
                 justifyContent="center"
                 alignItems="center"
             >
-                <Select variant="outlined" size="small" defaultValue={size}
-                        onChange={(event) => dispatch(setSize(Number.parseInt(event.target.value)))}>
+                <Select variant="outlined" size="small" defaultValue={emailSize}
+                        onChange={(event) => dispatch(setEmailsSize(Number.parseInt(event.target.value)))}>
                     <MenuItem value={10}>10</MenuItem>
                     <MenuItem value={20}>20</MenuItem>
                     <MenuItem value={50}>50</MenuItem>
                     <MenuItem value={100}>100</MenuItem>
                 </Select>
                 <Pagination count={10} variant="outlined" shape="rounded"
-                            onChange={(event, page) => dispatch(setPage(page))}/>
+                            onChange={(event, page) => dispatch(setEmailsPage(page))}/>
             </Box>
             {showEmailForm && (
                 <EmailForm open={showEmailForm} onClose={() => {

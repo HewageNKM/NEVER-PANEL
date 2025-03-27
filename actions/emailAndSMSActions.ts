@@ -73,3 +73,18 @@ export const sendSMSAction = async (sms:SMS) => {
         )
     }
 }
+export const getAllSMSAction = async (page: number, size: number) => {
+    try {
+        const token = await getToken();
+        const response = await axios({
+            method: 'GET',
+            url: `/api/v1/sms?size=${size}&page=${page}`,
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (e) {
+        throw new Error(e.response ? e.response.data.message : e.message);
+    }
+}
