@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
     Box,
     FormControl,
@@ -33,6 +33,7 @@ import {getSMS, setSMSPage, setSMSSize} from "@/lib/emailAndSMSSlice/emailSMSSli
 const SMSSection = () => {
     const {showNotification} = useSnackbar();
     const {sms, smsPage, smsSize, isSMSLoading} = useAppSelector(state => state.emailAndSMSSlice);
+    const {currentUser} = useAppSelector(state => state.authSlice);
     const dispatch = useAppDispatch();
     const [message, setMessage] = useState("")
     const [error, setError] = useState<null | string>(null)
@@ -63,7 +64,11 @@ const SMSSection = () => {
             setIsLoading(false)
         }
     }
-
+    useEffect(() => {
+        if(currentUser){
+            fetchSMS()
+        }
+    }, [smsPage, smsSize])
     const fetchSMS = async () => {
         try {
             dispatch(getSMS({size: smsSize, page: smsPage}));
@@ -223,6 +228,7 @@ const SMSSection = () => {
                                         textTransform: "uppercase"
                                     }}>{sms.id}</TableCell>
                                     <TableCell>{sms.to}</TableCell>
+                                    <TableCell>{sms.text}</TableCell>
                                     <TableCell>{sms.sentAt}</TableCell>
                                 </TableRow>
                             ))}
