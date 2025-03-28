@@ -57,14 +57,14 @@ const SalesOverview = () => {
         try {
             setLoading(true);
 
-            const startOfMonth = new Date();
-            startOfMonth.setDate(1);
-            startOfMonth.setHours(0, 0, 0, 0);
+            // Get the current year and month
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const currentMonth = now.getMonth(); // 0-based index (Jan = 0, Dec = 11)
 
-            const endOfMonth = new Date(startOfMonth);
-            endOfMonth.setMonth(endOfMonth.getMonth() + 1);
-            endOfMonth.setDate(0);
-            endOfMonth.setHours(23, 59, 59, 999);
+            // Set the range for the current month
+            const startOfMonth = new Date(currentYear, currentMonth, 1, 0, 0, 0, 0);
+            const endOfMonth = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59, 999);
 
             const startTimestamp = Timestamp.fromDate(startOfMonth);
             const endTimestamp = Timestamp.fromDate(endOfMonth);
@@ -74,13 +74,18 @@ const SalesOverview = () => {
                 ordersRef,
                 where("createdAt", ">=", startTimestamp),
                 where("createdAt", "<=", endTimestamp),
-                where("paymentStatus", "in", ["Paid","Pending"])
+                where("paymentStatus", "in", ["Paid", "Pending"])
             );
 
             const querySnapshot = await getDocs(ordersQuery);
 
-            const websiteOrders: number[] = new Array(12).fill(0);
-            const storeOrders: number[] = new Array(12).fill(0);
+            // Preserve previous data, only update current month
+            const updatedWebsiteOrders = [...salesData.website];
+            const updatedStoreOrders = [...salesData.store];
+
+            // Reset only current month to ensure fresh data
+            updatedWebsiteOrders[currentMonth] = 0;
+            updatedStoreOrders[currentMonth] = 0;
 
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
@@ -88,19 +93,14 @@ const SalesOverview = () => {
                 if (createdAt) {
                     const monthIndex = createdAt.getMonth();
                     if (data.from.toString().toLowerCase() === "website") {
-                        websiteOrders[monthIndex]++;
+                        updatedWebsiteOrders[monthIndex]++;
                     } else if (data.from.toString().toLowerCase() === "store") {
-                        storeOrders[monthIndex]++;
+                        updatedStoreOrders[monthIndex]++;
                     }
                 }
             });
 
-            setSalesData({website: websiteOrders, store: storeOrders});
-
-            const monthLabels = Array.from({length: 12}, (_, i) =>
-                new Date(0, i).toLocaleString("default", {month: "short"})
-            );
-            setMonths(monthLabels);
+            setSalesData({ website: updatedWebsiteOrders, store: updatedStoreOrders });
         } catch (error) {
             console.error(error);
             showNotification(error.message, "error");
@@ -108,7 +108,6 @@ const SalesOverview = () => {
             setLoading(false);
         }
     };
-
 
     return (
         <DashboardCard
