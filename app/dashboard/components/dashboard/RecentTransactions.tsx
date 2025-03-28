@@ -25,7 +25,7 @@ const RecentTransactions = () => {
     useEffect(() => {
         try {
             const ordersRef = collection(db, "orders");
-            const ordersQuery = query(ordersRef, where("paymentStatus", "==", "Paid"), orderBy("createdAt", "desc"), limit(6));
+            const ordersQuery = query(ordersRef, where("paymentStatus", "not-in", ["Failed","Refunded"]), orderBy("createdAt", "desc"), limit(6));
 
             const unsubscribe = onSnapshot(ordersQuery, (snapshot) => {
                 const ordersData = snapshot.docs.map((doc) => ({
