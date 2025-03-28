@@ -1,23 +1,21 @@
-import React, {useEffect, useState} from "react";
-import {Box, CircularProgress} from "@mui/material";
-import {useTheme} from "@mui/material/styles";
+import React, { useEffect, useState } from "react";
+import { Box, CircularProgress } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import DashboardCard from "../shared/DashboardCard";
 import dynamic from "next/dynamic";
-import {collection, getDocs, query, Timestamp, where} from "@firebase/firestore";
-import {db} from "@/firebase/firebaseClient";
-import {useAppSelector} from "@/lib/hooks";
-import {useSnackbar} from "@/contexts/SnackBarContext";
+import { collection, getDocs, query, Timestamp, where } from "@firebase/firestore";
+import { db } from "@/firebase/firebaseClient";
+import { useAppSelector } from "@/lib/hooks";
+import { useSnackbar } from "@/contexts/SnackBarContext";
 
-const Chart = dynamic(() => import("react-apexcharts"), {ssr: false});
+const Chart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
 const SalesOverview = () => {
     const [loading, setLoading] = useState(true);
-    const [salesData, setSalesData] = useState({website: Array(12).fill(0), store: Array(12).fill(0)});
-    const [months, setMonths] = useState<string[]>(Array.from({length: 12}, (_, i) =>
-        new Date(0, i).toLocaleString("default", {month: "short"})
-    ));
-    const {showNotification} = useSnackbar();
-    const {currentUser} = useAppSelector(state => state.authSlice);
+    const [salesData, setSalesData] = useState({ website: 0, store: 0 });
+    const [month, setMonth] = useState<string>(new Date().toLocaleString("default", { month: "short" }));
+    const { showNotification } = useSnackbar();
+    const { currentUser } = useAppSelector(state => state.authSlice);
 
     // Chart colors
     const theme = useTheme();
@@ -25,27 +23,20 @@ const SalesOverview = () => {
     const secondary = theme.palette.secondary.main;
 
     const optionscolumnchart: any = {
-        chart: {type: "bar", height: 370},
+        chart: { type: "bar", height: 370 },
         colors: [primary, secondary],
         plotOptions: {
-            bar: {horizontal: false, columnWidth: "42%", borderRadius: 6},
+            bar: { horizontal: false, columnWidth: "42%", borderRadius: 6 },
         },
-        xaxis: {categories: months.length ? months : Array(12).fill("No Data")},
-        yaxis: {tickAmount: 4},
-        tooltip: {theme: "dark"},
+        xaxis: { categories: [month] }, // Only show the current month
+        yaxis: { tickAmount: 4 },
+        tooltip: { theme: "dark" },
     };
 
     const seriescolumnchart = [
-        {
-            name: "Website",
-            data: salesData.website && salesData.website.length ? salesData.website : Array(12).fill(0),
-        },
-        {
-            name: "Store",
-            data: salesData.store && salesData.store.length ? salesData.store : Array(12).fill(0),
-        },
+        { name: "Website", data: [salesData.website] },
+        { name: "Store", data: [salesData.store] },
     ];
-
 
     useEffect(() => {
         if (currentUser) {
@@ -74,33 +65,24 @@ const SalesOverview = () => {
                 ordersRef,
                 where("createdAt", ">=", startTimestamp),
                 where("createdAt", "<=", endTimestamp),
-                where("paymentStatus", "in", ["Paid","Pending"])
+                where("paymentStatus", "in", ["Paid", "Pending"])
             );
 
             const querySnapshot = await getDocs(ordersQuery);
 
-            const websiteOrders: number[] = new Array(12).fill(0);
-            const storeOrders: number[] = new Array(12).fill(0);
+            let websiteOrders = 0;
+            let storeOrders = 0;
 
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
-                const createdAt = data.createdAt?.toDate();
-                if (createdAt) {
-                    const monthIndex = createdAt.getMonth();
-                    if (data.from.toString().toLowerCase() === "website") {
-                        websiteOrders[monthIndex]++;
-                    } else if (data.from.toString().toLowerCase() === "store") {
-                        storeOrders[monthIndex]++;
-                    }
+                if (data.from.toString().toLowerCase() === "website") {
+                    websiteOrders++;
+                } else if (data.from.toString().toLowerCase() === "store") {
+                    storeOrders++;
                 }
             });
 
-            setSalesData({website: websiteOrders, store: storeOrders});
-
-            const monthLabels = Array.from({length: 12}, (_, i) =>
-                new Date(0, i).toLocaleString("default", {month: "short"})
-            );
-            setMonths(monthLabels);
+            setSalesData({ website: websiteOrders, store: storeOrders });
         } catch (error) {
             console.error(error);
             showNotification(error.message, "error");
@@ -109,14 +91,15 @@ const SalesOverview = () => {
         }
     };
 
-
     return (
-        <DashboardCard
-            title="Sales Overview"
-        >
-            {loading ? (<Box sx={{display: "flex", justifyContent: "center", alignItems: "center", height: "100px"}}>
-                <CircularProgress/>
-            </Box>) : (<Chart options={optionscolumnchart} series={seriescolumnchart} type="bar" height={370}/>)}
+        <DashboardCard title="Sales Overview">
+            {loading ? (
+                <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100px" }}>
+                    <CircularProgress />
+                </Box>
+            ) : (
+                <Chart options={optionscolumnchart} series={seriescolumnchart} type="bar" height={370} />
+            )}
         </DashboardCard>
     );
 };
