@@ -62,11 +62,11 @@ const SalesOverview = () => {
             const currentYear = now.getFullYear();
             const currentMonth = now.getMonth(); // 0-based index (Jan = 0, Dec = 11)
 
-            // Set the range for the current month
-            const startOfMonth = new Date(currentYear, currentMonth, 1, 0, 0, 0, 0);
+            // Set the range from the beginning of the year to the current month
+            const startOfYear = new Date(currentYear, 0, 1, 0, 0, 0, 0);
             const endOfMonth = new Date(currentYear, currentMonth + 1, 0, 23, 59, 59, 999);
 
-            const startTimestamp = Timestamp.fromDate(startOfMonth);
+            const startTimestamp = Timestamp.fromDate(startOfYear);
             const endTimestamp = Timestamp.fromDate(endOfMonth);
 
             const ordersRef = collection(db, "orders");
@@ -79,13 +79,9 @@ const SalesOverview = () => {
 
             const querySnapshot = await getDocs(ordersQuery);
 
-            // Preserve previous data, only update current month
-            const updatedWebsiteOrders = [...salesData.website];
-            const updatedStoreOrders = [...salesData.store];
-
-            // Reset only current month to ensure fresh data
-            updatedWebsiteOrders[currentMonth] = 0;
-            updatedStoreOrders[currentMonth] = 0;
+            // Initialize arrays to store monthly sales data
+            const updatedWebsiteOrders = new Array(12).fill(0);
+            const updatedStoreOrders = new Array(12).fill(0);
 
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
@@ -99,7 +95,6 @@ const SalesOverview = () => {
                     }
                 }
             });
-
             setSalesData({ website: updatedWebsiteOrders, store: updatedStoreOrders });
         } catch (error) {
             console.error(error);
