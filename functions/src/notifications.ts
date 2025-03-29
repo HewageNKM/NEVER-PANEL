@@ -4,6 +4,7 @@
 import axios from "axios";
 import {db} from "./index";
 import {TEXT_API_KEY} from "./constant";
+import {firestore} from "firebase-admin";
 
 export const sendEmail = async (
     to: string, templateName: string, templateData: object
@@ -42,7 +43,14 @@ export const sendSMS = async (to: string, text: string) => {
                     "Accept": "*/*"
                 }
             }
-        )
+    )
+        const id = `SM-${crypto.randomUUID().replace("-", "").substring(0, 5)}`.toLowerCase();
+        await db.collection("sms").doc(id).set({
+            id,
+            to,
+            text,
+            sentAt: firestore.Timestamp.now(),
+        })
     } catch (e) {
         console.log("Failed to send SMS: ", e)
     }
