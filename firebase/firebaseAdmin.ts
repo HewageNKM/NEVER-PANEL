@@ -1431,7 +1431,7 @@ export const sendTextMessage = async (sms: SMS) => {
         });
         await adminFirestore.collection('sms').doc(sms.id).set({
             ...sms,
-            createdAt: admin.firestore.Timestamp.fromDate(new Date(sms.sentAt)),
+            sentAt: admin.firestore.Timestamp.fromDate(new Date(sms.sentAt)),
         });
         return response.data;
     } catch (e) {
@@ -1445,13 +1445,14 @@ export const getSMS = async (page: number, size: number) => {
         const smsQuery = await adminFirestore.collection('sms')
             .limit(size)
             .offset(offset)
-            .orderBy('createdAt', 'desc')
+            .orderBy('sentAt', 'desc')
             .get();
         const smsList: SMS[] = [];
+        console.log(`Fetched ${smsQuery.size} SMS`);
         smsQuery.forEach(doc => {
             smsList.push({
                 ...doc.data(),
-                sentAt: doc.data()?.createdAt?.toDate()?.toLocaleString(),
+                sentAt: doc.data()?.sentAt?.toDate()?.toLocaleString(),
             } as SMS);
         });
         return smsList;

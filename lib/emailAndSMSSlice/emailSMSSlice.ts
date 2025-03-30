@@ -16,10 +16,10 @@ interface EmailSMSSlice {
 const initialState: EmailSMSSlice = {
     emails: [],
     isEmailsLoading: false,
-    emailPage: 0,
+    emailPage: 1,
     emailSize: 20,
     isSMSLoading: false,
-    smsPage: 0,
+    smsPage: 1,
     smsSize: 20,
     sms: []
 }

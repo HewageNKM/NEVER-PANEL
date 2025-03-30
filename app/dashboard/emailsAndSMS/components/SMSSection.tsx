@@ -64,11 +64,13 @@ const SMSSection = () => {
             setIsLoading(false)
         }
     }
+
     useEffect(() => {
         if(currentUser){
             fetchSMS()
         }
     }, [smsPage, smsSize])
+
     const fetchSMS = async () => {
         try {
             dispatch(getSMS({size: smsSize, page: smsPage}));
@@ -247,6 +249,7 @@ const SMSSection = () => {
                 <Box
                     mt={2}
                     gap={1}
+                    width={"100%"}
                     display="flex"
                     flexDirection="row"
                     justifyContent="center"
