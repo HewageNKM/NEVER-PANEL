@@ -14,7 +14,7 @@ export const db = admin.firestore();
  * Scheduled function to clean up failed orders and restock inventory.
  */
 export const scheduledOrdersCleanup = functions.pubsub
-    .schedule("every 1 hours")
+    .schedule("every 24 hours")
     .onRun(async () => {
         try {
             console.log("Starting scheduled Firestore cleanup and deletion.");
@@ -22,23 +22,15 @@ export const scheduledOrdersCleanup = functions.pubsub
             const inventoryCollection = db.collection("inventory");
 
             const timeFrame = admin.firestore.Timestamp
-                .fromDate(new Date(Date.now() - 60 * 60 * 1000));
+                .fromDate(new Date(Date.now() - 4 * 60 * 60 * 1000));
 
-            // Fetch failed and pending PayHere orders
-            const payhereFailedOrders = await orderCollection
-                .where("paymentMethod", "==", PaymentMethod.IPG)
-                .where("createdAt", "<=", timeFrame)
-                .where("paymentStatus", "in", [PaymentStatus.Failed, PaymentStatus.Pending])
-                .get();
-
-            // Fetch failed COD orders
-            const codFailedOrders = await orderCollection
-                .where("paymentMethod", "==", PaymentMethod.COD)
+            // Fetch failed orders
+            const failedOrders = await orderCollection
                 .where("createdAt", "<=", timeFrame)
                 .where("paymentStatus", "==", PaymentStatus.Failed)
                 .get();
 
-            const allFailedOrders = [...payhereFailedOrders.docs, ...codFailedOrders.docs];
+            const allFailedOrders = [...failedOrders.docs];
 
             if (allFailedOrders.length === 0) {
                 console.log("No failed orders to restock.");
