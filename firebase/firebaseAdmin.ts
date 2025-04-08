@@ -550,7 +550,7 @@ export const getOverview = async (start: Timestamp, end: Timestamp) => {
             .collection('orders')
             .where('createdAt', '>=', start)
             .where('createdAt', '<=', end)
-            .where('paymentStatus', '==', 'Paid');
+            .where('paymentStatus', 'not-in', ["Failed,Refunded"]);
 
         const querySnapshot = await todayOrdersQuery.get();
 
