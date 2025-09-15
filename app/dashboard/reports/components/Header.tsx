@@ -252,12 +252,6 @@ const Header = () => {
                         value={totalProfit}
                     />
                     <HeaderCard
-                        title={"Discount"}
-                        value={totalDiscount}
-                        startDate={new Date(selectedYear, selectedMonth, 1,).toLocaleString()}
-                        endDate={new Date(selectedYear, selectedMonth + 1, 0, 23, 59, 59).toLocaleString()}
-                        isLoading={isLoading} invoices={invoiceCount}/>
-                    <HeaderCard
                         title={"Expenses"}
                         value={totalExpenses}
                         startDate={new Date(selectedYear, selectedMonth, 1,).toLocaleString()}
