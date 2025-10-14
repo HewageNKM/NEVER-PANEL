@@ -42,9 +42,6 @@ const OrderTable = () => {
     const [showItemsForm, setShowItemsForm] = useState(false)
     const [orderItems, setOrderItems] = useState<OrderItem []>([])
 
-    const [showTrackingForm, setShowTrackingForm] = useState(false)
-    const [tracking, setTracking] = useState<Tracking | null>(null)
-
     const [showPaymentStatusForm, setShowPaymentStatusForm] = useState(false)
     const [paymentStatus, setPaymentStatus] = useState(null)
 
@@ -122,7 +119,6 @@ const OrderTable = () => {
                             <TableCell>Customer</TableCell>
                             <TableCell>Method</TableCell>
                             <TableCell>Total</TableCell>
-                            <TableCell>Status</TableCell>
                             <TableCell>Items</TableCell>
                             <TableCell>From</TableCell>
                             <TableCell>Tracking</TableCell>
@@ -205,36 +201,6 @@ const OrderTable = () => {
                                     {order.from}
                                 </TableCell>
                                 <TableCell>
-                                    {order.from == "Store" ? ("Complete") : (order.tracking ? (
-                                            <Box>
-                                                <Typography>{order.tracking.status}</Typography>
-                                                <IconButton onClick={() => {
-                                                    setTracking(order.tracking)
-                                                    setShowTrackingForm(true)
-                                                    dispatch(setSelectedOrder(order))
-                                                }}>
-                                                    <IoInformationCircle color={"blue"} size={25}/>
-                                                </IconButton>
-                                            </Box>
-                                        ) : (
-                                            <Box>
-                                                <Typography>
-                                                    {order.paymentStatus.toLowerCase() == "failed" ? "N/A" : "Processing"}
-                                                </Typography>
-                                                <IconButton
-                                                    disabled={order.paymentStatus.toLowerCase() == "failed"}
-                                                    onClick={() => {
-                                                        setTracking(order.tracking)
-                                                        setShowTrackingForm(true)
-                                                        dispatch(setSelectedOrder(order))
-                                                    }}>
-                                                    {order.paymentStatus.toLowerCase() !== "failed" && (
-                                                        <IoInformationCircle color={"blue"} size={25}/>)}
-                                                </IconButton>
-                                            </Box>)
-                                    )}
-                                </TableCell>
-                                <TableCell>
                                     {order.createdAt}
                                 </TableCell>
                                 <TableCell>
@@ -286,12 +252,6 @@ const OrderTable = () => {
                     setShowItemsForm(false)
                     setOrderItems([])
                 }}
-            />
-            <TrackingFormDialog tracking={tracking} showForm={showTrackingForm} onFormClose={() => {
-                setShowTrackingForm(false)
-                setTracking(null)
-                dispatch(setSelectedOrder(null))
-            }}
             />
             <PaymentStatusFormDialog showForm={showPaymentStatusForm} onClose={() => {
                 setPaymentStatus(null)

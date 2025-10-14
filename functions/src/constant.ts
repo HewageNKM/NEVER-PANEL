@@ -41,6 +41,7 @@ export interface Tracking {
 export enum PaymentMethod {
     IPG = "PAYHERE",
     COD = "COD",
+    KOKO = "KOKO"
 }
 
 export enum PaymentStatus {
