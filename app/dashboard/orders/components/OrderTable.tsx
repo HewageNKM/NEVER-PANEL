@@ -119,9 +119,9 @@ const OrderTable = () => {
                             <TableCell>Customer</TableCell>
                             <TableCell>Method</TableCell>
                             <TableCell>Total</TableCell>
+                            <TableCell>Status</TableCell>
                             <TableCell>Items</TableCell>
                             <TableCell>From</TableCell>
-                            <TableCell>Tracking</TableCell>
                             <TableCell>Created At</TableCell>
                             <TableCell>Action</TableCell>
                         </TableRow>
