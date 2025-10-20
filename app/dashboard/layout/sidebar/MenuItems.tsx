@@ -1,5 +1,13 @@
 import { IoIosApps } from "react-icons/io";
-import { IconShoppingCart, IconReportMoney, IconUsersGroup, IconUser, IconLayoutDashboard, IconList, IconFileInvoice } from "@tabler/icons-react";
+import {
+  IconShoppingCart,
+  IconReportMoney,
+  IconUsersGroup,
+  IconUser,
+  IconLayoutDashboard,
+  IconList,
+  IconFileInvoice,
+} from "@tabler/icons-react";
 import { uniqueId } from "lodash";
 
 const Menuitems = [
@@ -22,10 +30,10 @@ const Menuitems = [
     title: "Master Data",
     icon: IoIosApps,
     children: [
-    //   { id: uniqueId(), title: "Categories", href: "/dashboard/master/categories" },
       { id: uniqueId(), title: "Products", href: "/dashboard/master/products" },
-    //   { id: uniqueId(), title: "Brands", href: "/dashboard/master/brands" },
-    //   { id: uniqueId(), title: "Sizes", href: "/dashboard/master/sizes" },
+      //   { id: uniqueId(), title: "Categories", href: "/dashboard/master/categories" },
+      //   { id: uniqueId(), title: "Brands", href: "/dashboard/master/brands" },
+      //   { id: uniqueId(), title: "Sizes", href: "/dashboard/master/sizes" },
     ],
   },
   {
