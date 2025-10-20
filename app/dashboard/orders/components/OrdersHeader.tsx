@@ -1,161 +1,168 @@
-import React, {useEffect} from 'react';
-import {FormControl, IconButton, InputLabel, MenuItem, Select, Stack, TextField} from '@mui/material';
-import Typography from "@mui/material/Typography";
-import {IoSearchCircle, IoSearchCircleOutline} from "react-icons/io5";
-import {useAppDispatch, useAppSelector} from "@/lib/hooks";
+"use client";
+
+import React, { useEffect } from "react";
 import {
-    getOrders,
-    setLoading,
-    setOrders,
-    setSelectedFilterStatus,
-    setSelectedFilterTracking
+  Stack,
+  Typography,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  TextField,
+  IconButton,
+  Box,
+  Paper,
+} from "@mui/material";
+import { IoSearchCircle } from "react-icons/io5";
+import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { useAppDispatch, useAppSelector } from "@/lib/hooks";
+import {
+  getOrders,
+  setLoading,
+  setOrders,
+  setSelectedFilterStatus,
+  setSelectedFilterTracking,
 } from "@/lib/ordersSlice/ordersSlice";
-import {getAlgoliaClient} from "@/lib/algoliaConfig";
-import {DatePicker} from '@mui/x-date-pickers/DatePicker';
-import {LocalizationProvider} from '@mui/x-date-pickers';
-import {AdapterDayjs} from "@mui/x-date-pickers/AdapterDayjs";
-import {getOrdersByDateAction} from "@/actions/ordersActions";
-import {paymentStatusList} from "@/constant";
-import {useSnackbar} from "@/contexts/SnackBarContext";
+import { getAlgoliaClient } from "@/lib/algoliaConfig";
+import { getOrdersByDateAction } from "@/actions/ordersActions";
+import { paymentStatusList } from "@/constant";
+import { useSnackbar } from "@/contexts/SnackBarContext";
 
 const OrdersHeader = () => {
-    const dispatch = useAppDispatch();
-    const {currentUser} = useAppSelector(state => state.authSlice);
-    const {
-        selectedPage,
-        size,
-        selectedFilterStatus,
-        selectedFilterTracking
-    } = useAppSelector(state => state.ordersSlice);
-    const {showNotification} = useSnackbar();
-    const onSearch = async (evt) => {
-        try {
-            dispatch(setLoading(true))
-            evt.preventDefault();
-            const search = evt.target.search.value;
-            const client = getAlgoliaClient();
-            const searchResults = await client.search({
-                requests: [{indexName: "orders_index", query: search}]
-            });
-            const getDate = (date) => {
-                return new Date(date).toLocaleString()
-            }
-            const orders = searchResults.results[0].hits.map(order => {
-                return {
-                    ...order,
-                    createdAt: getDate(order.createdAt)
-                }
-            })
-            dispatch(setOrders(orders))
-        } catch (e) {
-            showNotification(e.message, "error")
-            console.error(e)
-        } finally {
-            dispatch(setLoading(false))
-        }
-    }
-    const onDatePick = async (date) => {
-        try {
-            dispatch(setLoading(true))
-            if (date) {
-                const d = date.toDate().toLocaleString()
-                const orders = await getOrdersByDateAction(d);
-                dispatch(setOrders(orders))
-            }
-        } catch (e) {
-            console.error(e)
-            showNotification(e.message, "error")
-        } finally {
-            dispatch(setLoading(false))
-        }
-    }
+  const dispatch = useAppDispatch();
+  const { currentUser } = useAppSelector((state) => state.authSlice);
+  const {
+    selectedPage,
+    size,
+    selectedFilterStatus,
+    selectedFilterTracking,
+  } = useAppSelector((state) => state.ordersSlice);
+  const { showNotification } = useSnackbar();
 
-    useEffect(() => {
-        if (currentUser) {
-            dispatch(getOrders({size, page: selectedPage}))
-        }
-    }, [currentUser, selectedFilterTracking, selectedFilterStatus]);
-    return (
-        <Stack direction="column" spacing={2} alignItems="start" flexWrap={"wrap"} justifyContent="space-between" p={2}>
-            <Stack>
-                <Stack>
-                    <Typography
-                        variant={"h5"}
-                    >
-                        Options
-                    </Typography>
-                </Stack>
-                <Stack direction="row" spacing={5} alignItems="center" justifyContent="space-between" py={2}
-                       flexWrap={"wrap"}>
-                    <Stack direction="row" spacing={2} alignItems="center">
-                        <FormControl variant="outlined" size="small">
-                            <InputLabel id="Status-label">Status</InputLabel>
-                            <Select
-                                placeholder={"Status"}
-                                labelId="Status-label"
-                                label="Status"
-                                value={selectedFilterStatus}
-                                onChange={(e) => dispatch(setSelectedFilterStatus(e.target.value))}
-                                defaultValue="all"
-                            >
-                                <MenuItem value={"all"} key="all">All</MenuItem>
-                                {paymentStatusList.map((status) => (
-                                    <MenuItem
-                                        key={status.id}
-                                        value={status.value}
-                                    >
-                                        {status.name}
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
-                        {/* Filter Dropdown */}
-                        <FormControl variant="outlined" size="small">
-                            <InputLabel id="Tracking-label">Track</InputLabel>
-                            <Select
-                                placeholder={"Track"}
-                                labelId="Track-label"
-                                label="Track"
-                                value={selectedFilterTracking}
-                                onChange={(e) => dispatch(setSelectedFilterTracking(e.target.value))}
-                                defaultValue="all" // Ensure a default value is set
-                            >
-                                <MenuItem value={"all"} key="all">All</MenuItem>
-                                <MenuItem value="processing">Processing</MenuItem>
-                                <MenuItem value="shipped">Shipped</MenuItem>
-                                <MenuItem value="complete">Complete</MenuItem>
-                            </Select>
-                        </FormControl>
-                    </Stack>
-                    <Stack direction="row" spacing={1} alignItems="center" flexWrap={"wrap"}>
-                        {/* Search TextField */}
-                        <form onSubmit={onSearch}>
-                            <Stack display={"flex"} direction={"row"} flexWrap={"wrap"} alignItems={"center"}>
-                                <TextField
-                                    variant="outlined"
-                                    size="small"
-                                    placeholder="Search orders..."
-                                    name={"search"}
-                                />
-                                <IconButton color="primary"
-                                            type={"submit"}
-                                >
-                                    <IoSearchCircle size={30}/>
-                                </IconButton>
-                            </Stack>
-                        </form>
-                    </Stack>
-                    <LocalizationProvider dateAdapter={AdapterDayjs}>
-                        <DatePicker
-                            label="Date"
-                            onChange={onDatePick}
-                            renderInput={(params) => <TextField {...params} />}
-                        />
-                    </LocalizationProvider>
-                </Stack>
-            </Stack>
+  // --- Search handler ---
+  const onSearch = async (evt: React.FormEvent<HTMLFormElement>) => {
+    evt.preventDefault();
+    try {
+      dispatch(setLoading(true));
+      const search = (evt.currentTarget as any).search.value;
+      const client = getAlgoliaClient();
+      const searchResults = await client.search({
+        requests: [{ indexName: "orders_index", query: search }],
+      });
+      const orders = searchResults.results[0].hits.map((order: any) => ({
+        ...order,
+        createdAt: new Date(order.createdAt).toLocaleString(),
+      }));
+      dispatch(setOrders(orders));
+    } catch (err: any) {
+      console.error(err);
+      showNotification(err.message, "error");
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
+
+  // --- Date filter handler ---
+  const onDatePick = async (date: any) => {
+    try {
+      dispatch(setLoading(true));
+      if (date) {
+        const d = date.toDate().toLocaleString();
+        const orders = await getOrdersByDateAction(d);
+        dispatch(setOrders(orders));
+      }
+    } catch (err: any) {
+      console.error(err);
+      showNotification(err.message, "error");
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
+
+  useEffect(() => {
+    if (currentUser) {
+      dispatch(getOrders({ size, page: selectedPage }));
+    }
+  }, [currentUser, selectedFilterTracking, selectedFilterStatus]);
+
+  return (
+    <Paper sx={{ p: 3, mb: 3 }} elevation={2}>
+      <Stack spacing={3}>
+        <Typography variant="h5" fontWeight={600}>
+          Orders Management
+        </Typography>
+
+        <Stack
+          direction={{ xs: "column", sm: "row" }}
+          spacing={2}
+          alignItems="center"
+          justifyContent="space-between"
+          flexWrap="wrap"
+        >
+          {/* Filters */}
+          <Stack direction="row" spacing={2} flexWrap="wrap">
+            {/* Status Filter */}
+            <FormControl size="small" sx={{ minWidth: 140 }}>
+              <InputLabel>Status</InputLabel>
+              <Select
+                value={selectedFilterStatus}
+                label="Status"
+                onChange={(e) =>
+                  dispatch(setSelectedFilterStatus(e.target.value))
+                }
+              >
+                <MenuItem value="all">All</MenuItem>
+                {paymentStatusList.map((status) => (
+                  <MenuItem key={status.id} value={status.value}>
+                    {status.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            {/* Tracking Filter */}
+            <FormControl size="small" sx={{ minWidth: 140 }}>
+              <InputLabel>Track</InputLabel>
+              <Select
+                value={selectedFilterTracking}
+                label="Track"
+                onChange={(e) =>
+                  dispatch(setSelectedFilterTracking(e.target.value))
+                }
+              >
+                <MenuItem value="all">All</MenuItem>
+                <MenuItem value="processing">Processing</MenuItem>
+                <MenuItem value="shipped">Shipped</MenuItem>
+                <MenuItem value="complete">Complete</MenuItem>
+              </Select>
+            </FormControl>
+          </Stack>
+
+          {/* Search */}
+          <Box component="form" onSubmit={onSearch} display="flex" gap={1}>
+            <TextField
+              size="small"
+              placeholder="Search orders..."
+              name="search"
+            />
+            <IconButton color="primary" type="submit">
+              <IoSearchCircle size={28} />
+            </IconButton>
+          </Box>
+
+          {/* Date Picker */}
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DatePicker
+              label="Filter by Date"
+              onChange={onDatePick}
+              renderInput={(params) => <TextField size="small" {...params} />}
+            />
+          </LocalizationProvider>
         </Stack>
-    );
+      </Stack>
+    </Paper>
+  );
 };
 
 export default OrdersHeader;

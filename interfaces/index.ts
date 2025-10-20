@@ -102,12 +102,11 @@ export interface Order {
     paymentMethod: string,
     shippingFee?: number,
     fee?: number,
-    customer: Customer,
+    customer?: Customer,
     discount: number,
     from: string,
     paymentReceived?: Payment[],
 
-    tracking: Tracking | null,
     createdAt: Timestamp | string,
     updatedAt: Timestamp | string,
 }
@@ -131,6 +130,13 @@ export interface Customer {
     address: string;
     city: string;
     zip: string;
+
+    shippingName?: string;
+    shippingAddress?: string;
+    shippingCity?: string;
+    shippingZip?: string;
+    shippingPhone?: string;
+
 
     createdAt: Timestamp | string,
     updatedAt: Timestamp | string,

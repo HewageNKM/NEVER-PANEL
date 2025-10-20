@@ -57,21 +57,3 @@ export const updateAOrderAction = async (order: Order) => {
         )
     }
 }
-
-export const deleteOrderAction = async (id: string) => {
-    try {
-        const token = await getToken();
-        const response = await axios({
-            method: 'DELETE',
-            url: `/api/v1/orders/${id}`,
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        });
-        return response.data;
-    } catch (e) {
-        throw new Error(
-            e.response ? e.response.data.message : e.message
-        )
-    }
-}

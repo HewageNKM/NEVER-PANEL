@@ -101,32 +101,41 @@ export const getInventoryItems = async (pageNumber: number = 1, size: number = 2
     }
 };
 
-export const getOrder = async (orderId: string) => {
-    try {
-        const orderDoc = await adminFirestore.collection('orders').doc(orderId).get();
-        if (!orderDoc.exists) {
-            console.warn(`Order with ID ${orderId} not found`);
-            return null;
-        }
-        return {
-            ...orderDoc.data(),
-            customer: orderDoc.data()?.customer ? {
-                ...orderDoc.data()?.customer,
-                createdAt: orderDoc.data()?.customer.createdAt.toDate().toLocaleString(),
-                updatedAt: orderDoc.data()?.customer.updatedAt.toDate().toLocaleString(),
-            } : null,
-            tracking: orderDoc.data()?.tracking ? {
-                ...orderDoc.data()?.tracking,
-                updatedAt: orderDoc.data()?.tracking.updatedAt.toDate().toLocaleString(),
-            } : null,
-            createdAt: orderDoc.data()?.createdAt.toDate().toLocaleString(),
-            updatedAt: orderDoc.data()?.updatedAt.toDate().toLocaleString(),
-        } as Order;
+export const getOrder = async (orderId: string): Promise<Order | null> => {
+  try {
+    const snapshot = await adminFirestore
+      .collection("orders")
+      .where("orderId", "==", orderId)
+      .limit(1)
+      .get();
 
-    } catch (error: any) {
-        console.error(error);
-        throw error
+    // Check if no document found
+    if (snapshot.empty) {
+      console.warn(`Order with ID ${orderId} not found`);
+      return null;
     }
+
+    // Extract the first document
+    const doc = snapshot.docs[0];
+    const data = doc.data();
+
+    // Convert timestamps to readable strings
+    return {
+      ...data,
+      customer: data.customer
+        ? {
+            ...data.customer,
+            createdAt: data.customer.createdAt?.toDate().toLocaleString() ?? "",
+            updatedAt: data.customer.updatedAt?.toDate().toLocaleString() ?? "",
+          }
+        : null,
+      createdAt: data.createdAt?.toDate().toLocaleString() ?? "",
+      updatedAt: data.updatedAt?.toDate().toLocaleString() ?? "",
+    } as Order;
+  } catch (error) {
+    console.error("Error fetching order:", error);
+    throw error;
+  }
 };
 
 export const getItemById = async (itemId: string) => {
