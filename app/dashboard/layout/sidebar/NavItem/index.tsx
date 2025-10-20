@@ -1,39 +1,28 @@
-import React from "react";
-// mui imports
+import React, { useState } from "react";
 import {
-  ListItemIcon,
   ListItem,
-  List,
-  styled,
+  ListItemIcon,
   ListItemText,
-  useTheme,
   ListItemButton,
+  Collapse,
+  styled,
+  useTheme,
+  List,
 } from "@mui/material";
 import Link from "next/link";
+import { IconChevronDown, IconChevronUp } from "@tabler/icons-react";
 
-type NavGroup = {
-  [x: string]: any;
-  id?: string;
-  navlabel?: boolean;
-  subheader?: string;
-  title?: string;
-  icon?: any;
-  href?: any;
-  onClick?: React.MouseEvent<HTMLButtonElement, MouseEvent>;
-};
-
-interface ItemType {
-  item: NavGroup;
-  onClick: (event: React.MouseEvent<HTMLElement>) => void;
-  hideMenu?: any;
-  level?: number | any;
+interface NavItemProps {
+  item: any;
+  level?: number;
   pathDirect: string;
+  onClick: () => void;
 }
 
-const NavItem = ({ item, level, pathDirect, onClick }: ItemType) => {
-  const Icon = item.icon;
+const NavItem = ({ item, level = 1, pathDirect, onClick }: NavItemProps) => {
   const theme = useTheme();
-  const itemIcon = <Icon stroke={1.5} size="1.3rem" />;
+  const [open, setOpen] = useState(false);
+  const Icon = item.icon;
 
   const ListItemStyled = styled(ListItem)(() => ({
     padding: 0,
@@ -44,7 +33,7 @@ const NavItem = ({ item, level, pathDirect, onClick }: ItemType) => {
       borderRadius: "8px",
       backgroundColor: level > 1 ? "transparent !important" : "inherit",
       color: theme.palette.text.secondary,
-      paddingLeft: "10px",
+      paddingLeft: `${level * 16}px`,
       "&:hover": {
         backgroundColor: theme.palette.primary.light,
         color: theme.palette.primary.main,
@@ -60,31 +49,46 @@ const NavItem = ({ item, level, pathDirect, onClick }: ItemType) => {
     },
   }));
 
+  const hasChildren = Array.isArray(item.children) && item.children.length > 0;
+
   return (
-    <List component="div" disablePadding key={item.id}>
+    <List component="div" disablePadding>
       <ListItemStyled>
         <ListItemButton
-          component={Link}
-          href={item.href}
-          disabled={item.disabled}
+          component={item.href ? Link : "button"}
+          href={item.href || undefined}
           selected={pathDirect === item.href}
-          target={item.external ? "_blank" : ""}
-          onClick={onClick}
+          onClick={() => {
+            if (hasChildren) setOpen(!open);
+            onClick();
+          }}
         >
-          <ListItemIcon
-            sx={{
-              minWidth: "36px",
-              p: "3px 0",
-              color: "inherit",
-            }}
-          >
-            {itemIcon}
-          </ListItemIcon>
-          <ListItemText>
-            <>{item.title}</>
-          </ListItemText>
+          {item.icon && (
+            <ListItemIcon sx={{ minWidth: 36, p: "3px 0", color: "inherit" }}>
+              <Icon stroke={1.5} size="1.3rem" />
+            </ListItemIcon>
+          )}
+          <ListItemText>{item.title}</ListItemText>
+          {hasChildren &&
+            (open ? <IconChevronUp size={16} /> : <IconChevronDown size={16} />)}
         </ListItemButton>
       </ListItemStyled>
+
+      {hasChildren && (
+        <Collapse in={open} timeout="auto" unmountOnExit>
+          <List component="div" disablePadding>
+            {item.children.map((child: any) => (
+              <NavItem
+                key={child.id}
+                item={child}
+                level={level + 1}
+                pathDirect={pathDirect}
+                onClick={onClick}
+              />
+            ))}
+          </List>
+        </Collapse>
+      )}
     </List>
   );
 };
