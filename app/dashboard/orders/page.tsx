@@ -14,7 +14,8 @@ const Orders = () => {
                     padding: 1,
                     display: "flex",
                     flexDirection: "column",
-                    gap: 3
+                    gap: 3,
+                    maxWidth:"70vw"
                 }}>
                     <OrdersHeader />
                     <OrderTable />

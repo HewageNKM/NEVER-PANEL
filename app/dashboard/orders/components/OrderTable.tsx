@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import {
   Box,
   IconButton,
@@ -41,6 +41,10 @@ const OrderTable = () => {
     router.push(`/dashboard/orders/${orderId}`);
   };
 
+  useEffect(() => {
+    dispatch(getOrders({ size, page: selectedPage }));
+  }, [size, selectedPage])
+
   return (
     <Stack spacing={4}>
       {/* Header */}
@@ -67,7 +71,6 @@ const OrderTable = () => {
         sx={{
           borderRadius: 2,
           boxShadow: 1,
-          maxHeight: 500,
           overflowX: "auto",
           position: "relative",
         }}
@@ -75,7 +78,6 @@ const OrderTable = () => {
         <Table
           stickyHeader 
           sx={{
-            minWidth: 900,
             "& thead": {
               backgroundColor: "grey.100",
               "& th": {

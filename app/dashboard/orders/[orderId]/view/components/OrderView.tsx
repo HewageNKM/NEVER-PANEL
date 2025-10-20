@@ -348,7 +348,7 @@ const OrderView = ({ orderId }: { orderId: string }) => {
 
         {/* 💳 Payments */}
         {order?.paymentReceived && order.paymentReceived.length > 0 && (
-          <Card variant="outlined" className="shadow-sm border border-gray-100">
+          <Card variant="outlined" className="shadow-sm">
             <CardContent>
               <Typography
                 variant="h6"
@@ -360,23 +360,19 @@ const OrderView = ({ orderId }: { orderId: string }) => {
               <TableContainer component={Paper} variant="outlined">
                 <Table
                   size="small"
-                  sx={{ border: "1px solid rgba(224, 224, 224, 1)" }}
                 >
                   <TableHead className="bg-gray-50">
                     <TableRow>
                       <TableCell
-                        sx={{ borderRight: "1px solid rgba(224, 224, 224, 1)" }}
                       >
                         Payment ID
                       </TableCell>
                       <TableCell
-                        sx={{ borderRight: "1px solid rgba(224, 224, 224, 1)" }}
                       >
                         Method
                       </TableCell>
                       <TableCell
                         align="right"
-                        sx={{ borderRight: "1px solid rgba(224, 224, 224, 1)" }}
                       >
                         Amount
                       </TableCell>
@@ -387,24 +383,15 @@ const OrderView = ({ orderId }: { orderId: string }) => {
                     {order.paymentReceived.map((p) => (
                       <TableRow key={p.id} hover>
                         <TableCell
-                          sx={{
-                            borderRight: "1px solid rgba(224, 224, 224, 1)",
-                          }}
                         >
                           {p.id}
                         </TableCell>
                         <TableCell
-                          sx={{
-                            borderRight: "1px solid rgba(224, 224, 224, 1)",
-                          }}
                         >
                           {p.paymentMethod}
                         </TableCell>
                         <TableCell
                           align="right"
-                          sx={{
-                            borderRight: "1px solid rgba(224, 224, 224, 1)",
-                          }}
                         >
                           Rs.{p.amount.toFixed(2)}
                         </TableCell>
