@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import {Box, Button, Grid, Stack} from "@mui/material";
-import VariantCard from "@/app/dashboard/inventory/[itemId]/components/VariantCard";
+import VariantCard from "@/app/dashboard/master/products/[itemId]/components/VariantCard";
 import Typography from "@mui/material/Typography";
 import EmptyState from "@/app/components/EmptyState";
 import AddIcon from '@mui/icons-material/Add';

@@ -3,12 +3,12 @@ import React, {useEffect} from 'react';
 import DashboardCard from "@/app/dashboard/components/shared/DashboardCard";
 import PageContainer from "@/app/dashboard/components/container/PageContainer";
 import {Stack} from "@mui/material";
-import Hero from "@/app/dashboard/inventory/[itemId]/components/Hero";
-import Variants from "@/app/dashboard/inventory/[itemId]/components/Variants";
+import Hero from "@/app/dashboard/master/products/[itemId]/components/Hero";
+import Variants from "@/app/dashboard/master/products/[itemId]/components/Variants";
 import {useParams} from "next/navigation";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import {fetchAItemAction} from "@/actions/inventoryActions";
-import VariantFormDialog from "@/app/dashboard/inventory/[itemId]/components/VariantFormDialog";
+import VariantFormDialog from "@/app/dashboard/master/products/[itemId]/components/VariantFormDialog";
 import {setItem} from "@/lib/itemDetailsSlice/itemDetailsSlice";
 
 const Page = () => {

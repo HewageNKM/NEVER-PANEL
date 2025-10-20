@@ -1,6 +1,6 @@
 "use client";
-import PageContainer from "../components/container/PageContainer";
-import DashboardCard from "../components/shared/DashboardCard";
+import PageContainer from "../../components/container/PageContainer";
+import DashboardCard from "../../components/shared/DashboardCard";
 import {
   Box,
   Button,
@@ -13,10 +13,10 @@ import {
 import React, { useEffect } from "react";
 import { Item } from "@/interfaces";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
-import ItemCard from "@/app/dashboard/inventory/components/ItemCard";
+import ItemCard from "@/app/dashboard/master/products/components/ItemCard";
 import { IoRefresh } from "react-icons/io5";
 import EmptyState from "@/app/components/EmptyState";
-import Header from "@/app/dashboard/inventory/components/Header";
+import Header from "@/app/dashboard/master/products/components/Header";
 import {
   getInventoryItems,
   setPage,
@@ -24,7 +24,7 @@ import {
   setShowEditingForm,
   setSize,
 } from "@/lib/inventorySlice/inventorySlice";
-import ItemFormDialog from "@/app/dashboard/inventory/components/ItemFormDialog";
+import ItemFormDialog from "@/app/dashboard/master/products/components/ItemFormDialog";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
 
 const Page = () => {
