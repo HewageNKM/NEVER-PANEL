@@ -67,11 +67,13 @@ const OrderTable = () => {
         sx={{
           borderRadius: 2,
           boxShadow: 1,
+          maxHeight: 500,
+          overflowX: "auto",
           position: "relative",
-          overflow: "hidden",
         }}
       >
         <Table
+          stickyHeader 
           sx={{
             minWidth: 900,
             "& thead": {
@@ -96,6 +98,7 @@ const OrderTable = () => {
               <TableCell>Total</TableCell>
               <TableCell>Items</TableCell>
               <TableCell>From</TableCell>
+              <TableCell>Status</TableCell>
               <TableCell>Created At</TableCell>
               <TableCell align="center">Actions</TableCell>
             </TableRow>
@@ -133,6 +136,18 @@ const OrderTable = () => {
                 </TableCell>
                 <TableCell>{order.items.length}</TableCell>
                 <TableCell>{order.from}</TableCell>
+                <TableCell>
+                  <Chip
+                    label={order?.status?.toUpperCase() || "UNKNOWN"}
+                    color={
+                      order?.status?.toLowerCase() === "complete"
+                        ? "success"
+                        : order?.status?.toLowerCase() === "processing"
+                        ? "warning"
+                        : "default"
+                    }
+                  />
+                </TableCell>
                 <TableCell>{order.createdAt}</TableCell>
                 <TableCell align="center">
                   <Stack direction="row" spacing={1} justifyContent="center">
