@@ -13,7 +13,7 @@ import {
     TextField,
     Typography
 } from "@mui/material";
-import {PaymentMethod} from "@/interfaces";
+import {PaymentMethod} from "@/model";
 import {createPaymentMethodAction, updatePaymentMethodAction} from "@/actions/paymentMethodActions";
 import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch, RootState} from "@/lib/store";

@@ -15,7 +15,7 @@ import {
 import {IoAdd, IoPencil, IoRefreshOutline} from "react-icons/io5";
 import EmptyState from "@/app/components/EmptyState";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
-import {PaymentMethod} from "@/interfaces";
+import {PaymentMethod} from "@/model";
 import {useDispatch, useSelector} from "react-redux";
 import {AppDispatch, RootState} from "@/lib/store";
 import {getPayments, setSelectedPayment} from '@/lib/ordersSlice/ordersSlice';

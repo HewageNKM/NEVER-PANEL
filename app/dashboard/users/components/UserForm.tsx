@@ -4,7 +4,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import DialogContent from "@mui/material/DialogContent";
 import {Button, FormControl, InputLabel, MenuItem, Select, Stack, TextField} from "@mui/material";
 import DialogActions from "@mui/material/DialogActions";
-import {User} from "@/interfaces";
+import {User} from "@/model";
 import {addNewUserAction, updateUserByIdAction} from "@/actions/usersActions";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import {getAllUsers} from '@/lib/usersSlice/usersSlice';

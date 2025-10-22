@@ -1,6 +1,6 @@
 import {NextResponse} from "next/server";
 import {addNewExpense, authorizeRequest, getAllExpenses, getAllExpensesByDate} from "@/firebase/firebaseAdmin";
-import { Expense } from "@/interfaces";
+import { Expense } from "@/model";
 
 export const POST = async (req: Request) => {
     try {

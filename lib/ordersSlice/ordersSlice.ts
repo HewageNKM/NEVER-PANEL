@@ -1,4 +1,4 @@
-import {Customer, Order, PaymentMethod, Tracking} from "@/interfaces";
+import {Customer, Order, PaymentMethod, Tracking} from "@/model";
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {fetchOrdersAction} from "@/actions/ordersActions";
 import {getAllPaymentMethodAction} from "@/actions/paymentMethodActions";

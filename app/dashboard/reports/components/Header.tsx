@@ -8,7 +8,7 @@ import {useAppSelector} from "@/lib/hooks";
 import SaleReport from "@/app/dashboard/reports/components/SaleReport";
 import {getCashReportAction, getExpenseReportAction, getMonthlyOverviewAction, getSalesReportAction, getStocksReportAction} from "@/actions/reportsActions";
 import StockReport from "@/app/dashboard/reports/components/StockReport";
-import {SalesReport} from "@/interfaces";
+import {SalesReport} from "@/model";
 import CashStatementReport from "@/app/dashboard/reports/components/CashStatementReport";
 import ExpenseReport from "@/app/dashboard/reports/components/ExpenseReport";
 import {useSnackbar} from "@/contexts/SnackBarContext";

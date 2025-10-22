@@ -22,7 +22,7 @@ import {
 import Button from "@mui/material/Button";
 import {useSnackbar} from "@/contexts/SnackBarContext";
 import {sendSMSAction} from "@/actions/emailAndSMSActions";
-import {SMS} from "@/interfaces";
+import {SMS} from "@/model";
 import {smsTemplates} from "@/constant";
 import {IoRefreshOutline} from "react-icons/io5";
 import EmptyState from "@/app/components/EmptyState";

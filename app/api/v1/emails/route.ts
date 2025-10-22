@@ -1,6 +1,6 @@
 import {NextResponse} from "next/server";
 import {authorizeRequest, fetchAllEmails, sendEmail} from "@/firebase/firebaseAdmin";
-import {Email} from "@/interfaces";
+import {Email} from "@/model";
 
 export const GET = async (req: Request) => {
     try {

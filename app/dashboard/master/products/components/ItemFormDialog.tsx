@@ -21,7 +21,7 @@ import {genders, types} from "@/constant";
 import {IoCloudUpload} from "react-icons/io5";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import {setItems, setSelectedItem, setShowEditingForm} from "@/lib/inventorySlice/inventorySlice";
-import {Item} from "@/interfaces";
+import {Item} from "@/model";
 import {generateId} from "@/utils/Generate";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
 import {addAItem, deleteAFileAction, updateAItemAction, uploadAFileAction} from '@/actions/inventoryActions';

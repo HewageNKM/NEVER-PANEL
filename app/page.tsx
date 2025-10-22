@@ -10,7 +10,7 @@ import {useRouter} from "next/navigation";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
 import {setUser} from "@/lib/authSlice/authSlice";
 import {useEffect, useState} from "react";
-import {User} from "@/interfaces";
+import {User} from "@/model";
 import {useSnackbar} from "@/contexts/SnackBarContext";
 
 const Login = () => {

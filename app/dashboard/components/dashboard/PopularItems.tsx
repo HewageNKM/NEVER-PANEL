@@ -1,4 +1,4 @@
-import {PopularItem} from "@/interfaces";
+import {PopularItem} from "@/model";
 import {Box, CircularProgress, Grid, IconButton, MenuItem, Select, Stack, Typography,} from "@mui/material";
 import {useEffect, useState} from "react";
 import {useAppSelector} from "@/lib/hooks";

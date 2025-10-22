@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { Item } from "@/interfaces";
+import { Item } from "@/model";
 import {
   Box,
   Card,

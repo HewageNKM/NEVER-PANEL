@@ -8,7 +8,7 @@ import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import {SalesReport} from "@/interfaces";
+import {SalesReport} from "@/model";
 import {Stack, Typography} from "@mui/material";
 
 interface SaleReportProps {

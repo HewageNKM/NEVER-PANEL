@@ -1,6 +1,6 @@
 import {getToken} from "@/firebase/firebaseClient";
 import axios from "axios";
-import {Order} from "@/interfaces";
+import {Order} from "@/model";
 
 export const fetchOrdersAction = async (page: number, size: number) => {
     try {

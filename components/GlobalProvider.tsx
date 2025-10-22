@@ -6,7 +6,7 @@ import {onAuthStateChanged} from "@firebase/auth";
 import {auth} from "@/firebase/firebaseClient";
 import {checkUserAction} from "@/actions/authActions";
 import {useRouter} from "next/navigation";
-import {User} from "@/interfaces";
+import {User} from "@/model";
 
 const GlobalProvider = ({children}: { children: ReactNode }) => {
     const dispatch = useDispatch();

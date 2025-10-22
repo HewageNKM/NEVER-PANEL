@@ -1,6 +1,6 @@
 import {authorizeRequest, updatePaymentMethod} from "@/firebase/firebaseAdmin";
 import {NextResponse} from "next/server";
-import {PaymentMethod} from "@/interfaces";
+import {PaymentMethod} from "@/model";
 
 export const PUT = async (req: Request) => {
     try {

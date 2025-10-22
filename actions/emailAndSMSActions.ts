@@ -1,6 +1,6 @@
 import {getToken} from "@/firebase/firebaseClient";
 import axios from "axios";
-import {Email, SMS} from "@/interfaces";
+import {Email, SMS} from "@/model";
 
 export const getAllEmailsAction = async (page: number, size: number) => {
     try {

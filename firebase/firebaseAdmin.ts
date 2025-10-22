@@ -12,10 +12,10 @@ import {
     SMS,
     StocksReport,
     User
-} from "@/interfaces";
+} from "@/model";
 import {uuidv4} from "@firebase/util";
 import {Timestamp} from "firebase-admin/firestore";
-import {generateRandomPassword, getSMSId, hashPassword} from "@/utils/Generate";
+import {generateRandomPassword, hashPassword} from "@/utils/Generate";
 import axios from "axios";
 
 if (!admin.apps.length) {
@@ -28,9 +28,9 @@ if (!admin.apps.length) {
     });
 }
 
-const adminFirestore = admin.firestore();
-const adminAuth = admin.auth();
-const adminStorageBucket = admin.storage().bucket(process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET);
+export const adminFirestore = admin.firestore();
+export const adminAuth = admin.auth();
+export const adminStorageBucket = admin.storage().bucket(process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET);
 
 
 export const getOrders = async (pageNumber: number = 1, size: number = 20) => {

@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+// Import React to use React.Fragment
+import React, { useState } from "react"; 
 import {
   ListItem,
   ListItemIcon,
@@ -21,7 +22,15 @@ interface NavItemProps {
 
 const NavItem = ({ item, level = 1, pathDirect, onClick }: NavItemProps) => {
   const theme = useTheme();
-  const [open, setOpen] = useState(false);
+  const hasChildren = Array.isArray(item.children) && item.children.length > 0;
+
+  const isChildActive = hasChildren
+    ? item.children.some(
+        (child: any) => child.href && pathDirect.startsWith(child.href)
+      )
+    : false;
+
+  const [open, setOpen] = useState(isChildActive);
   const Icon = item.icon;
 
   const ListItemStyled = styled(ListItem)(() => ({
@@ -49,18 +58,21 @@ const NavItem = ({ item, level = 1, pathDirect, onClick }: NavItemProps) => {
     },
   }));
 
-  const hasChildren = Array.isArray(item.children) && item.children.length > 0;
+  const isSelected =
+    (level === 1 && pathDirect === item.href) ||
+    (level > 1 && item.href && pathDirect.startsWith(item.href));
 
   return (
-    <List component="div" disablePadding>
+    // --- FIX: Changed from <List> to <React.Fragment> ---
+    <React.Fragment>
       <ListItemStyled>
         <ListItemButton
           component={item.href ? Link : "button"}
           href={item.href || undefined}
-          selected={pathDirect === item.href}
+          selected={isSelected}
           onClick={() => {
             if (hasChildren) setOpen(!open);
-            onClick();
+            if (onClick) onClick();
           }}
         >
           {item.icon && (
@@ -89,7 +101,7 @@ const NavItem = ({ item, level = 1, pathDirect, onClick }: NavItemProps) => {
           </List>
         </Collapse>
       )}
-    </List>
+    </React.Fragment>
   );
 };
 

@@ -9,7 +9,7 @@ import TableCell from "@mui/material/TableCell";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
 import { Stack, Typography } from "@mui/material";
-import { ExpensesReport } from "@/interfaces";
+import { ExpensesReport } from "@/model";
 
 const ExpenseReport = ({
                            setShow,

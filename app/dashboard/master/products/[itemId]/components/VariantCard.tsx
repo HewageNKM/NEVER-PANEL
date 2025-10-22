@@ -1,7 +1,7 @@
 "use client"
 import React, {useState} from "react";
 import {Box, Button, Card, CardActions, CardContent, Stack, Typography} from "@mui/material";
-import {Item, Variant} from "@/interfaces";
+import {Item, Variant} from "@/model";
 import "swiper/css";
 import ImageSlider from "@/app/dashboard/master/products/[itemId]/components/ImageSlider";
 import ConfirmationDialog from "@/components/ConfirmationDialog";

@@ -1,4 +1,4 @@
-import {Expense} from "@/interfaces";
+import {Expense} from "@/model";
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
 import {getAllExpensesAction, getAllExpensesByDateAction} from "@/actions/expenseActions";
 

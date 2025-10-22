@@ -19,7 +19,7 @@ import {
 import { Breadcrumbs, Link } from "@mui/material";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import { useRouter } from "next/navigation";
-import { Order } from "@/interfaces";
+import { Order } from "@/model";
 import Image from "next/image";
 import axios from "axios";
 import { getToken } from "@/firebase/firebaseClient";

@@ -1,4 +1,4 @@
-import {Item, Variant} from "@/interfaces";
+import {Item, Variant} from "@/model";
 import {createSlice} from "@reduxjs/toolkit";
 
 interface ItemDetailsSlice {

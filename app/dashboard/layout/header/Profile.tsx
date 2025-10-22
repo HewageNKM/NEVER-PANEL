@@ -6,7 +6,7 @@ import {clearUser} from "@/lib/authSlice/authSlice";
 import {useRouter} from "next/navigation";
 import {auth} from "@/firebase/firebaseClient";
 import {IoPowerOutline} from "react-icons/io5";
-import {User} from "@/interfaces";
+import {User} from "@/model";
 import {useSnackbar} from "@/contexts/SnackBarContext";
 
 const Profile = () => {

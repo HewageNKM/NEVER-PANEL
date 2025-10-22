@@ -16,7 +16,7 @@ import {$generateHtmlFromNodes} from "@lexical/html";
 import {useLexicalComposerContext} from "@lexical/react/LexicalComposerContext";
 import ToolbarPlugin from "./Toolbarplugin";
 import {sendEmailAction} from "@/actions/emailAndSMSActions";
-import {Email} from "@/interfaces";
+import {Email} from "@/model";
 
 const EmailForm = ({open, onClose}: { open: boolean; onClose: () => void }) => {
     const {showNotification} = useSnackbar();

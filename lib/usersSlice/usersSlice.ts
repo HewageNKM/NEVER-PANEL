@@ -1,4 +1,4 @@
-import {User} from "@/interfaces";
+import {User} from "@/model";
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
 import {getUsersAction} from "@/actions/usersActions";
 

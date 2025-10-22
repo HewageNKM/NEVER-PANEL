@@ -1,4 +1,4 @@
-import {Item} from "@/interfaces";
+import {Item} from "@/model";
 import {createAsyncThunk, createSlice, PayloadAction} from "@reduxjs/toolkit";
 import {fetchInventoryAction} from "@/actions/inventoryActions";
 

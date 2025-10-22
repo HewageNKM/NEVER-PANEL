@@ -20,7 +20,7 @@ import {useAppDispatch, useAppSelector} from "@/lib/hooks";
 import {accessoriesSizesList, shoeSizesList} from "@/constant";
 import {setItem, setSelectedVariant, setShowEditingForm} from "@/lib/itemDetailsSlice/itemDetailsSlice";
 import DeleteIcon from "@mui/icons-material/Delete";
-import {Img, Item, Size, Variant} from "@/interfaces";
+import {Img, Item, Size, Variant} from "@/model";
 import Image from "next/image";
 import {IoCloudUpload, IoPencil, IoTrashBin} from "react-icons/io5";
 import {generateId} from "@/utils/Generate";

@@ -8,7 +8,7 @@ import TableCell from "@mui/material/TableCell";
 import TableBody from "@mui/material/TableBody";
 import DialogActions from "@mui/material/DialogActions";
 import Button from "@mui/material/Button";
-import { CashFlowReport } from "@/interfaces";
+import { CashFlowReport } from "@/model";
 import { Stack, Typography } from "@mui/material";
 
 const CashStatementReport = ({ setShow, cash, show, date }: { setShow: () => void, cash: {

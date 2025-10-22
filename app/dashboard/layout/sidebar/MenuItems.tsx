@@ -30,10 +30,15 @@ const Menuitems = [
     title: "Master Data",
     icon: IoIosApps,
     children: [
+      {
+        id: uniqueId(),
+        title: "Categories",
+        href: "/dashboard/master/categories",
+      },
+
+      { id: uniqueId(), title: "Brands", href: "/dashboard/master/brands" },
+      { id: uniqueId(), title: "Sizes", href: "/dashboard/master/sizes" },
       { id: uniqueId(), title: "Products", href: "/dashboard/master/products" },
-      //   { id: uniqueId(), title: "Categories", href: "/dashboard/master/categories" },
-      //   { id: uniqueId(), title: "Brands", href: "/dashboard/master/brands" },
-      //   { id: uniqueId(), title: "Sizes", href: "/dashboard/master/sizes" },
     ],
   },
   {

@@ -1,6 +1,6 @@
 import axios from "axios";
 import {getToken} from "@/firebase/firebaseClient";
-import {User} from "@/interfaces";
+import {User} from "@/model";
 
 export const getUsersAction = async (page: number, size: number) => {
     try {

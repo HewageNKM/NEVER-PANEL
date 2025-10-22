@@ -1,6 +1,6 @@
 import {auth, getToken} from "@/firebase/firebaseClient";
 import axios from "axios";
-import {PaymentMethod} from "@/interfaces";
+import {PaymentMethod} from "@/model";
 
 export const getAllPaymentMethodAction = async () => {
     try {

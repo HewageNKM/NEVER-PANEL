@@ -15,7 +15,7 @@ import {
 import {CircularProgress, Typography} from "@mui/material";
 import {collection, limit, onSnapshot, orderBy, query, where} from "@firebase/firestore";
 import {db} from "@/firebase/firebaseClient";
-import {Order} from "@/interfaces";
+import {Order} from "@/model";
 import {useSnackbar} from "@/contexts/SnackBarContext";
 
 const RecentTransactions = () => {

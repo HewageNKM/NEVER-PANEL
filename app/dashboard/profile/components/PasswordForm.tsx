@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {useAppSelector} from "@/lib/hooks";
 import {Box, Button, FormControl, IconButton, InputAdornment, Stack, TextField} from "@mui/material";
 import {IoEye, IoEyeOff} from "react-icons/io5";
-import {User} from "@/interfaces";
+import {User} from "@/model";
 import {updateUserByIdAction} from "@/actions/usersActions";
 import {sendPasswordResetEmail} from "@firebase/auth";
 import {auth} from "@/firebase/firebaseClient";

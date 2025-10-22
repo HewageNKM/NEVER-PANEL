@@ -11,7 +11,7 @@ import {
   Stack,
 } from "@mui/material";
 import React, { useEffect } from "react";
-import { Item } from "@/interfaces";
+import { Item } from "@/model";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import ItemCard from "@/app/dashboard/master/products/components/ItemCard";
 import { IoRefresh } from "react-icons/io5";

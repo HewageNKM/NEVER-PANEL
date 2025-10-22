@@ -20,7 +20,7 @@ import {IoAdd, IoPencil, IoRefreshCircle, IoRefreshOutline, IoTrash} from "react
 import EmptyState from "@/app/components/EmptyState";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
 import {useAppDispatch, useAppSelector} from "@/lib/hooks";
-import {User} from "@/interfaces";
+import {User} from "@/model";
 import {getAllUsers, setSelectedPage, setSelectedSize, setSelectedUser} from '@/lib/usersSlice/usersSlice';
 import UserForm from "@/app/dashboard/users/components/UserForm";
 import {deleteUserByIdAction} from "@/actions/usersActions";

@@ -1,4 +1,4 @@
-import {Email, SMS} from "@/interfaces";
+import {Email, SMS} from "@/model";
 import {createAsyncThunk, createSlice} from "@reduxjs/toolkit";
 import {getAllEmailsAction, getAllSMSAction} from "@/actions/emailAndSMSActions";
 

@@ -23,7 +23,7 @@ import {
   CircularProgress,
   Box,
 } from "@mui/material";
-import { Order } from "@/interfaces";
+import { Order } from "@/model";
 import { useSnackbar } from "@/contexts/SnackBarContext";
 import { useAppSelector } from "@/lib/hooks";
 import axios from "axios";

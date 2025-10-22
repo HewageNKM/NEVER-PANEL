@@ -1,6 +1,6 @@
 import {authorizeRequest, getSMS, sendTextMessage} from "@/firebase/firebaseAdmin";
 import {NextResponse} from "next/server";
-import {SMS} from "@/interfaces";
+import {SMS} from "@/model";
 
 
 export const POST = async (req: Request) => {

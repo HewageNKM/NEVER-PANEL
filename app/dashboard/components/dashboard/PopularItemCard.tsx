@@ -1,5 +1,5 @@
 import React from 'react';
-import { PopularItem } from "@/interfaces";
+import { PopularItem } from "@/model";
 import { Card, CardActionArea, CardContent, CardMedia, Typography, Box } from "@mui/material";
 
 const PopularItemCard = ({ item }: { item: PopularItem }) => {
