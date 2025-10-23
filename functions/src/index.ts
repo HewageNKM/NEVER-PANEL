@@ -1,248 +1,141 @@
-import * as functions from "firebase-functions/v1"; // Updated import for v6
+import { onSchedule } from "firebase-functions/v2/scheduler";
 import * as admin from "firebase-admin";
-import {
-  adminNotifySMS,
-  getOrderStatusSMS,
-} from "./templates";
-import {
-  BATCH_LIMIT,
-  Item,
-  Order,
-  PaymentMethod,
-  PaymentStatus,
-} from "./constant";
-import { sendEmail, sendSMS } from "./notifications";
-import {
-  calculateTotal,
-  commitBatch,
-  sendAdminEmail,
-  sendAdminSMS,
-} from "./util";
+import { BATCH_LIMIT, Item, Order, PaymentStatus } from "./constant";
+import { calculateTotal, commitBatch } from "./util";
 
 admin.initializeApp();
-export const db = admin.firestore();
+const db = admin.firestore();
 
-// Cloud Functions
-
-/**
- * Scheduled function to clean up failed orders and restock inventory.
- */
-export const scheduledOrdersCleanup = functions.pubsub
-  .schedule("every 24 hours")
-  .onRun(async () => {
+export const scheduledOrdersCleanup = onSchedule(
+  {
+    schedule: "every 24 hours",
+    timeZone: "Asia/Colombo",
+    region: "asia-south1",
+    memory: "512MiB",
+    timeoutSeconds: 540,
+  },
+  async (event) => {
     try {
-      console.log("Starting scheduled Firestore cleanup and deletion.");
+      console.log("🧹 Starting scheduled Firestore cleanup job...");
+
       const orderCollection = db.collection("orders");
       const inventoryCollection = db.collection("inventory");
+      const cleanupLogCollection = db.collection("cleanup_logs");
 
       const timeFrame = admin.firestore.Timestamp.fromDate(
         new Date(Date.now() - 4 * 60 * 60 * 1000)
       );
 
-      // Fetch failed orders
-      const failedOrders = await orderCollection
+      const failedOrdersSnap = await orderCollection
         .where("createdAt", "<=", timeFrame)
         .where("paymentStatus", "==", PaymentStatus.Failed)
         .get();
 
-      const allFailedOrders = [...failedOrders.docs];
-
-      if (allFailedOrders.length === 0) {
-        console.log("No failed orders to restock.");
-        return null;
+      if (failedOrdersSnap.empty) {
+        console.log("✅ No failed orders to clean up.");
+        return; // <-- fine; returns void
       }
 
       console.log(
-        `Found ${allFailedOrders.length} failed orders to restock and delete.`
+        `⚠️ Found ${failedOrdersSnap.size} failed orders to process.`
       );
 
       let batch = db.batch();
-      let opCounts = 0;
+      let opCount = 0;
+      const logs: any[] = [];
 
-      for (const orderDoc of allFailedOrders) {
+      for (const orderDoc of failedOrdersSnap.docs) {
         const orderData = orderDoc.data() as Order;
 
         for (const orderItem of orderData.items) {
           const inventoryDocRef = inventoryCollection.doc(orderItem.itemId);
-          const inventoryDoc = await inventoryDocRef.get();
+          const inventorySnap = await inventoryDocRef.get();
 
-          if (inventoryDoc.exists) {
-            const inventoryData = inventoryDoc.data() as Item;
-
-            const variant = inventoryData.variants.find(
-              (v) => v.variantId === orderItem.variantId
-            );
-
-            if (variant) {
-              const size = variant.sizes.find((s) => s.size === orderItem.size);
-              if (size) {
-                size.stock += orderItem.quantity;
-                batch.set(inventoryDocRef, inventoryData);
-                opCounts++;
-
-                if (opCounts >= BATCH_LIMIT) {
-                  batch = await commitBatch(batch, opCounts);
-                  opCounts = 0;
-                }
-              } else {
-                console.warn(
-                  `Size not found for itemId: ${orderItem.itemId}, variantId: ${orderItem.variantId}, size: ${orderItem.size}`
-                );
-              }
-            } else {
-              console.warn(
-                `Variant not found for itemId: ${orderItem.itemId}, variantId: ${orderItem.variantId}`
-              );
-            }
-          } else {
+          if (!inventorySnap.exists) {
             console.warn(
-              `Inventory document not found for itemId: ${orderItem.itemId}`
+              `❗ Inventory doc not found for itemId: ${orderItem.itemId}`
             );
+            continue;
+          }
+
+          const inventoryData = inventorySnap.data() as Item;
+          const variant = inventoryData.variants.find(
+            (v) => v.variantId === orderItem.variantId
+          );
+
+          if (!variant) {
+            console.warn(
+              `❗ Variant not found for itemId: ${orderItem.itemId}, variantId: ${orderItem.variantId}`
+            );
+            continue;
+          }
+
+          const size = variant.sizes.find((s) => s.size === orderItem.size);
+          if (!size) {
+            console.warn(
+              `❗ Size not found for itemId: ${orderItem.itemId}, variantId: ${orderItem.variantId}, size: ${orderItem.size}`
+            );
+            continue;
+          }
+
+          // ✅ Restock item
+          size.stock += orderItem.quantity;
+          batch.set(inventoryDocRef, inventoryData);
+          opCount++;
+
+          if (opCount >= BATCH_LIMIT) {
+            batch = await commitBatch(batch, opCount);
+            opCount = 0;
           }
         }
 
-        // Delete the order after restocking
+        const total =
+          calculateTotal(orderData.items) +
+          (orderData?.shippingFee || 0) +
+          (orderData?.fee || 0) -
+          (orderData?.discount || 0);
+
+        // ✅ Log cleaned order
+        logs.push({
+          orderId: orderDoc.id,
+          paymentMethod: orderData.paymentMethod,
+          paymentMethodId: orderData.paymentMethodId,
+          userId: orderData.userId ?? null,
+          total: total ?? 0,
+          reason: "Payment failed for more than 4 hours",
+          items: orderData.items,
+          createdAt: orderData.createdAt,
+          deletedAt: admin.firestore.Timestamp.now(),
+        });
+
+        // Delete order
         batch.delete(orderDoc.ref);
-        opCounts++;
+        opCount++;
 
-        if (opCounts >= BATCH_LIMIT) {
-          batch = await commitBatch(batch, opCounts);
-          opCounts = 0;
+        if (opCount >= BATCH_LIMIT) {
+          batch = await commitBatch(batch, opCount);
+          opCount = 0;
         }
       }
 
-      // Commit any remaining operations
-      if (opCounts > 0) {
+      if (opCount > 0) {
         await batch.commit();
-        console.log(`Committed the final batch of ${opCounts} operations.`);
+        console.log(`💾 Committed final batch of ${opCount} operations.`);
       }
 
-      console.log(
-        "Scheduled Firestore cleanup and deletion completed successfully."
-      );
-      return null;
-    } catch (error) {
-      console.error("Error during scheduledOrdersCleanup:", error);
-      return null;
-    }
-  });
-
-/**
- * Triggered function to handle order payment state changes.
- */
-export const onPaymentStatusUpdates = functions.firestore
-  .document("orders/{orderId}")
-  .onWrite(async (change, context) => {
-    console.log("Payment status update detected.");
-    const orderId = context.params.orderId;
-    const orderData = change.after.exists
-      ? (change.after.data() as Order)
-      : null;
-    const previousOrderData = change.before.exists
-      ? (change.before.data() as Order)
-      : null;
-
-    if (!orderData) return null;
-
-    const { paymentMethod, paymentStatus, items, customer, discount } =
-      orderData;
-    const paymentMethodLower = paymentMethod.toLowerCase();
-    const paymentStatusLower = paymentStatus.toLowerCase();
-
-    // ✅ include KOKO in allowed methods
-    const allowedMethods = [
-      PaymentMethod.IPG.toLowerCase(),
-      PaymentMethod.COD.toLowerCase(),
-      PaymentMethod.KOKO.toLowerCase(),
-    ];
-
-    if (!allowedMethods.includes(paymentMethodLower)) {
-      console.log(`Order ${orderId} is not IPG, COD, or KOKO. Skipping...`);
-      return null;
-    }
-
-    // Calculate totals and address
-    const subTotal = calculateTotal(items);
-    const total =
-      subTotal +
-      (orderData?.fee || 0) +
-      (orderData?.shippingFee || 0) -
-      (orderData?.discount || 0);
-
-    const address = `${customer.address} ${customer.city} ${
-      customer?.zip || ""
-    } ${customer?.phone || ""}`;
-
-    const templateData = {
-      name: customer.name,
-      address,
-      orderId: orderId.toUpperCase(),
-      items,
-      total,
-      fee: orderData.fee,
-      shippingFee: orderData.shippingFee,
-      paymentMethod,
-      subTotal,
-      discount,
-    };
-
-    try {
-      const sendNotifications = async (additionalTemplateData?: any) => {
-        await Promise.all([
-          sendEmail(customer.email.trim().toLowerCase(), "orderConfirmed", {
-            ...templateData,
-            ...additionalTemplateData,
-          }),
-          sendSMS(
-            customer.phone,
-            getOrderStatusSMS(
-              customer.name,
-              orderId,
-              paymentMethod,
-              paymentStatus
-            )
-          ),
-        ]);
-      };
-
-      if (previousOrderData) {
-        const previousPaymentStatusLower =
-          previousOrderData.paymentStatus.toLowerCase();
-
-        if (paymentStatusLower === previousPaymentStatusLower) {
-          console.log(`No change in payment status for order ${orderId}.`);
-          return null;
+      if (logs.length > 0) {
+        const logBatch = db.batch();
+        for (const log of logs) {
+          const logRef = cleanupLogCollection.doc();
+          logBatch.set(logRef, log);
         }
-
-        // ✅ handle both IPG (PayHere) and KOKO when changing from Pending → Paid
-        if (
-          paymentStatusLower === PaymentStatus.Paid.toLowerCase() &&
-          previousPaymentStatusLower === PaymentStatus.Pending.toLowerCase() &&
-          (paymentMethodLower === PaymentMethod.IPG.toLowerCase() ||
-            paymentMethodLower === PaymentMethod.KOKO.toLowerCase())
-        ) {
-          await sendNotifications();
-          await sendAdminSMS(adminNotifySMS(orderId));
-          await sendAdminEmail("adminOrderNotify", templateData);
-          console.log(
-            `✅ Order confirmation sent for ${paymentMethod} order ${orderId}`
-          );
-        }
-      } else {
-        // COD new order notification (unchanged)
-        if (
-          paymentMethodLower === PaymentMethod.COD.toLowerCase() &&
-          paymentStatusLower === PaymentStatus.Pending.toLowerCase()
-        ) {
-          await sendNotifications();
-          await sendAdminSMS(adminNotifySMS(orderId));
-          await sendAdminEmail("adminOrderNotify", templateData);
-          console.log(`Notification sent for new COD pending order ${orderId}`);
-        }
+        await logBatch.commit();
+        console.log(`🗂️ Logged ${logs.length} cleaned orders to cleanup_logs.`);
       }
-    } catch (error) {
-      console.error(`❌ Error processing order ${orderId}:`, error);
-    }
 
-    return null;
-  });
+      console.log("✅ Firestore cleanup and deletion completed successfully.");
+    } catch (error) {
+      console.error("❌ Error during scheduledOrdersCleanup:", error);
+    }
+  }
+);
