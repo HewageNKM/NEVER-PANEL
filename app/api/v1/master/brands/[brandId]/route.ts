@@ -57,7 +57,7 @@ export const PUT = async (
 };
 
 export const DELETE = async (
-  _req: Request,
+  req: Request,
   { params }: { params: { brandId: string } }
 ) => {
   try {

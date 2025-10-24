@@ -23,6 +23,7 @@ export const PUT = async (req: NextRequest, { params }: { params: { categoryId: 
     if (!user) return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
 
     const data = await req.json();
+    if(!data.name || !data.status) return NextResponse.json({ message: "Name and Status are required" }, { status: 400 })
     const res = await updateCategory(params.categoryId, data);
     return NextResponse.json(res);
   } catch (e) {

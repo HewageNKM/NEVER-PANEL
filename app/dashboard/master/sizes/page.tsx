@@ -322,6 +322,7 @@ const SizePage: React.FC = () => {
               margin="normal"
               fullWidth
               label="Size Name"
+              disabled={saving}
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
             />
@@ -334,6 +335,7 @@ const SizePage: React.FC = () => {
             >
               <Typography>Status</Typography>
               <Switch
+                disabled={saving}
                 checked={form.status}
                 onChange={(e) => setForm({ ...form, status: e.target.checked })}
               />

@@ -35,6 +35,7 @@ import PageContainer from "../../components/container/PageContainer";
 import DashboardCard from "../../components/shared/DashboardCard";
 import { getToken } from "@/firebase/firebaseClient";
 import { useAppSelector } from "@/lib/hooks";
+import { Category } from "@/model/Category";
 
 // Emotion styles
 const actionsBar = css`
@@ -62,13 +63,6 @@ const EmptyState = styled.div`
   color: #777;
   padding: 2rem;
 `;
-
-interface Category {
-  id: string;
-  name: string;
-  description?: string;
-  active: boolean;
-}
 
 const CategoryPage: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -126,7 +120,7 @@ const CategoryPage: React.FC = () => {
       setForm({
         name: category.name,
         description: category.description || "",
-        status: category.active,
+        status: category.status,
       });
     } else {
       setEditingCategory(null);
@@ -300,8 +294,8 @@ const CategoryPage: React.FC = () => {
                     <TableCell>
                       <Box display="flex" alignItems="center">
                         <Chip
-                          label={cat.active ? "Active" : "Inactive"}
-                          color={cat.active ? "success" : "error"}
+                          label={cat.status ? "Active" : "Inactive"}
+                          color={cat.status ? "success" : "error"}
                           size="small"
                         />
                       </Box>

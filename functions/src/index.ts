@@ -95,17 +95,21 @@ export const scheduledOrdersCleanup = onSchedule(
           (orderData?.fee || 0) -
           (orderData?.discount || 0);
 
-        // ✅ Log cleaned order
         logs.push({
-          orderId: orderDoc.id,
-          paymentMethod: orderData.paymentMethod,
-          paymentMethodId: orderData.paymentMethodId,
+          context: "order_cleanup",
+          entityType: "order",
+          refId: orderDoc.id,
           userId: orderData.userId ?? null,
           total: total ?? 0,
           reason: "Payment failed for more than 4 hours",
-          items: orderData.items,
-          createdAt: orderData.createdAt,
+          metadata: {
+            paymentMethod: orderData.paymentMethod ?? null,
+            paymentMethodId: orderData.paymentMethodId ?? null,
+            items: orderData.items ?? [],
+            createdAt: orderData.createdAt ?? null,
+          },
           deletedAt: admin.firestore.Timestamp.now(),
+          timestamp: admin.firestore.Timestamp.now(),
         });
 
         // Delete order
