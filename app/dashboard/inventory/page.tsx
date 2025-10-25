@@ -204,7 +204,6 @@ const InventoryPage = () => {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingItem(null);
-    fetchInventory();
   };
 
   const handleSaveStock = async (itemData: InventoryItem) => {
