@@ -65,7 +65,7 @@ const InventoryPage = () => {
       fetchDropdown("/api/v2/master/sizes/dropdown", setSizes);
       fetchDropdown("/api/v2/master/stocks/dropdown", setStockLocations);
     }
-  }, [currentUser, authLoading]);
+  }, [currentUser]);
 
   // Re-fetch when page or filters change (filters are now handled by buttons)
   useEffect(() => {

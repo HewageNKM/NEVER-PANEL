@@ -173,7 +173,6 @@ const ProductPage = () => {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setEditingProduct(null);
-    fetchProducts(); // Refetch after modal closes
   };
 
   const handleSaveProduct = async (productData: Product, file: File | null) => {
