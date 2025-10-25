@@ -55,10 +55,7 @@ export const getOrders = async (pageNumber: number = 1, size: number = 20) => {
                 } : null,
                 createdAt: order?.createdAt?.toDate().toLocaleString(),
                 updatedAt: order?.updatedAt?.toDate().toLocaleString(),
-                tracking: order?.tracking ? {
-                    ...order.tracking,
-                    updatedAt: order.tracking.updatedAt.toDate().toLocaleString(),
-                } : null,
+                tracking: undefined
             }
             orders.push(order);
         });

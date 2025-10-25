@@ -58,17 +58,18 @@ export interface PaymentMethod {
 export interface Item {
     itemId: string,
     type: string,
+    category: string,
     brand: string,
     description: string,
     thumbnail: Img,
     variants: Variant[],
-    manufacturer: string,
     name: string,
-    genders: string[],
     buyingPrice: number,
     sellingPrice: number,
     marketPrice: number,
     discount: number,
+    tags: string[],
+
     listing: "Active" | "Inactive",
     status: "Active" | "Inactive",
 
@@ -100,6 +101,8 @@ export interface Order {
     items: OrderItem[],
     paymentStatus: string,
     paymentMethod: string,
+    paymentMethodId?: string,
+    status?: string,
     shippingFee?: number,
     fee?: number,
     customer?: Customer,
@@ -215,15 +218,6 @@ export interface OrderItem {
     quantity: number,
     price: number,
     discount: number,
-}
-
-export interface Tracking {
-    trackingNumber: string;
-    status: orderStatus;
-
-    trackingCompany: string;
-    trackingUrl: string;
-    updatedAt: Timestamp;
 }
 
 export interface Error {

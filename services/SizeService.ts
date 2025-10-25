@@ -26,9 +26,7 @@ export const getSizes = async ({
 
     if (search.trim()) {
       const s = search.trim();
-      query = query
-        .where("name", ">=", s)
-        .where("name", "<=", s + "\uf8ff");
+      query = query.where("name", ">=", s).where("name", "<=", s + "\uf8ff");
     }
 
     const offset = (page - 1) * size;
@@ -68,6 +66,26 @@ export const updateSize = async (id: string, data: Partial<Size>) => {
 
 // 🔹 Delete Size (soft delete)
 export const deleteSize = async (id: string) => {
-  await adminFirestore.collection(COLLECTION).doc(id).update({ isDeleted: true });
+  await adminFirestore
+    .collection(COLLECTION)
+    .doc(id)
+    .update({ isDeleted: true });
   return { id };
+};
+
+export const getSizeDropdown = async () => {
+  try {
+    const snapshot = await adminFirestore.collection(COLLECTION)
+    .where("isDeleted", "==", false)
+    .where("status", "==", "active")
+    .get();
+    const sizes = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      label: doc.data().name,
+    }));
+    return sizes;
+  } catch (error) {
+    console.log(error);
+    return [];
+  }
 };

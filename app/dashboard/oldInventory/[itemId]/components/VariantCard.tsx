@@ -3,7 +3,7 @@ import React, {useState} from "react";
 import {Box, Button, Card, CardActions, CardContent, Stack, Typography} from "@mui/material";
 import {Item, Variant} from "@/model";
 import "swiper/css";
-import ImageSlider from "@/app/dashboard/master/products/[itemId]/components/ImageSlider";
+import ImageSlider from "@/app/dashboard/oldInventory/[itemId]/components/ImageSlider";
 import ConfirmationDialog from "@/components/ConfirmationDialog";
 import {useDispatch} from "react-redux";
 import {setItem, setSelectedVariant, setShowEditingForm} from "@/lib/itemDetailsSlice/itemDetailsSlice";

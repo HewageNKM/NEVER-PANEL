@@ -49,7 +49,7 @@ export const getCategories = async ({
   try {
     let query: FirebaseFirestore.Query = adminFirestore
       .collection(COLLECTION)
-      .where("isDeleted", "==", false)
+      .where("isDeleted", "==", false);
 
     // Apply status filter
     if (status === "active") query = query.where("active", "==", true);
@@ -57,10 +57,8 @@ export const getCategories = async ({
 
     // Apply search filter
     if (search.trim()) {
-      const s = search.trim()
-      query = query
-        .where("name", ">=", s)
-        .where("name", "<=", s + "\uf8ff");
+      const s = search.trim();
+      query = query.where("name", ">=", s).where("name", "<=", s + "\uf8ff");
     }
 
     // Pagination
@@ -149,5 +147,22 @@ export const restoreCategory = async (id: string) => {
   } catch (error) {
     console.error("Restore Category Error:", error);
     return { success: false, message: "Failed to restore category" };
+  }
+};
+
+export const getCategoriesForDropdown = async () => {
+  try {
+    const snapshot = await adminFirestore.collection(COLLECTION)
+    .where("isDeleted", "==", false)
+    .where("status", "==", true)
+    .get();
+    const categories = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      label: doc.data().name,
+    }));
+    return categories;
+  } catch (error) {
+    console.log(error);
+    return [];
   }
 };
