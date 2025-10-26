@@ -68,7 +68,6 @@ const ProductPage = () => {
         setCategories,
         setCategoryMap
       );
-      // Fetches sizes, no map needed
       fetchDropdown("/api/v2/master/sizes/dropdown", setSizes);
     }
   }, [currentUser, authLoading]); // Only run on auth change

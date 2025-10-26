@@ -77,7 +77,7 @@ export const getSizeDropdown = async () => {
   try {
     const snapshot = await adminFirestore.collection(COLLECTION)
     .where("isDeleted", "==", false)
-    .where("status", "==", "active")
+    .where("status", "==", true)
     .get();
     const sizes = snapshot.docs.map((doc) => ({
       id: doc.id,
@@ -86,6 +86,6 @@ export const getSizeDropdown = async () => {
     return sizes;
   } catch (error) {
     console.log(error);
-    return [];
+    throw error;
   }
 };
