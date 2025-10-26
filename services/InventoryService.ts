@@ -178,7 +178,6 @@ export const addInventory = async (
 
   // Check if item already exists
   const existingDocId = await findExistingInventoryItem(
-    // Renamed for clarity
     productId,
     variantId,
     size,
@@ -293,3 +292,42 @@ export const updateProductStockCount = async (
     // Don't re-throw; this is a-denormalization, main op may have succeeded
   }
 };
+
+export async function getInventoryQuantity(
+  productId: string,
+  variantId: string,
+  size: string,
+  stockId: string
+) {
+  try {
+    // Note: This composite query will likely require you to create
+    // a corresponding index in your Firestore database.
+    // Firestore will provide a link in the error message to create it.
+    const inventoryRef = adminFirestore.collection(INVENTORY_COLLECTION); // Assuming collection is named 'inventory'
+    const query = inventoryRef
+      .where("productId", "==", productId)
+      .where("variantId", "==", variantId)
+      .where("size", "==", size)
+      .where("stockId", "==", stockId)
+      .limit(1);
+
+    const snapshot = await query.get();
+
+    if (snapshot.empty) {
+      return {
+        id: null,
+        quantity: 0,
+      }
+    }
+
+    // Return the quantity from the found document
+    const docData = snapshot.docs[0].data();
+    return {
+      id: snapshot.docs[0].id,
+      ...docData,
+    };
+  } catch (error) {
+    console.error("Error fetching inventory quantity:", error);
+    throw error;
+  }
+}

@@ -64,7 +64,9 @@ const InventoryListTable: React.FC<StockListTableProps> = ({
       <Table>
         <TableHead>
           <TableRow>
+            <TableCell>Product ID</TableCell>
             <TableCell>Product</TableCell>
+            <TableCell>Variant ID</TableCell>
             <TableCell>Variant</TableCell>
             <TableCell>Size</TableCell>
             <TableCell>Location</TableCell>
@@ -75,10 +77,12 @@ const InventoryListTable: React.FC<StockListTableProps> = ({
         <TableBody>
           {items.map((item) => (
             <TableRow key={item.id}>
-              <TableCell>{`${item.productId} -> ${productMap.get(item.productId)}`.toUpperCase()}</TableCell>
-              <TableCell>{`${item.variantId} -> ${item.variantName}`.toUpperCase()}</TableCell> {/* Display variant ID for now */}
+              <TableCell>{item.productId.toUpperCase() || "N/A"}</TableCell>
+              <TableCell>{item.productName?.toUpperCase() || "N/A"}</TableCell>
+              <TableCell>{item.variantId.toUpperCase() || "N/A"}</TableCell>
+              <TableCell>{item.variantName?.toUpperCase() || "N/A"}</TableCell> {/* Display variant ID for now */}
               <TableCell>{item.size}</TableCell>
-              <TableCell>{`${item.stockId} -> ${locationMap.get(item.stockId)}`.toUpperCase()}</TableCell>
+              <TableCell>{item.stockName?.toUpperCase() || "N/A"}</TableCell>
               <TableCell align="right">
                  <Chip label={item.quantity} color={item.quantity > 0 ? "success" : "default"} size="small" />
               </TableCell>

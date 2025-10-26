@@ -24,6 +24,7 @@ import { DropdownOption } from "../master/products/page";
 import { InventoryItem } from "@/model/InventoryItem";
 import InventoryListTable from "./components/InventoryListTable";
 import InventoryFormModal from "./components/InventoryFormModal";
+import { useSnackbar } from "@/contexts/SnackBarContext";
 
 // --- Define Interfaces ---
 interface StockLocationOption extends DropdownOption {}
@@ -48,7 +49,7 @@ const InventoryPage = () => {
   const { currentUser, loading: authLoading } = useAppSelector(
     (state) => state.authSlice
   );
-
+  const { showNotification } = useSnackbar();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
 
@@ -113,10 +114,7 @@ const InventoryPage = () => {
     }
   };
 
-  const fetchDropdown = async (
-    url: string,
-    setData: (data: any[]) => void
-  ) => {
+  const fetchDropdown = async (url: string, setData: (data: any[]) => void) => {
     try {
       const token = await getToken();
       const response = await axios.get(url, {
@@ -225,8 +223,11 @@ const InventoryPage = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       handleCloseModal();
+      fetchInventory();
+      showNotification("Stock item saved successfully", "success");
     } catch (error) {
       console.error("Error saving stock item:", error);
+      showNotification("Error saving stock item", "error");
     }
   };
 
@@ -258,7 +259,9 @@ const InventoryPage = () => {
             options={products}
             getOptionLabel={(option) => option.label}
             value={products.find((p) => p.id === filters.productId) || null}
-            onChange={(_, newValue) => handleFilterChange("productId", newValue)}
+            onChange={(_, newValue) =>
+              handleFilterChange("productId", newValue)
+            }
             renderInput={(params) => (
               <TextField
                 {...params}

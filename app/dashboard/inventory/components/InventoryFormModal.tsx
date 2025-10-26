@@ -58,29 +58,76 @@ const InventoryFormModal: React.FC<StockFormModalProps> = ({
     useState<VariantDropdownOption | null>(null);
   const [loadingVariants, setLoadingVariants] = useState(false);
   const [saving, setSaving] = useState(false);
+  // --- New state to track loading the current quantity on edit ---
+  const [loadingQuantity, setLoadingQuantity] = useState(false);
   const isEditing = !!item;
 
   useEffect(() => {
     if (open) {
+      // Reset states on open
+      setSaving(false);
+      setLoadingQuantity(false);
+
       if (item) {
-        setFormData({
-          productId: item.productId, // Use productId
-          variantId: item.variantId,
-          size: item.size,
-          stockId: item.stockId,
-          quantity: item.quantity,
-        });
-        if (item.productId) { // Use productId
+        // --- EDIT MODE ---
+        // Define an async function to fetch all data needed for the edit form
+        const initializeEditForm = async () => {
+          // 1. Fetch variants (this was already here)
+          // We trigger this and let it run
           fetchVariants(item.productId, item.variantId);
-        }
+
+          // 2. Fetch the current, real-time quantity from the inventory
+          setLoadingQuantity(true);
+          let currentQuantity = item.quantity; // Default to the stale quantity from the prop
+          try {
+            const token = await getToken();
+            // --- API Call to check current stock ---
+            // NOTE: You must create this API endpoint
+            const response = await axios.get(
+              "/api/v2/inventory/check-quantity", // <--- ASSUMED API ENDPOINT
+              {
+                headers: { Authorization: `Bearer ${token}` },
+                params: {
+                  // Send the unique identifiers for the stock item
+                  productId: item.productId,
+                  variantId: item.variantId,
+                  size: item.size,
+                  stockId: item.stockId,
+                },
+              }
+            );
+            // Assuming your API returns an object like { quantity: 123 }
+            // Use ?? to fallback to item.quantity if response.data.quantity is null/undefined
+            currentQuantity = response.data.quantity ?? item.quantity;
+          } catch (error) {
+            console.error(
+              "Failed to fetch current quantity, using prop data:",
+              error
+            );
+            // On error, we'll just use the quantity from the item prop
+          } finally {
+            setLoadingQuantity(false);
+          }
+
+          // 3. Set the form data *after* fetching the quantity
+          setFormData({
+            productId: item.productId,
+            variantId: item.variantId,
+            size: item.size,
+            stockId: item.stockId,
+            quantity: currentQuantity, // Use the newly fetched (or default) quantity
+          });
+        };
+
+        initializeEditForm();
       } else {
+        // --- CREATE MODE ---
         setFormData(emptyItem);
         setVariants([]);
         setSelectedVariant(null);
       }
-      setSaving(false);
     }
-  }, [item, open]);
+  }, [item, open]); // Dependency array is correct
 
   const fetchVariants = async (
     productId: string | null,
@@ -125,14 +172,14 @@ const InventoryFormModal: React.FC<StockFormModalProps> = ({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     // Specifically handle quantity as a number
-    if (name === 'quantity') {
+    if (name === "quantity") {
       const numValue = parseInt(value, 10);
       setFormData((prev) => ({
-         ...prev,
-         [name]: isNaN(numValue) ? 0 : Math.max(0, numValue) // Ensure it's a non-negative number, default to 0 if invalid
+        ...prev,
+        [name]: isNaN(numValue) ? 0 : Math.max(0, numValue), // Ensure it's a non-negative number, default to 0 if invalid
       }));
     } else {
-       setFormData((prev) => ({ ...prev, [name]: value }));
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
@@ -144,7 +191,8 @@ const InventoryFormModal: React.FC<StockFormModalProps> = ({
     // Update formData for the selected field (productId or stockId)
     setFormData((prev) => ({ ...prev, [name]: value ?? "" }));
 
-    if (name === "productId") { // Use productId
+    if (name === "productId") {
+      // Use productId
       fetchVariants(value);
     }
   };
@@ -181,13 +229,19 @@ const InventoryFormModal: React.FC<StockFormModalProps> = ({
       !formData.stockId ||
       formData.quantity < 0
     ) {
-      alert(
-        "Please select Product, Variant, Size, Location and ensure quantity is not negative."
-      );
+      // Use a more modern notification system than alert() in a real app
+      console.error("Validation Failed: Missing required fields.");
+      // alert(
+      //   "Please select Product, Variant, Size, Location and ensure quantity is not negative."
+      // );
       return;
     }
+
+    // Check if the selected size is valid for the variant
+    // Added optional chaining for safety
     if (!selectedVariant?.sizes?.includes(formData.size)) {
-      alert("The selected size is not available for the chosen variant.");
+      console.error("Validation Failed: Invalid size for variant.");
+      // alert("The selected size is not available for the chosen variant.");
       return;
     }
 
@@ -197,7 +251,7 @@ const InventoryFormModal: React.FC<StockFormModalProps> = ({
       const saveData = {
         ...(item || {}),
         ...formData,
-        quantity: Number(formData.quantity) // Explicitly cast/ensure it's a number
+        quantity: Number(formData.quantity), // Explicitly cast/ensure it's a number
       };
       await onSave(saveData);
     } catch (error) {
@@ -206,6 +260,62 @@ const InventoryFormModal: React.FC<StockFormModalProps> = ({
       setSaving(false);
     }
   };
+
+  // --- Auto-fetch quantity if stock already exists when creating new entry ---
+  useEffect(() => {
+    if (
+      !open || // Only when modal is open
+      isEditing || // Only for "Add", not "Edit"
+      !formData.productId ||
+      !formData.variantId ||
+      !formData.size ||
+      !formData.stockId
+    ) {
+      return;
+    }
+
+    const fetchExistingQuantity = async () => {
+      setLoadingQuantity(true);
+      try {
+        const token = await getToken();
+        const response = await axios.get("/api/v2/inventory/check-quantity", {
+          headers: { Authorization: `Bearer ${token}` },
+          params: {
+            productId: formData.productId,
+            variantId: formData.variantId,
+            size: formData.size,
+            stockId: formData.stockId,
+          },
+        });
+
+        const currentQuantity = response.data?.quantity ?? 0;
+
+        if (currentQuantity > 0) {
+          console.info(
+            "Existing stock found. Prefilling quantity:",
+            currentQuantity
+          );
+          setFormData((prev) => ({
+            ...prev,
+            quantity: currentQuantity,
+          }));
+        }
+      } catch (error) {
+        console.error("Error checking existing stock quantity:", error);
+      } finally {
+        setLoadingQuantity(false);
+      }
+    };
+
+    // Fetch once when all required fields are chosen
+    fetchExistingQuantity();
+  }, [
+    formData.productId,
+    formData.variantId,
+    formData.size,
+    formData.stockId,
+    open,
+  ]);
 
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm">
@@ -220,8 +330,8 @@ const InventoryFormModal: React.FC<StockFormModalProps> = ({
               getOptionLabel={(option) => option.label}
               value={products.find((p) => p.id === formData.productId) || null} // Use productId
               onChange={(_, newValue) =>
-                handleAutocompleteChange("productId", newValue) // Use productId
-              }
+                handleAutocompleteChange("productId", newValue)
+              } // Use productId
               disabled={saving || isEditing}
               renderInput={(params) => (
                 <TextField {...params} label="Product" required />
@@ -265,9 +375,7 @@ const InventoryFormModal: React.FC<StockFormModalProps> = ({
               value={
                 availableSizes.find((s) => s.label === formData.size) || null
               }
-              onChange={(_, newValue) =>
-                handleSizeAutocompleteChange(newValue)
-              }
+              onChange={(_, newValue) => handleSizeAutocompleteChange(newValue)}
               disabled={saving || isEditing || !selectedVariant}
               renderInput={(params) => (
                 <TextField {...params} label="Size" required />
@@ -279,7 +387,8 @@ const InventoryFormModal: React.FC<StockFormModalProps> = ({
               options={stockLocations}
               getOptionLabel={(option) => option.label}
               value={
-                stockLocations.find((loc) => loc.id === formData.stockId) || null
+                stockLocations.find((loc) => loc.id === formData.stockId) ||
+                null
               }
               onChange={(_, newValue) =>
                 handleAutocompleteChange("stockId", newValue)
@@ -299,8 +408,14 @@ const InventoryFormModal: React.FC<StockFormModalProps> = ({
               onChange={handleChange} // Use updated handleChange
               fullWidth
               required
-              disabled={saving}
-              InputProps={{ inputProps: { min: 0 } }}
+              disabled={saving || loadingQuantity} // --- Updated to disable while fetching qty ---
+              InputProps={{
+                inputProps: { min: 0 },
+                // --- Added loading indicator for quantity fetch ---
+                endAdornment: loadingQuantity ? (
+                  <CircularProgress color="inherit" size={20} />
+                ) : null,
+              }}
             />
           </Grid>
         </Grid>
@@ -309,7 +424,11 @@ const InventoryFormModal: React.FC<StockFormModalProps> = ({
         <Button onClick={onClose} color="inherit" disabled={saving}>
           Cancel
         </Button>
-        <Button onClick={handleSubmit} variant="contained" disabled={saving}>
+        <Button
+          onClick={handleSubmit}
+          variant="contained"
+          disabled={saving || loadingQuantity}
+        >
           {saving ? <CircularProgress size={24} color="inherit" /> : "Save"}
         </Button>
       </DialogActions>
