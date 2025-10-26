@@ -13,7 +13,7 @@ import {
   CircularProgress,
   Pagination,
 } from "@mui/material";
-import { IconPlus, IconSearch } from "@tabler/icons-react";
+import { IconPlus, IconSearch, IconX } from "@tabler/icons-react";
 import { Product } from "@/model/Product";
 import ProductListTable from "./components/ProductListTable";
 import ProductFormModal from "./components/ProductFormModal";
@@ -26,7 +26,14 @@ export interface DropdownOption {
   id: string;
   label: string;
 }
-// --- END TYPES ---
+
+const initialFilterState = {
+  search: "",
+  brand: "all",
+  category: "all",
+  status: "all",
+  listing: "all",
+};
 
 // --- MAIN PAGE COMPONENT ---
 const ProductPage = () => {
@@ -114,6 +121,19 @@ const ProductPage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // 2. ADD THE CLEAR FILTER HANDLER
+  const handleClearFilters = () => {
+    // Check if filters are already clear to avoid unnecessary re-fetch
+    if (JSON.stringify(filters) === JSON.stringify(initialFilterState)) {
+      return;
+    }
+    setFilters(initialFilterState);
+    setPagination((prev) => ({ ...prev, page: 1 }));
+    // We call fetchProducts() here to match your existing pattern in handleFilter
+    // This will trigger a re-fetch.
+    fetchProducts();
   };
 
   // Handle filter button click
@@ -219,7 +239,8 @@ const ProductPage = () => {
           : "Product added successfully",
         "success"
       );
-      handleCloseModal(); // Close modal and refetch
+      handleCloseModal();
+      fetchProducts();
     } catch (error: any) {
       console.error("Error saving product:", error);
       // --- Show error notification ---
@@ -354,6 +375,15 @@ const ProductPage = () => {
             disabled={loading}
           >
             {loading ? "Filtering..." : "Filter"}
+          </Button>
+          <Button
+            variant="outlined"
+            color="secondary"
+            startIcon={<IconX />}
+            onClick={handleClearFilters}
+            disabled={loading}
+          >
+            Clear
           </Button>
         </Box>
 

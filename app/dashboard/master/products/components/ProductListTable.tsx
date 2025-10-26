@@ -71,14 +71,14 @@ const ProductListTable: React.FC<ProductListTableProps> = ({
               <TableCell>
                 <Chip
                   label={product.status ? "Active" : "Inactive"}
-                  color={product.status ? "primary" : "default"}
+                  color={product.status ? "primary" : "error"}
                   size="small"
                 />
               </TableCell>
               <TableCell>
                 <Chip
                   label={product.listing ? "Listed" : "Unlisted"}
-                  color={product.listing ? "primary" : "default"}
+                  color={product.listing ? "primary" : "error"}
                   size="small"
                 />
               </TableCell>

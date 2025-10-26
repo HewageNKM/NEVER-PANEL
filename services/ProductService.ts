@@ -1,94 +1,116 @@
-import { adminFirestore, adminStorageBucket } from "@/firebase/firebaseAdmin"; // <-- Import adminStorage
+import { adminFirestore, adminStorageBucket } from "@/firebase/firebaseAdmin";
 import { Product } from "@/model/Product";
 import { ProductVariant } from "@/model/ProductVariant";
 import { nanoid } from "nanoid";
-import natural from "natural";
 
-const { PorterStemmer, NGrams } = natural;
+// --- NEW IMPORTS for retext-keywords ---
+import { retext } from "retext";
+import retextPos from "retext-pos";
+import retextKeywords from "retext-keywords";
+import { toString } from "nlcst-to-string";
+// --- END NEW IMPORTS ---
+
+// --- REMOVED wink-nlp and model imports ---
+
+// --- NEW: Create the retext processor ---
+// We create this once and reuse it for efficiency.
+const retextProcessor = retext()
+  .use(retextPos) // Add Part-of-Speech tagging
+  .use(retextKeywords, {
+    maximum: 15, // Extract the top 15 keywords and phrases
+  });
+// --- END NEW PROCESSOR ---
+
 const PRODUCTS_COLLECTION = "products";
-const BUCKET = adminStorageBucket; // Get your default bucket
+const BUCKET = adminStorageBucket;
 
-/**
- * Helper function to upload a file to Firebase Storage
- */
-
-// ... (your other imports and BUCKET definition)
-
+// ... (uploadThumbnail function remains unchanged) ...
 const uploadThumbnail = async (
   file: File,
   id: string
 ): Promise<Product["thumbnail"]> => {
   const filePath = `products/${id}/thumbnail/${file.name}`;
   const fileRef = BUCKET.file(filePath);
-
-  // Convert File to Buffer
   const buffer = Buffer.from(await file.arrayBuffer());
 
-  // 1. Save the file
   await fileRef.save(buffer, {
     metadata: {
       contentType: file.type,
     },
-    // Optionally, you can set predefinedAcl to publicRead here
-    // public: true, // This is another way to do it on save
   });
 
-  // 2. Make the file public
   await fileRef.makePublic();
-
-  // 3. Construct the public URL directly
-  // This URL format is standard for public files in GCS/Firebase Storage
   const url = `https://storage.googleapis.com/${BUCKET.name}/${filePath}`;
 
   return {
     url: url,
-    file: filePath, // Store the storage path, not the original name
+    file: filePath,
     order: 0,
   };
 };
 
-// ... generateKeywords and generateTags functions (no changes) ...
-export const generateKeywords = (text: string): string[] => {
-  if (!text) return [];
-  const tokens = PorterStemmer.tokenizeAndStem(text);
-  const unigrams = tokens;
-  const bigrams = NGrams.ngrams(tokens, 2).map((ngram: string[]) =>
-    ngram.join(" ")
-  );
-  return [...unigrams, ...bigrams];
+// --- REMOVED STOPWORDS constant ---
+
+// --- REMOVED generateHybridTags function ---
+
+/**
+ * NEW: Helper function to extract keywords using retext
+ */
+const extractKeywords = async (text: string): Promise<string[]> => {
+  if (!text || text.trim() === "") return [];
+
+  try {
+    const file = await retextProcessor.process(text);
+
+    // Extract single keywords (e.g., "laptop")
+    const keywords =
+      file.data.keywords?.map((kw) => toString(kw.matches[0].node)) || [];
+
+    // Extract key-phrases (e.g., "natural language processing")
+    const keyphrases =
+      file.data.keyphrases?.map((ph) => toString(ph.matches[0].nodes)) || [];
+
+    // Combine, lowercase, and deduplicate
+    const allTags = [...keywords, ...keyphrases].map((tag) => tag.toLowerCase());
+    return Array.from(new Set(allTags));
+  } catch (e) {
+    console.error("Retext processing error:", e);
+    return []; // Return empty on error
+  }
 };
 
-export const generateTags = (product: Partial<Product>): string[] => {
+/**
+ * UPDATED: generateTags is now async and uses retext
+ */
+export const generateTags = async (
+  product: Partial<Product>
+): Promise<string[]> => {
   const tagsSet = new Set<string>();
-  if (product.name) {
-    generateKeywords(product.name).forEach((tag) => tagsSet.add(tag));
-  }
-  if (product.description) {
-    generateKeywords(product.description).forEach((tag) => tagsSet.add(tag));
-  }
+
+  const texts: string[] = [];
+  if (product.name) texts.push(product.name);
+  if (product.description) texts.push(product.description);
   if (product.variants) {
-    product.variants.forEach((variant) => {
-      if (variant.variantName) {
-        generateKeywords(variant.variantName).forEach((tag) =>
-          tagsSet.add(tag)
-        );
-      }
+    product.variants.forEach((v) => {
+      if (v.variantName) texts.push(v.variantName);
     });
   }
-  if (product.category) {
-    tagsSet.add(product.category.toLowerCase());
-  }
-  if (product.brand) {
-    tagsSet.add(product.brand.toLowerCase());
-  }
-  if (product.tags) {
-    product.tags.forEach((tag) => tagsSet.add(tag.toLowerCase()));
-  }
+
+  // Add brand and category directly
+  if (product.category) tagsSet.add(product.category.toLowerCase());
+  if (product.brand) tagsSet.add(product.brand.toLowerCase());
+
+  // Process all text fields at once for better context
+  const combinedText = texts.join(" ");
+  const nlpTags = await extractKeywords(combinedText); // AWAIT new function
+  nlpTags.forEach((tag) => tagsSet.add(tag));
+
   return [...tagsSet];
 };
 
 /**
  * Adds a new product to Firestore, now including generated keywords.
+ * UPDATED to await generateTags
  */
 export const addProducts = async (product: Partial<Product>, file: File) => {
   try {
@@ -97,15 +119,15 @@ export const addProducts = async (product: Partial<Product>, file: File) => {
     // 1. Upload thumbnail
     const thumbnail = await uploadThumbnail(file, id);
 
-    // 2. Generate keywords
-    const keywords = generateTags(product);
+    // 2. Generate keywords (now async)
+    const keywords = await generateTags(product); // AWAIT
 
     const newProductDocument: Product = {
       ...(product as Product), // Cast after filling required fields
       id: id,
-      productId: id, // Assuming itemId is the same as the doc ID
-      thumbnail: thumbnail, // Add the uploaded image URL
-      tags: keywords, // Note: your model says tags, your old code saved keywords here
+      productId: id,
+      thumbnail: thumbnail,
+      tags: keywords,
       isDeleted: false,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -125,19 +147,28 @@ export const addProducts = async (product: Partial<Product>, file: File) => {
   }
 };
 
+/**
+ * UPDATED to await generateTags
+ */
 export const updateProduct = async (
   id: string,
   product: Partial<Product>,
   file?: File | null
 ) => {
   try {
-    const keywords = generateTags(product);
+    const keywords = await generateTags(product); // AWAIT
     let thumbnail = product.thumbnail; // Keep old thumbnail by default
 
     if (file) {
-      const oldPath = (await getProductById(id))?.thumbnail.url;
+      // Note: getProductById now also filters variants, which is fine
+      const oldProduct = await getProductById(id);
+      const oldPath = oldProduct?.thumbnail?.file; // Use .file for the storage path
       if (oldPath) {
-        BUCKET.file(oldPath).delete();
+        try {
+          await BUCKET.file(oldPath).delete();
+        } catch (delError) {
+          console.warn(`Failed to delete old thumbnail: ${oldPath}`, delError);
+        }
       }
       thumbnail = await uploadThumbnail(file, id);
     }
@@ -155,12 +186,11 @@ export const updateProduct = async (
       weight: product.weight,
       variants: product.variants,
       status: product.status,
-      thumbnail: thumbnail, // Set new or existing thumbnail
+      thumbnail: thumbnail,
       tags: keywords,
       updatedAt: new Date(),
     };
 
-    // Use 'merge: true' to avoid overwriting fields not in 'product'
     await adminFirestore
       .collection(PRODUCTS_COLLECTION)
       .doc(id)
@@ -169,11 +199,14 @@ export const updateProduct = async (
     console.log(`Product updated with ID: ${id}`);
     return true;
   } catch (error) {
-    console.log(error);
+    console.log("Error updating product:", error); // Added log message
     return false;
   }
 };
 
+/**
+ * UPDATED to await generateTags and fixed search bug
+ */
 export const getProducts = async (
   pageNumber: number = 1,
   size: number = 20,
@@ -186,21 +219,34 @@ export const getProducts = async (
   try {
     let query: FirebaseFirestore.Query = adminFirestore
       .collection(PRODUCTS_COLLECTION)
-      .where("isDeleted", "==", false); // Filter deleted products
+      .where("isDeleted", "==", false);
 
     let countQuery: FirebaseFirestore.Query = adminFirestore
       .collection(PRODUCTS_COLLECTION)
       .where("isDeleted", "==", false);
 
-    // --- Simplified Logic: Search OR Filter ---
     if (search) {
-      const searchKeywords = generateKeywords(search);
-      query = query.where("tags", "array-contains-any", searchKeywords);
-      countQuery = countQuery.where(
-        "tags",
-        "array-contains-any",
-        searchKeywords
-      );
+      // --- FIX: Pass an object to generateTags, not just a string ---
+      // and AWAIT the result
+      const searchKeywords = await generateTags({
+        name: search,
+        description: search,
+      });
+
+      if (searchKeywords.length > 0) {
+        query = query.where("tags", "array-contains-any", searchKeywords);
+        countQuery = countQuery.where(
+          "tags",
+          "array-contains-any",
+          searchKeywords
+        );
+      } else {
+        // If search generates no keywords, return no results.
+        // We can force this by querying for a dummy tag.
+        query = query.where("tags", "array-contains", `__no_match__${nanoid()}`);
+        countQuery = countQuery.where("tags", "array-contains", `__no_match__${nanoid()}`);
+      }
+
     } else {
       if (brand) {
         query = query.where("brand", "==", brand);
@@ -218,9 +264,7 @@ export const getProducts = async (
         query = query.where("listing", "==", listing);
         countQuery = countQuery.where("listing", "==", listing);
       }
-      // No orderBy to avoid needing indexes
     }
-    // --- End ---
 
     // Get total count
     const totalSnapshot = await countQuery.get();
@@ -228,26 +272,27 @@ export const getProducts = async (
 
     // Apply pagination
     const offset = (pageNumber - 1) * size;
-    const productsSnapshot = await query.offset(offset).limit(size).get();
+    // Add ordering for consistent pagination
+    const productsSnapshot = await query
+      .offset(offset)
+      .limit(size)
+      .get();
 
-    // Map documents, excluding deleted variants and the top-level 'isDeleted' field
+    // ... (rest of getProducts function is unchanged) ...
     const products = productsSnapshot.docs.map((doc) => {
       const data = doc.data() as any;
-      const { isDeleted, variants, ...productData } = data; // Destructure fields
+      const { isDeleted, variants, ...productData } = data; 
 
-      // --- Filter Variants ---
       const activeVariants = (variants || []).filter(
         (variant: ProductVariant & { isDeleted?: boolean }) => {
-          return variant.isDeleted !== true; // Keep if not explicitly deleted
+          return variant.isDeleted !== true; 
         }
       );
-      // --- End Filter ---
 
       return {
-        ...productData, // Spread the rest of the product data
+        ...productData, 
         productId: doc.id,
-        variants: activeVariants, // Use the filtered variants array
-        // Convert Timestamps
+        variants: activeVariants,
         createdAt: data.createdAt?.toDate
           ? data.createdAt.toDate().toISOString()
           : new Date().toISOString(),
@@ -264,38 +309,34 @@ export const getProducts = async (
   }
 };
 
+// ... (getProductById function remains unchanged) ...
 export const getProductById = async (id: string): Promise<Product | null> => {
   try {
     const docRef = adminFirestore.collection(PRODUCTS_COLLECTION).doc(id);
     const docSnap = await docRef.get();
 
-    // Check if product exists and is not marked as deleted at the top level
     if (!docSnap.exists || docSnap.data()?.isDeleted) {
       return null;
     }
 
-    const data = docSnap.data() as any; // Cast to 'any' for easier manipulation initially
+    const data = docSnap.data() as any; 
 
-    // Filter the variants array
     const activeVariants = (data.variants || []).filter(
       (variant: ProductVariant & { isDeleted?: boolean }) => {
-        // Keep variant if isDeleted is explicitly false or if the field doesn't exist
         return variant.isDeleted !== true;
       }
     );
 
-    // Construct the final product object with filtered variants
     const product: Product = {
       ...data,
       productId: docSnap.id,
-      variants: activeVariants, // Use the filtered array
-      // Convert Timestamps to ISO strings, handle potential missing timestamps
+      variants: activeVariants, 
       createdAt: data.createdAt?.toDate
         ? data.createdAt.toDate().toISOString()
-        : new Date().toISOString(), // Or handle as null/undefined if preferred
+        : new Date().toISOString(),
       updatedAt: data.updatedAt?.toDate
         ? data.updatedAt.toDate().toISOString()
-        : new Date().toISOString(), // Or handle as null/undefined if preferred
+        : new Date().toISOString(),
     };
 
     return product;
@@ -305,6 +346,8 @@ export const getProductById = async (id: string): Promise<Product | null> => {
   }
 };
 
+
+// ... (getProductDropdown function remains unchanged) ...
 export const getProductDropdown = async () => {
   try {
     const snapshot = await adminFirestore

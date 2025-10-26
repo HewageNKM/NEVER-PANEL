@@ -53,6 +53,7 @@ interface ProductFormModalProps {
   brands: DropdownOption[];
   categories: DropdownOption[];
   sizes: DropdownOption[];
+  saving: boolean;
 }
 
 const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1MB
@@ -66,6 +67,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
   brands,
   categories,
   sizes,
+  saving,
 }) => {
   const [formData, setFormData] = useState<Product | typeof emptyProduct>(
     emptyProduct
@@ -76,8 +78,6 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
     null
   );
   const [errors, setErrors] = useState<ProductErrors>({});
-  const [saving, setSaving] = useState(false);
-
   const isEditing = !!product; // This determines if we are editing or creating
 
   useEffect(() => {
@@ -220,9 +220,7 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
 
   const handleSubmit = () => {
     try {
-      setSaving(true);
       if (validateForm()) {
-        // Ensure variants is always an array before saving
         const finalProductData = {
           ...formData,
           variants: formData.variants || [], // Default to empty array if null/undefined
@@ -231,8 +229,6 @@ const ProductFormModal: React.FC<ProductFormModalProps> = ({
       }
     } catch (error) {
       console.error("Save failed in modal:", error);
-    } finally {
-      setSaving(false);
     }
   };
 
