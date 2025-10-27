@@ -1,4 +1,3 @@
-import {orderStatus} from "@/constant";
 import {firestore} from "firebase-admin";
 import Timestamp = firestore.Timestamp;
 
@@ -101,10 +100,12 @@ export interface Order {
     items: OrderItem[],
     paymentStatus: string,
     paymentMethod: string,
-    paymentMethodId?: string,
-    status?: string,
-    shippingFee?: number,
-    fee?: number,
+    paymentMethodId: string,
+    total: number,
+    status: string,
+    shippingFee: number,
+    transactionFeeCharge: number,
+    fee: number,
     customer?: Customer,
     discount: number,
     from: string,
@@ -117,6 +118,7 @@ export interface Order {
 export interface Payment{
     amount: number,
     paymentMethod: string,
+    paymentMethodId?: string,
     id: string,
     cardNumber: string,
 }

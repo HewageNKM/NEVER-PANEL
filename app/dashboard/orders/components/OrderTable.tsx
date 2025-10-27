@@ -128,13 +128,7 @@ const OrderTable = () => {
                 </TableCell>
                 <TableCell>
                   LKR{" "}
-                  {order.items.reduce(
-                    (sum, item) => sum + item.price * item.quantity,
-                    0
-                  ) -
-                    (order?.discount || 0) +
-                    (order?.fee || 0) +
-                    (order?.shippingFee || 0)}
+                  {order.total}
                 </TableCell>
                 <TableCell>{order.items.length}</TableCell>
                 <TableCell>{order.from}</TableCell>
