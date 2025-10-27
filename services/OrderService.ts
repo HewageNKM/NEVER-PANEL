@@ -4,7 +4,7 @@ import {
   updateOrAddOrderHash,
   validateDocumentIntegrity,
 } from "./IntegrityService";
-import { Timestamp } from "firebase-admin/firestore";
+import { FieldValue, Timestamp } from "firebase-admin/firestore";
 
 const ORDERS_COLLECTION = "orders";
 
@@ -99,7 +99,6 @@ export const getOrder = async (orderId: string): Promise<Order | null> => {
 
     // 2. Passed 'adminFirestore' and used the doc.id for the check
     const integrity = await validateDocumentIntegrity(
-      adminFirestore,
       ORDERS_COLLECTION,
       doc.id
     );
@@ -127,29 +126,48 @@ export const getOrder = async (orderId: string): Promise<Order | null> => {
 
 export const updateOrder = async (order: Order, orderId: string) => {
   try {
-    await adminFirestore
-      .collection(ORDERS_COLLECTION)
-      .doc(orderId)
-      .set(
-        {
-          paymentStatus: order.paymentStatus,
-          status: order.status,
-          updatedAt: new Date(),
-          ...(order.customer && {
-            customer: {
-              ...order.customer,
-              updatedAt: new Date(),
-            },
-          }),
-        },
-        { merge: true }
+    const orderRef = adminFirestore.collection(ORDERS_COLLECTION).doc(orderId);
+    const orderDoc = await orderRef.get();
+
+    if (!orderDoc.exists) throw new Error(`Order with ID ${orderId} not found`);
+
+    const existingOrder = orderDoc.data() as Order;
+
+    if (existingOrder.paymentStatus?.toLowerCase() === "refunded") {
+      throw new Error(
+        `Order with ID ${orderId} is already refunded can't proceed with update`
       );
-    const updatedOrder = await getOrder(orderId);
-    if (!updatedOrder) return;
-    await updateOrAddOrderHash(order);
-    console.log(`Order with ID ${order.orderId} updated successfully`);
-  } catch (error: any) {
-    console.error(error);
+    }
+
+    // 🧾 Update Firestore order
+    const orderUpdate = {
+      paymentStatus: order.paymentStatus,
+      status: order.status,
+      updatedAt: FieldValue.serverTimestamp(),
+      ...(order.customer && {
+        customer: {
+          ...order.customer,
+          updatedAt: FieldValue.serverTimestamp(),
+        },
+      }),
+    };
+
+    await orderRef.set(orderUpdate, { merge: true });
+
+    // ✅ Fetch the final updated data
+    const updatedOrderDoc = await orderRef.get();
+    const updatedOrderData = updatedOrderDoc.data();
+
+    if (!updatedOrderData) {
+      throw new Error(`Order with ID ${orderId} not found after update`);
+    }
+
+    // 🔒 Update or add hash ledger entry
+    await updateOrAddOrderHash(updatedOrderData);
+
+    console.log(`✅ Order with ID ${orderId} updated and hashed successfully`);
+  } catch (error) {
+    console.error("❌ Error updating order:", error);
     throw error;
   }
 };
