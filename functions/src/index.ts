@@ -1,9 +1,11 @@
 import { onSchedule } from "firebase-functions/v2/scheduler";
 import * as admin from "firebase-admin";
 import { BATCH_LIMIT, Item, Order, PaymentStatus } from "./constant";
-import { calculateTotal, commitBatch } from "./util";
+import { calculateTotal, commitBatch, generateDocumentHash } from "./util";
+
 admin.initializeApp();
 const db = admin.firestore();
+const FieldValue = admin.firestore.FieldValue;
 
 export const scheduledOrdersCleanup = onSchedule(
   {
@@ -13,47 +15,57 @@ export const scheduledOrdersCleanup = onSchedule(
     memory: "512MiB",
     timeoutSeconds: 540,
   },
-  async (event) => {
+  async () => {
     try {
       console.log("🧹 Starting scheduled Firestore cleanup job...");
 
       const orderCollection = db.collection("orders");
       const inventoryCollection = db.collection("inventory");
       const cleanupLogCollection = db.collection("cleanup_logs");
+      const hashLedgerCollection = db.collection("hash_ledger");
 
       const timeFrame = admin.firestore.Timestamp.fromDate(
-        new Date(Date.now() - 4 * 60 * 60 * 1000)
+        new Date(Date.now() - 4 * 60 * 60 * 1000) // 4 hours ago
       );
 
-      const failedOrdersSnap = await orderCollection
+      const ordersSnap = await orderCollection
         .where("createdAt", "<=", timeFrame)
-        .where("paymentStatus", "==", PaymentStatus.Failed)
+        .where("paymentStatus", "in", [
+          PaymentStatus.Failed,
+          PaymentStatus.Refunded,
+        ])
+        .where("restocked", "in", [false, null])
         .get();
 
-      if (failedOrdersSnap.empty) {
-        console.log("✅ No failed orders to clean up.");
-        return; // <-- fine; returns void
+      if (ordersSnap.empty) {
+        console.log("✅ No failed or refunded orders to clean up.");
+        return;
       }
 
-      console.log(
-        `⚠️ Found ${failedOrdersSnap.size} failed orders to process.`
-      );
+      console.log(`⚠️ Found ${ordersSnap.size} orders to process.`);
 
       let batch = db.batch();
       let opCount = 0;
       const logs: any[] = [];
 
-      for (const orderDoc of failedOrdersSnap.docs) {
+      for (const orderDoc of ordersSnap.docs) {
         const orderData = orderDoc.data() as Order;
+        const orderId = orderDoc.id;
+        const hashId = `hash${orderId}`;
+        const hashDocRef = hashLedgerCollection.doc(hashId);
 
+        const total =
+          calculateTotal(orderData.items) +
+          (orderData?.shippingFee || 0) +
+          (orderData?.fee || 0) -
+          (orderData?.discount || 0);
+
+        // 🧮 Restock items
         for (const orderItem of orderData.items) {
           const inventoryDocRef = inventoryCollection.doc(orderItem.itemId);
           const inventorySnap = await inventoryDocRef.get();
-
           if (!inventorySnap.exists) {
-            console.warn(
-              `❗ Inventory doc not found for itemId: ${orderItem.itemId}`
-            );
+            console.warn(`❗ Missing inventory item: ${orderItem.itemId}`);
             continue;
           }
 
@@ -61,25 +73,12 @@ export const scheduledOrdersCleanup = onSchedule(
           const variant = inventoryData.variants.find(
             (v) => v.variantId === orderItem.variantId
           );
-
-          if (!variant) {
-            console.warn(
-              `❗ Variant not found for itemId: ${orderItem.itemId}, variantId: ${orderItem.variantId}`
-            );
-            continue;
-          }
-
+          if (!variant) continue;
           const size = variant.sizes.find((s) => s.size === orderItem.size);
-          if (!size) {
-            console.warn(
-              `❗ Size not found for itemId: ${orderItem.itemId}, variantId: ${orderItem.variantId}, size: ${orderItem.size}`
-            );
-            continue;
-          }
+          if (!size) continue;
 
-          // ✅ Restock item
           size.stock += orderItem.quantity;
-          batch.set(inventoryDocRef, inventoryData);
+          batch.set(inventoryDocRef, inventoryData, { merge: true });
           opCount++;
 
           if (opCount >= BATCH_LIMIT) {
@@ -88,55 +87,87 @@ export const scheduledOrdersCleanup = onSchedule(
           }
         }
 
-        const total =
-          calculateTotal(orderData.items) +
-          (orderData?.shippingFee || 0) +
-          (orderData?.fee || 0) -
-          (orderData?.discount || 0);
-
+        // 🧾 Log cleanup
         logs.push({
           context: "order_cleanup",
           entityType: "order",
-          refId: orderDoc.id,
+          refId: orderId,
           userId: orderData.userId ?? null,
           total: total ?? 0,
-          reason: "Payment failed for more than 4 hours",
+          reason:
+            orderData.paymentStatus === PaymentStatus.Refunded
+              ? "Refunded order restocked"
+              : "Payment failed for more than 4 hours",
+          action: "restock",
+          paymentStatus: orderData.paymentStatus,
           metadata: {
-            paymentMethod: orderData.paymentMethod ?? null,
-            paymentMethodId: orderData.paymentMethodId ?? null,
             items: orderData.items ?? [],
             createdAt: orderData.createdAt ?? null,
+            paymentMethod: orderData.paymentMethod ?? null,
           },
           deletedAt: admin.firestore.Timestamp.now(),
           timestamp: admin.firestore.Timestamp.now(),
         });
 
-        // Delete order
-        batch.delete(orderDoc.ref);
-        opCount++;
+        // 🧾 Handle order and hash logic
+        if (orderData.paymentStatus === PaymentStatus.Failed) {
+          // ❌ Delete failed order + its hash
+          batch.delete(orderDoc.ref);
+          batch.delete(hashDocRef);
+        } else if (orderData.paymentStatus === PaymentStatus.Refunded) {
+          // ♻️ Update refunded order
+          const orderUpdate = {
+            restocked: true,
+            restockedAt: admin.firestore.Timestamp.now(),
+            cleanupProcessed: true,
+          };
+          batch.update(orderDoc.ref, orderUpdate);
 
+          // 🧩 Generate new hash from updated data
+          const updatedOrderData = { ...orderData, ...orderUpdate };
+          const hash = generateDocumentHash(updatedOrderData);
+
+          // 🔁 Update or create hash ledger entry
+          batch.set(
+            hashDocRef,
+            {
+              id: hashDocRef.id,
+              hashValue: hash,
+              sourceCollection: "orders",
+              sourceDocId: orderId,
+              paymentStatus: orderData.paymentStatus,
+              updatedAt: FieldValue.serverTimestamp(),
+              createdAt: FieldValue.serverTimestamp(),
+              cleanupFlag: true,
+            },
+            { merge: true }
+          );
+        }
+
+        opCount++;
         if (opCount >= BATCH_LIMIT) {
           batch = await commitBatch(batch, opCount);
           opCount = 0;
         }
       }
 
+      // Final commit
       if (opCount > 0) {
         await batch.commit();
         console.log(`💾 Committed final batch of ${opCount} operations.`);
       }
 
+      // Log entries
       if (logs.length > 0) {
         const logBatch = db.batch();
         for (const log of logs) {
-          const logRef = cleanupLogCollection.doc();
-          logBatch.set(logRef, log);
+          logBatch.set(cleanupLogCollection.doc(), log);
         }
         await logBatch.commit();
-        console.log(`🗂️ Logged ${logs.length} cleaned orders to cleanup_logs.`);
+        console.log(`🗂️ Logged ${logs.length} cleanup entries.`);
       }
 
-      console.log("✅ Firestore cleanup and deletion completed successfully.");
+      console.log("✅ Firestore cleanup and restock completed successfully.");
     } catch (error) {
       console.error("❌ Error during scheduledOrdersCleanup:", error);
     }
