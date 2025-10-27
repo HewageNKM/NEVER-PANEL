@@ -17,7 +17,10 @@ import { uuidv4 } from "@firebase/util";
 import { Timestamp } from "firebase-admin/firestore";
 import { generateRandomPassword, hashPassword } from "@/utils/Generate";
 import axios from "axios";
-import { validateDocumentIntegrity } from "@/services/IntegrityService";
+import {
+  updateOrAddOrderHash,
+  validateDocumentIntegrity,
+} from "@/services/IntegrityService";
 
 if (!admin.apps.length) {
   admin.initializeApp({
@@ -85,10 +88,7 @@ export const getOrders = async (pageNumber: number = 1, size: number = 20) => {
       const orderData = doc.data() as Order;
 
       // 2. Passed 'adminFirestore' as the first argument
-      const integrityResult = await validateDocumentIntegrity(
-        "orders",
-        doc.id
-      );
+      const integrityResult = await validateDocumentIntegrity("orders", doc.id);
 
       // 3. Fixed object creation:
       // - 'orderId' is now correctly set to the doc.id
@@ -231,14 +231,6 @@ export const updateOrder = async (order: Order) => {
           ),
         }
       : null,
-    tracking: order?.tracking
-      ? {
-          ...order.tracking,
-          updatedAt: admin.firestore.Timestamp.fromDate(
-            new Date(order.tracking.updatedAt)
-          ),
-        }
-      : null,
     createdAt: admin.firestore.Timestamp.fromDate(new Date(order.createdAt)),
     updatedAt: admin.firestore.Timestamp.fromDate(new Date(order.updatedAt)),
   };
@@ -254,6 +246,14 @@ export const updateOrder = async (order: Order) => {
       );
 
     console.log(`Order with ID ${order.orderId} updated successfully`);
+    const orderDoc = await adminFirestore
+      .collection("orders")
+      .doc(order.orderId)
+      .get();
+    if (!orderDoc.exists)
+      throw new Error(`Order with ID ${order.orderId} not found`);
+    await updateOrAddOrderHash(orderDoc.data());
+    return orderDoc.data() as Order;
   } catch (error: any) {
     console.error(error);
     throw error;
@@ -827,10 +827,7 @@ export const getOrdersByDate = async (date: string) => {
       const orderData = doc.data() as Order;
 
       // 2. Passed 'adminFirestore' as the first argument
-      const integrityResult = await validateDocumentIntegrity(
-        "orders",
-        doc.id
-      );
+      const integrityResult = await validateDocumentIntegrity("orders", doc.id);
 
       const order: Order = {
         ...orderData,
@@ -1503,7 +1500,6 @@ export const authorizeRequest = async (req: any) => {
     const token = authHeader?.startsWith("Bearer ")
       ? authHeader.split(" ")[1]
       : null;
-    console.log("Token:", token);
 
     if (token != "undefined") {
       const decodedIdToken = await adminAuth.verifyIdToken(token);
