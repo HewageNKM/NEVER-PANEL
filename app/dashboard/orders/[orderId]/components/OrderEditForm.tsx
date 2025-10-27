@@ -31,7 +31,10 @@ interface OrderEditFormProps {
   onRefresh?: () => void; // optional callback to refresh parent data
 }
 
-export const OrderEditForm: React.FC<OrderEditFormProps> = ({ order, onRefresh }) => {
+export const OrderEditForm: React.FC<OrderEditFormProps> = ({
+  order,
+  onRefresh,
+}) => {
   const { showNotification } = useSnackbar();
 
   const [formData, setFormData] = useState<Order>(order);
@@ -41,6 +44,13 @@ export const OrderEditForm: React.FC<OrderEditFormProps> = ({ order, onRefresh }
     setFormData((prev) => ({
       ...prev,
       paymentStatus: event.target.value,
+    }));
+  };
+
+  const handleOrderStatusChange = (event: SelectChangeEvent<string>) => {
+    setFormData((prev) => ({
+      ...prev,
+      status: event.target.value,
     }));
   };
 
@@ -70,11 +80,14 @@ export const OrderEditForm: React.FC<OrderEditFormProps> = ({ order, onRefresh }
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      showNotification(`Order #${order.orderId} updated successfully.`, "success");
+      showNotification(
+        `Order #${order.orderId} updated successfully.`,
+        "success"
+      );
       onRefresh?.(); // refresh parent data if provided
     } catch (error: any) {
       console.error(error);
-      showNotification(error.message || "Failed to update order", "error");
+      showNotification(error.response?.data?.message || "Failed to update order", "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -82,7 +95,8 @@ export const OrderEditForm: React.FC<OrderEditFormProps> = ({ order, onRefresh }
 
   const formatDate = (timestamp: any) => {
     if (!timestamp) return "—";
-    if (typeof timestamp === "string") return new Date(timestamp).toLocaleString();
+    if (typeof timestamp === "string")
+      return new Date(timestamp).toLocaleString();
     if (timestamp.toDate) return timestamp.toDate().toLocaleString();
     return new Date(timestamp).toLocaleString();
   };
@@ -130,12 +144,29 @@ export const OrderEditForm: React.FC<OrderEditFormProps> = ({ order, onRefresh }
                     }
                   />
                 </Typography>
-
-                <Typography>
-                  <span className="font-semibold">From:</span> {order?.from || "—"}
+                 <Typography>
+                  <span className="font-semibold">Status:</span>{" "}
+                  <Chip
+                    size="small"
+                    label={order?.status?.toUpperCase() || "UNKNOWN"}
+                    color={
+                      order?.status?.toLowerCase() === "processing"
+                        ? "warning"
+                        : order?.status?.toLowerCase() === "completed"
+                        ? "success"
+                        : "default"
+                    }
+                  />
                 </Typography>
 
-                <Typography sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Typography>
+                  <span className="font-semibold">From:</span>{" "}
+                  {order?.from || "—"}
+                </Typography>
+
+                <Typography
+                  sx={{ display: "flex", alignItems: "center", gap: 1 }}
+                >
                   <span className="font-semibold">Integrity:</span>
                   {order?.integrity ? (
                     <IoCheckmark color="green" size={20} />
@@ -189,7 +220,8 @@ export const OrderEditForm: React.FC<OrderEditFormProps> = ({ order, onRefresh }
                 <Typography>{order.customer.phone}</Typography>
                 <Typography>{order.customer.email}</Typography>
                 <Typography>
-                  {order.customer.address}, {order.customer.city} {order.customer.zip}
+                  {order.customer.address}, {order.customer.city}{" "}
+                  {order.customer.zip}
                 </Typography>
               </Box>
             )}
@@ -220,6 +252,23 @@ export const OrderEditForm: React.FC<OrderEditFormProps> = ({ order, onRefresh }
                   <MenuItem value="Paid">Paid</MenuItem>
                   <MenuItem value="Failed">Failed</MenuItem>
                   <MenuItem value="Refunded">Refunded</MenuItem>
+                </Select>
+              </FormControl>
+
+              {/* Order Status */}
+              <FormControl fullWidth margin="normal">
+                <InputLabel id="orderStatus-label">Order Status</InputLabel>
+                <Select
+                  fullWidth
+                  labelId="orderStatus-label"
+                  id="orderStatus"
+                  name="status"
+                  value={formData?.status || ""}
+                  label="Order Status"
+                  onChange={handleOrderStatusChange}
+                >
+                  <MenuItem value="Processing">Processing</MenuItem>
+                  <MenuItem value="Completed">Completed</MenuItem>
                 </Select>
               </FormControl>
 
