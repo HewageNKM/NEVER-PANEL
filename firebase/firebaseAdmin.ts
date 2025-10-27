@@ -17,6 +17,7 @@ import { uuidv4 } from "@firebase/util";
 import { Timestamp } from "firebase-admin/firestore";
 import { generateRandomPassword, hashPassword } from "@/utils/Generate";
 import axios from "axios";
+import { validateDocumentIntegrity } from "@/services/IntegrityService";
 
 if (!admin.apps.length) {
   admin.initializeApp({
@@ -34,36 +35,83 @@ export const adminStorageBucket = admin
   .storage()
   .bucket(process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET);
 
+// const adminFirestore = admin.firestore();
+
+// --- Helper Functions (from previous conversation) ---
+
+// This helper is needed to safely convert Firestore Timestamps or strings
+function toSafeLocaleString(
+  val: admin.firestore.Timestamp | string | null | undefined
+): string | null {
+  if (!val) {
+    return null;
+  }
+  if (typeof (val as any)?.toDate === "function") {
+    // It's a Firestore Timestamp
+    return (val as admin.firestore.Timestamp).toDate().toLocaleString();
+  }
+  if (typeof val === "string") {
+    // It's already a string, return as-is or try to parse
+    return new Date(val).toLocaleString();
+  }
+  return null;
+}
+
+/**
+ * Assumes validateDocumentIntegrity(db, collectionName, docId) is in this file
+ * and returns a Promise<{valid: boolean, message: string}>
+ */
+// import { validateDocumentIntegrity } from './your-hash-utils';
+// import { Order } from './your-interfaces';
+
+// --- Fixed Function ---
+
 export const getOrders = async (pageNumber: number = 1, size: number = 20) => {
   try {
     const offset = (pageNumber - 1) * size;
+
     // Fetch orders with pagination and sorting by createdAt
     const ordersSnapshot = await adminFirestore
       .collection("orders")
+      .orderBy("createdAt", "desc") // OrderBy must come before limit/offset
       .limit(size)
       .offset(offset)
-      .orderBy("createdAt", "desc")
       .get();
 
     const orders: Order[] = [];
-    ordersSnapshot.forEach((doc) => {
-      let order: Order = doc.data() as Order;
-      order = {
-        orderId: doc.id,
-        ...order,
-        customer: order.customer
+
+    // 1. Replaced forEach with a for...of loop to handle async/await
+    for (const doc of ordersSnapshot.docs) {
+      const orderData = doc.data() as Order;
+
+      // 2. Passed 'adminFirestore' as the first argument
+      const integrityResult = await validateDocumentIntegrity(
+        "orders",
+        doc.id
+      );
+
+      // 3. Fixed object creation:
+      // - 'orderId' is now correctly set to the doc.id
+      // - 'integrity' field is now added
+      // - 'toSafeLocaleString' helper is used for crash-safe date conversion
+      const order: Order = {
+        ...orderData,
+        orderId: doc.id, // 4. Correctly overwrites orderData.orderId with the doc ID
+        integrity: integrityResult, // 3. Added the integrity check result
+        customer: orderData.customer
           ? {
-              ...order.customer,
-              createdAt: order.customer.createdAt.toDate().toLocaleString(),
-              updatedAt: order.customer.updatedAt.toDate().toLocaleString(),
+              ...orderData.customer,
+              updatedAt: orderData.updatedAt
+                ? toSafeLocaleString(orderData.customer.updatedAt)
+                : null,
             }
           : null,
-        createdAt: order?.createdAt?.toDate().toLocaleString(),
-        updatedAt: order?.updatedAt?.toDate().toLocaleString(),
-        tracking: undefined,
+        createdAt: toSafeLocaleString(orderData.createdAt), // 5. Safe conversion
+        updatedAt: toSafeLocaleString(orderData.updatedAt), // 5. Safe conversion
       };
+
       orders.push(order);
-    });
+    }
 
     console.log(`Fetched ${orders.length} orders on page ${pageNumber}`);
     return orders;
@@ -124,6 +172,7 @@ export const getOrder = async (orderId: string): Promise<Order | null> => {
     // Extract the first document
     const doc = snapshot.docs[0];
     const data = doc.data();
+    const integrity = await validateDocumentIntegrity("orders", doc.id);
 
     // Convert timestamps to readable strings
     return {
@@ -132,12 +181,12 @@ export const getOrder = async (orderId: string): Promise<Order | null> => {
       customer: data.customer
         ? {
             ...data.customer,
-            createdAt: data.customer.createdAt?.toDate().toLocaleString() ?? "",
             updatedAt: data.customer.updatedAt?.toDate().toLocaleString() ?? "",
           }
         : null,
       createdAt: data.createdAt?.toDate().toLocaleString() ?? "",
       updatedAt: data.updatedAt?.toDate().toLocaleString() ?? "",
+      integrity: integrity,
     } as Order;
   } catch (error) {
     console.error("Error fetching order:", error);
@@ -748,10 +797,12 @@ export const deleteOrder = async (orderId: string) => {
 export const getOrdersByDate = async (date: string) => {
   try {
     console.log(`Fetching orders on ${date}`);
+
+    // Use precise start/end of day
     const startDate = new Date(date);
-    startDate.setHours(0, 0);
+    startDate.setHours(0, 0, 0, 0);
     const endDate = new Date(date);
-    endDate.setHours(23, 59);
+    endDate.setHours(23, 59, 59, 999);
 
     const startTimestamp = Timestamp.fromDate(startDate);
     const endTimestamp = Timestamp.fromDate(endDate);
@@ -769,36 +820,37 @@ export const getOrdersByDate = async (date: string) => {
     }
 
     const orders: Order[] = [];
-    querySnapshot.forEach((doc) => {
-      orders.push({
+
+    // 1. Replaced forEach with a for...of loop
+    for (const doc of querySnapshot.docs) {
+      // 5. Call doc.data() once
+      const orderData = doc.data() as Order;
+
+      // 2. Passed 'adminFirestore' as the first argument
+      const integrityResult = await validateDocumentIntegrity(
+        "orders",
+        doc.id
+      );
+
+      const order: Order = {
+        ...orderData,
         orderId: doc.id,
-        ...doc.data(),
-        createdAt: doc.data()?.createdAt?.toDate().toLocaleString(),
-        updatedAt: doc.data()?.updatedAt?.toDate().toLocaleString(),
-        customer: doc.data().customer
+        integrity: integrityResult,
+
+        // 4. Used safe date conversion
+        createdAt: toSafeLocaleString(orderData.createdAt),
+        updatedAt: toSafeLocaleString(orderData.updatedAt),
+
+        customer: orderData.customer
           ? {
-              ...doc.data().customer,
-              createdAt: doc
-                .data()
-                .customer?.createdAt?.toDate()
-                .toLocaleString(),
-              updatedAt: doc
-                .data()
-                .customer?.updatedAt?.toDate()
-                .toLocaleString(),
+              ...orderData.customer,
+              updatedAt: toSafeLocaleString(orderData.customer.updatedAt),
             }
           : null,
-        tracking: doc.data().tracking
-          ? {
-              ...doc.data().tracking,
-              updatedAt: doc
-                .data()
-                ?.tracking?.updatedAt?.toDate()
-                .toLocaleString(),
-            }
-          : null,
-      } as Order);
-    });
+      };
+
+      orders.push(order);
+    }
 
     console.log(`Fetched ${orders.length} orders on ${date}`);
     return orders;

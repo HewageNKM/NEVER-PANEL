@@ -1,23 +1,34 @@
-import {authorizeRequest, deleteOrder, getOrder, updateOrder} from "@/firebase/firebaseAdmin";
-import {NextResponse} from "next/server";
+import { authorizeRequest, getOrder } from "@/firebase/firebaseAdmin";
+import { updateOrder } from "@/services/OrderService";
+import { NextResponse } from "next/server";
 
-export const PUT = async (req: Request) => {
-    try {
-        // Verify the ID token
-        const response = await authorizeRequest(req);
-        if (!response) {
-            return NextResponse.json({message: 'Unauthorized'}, {status: 401});
-        }
-
-        const body = await req.json();
-        await updateOrder(body);
-
-        return NextResponse.json({message: 'Order updated successfully'});
-    } catch (error: any) {
-        console.error(error);
-        // Return a response with error message
-        return NextResponse.json({message: error.message}, {status: 500});
+export const PUT = async (
+  req: Request,
+  { params }: { params: { orderId: string } }
+) => {
+  try {
+    // Verify the ID token
+    const response = await authorizeRequest(req);
+    if (!response) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
+
+    const body = await req.json();
+    if (!body.paymentStatus || !body.status) {
+      return NextResponse.json(
+        { message: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+    const id = params.orderId;
+    await updateOrder(body, id);
+
+    return NextResponse.json({ message: "Order updated successfully" });
+  } catch (error: any) {
+    console.error(error);
+    // Return a response with error message
+    return NextResponse.json({ message: error.message }, { status: 500 });
+  }
 };
 export const GET = async (
   req: Request,

@@ -1,93 +1,151 @@
-import { paymentMethods, paymentStatus } from "@/constant";
 import { adminFirestore } from "@/firebase/firebaseAdmin";
 import { Order } from "@/model";
+import { validateDocumentIntegrity } from "./IntegrityService";
+import { Timestamp } from "firebase-admin/firestore";
+
+const ORDERS_COLLECTION = "orders";
+
+/**
+ * Helper to safely convert Firestore Timestamps or strings to a locale string.
+ * Prevents crashes if the field is null, undefined, or not a date.
+ */
+function toSafeLocaleString(val: any): string | null {
+  if (!val) {
+    return null;
+  }
+  // Check if it's a Firestore Timestamp
+  if (typeof (val as Timestamp)?.toDate === "function") {
+    return (val as Timestamp).toDate().toLocaleString();
+  }
+  // Check if it's a string or number that can be parsed
+  try {
+    const date = new Date(val);
+    // Check if the date is valid before converting
+    if (!isNaN(date.getTime())) {
+      return date.toLocaleString();
+    }
+    return String(val); // Return original value if not a valid date
+  } catch (e) {
+    return String(val); // Fallback
+  }
+}
 
 export const getOrders = async (pageNumber: number = 1, size: number = 20) => {
-    try {
-        const offset = (pageNumber - 1) * size;
-        // Fetch orders with pagination and sorting by createdAt
-        const ordersSnapshot = await adminFirestore.collection('orders')
-            .limit(size)
-            .offset(offset)
-            .orderBy('createdAt', 'desc')
-            .get();
+  try {
+    const offset = (pageNumber - 1) * size;
+    const ordersSnapshot = await adminFirestore
+      .collection(ORDERS_COLLECTION)
+      .orderBy("createdAt", "desc") // OrderBy must come before limit/offset
+      .limit(size)
+      .offset(offset)
+      .get();
 
-        const orders: Order[] = [];
-        ordersSnapshot.forEach(doc => {
-            let order: Order = doc.data() as Order;
-            order = {
-                ...order,
-                customer: order.customer ? {
-                    ...order.customer,
-                    createdAt: order.customer.createdAt.toDate().toLocaleString(),
-                    updatedAt: order.customer.updatedAt.toDate().toLocaleString(),
-                } : null,
-                createdAt: order?.createdAt?.toDate().toLocaleString(),
-                updatedAt: order?.updatedAt?.toDate().toLocaleString(),
-                tracking: undefined
+    const orders: Order[] = [];
+
+    // 1. Replaced forEach with a for...of loop to handle async/await
+    for (const doc of ordersSnapshot.docs) {
+      const orderData = doc.data() as Order;
+
+      // 2. Passed 'adminFirestore' as the first argument
+      const integrity = await validateDocumentIntegrity(
+        adminFirestore,
+        ORDERS_COLLECTION,
+        doc.id
+      );
+
+      const order: Order = {
+        ...orderData,
+        orderId: doc.id, // 3. Set orderId to the document ID
+        integrity: integrity, // 4. Added the integrity check result
+        customer: orderData.customer
+          ? {
+              ...orderData.customer,
+              // 5. Use safe date conversion
+              createdAt: toSafeLocaleString(orderData.customer.createdAt),
+              updatedAt: toSafeLocaleString(orderData.customer.updatedAt),
             }
-            orders.push(order);
-        });
-
-        console.log(`Fetched ${orders.length} orders on page ${pageNumber}`);
-        return orders;
-
-    } catch (error: any) {
-        console.error(error);
-        throw error
+          : null,
+        createdAt: toSafeLocaleString(orderData.createdAt),
+        updatedAt: toSafeLocaleString(orderData.updatedAt),
+        tracking: undefined,
+      };
+      orders.push(order);
     }
-};
 
+    console.log(`Fetched ${orders.length} orders on page ${pageNumber}`);
+    return orders;
+  } catch (error: any) {
+    console.error(error);
+    throw error;
+  }
+};
 
 export const getOrder = async (orderId: string): Promise<Order | null> => {
   try {
-    const snapshot = await adminFirestore
-      .collection("orders")
-      .where("orderId", "==", orderId)
-      .limit(1)
+    // 1. Changed query to a direct doc.get() for efficiency and consistency
+    const doc = await adminFirestore
+      .collection(ORDERS_COLLECTION)
+      .doc(orderId)
       .get();
 
-    // Check if no document found
-    if (snapshot.empty) {
+    if (!doc.exists) {
       console.warn(`Order with ID ${orderId} not found`);
       return null;
     }
 
-    // Extract the first document
-    const doc = snapshot.docs[0];
-    const data = doc.data();
+    const data = doc.data() as Order;
 
-    // Convert timestamps to readable strings
+    // 2. Passed 'adminFirestore' and used the doc.id for the check
+    const integrity = await validateDocumentIntegrity(
+      adminFirestore,
+      ORDERS_COLLECTION,
+      doc.id
+    );
+
     return {
       ...data,
+      orderId: doc.id, // 3. Ensure orderId is the doc ID
+      integrity: integrity, // 4. Add integrity result
       customer: data.customer
         ? {
             ...data.customer,
-            createdAt: data.customer.createdAt?.toDate().toLocaleString() ?? "",
-            updatedAt: data.customer.updatedAt?.toDate().toLocaleString() ?? "",
+            updatedAt: data.customer.updatedAt
+              ? toSafeLocaleString(data.customer.updatedAt)
+              : null,
           }
         : null,
-      createdAt: data.createdAt?.toDate().toLocaleString() ?? "",
-      updatedAt: data.updatedAt?.toDate().toLocaleString() ?? "",
+      createdAt: toSafeLocaleString(data.createdAt),
+      updatedAt: toSafeLocaleString(data.updatedAt),
     } as Order;
   } catch (error) {
     console.error("Error fetching order:", error);
     throw error;
   }
 };
-export const updateOrder = async (order: Order) => {
-    try {
-        await adminFirestore.collection('orders').doc(order.orderId).set({
-            paymentStatus: order.paymentStatus,
-            paymentMethod: order.paymentMethod,
-            paymentMethodId: order.paymentMethodId,
-            status: order.status,
-            updatedAt: new Date()
-        }, {merge: true});
 
-        console.log(`Order with ID ${order.orderId} updated successfully`);
-    } catch (error: any) {
-        console.error(error);
-        throw error
-    }
+export const updateOrder = async (order: Order, orderId: string) => {
+  try {
+    await adminFirestore
+      .collection(ORDERS_COLLECTION)
+      .doc(orderId)
+      .set(
+        {
+          paymentStatus: order.paymentStatus,
+          status: order.status,
+          updatedAt: new Date(),
+          ...(order.customer && {
+            customer: {
+              ...order.customer,
+              updatedAt: new Date(),
+            },
+          }),
+        },
+        { merge: true }
+      );
+
+    console.log(`Order with ID ${order.orderId} updated successfully`);
+  } catch (error: any) {
+    console.error(error);
+    throw error;
+  }
 };

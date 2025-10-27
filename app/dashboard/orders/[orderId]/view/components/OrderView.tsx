@@ -28,6 +28,7 @@ import { useSnackbar } from "@/contexts/SnackBarContext";
 import { useAppSelector } from "@/lib/hooks";
 import axios from "axios";
 import { getToken } from "@/firebase/firebaseClient";
+import { IoCheckmark, IoClose } from "react-icons/io5";
 
 const OrderView = ({ orderId }: { orderId: string }) => {
   const [order, setOrder] = useState<Order | null>(null);
@@ -163,6 +164,14 @@ const OrderView = ({ orderId }: { orderId: string }) => {
                         : "default"
                     }
                   />
+                </Typography>
+                <Typography>
+                  <span className="font-semibold">Integrity:</span>{" "}
+                  {order?.integrity ? (
+                    <IoCheckmark color="green" size={20} />
+                  ) : (
+                    <IoClose color="red" size={20} />
+                  )}
                 </Typography>
                 <Typography>
                   <span className="font-semibold">From:</span>{" "}
@@ -353,9 +362,11 @@ const OrderView = ({ orderId }: { orderId: string }) => {
                     </TableCell>
                   </TableRow>
                   {/* --- NEW ROW --- */}
-                  <TableRow style={{
-                    color: 'red'
-                  }}>
+                  <TableRow
+                    style={{
+                      color: "red",
+                    }}
+                  >
                     <TableCell colSpan={6} align="right">
                       Transaction Fee
                     </TableCell>

@@ -18,10 +18,11 @@ import {
   Typography,
   Chip,
   Button,
+  Tooltip,
 } from "@mui/material";
 import { useAppDispatch, useAppSelector } from "@/lib/hooks";
 import { getOrders, setPage, setSize } from "@/lib/ordersSlice/ordersSlice";
-import { IoRefreshOutline } from "react-icons/io5";
+import { IoCheckmark, IoClose, IoRefreshOutline } from "react-icons/io5";
 import EmptyState from "@/app/components/EmptyState";
 import ComponentsLoader from "@/app/components/ComponentsLoader";
 import { useRouter } from "next/navigation";
@@ -43,7 +44,7 @@ const OrderTable = () => {
 
   useEffect(() => {
     dispatch(getOrders({ size, page: selectedPage }));
-  }, [size, selectedPage])
+  }, [size, selectedPage]);
 
   return (
     <Stack spacing={4}>
@@ -76,7 +77,7 @@ const OrderTable = () => {
         }}
       >
         <Table
-          stickyHeader 
+          stickyHeader
           sx={{
             "& thead": {
               backgroundColor: "grey.100",
@@ -101,6 +102,7 @@ const OrderTable = () => {
               <TableCell>Items</TableCell>
               <TableCell>From</TableCell>
               <TableCell>Status</TableCell>
+              <TableCell>Integrity</TableCell>
               <TableCell>Created At</TableCell>
               <TableCell align="center">Actions</TableCell>
             </TableRow>
@@ -126,23 +128,28 @@ const OrderTable = () => {
                     size="small"
                   />
                 </TableCell>
-                <TableCell>
-                  LKR{" "}
-                  {order.total}
-                </TableCell>
+                <TableCell>LKR {order.total}</TableCell>
                 <TableCell>{order.items.length}</TableCell>
                 <TableCell>{order.from}</TableCell>
                 <TableCell>
                   <Chip
-                    label={order?.status?.toUpperCase() || "UNKNOWN"}
+                    label={order.status?.toUpperCase() || "UNKNOWN"}
                     color={
-                      order?.status?.toLowerCase() === "complete"
-                        ? "success"
-                        : order?.status?.toLowerCase() === "processing"
+                      order.status?.toLowerCase() === "processing"
                         ? "warning"
+                        : order.status?.toLowerCase() === "complete"
+                        ? "success"
                         : "default"
                     }
+                    size="small"
                   />
+                </TableCell>
+                <TableCell align="center">
+                  {order.integrity ? (
+                    <IoCheckmark color="green" size={20} />
+                  ) : (
+                    <IoClose color="red" size={20} />
+                  )}
                 </TableCell>
                 <TableCell>{order.createdAt}</TableCell>
                 <TableCell align="center">

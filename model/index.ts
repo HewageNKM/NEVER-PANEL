@@ -109,6 +109,7 @@ export interface Order {
     customer?: Customer,
     discount: number,
     from: string,
+    integrity: boolean,
     paymentReceived?: Payment[],
 
     createdAt: Timestamp | string,
