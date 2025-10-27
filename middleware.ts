@@ -5,8 +5,6 @@ export async function middleware(req: Request) {
 
   // Define allowed origins
   const allowedOrigins = ["https://admin.neverbe.lk"];
-  if (process.env.NODE_ENV === "development")
-    allowedOrigins.push("http://localhost:3000");
 
   // Handle CORS for all requests
   if (req.method === "OPTIONS") {

@@ -59,7 +59,7 @@ export const getBrands = async ({
     // 1️⃣ Base query
     let query: FirebaseFirestore.Query = adminFirestore
       .collection(COLLECTION)
-      .where("isDeleted", "==", false)
+      .where("isDeleted", "==", false);
 
     // 2️⃣ Status filter
     if (status === "active") query = query.where("active", "==", true);
@@ -68,9 +68,7 @@ export const getBrands = async ({
     // 3️⃣ Search filter (case-insensitive)
     if (search.trim()) {
       const s = search.trim();
-      query = query
-        .where("name", ">=", s)
-        .where("name", "<=", s + "\uf8ff");
+      query = query.where("name", ">=", s).where("name", "<=", s + "\uf8ff");
     }
 
     // 4️⃣ Pagination
@@ -159,4 +157,22 @@ export const deleteBrand = async (id: string) => {
   });
 
   return { success: true };
+};
+
+export const getBrandDropdown = async () => {
+  try {
+    const snapshot = await adminFirestore.collection(COLLECTION)
+    .where("isDeleted", "==", false)
+    .where("status", "==", true)
+    .get();
+
+    const brands = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      label: doc.data().name,
+    }));
+    return brands;
+  } catch (error) {
+    console.log(error);
+    return [];
+  }
 };

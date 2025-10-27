@@ -39,7 +39,24 @@ const Menuitems = [
       { id: uniqueId(), title: "Brands", href: "/dashboard/master/brands" },
       { id: uniqueId(), title: "Sizes", href: "/dashboard/master/sizes" },
       { id: uniqueId(), title: "Products", href: "/dashboard/master/products" },
+      {
+        id: uniqueId(),
+        title: "Stock Locations",
+        href: "/dashboard/master/stocks",
+      },
     ],
+  },
+  {
+    id: uniqueId(),
+    title: "Old Inventory",
+    icon: IconList,
+    href: "/dashboard/oldInventory",
+  },
+  {
+    id: uniqueId(),
+    title: "Inventory",
+    icon: IconList,
+    href: "/dashboard/inventory",
   },
   {
     id: uniqueId(),

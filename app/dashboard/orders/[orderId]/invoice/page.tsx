@@ -61,18 +61,6 @@ const OrderInvoice = () => {
     window.print();
   };
 
-  const subtotal =
-    order?.items.reduce((sum, item) => sum + item.price * item.quantity, 0) ||
-    0;
-  const totalItemDiscount =
-    order?.items.reduce(
-      (sum, item) => sum + item.discount * item.quantity,
-      0
-    ) || 0;
-  const totalDiscount = (order?.discount || 0) + totalItemDiscount;
-  const grandTotal =
-    subtotal - totalDiscount + (order?.shippingFee || 0) + (order?.fee || 0);
-
   if (loading) {
     return (
       <Box
@@ -298,7 +286,7 @@ const OrderInvoice = () => {
                   }}
                 >
                   <Typography>Subtotal:</Typography>
-                  <Typography>Rs. {subtotal.toFixed(2)}</Typography>
+                  <Typography>Rs. {order.items.reduce((acc, item) => acc + item.price * item.quantity, 0).toFixed(2)}</Typography>
                 </Box>
                 <Box
                   sx={{
@@ -308,7 +296,7 @@ const OrderInvoice = () => {
                   }}
                 >
                   <Typography>Total Discount:</Typography>
-                  <Typography>Rs. {totalDiscount.toFixed(2)}</Typography>
+                  <Typography>Rs. {order?.discount.toFixed(2)}</Typography>
                 </Box>
                 <Box
                   sx={{
@@ -338,7 +326,7 @@ const OrderInvoice = () => {
                     Grand Total:
                   </Typography>
                   <Typography variant="h6" fontWeight="bold">
-                    Rs. {grandTotal.toFixed(2)}
+                    Rs. {order?.total.toFixed(2)}
                   </Typography>
                 </Box>
               </Grid>

@@ -28,6 +28,7 @@ import { useSnackbar } from "@/contexts/SnackBarContext";
 import { useAppSelector } from "@/lib/hooks";
 import axios from "axios";
 import { getToken } from "@/firebase/firebaseClient";
+import { IoCheckmark, IoClose } from "react-icons/io5";
 
 const OrderView = ({ orderId }: { orderId: string }) => {
   const [order, setOrder] = useState<Order | null>(null);
@@ -57,6 +58,7 @@ const OrderView = ({ orderId }: { orderId: string }) => {
   };
 
   // --- 💰 Derived Calculations ---
+  // Subtotal is still needed for the table breakdown
   const subtotal =
     order?.items.reduce(
       (sum, item) => sum + item.quantity * (item.price - item.discount),
@@ -65,7 +67,9 @@ const OrderView = ({ orderId }: { orderId: string }) => {
   const discount = order?.discount || 0;
   const fee = order?.fee || 0;
   const shippingFee = order?.shippingFee || 0;
-  const total = subtotal - discount + fee + shippingFee;
+  // NEW: Get the transaction fee from the order
+  const transactionFeeCharge = order?.transactionFeeCharge || 0;
+  // REMOVED: Local 'total' calculation is no longer needed
 
   if (loadingOrder) {
     return (
@@ -116,7 +120,7 @@ const OrderView = ({ orderId }: { orderId: string }) => {
           <Chip
             label={order?.status?.toUpperCase() || "UNKNOWN"}
             color={
-              order?.status?.toLowerCase() === "complete"
+              order?.status?.toLowerCase() === "completed" // Updated value
                 ? "success"
                 : order?.status?.toLowerCase() === "processing"
                 ? "warning"
@@ -135,7 +139,13 @@ const OrderView = ({ orderId }: { orderId: string }) => {
               <Grid item xs={12} sm={6}>
                 <Typography>
                   <span className="font-semibold">Payment Method:</span>{" "}
-                  {order?.paymentMethod || "—"}
+                  {`${order?.paymentMethod} - ${
+                    order?.paymentMethodId?.toUpperCase() || "N/A"
+                  }`}
+                </Typography>
+                <Typography>
+                  <span className="font-semibold">Payment ID:</span>{" "}
+                  {order?.paymentId || "N/A"}
                 </Typography>
                 <Typography>
                   <span className="font-semibold">Payment Status:</span>{" "}
@@ -156,6 +166,14 @@ const OrderView = ({ orderId }: { orderId: string }) => {
                   />
                 </Typography>
                 <Typography>
+                  <span className="font-semibold">Integrity:</span>{" "}
+                  {order?.integrity ? (
+                    <IoCheckmark color="green" size={20} />
+                  ) : (
+                    <IoClose color="red" size={20} />
+                  )}
+                </Typography>
+                <Typography>
                   <span className="font-semibold">From:</span>{" "}
                   {order?.from || "—"}
                 </Typography>
@@ -167,7 +185,7 @@ const OrderView = ({ orderId }: { orderId: string }) => {
                 </Typography>
                 <Typography>
                   <span className="font-semibold">Updated:</span>{" "}
-                  {order?.updatedAt}
+                  {order?.updatedAt || "—"}
                 </Typography>
               </Grid>
             </Grid>
@@ -276,7 +294,7 @@ const OrderView = ({ orderId }: { orderId: string }) => {
                   {order?.items.map((item, i) => (
                     <TableRow key={i} hover>
                       <TableCell>{item.name}</TableCell>
-                      <TableCell>{item.variantName}</TableCell>
+                      <TableCell>{item.variantName.toUpperCase()}</TableCell>
                       <TableCell align="right">{item.size}</TableCell>
                       <TableCell align="right">{item.quantity}</TableCell>
                       <TableCell align="right">
@@ -329,6 +347,8 @@ const OrderView = ({ orderId }: { orderId: string }) => {
                     </TableCell>
                     <TableCell align="right">Rs.{fee.toFixed(2)}</TableCell>
                   </TableRow>
+
+                  {/* --- MODIFIED ROW --- */}
                   <TableRow>
                     <TableCell colSpan={6} align="right" className="font-bold">
                       Grand Total
@@ -337,7 +357,33 @@ const OrderView = ({ orderId }: { orderId: string }) => {
                       align="right"
                       className="font-bold text-primary-600"
                     >
-                      Rs.{total.toFixed(2)}
+                      {/* Use the total from the order object */}
+                      Rs.{(order?.total || 0).toFixed(2)}
+                    </TableCell>
+                  </TableRow>
+                  {/* --- NEW ROW --- */}
+                  <TableRow
+                    style={{
+                      color: "red",
+                    }}
+                  >
+                    <TableCell colSpan={6} align="right">
+                      Transaction Fee
+                    </TableCell>
+                    <TableCell align="right">
+                      Rs.{transactionFeeCharge.toFixed(2)}
+                    </TableCell>
+                  </TableRow>
+
+                  <TableRow>
+                    <TableCell colSpan={6} align="right">
+                      Merchant Total
+                    </TableCell>
+                    <TableCell align="right">
+                      Rs.
+                      {(
+                        order?.total - order?.transactionFeeCharge || 0
+                      ).toFixed(2)}
                     </TableCell>
                   </TableRow>
                 </TableBody>
@@ -358,41 +404,27 @@ const OrderView = ({ orderId }: { orderId: string }) => {
               </Typography>
               <Divider className="mb-3" />
               <TableContainer component={Paper} variant="outlined">
-                <Table
-                  size="small"
-                >
+                <Table size="small">
                   <TableHead className="bg-gray-50">
                     <TableRow>
-                      <TableCell
-                      >
-                        Payment ID
-                      </TableCell>
-                      <TableCell
-                      >
-                        Method
-                      </TableCell>
-                      <TableCell
-                        align="right"
-                      >
-                        Amount
-                      </TableCell>
+                      <TableCell>Payment ID</TableCell>
+                      <TableCell>Method ID</TableCell>
+                      <TableCell>Method</TableCell>
+                      <TableCell align="right">Amount</TableCell>
                       <TableCell>Card</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {order.paymentReceived.map((p) => (
                       <TableRow key={p.id} hover>
-                        <TableCell
-                        >
-                          {p.id}
+                        <TableCell>{p.id}</TableCell>
+                        <TableCell>
+                          {/* This assumes 'paymentMethodId' was added 
+                              to the Payment type during migration */}
+                          {(p as any)?.paymentMethodId?.toUpperCase() || "N/A"}
                         </TableCell>
-                        <TableCell
-                        >
-                          {p.paymentMethod}
-                        </TableCell>
-                        <TableCell
-                          align="right"
-                        >
+                        <TableCell>{p.paymentMethod.toUpperCase()}</TableCell>
+                        <TableCell align="right">
                           Rs.{p.amount.toFixed(2)}
                         </TableCell>
                         <TableCell>{p.cardNumber}</TableCell>
