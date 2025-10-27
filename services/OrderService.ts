@@ -70,7 +70,6 @@ export const getOrders = async (pageNumber: number = 1, size: number = 20) => {
           : null,
         createdAt: toSafeLocaleString(orderData.createdAt),
         updatedAt: toSafeLocaleString(orderData.updatedAt),
-        tracking: undefined,
       };
       orders.push(order);
     }

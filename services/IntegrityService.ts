@@ -3,7 +3,9 @@ import crypto from "crypto";
 import { FieldValue } from "firebase-admin/firestore";
 import stringify from "json-stable-stringify";
 
-export const generateDocumentHash = (docData:any) => {
+const HASH_LEDGER_COLLECTION = "hash_ledger";
+
+export const generateDocumentHash = (docData: any) => {
   // 1. Create a copy of the data
   const dataToHash = { ...docData };
 
@@ -17,9 +19,12 @@ export const generateDocumentHash = (docData:any) => {
     .digest("hex");
 
   return hash;
-}
+};
 
-export const validateDocumentIntegrity = async (collectionName:string, docId:string) => {
+export const validateDocumentIntegrity = async (
+  collectionName: string,
+  docId: string
+) => {
   try {
     // 1. Get the document's current data
     const docRef = adminFirestore.collection(collectionName).doc(docId);
@@ -33,12 +38,14 @@ export const validateDocumentIntegrity = async (collectionName:string, docId:str
 
     // 2. Determine the ledger ID and get the stored hash
     const ledgerId = `hash_${docId}`;
-    const hashRef = adminFirestore.collection("hash_ledger").doc(ledgerId);
+    const hashRef = adminFirestore
+      .collection(HASH_LEDGER_COLLECTION)
+      .doc(ledgerId);
     const hashDoc = await hashRef.get();
 
     if (!hashDoc.exists) {
       console.warn(`Hash ledger not found for ${collectionName}/${docId}.`);
-      return false
+      return false;
     }
     const storedHash = hashDoc?.data()?.hashValue;
 
@@ -66,27 +73,29 @@ export const validateDocumentIntegrity = async (collectionName:string, docId:str
   }
 };
 
-export const updateOrAddOrderHash = async (data:any) => {
+export const updateOrAddOrderHash = async (data: any) => {
   try {
     // 1. Generate the hash using the global helper
     const hashValue = generateDocumentHash(data);
     // 2. Use the standard naming convention: {collection}_{docId}
     const ledgerId = `hash_${data.orderId}`; // Assuming data has an orderId
-    
-    // 3. Save to the ledger
-    await adminFirestore.collection('hash_ledger').doc(ledgerId).set({
-      id: ledgerId,
-      hashValue: hashValue,
-      sourceCollection: 'orders', // Assuming this is for orders
-      sourceDocId: data.orderId,
-      createdAt: FieldValue.serverTimestamp(),
-      updatedAt: FieldValue.serverTimestamp(),
-    }, { merge: true }); // Use merge to update if exists, create if not
-    
-    console.log(`Hash ledger updated/created for: ${ledgerId}`);
 
+    // 3. Save to the ledger
+    await adminFirestore.collection(HASH_LEDGER_COLLECTION).doc(ledgerId).set(
+      {
+        id: ledgerId,
+        hashValue: hashValue,
+        sourceCollection: "orders", // Assuming this is for orders
+        sourceDocId: data.orderId,
+        createdAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
+      },
+      { merge: true }
+    ); // Use merge to update if exists, create if not
+
+    console.log(`Hash ledger updated/created for: ${ledgerId}`);
   } catch (error) {
     console.error(`Failed to create hash:`, error);
     throw error;
   }
-}
+};
