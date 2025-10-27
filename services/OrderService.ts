@@ -1,6 +1,9 @@
 import { adminFirestore } from "@/firebase/firebaseAdmin";
 import { Order } from "@/model";
-import { validateDocumentIntegrity } from "./IntegrityService";
+import {
+  updateOrAddOrderHash,
+  validateDocumentIntegrity,
+} from "./IntegrityService";
 import { Timestamp } from "firebase-admin/firestore";
 
 const ORDERS_COLLECTION = "orders";
@@ -142,7 +145,9 @@ export const updateOrder = async (order: Order, orderId: string) => {
         },
         { merge: true }
       );
-
+    const updatedOrder = await getOrder(orderId);
+    if (!updatedOrder) return;
+    await updateOrAddOrderHash(order);
     console.log(`Order with ID ${order.orderId} updated successfully`);
   } catch (error: any) {
     console.error(error);
