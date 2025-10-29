@@ -25,7 +25,7 @@ export const scheduledOrdersCleanup = onSchedule(
       const hashLedgerCollection = db.collection("hash_ledger");
 
       const timeFrame = admin.firestore.Timestamp.fromDate(
-        new Date(Date.now() - 4 * 60 * 60 * 1000) // 4 hours ago
+        new Date(Date.now() - 4 * 60 * 60 * 1000)
       );
 
       const ordersSnap = await orderCollection
@@ -60,7 +60,6 @@ export const scheduledOrdersCleanup = onSchedule(
           (orderData?.fee || 0) -
           (orderData?.discount || 0);
 
-        // 🧮 Restock items
         for (const orderItem of orderData.items) {
           const inventoryDocRef = inventoryCollection.doc(orderItem.itemId);
           const inventorySnap = await inventoryDocRef.get();
@@ -87,7 +86,6 @@ export const scheduledOrdersCleanup = onSchedule(
           }
         }
 
-        // 🧾 Log cleanup
         logs.push({
           context: "order_cleanup",
           entityType: "order",
@@ -109,13 +107,10 @@ export const scheduledOrdersCleanup = onSchedule(
           timestamp: admin.firestore.Timestamp.now(),
         });
 
-        // 🧾 Handle order and hash logic
         if (orderData.paymentStatus === PaymentStatus.Failed) {
-          // ❌ Delete failed order + its hash
           batch.delete(orderDoc.ref);
           batch.delete(hashDocRef);
         } else if (orderData.paymentStatus === PaymentStatus.Refunded) {
-          // ♻️ Update refunded order
           const orderUpdate = {
             restocked: true,
             restockedAt: admin.firestore.Timestamp.now(),
@@ -123,11 +118,9 @@ export const scheduledOrdersCleanup = onSchedule(
           };
           batch.update(orderDoc.ref, orderUpdate);
 
-          // 🧩 Generate new hash from updated data
           const updatedOrderData = { ...orderData, ...orderUpdate };
           const hash = generateDocumentHash(updatedOrderData);
 
-          // 🔁 Update or create hash ledger entry
           batch.set(
             hashDocRef,
             {
@@ -151,13 +144,11 @@ export const scheduledOrdersCleanup = onSchedule(
         }
       }
 
-      // Final commit
       if (opCount > 0) {
         await batch.commit();
         console.log(`💾 Committed final batch of ${opCount} operations.`);
       }
 
-      // Log entries
       if (logs.length > 0) {
         const logBatch = db.batch();
         for (const log of logs) {
