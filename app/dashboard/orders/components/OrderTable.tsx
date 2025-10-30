@@ -123,6 +123,8 @@ const OrderTable = () => {
                         ? "warning"
                         : order.paymentStatus?.toLowerCase() === "failed"
                         ? "error"
+                        : order.paymentStatus?.toLowerCase() === "refunded"
+                        ? "warning"
                         : "default"
                     }
                     size="small"

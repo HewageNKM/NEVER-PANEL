@@ -111,6 +111,10 @@ export interface Order {
     from: string,
     integrity: boolean,
     paymentReceived?: Payment[],
+    
+    restockedAt?: Timestamp | string,
+    restocked?: boolean,
+    cleanupProcessed?: boolean,
 
     createdAt: Timestamp | string,
     updatedAt: Timestamp | string,
