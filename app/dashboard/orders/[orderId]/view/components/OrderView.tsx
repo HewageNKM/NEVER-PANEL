@@ -57,19 +57,16 @@ const OrderView = ({ orderId }: { orderId: string }) => {
     }
   };
 
-  // --- 💰 Derived Calculations ---
-  // Subtotal is still needed for the table breakdown
   const subtotal =
     order?.items.reduce(
       (sum, item) => sum + item.quantity * (item.price - item.discount),
       0
     ) || 0;
+
   const discount = order?.discount || 0;
   const fee = order?.fee || 0;
   const shippingFee = order?.shippingFee || 0;
-  // NEW: Get the transaction fee from the order
   const transactionFeeCharge = order?.transactionFeeCharge || 0;
-  // REMOVED: Local 'total' calculation is no longer needed
 
   if (loadingOrder) {
     return (
@@ -86,6 +83,7 @@ const OrderView = ({ orderId }: { orderId: string }) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
     >
+      {/* Breadcrumbs */}
       <Breadcrumbs
         separator={<NavigateNextIcon fontSize="small" />}
         aria-label="breadcrumb"
@@ -120,7 +118,7 @@ const OrderView = ({ orderId }: { orderId: string }) => {
           <Chip
             label={order?.status?.toUpperCase() || "UNKNOWN"}
             color={
-              order?.status?.toLowerCase() === "completed" // Updated value
+              order?.status?.toLowerCase() === "completed"
                 ? "success"
                 : order?.status?.toLowerCase() === "processing"
                 ? "warning"
@@ -187,89 +185,53 @@ const OrderView = ({ orderId }: { orderId: string }) => {
                   <span className="font-semibold">Updated:</span>{" "}
                   {order?.updatedAt || "—"}
                 </Typography>
+
+                {/* 🟢 Restock Info */}
+                {order?.restocked !== undefined && (
+                  <Box marginTop={2}>
+                    <Divider className="mb-2" />
+                    <Typography
+                      variant="subtitle1"
+                      className="font-semibold text-gray-700 mb-1"
+                    >
+                      Restock Info
+                    </Typography>
+                    <Typography>
+                      <span className="font-semibold">Restocked:</span>{" "}
+                      {order.restocked ? (
+                        <Chip
+                          size="small"
+                          label="YES"
+                          color="success"
+                          variant="outlined"
+                        />
+                      ) : (
+                        <Chip
+                          size="small"
+                          label="NO"
+                          color="error"
+                          variant="outlined"
+                        />
+                      )}
+                    </Typography>
+                    <Typography>
+                      <span className="font-semibold">Restocked At:</span>{" "}
+                      {order?.restockedAt || "—"}
+                    </Typography>
+                    <Typography>
+                      <span className="font-semibold">Cleanup Processed:</span>{" "}
+                      {order?.cleanupProcessed ? (
+                        <IoCheckmark color="green" size={18} />
+                      ) : (
+                        <IoClose color="red" size={18} />
+                      )}
+                    </Typography>
+                  </Box>
+                )}
               </Grid>
             </Grid>
           </CardContent>
         </Card>
-
-        {/* 👤 Billing & Shipping */}
-        <Grid container spacing={2}>
-          {order?.customer && (
-            <Grid item xs={12} md={6}>
-              <Card
-                variant="outlined"
-                className="shadow-sm border border-gray-100"
-              >
-                <CardContent>
-                  <Typography
-                    variant="h6"
-                    className="font-medium text-gray-800 mb-3"
-                  >
-                    Billing Details
-                  </Typography>
-                  <Typography>
-                    <span className="font-semibold">Name:</span>{" "}
-                    {order?.customer.name}
-                  </Typography>
-                  <Typography>
-                    <span className="font-semibold">Phone:</span>{" "}
-                    {order?.customer.phone}
-                  </Typography>
-                  <Typography>
-                    <span className="font-semibold">Address:</span>{" "}
-                    {order?.customer.address}
-                  </Typography>
-                  <Typography>
-                    <span className="font-semibold">City:</span>{" "}
-                    {order?.customer.city}
-                  </Typography>
-                  <Typography>
-                    <span className="font-semibold">Postal Code:</span>{" "}
-                    {order?.customer.zip}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          )}
-
-          {order?.customer && (
-            <Grid item xs={12} md={6}>
-              <Card
-                variant="outlined"
-                className="shadow-sm border border-gray-100"
-              >
-                <CardContent>
-                  <Typography
-                    variant="h6"
-                    className="font-medium text-gray-800 mb-3"
-                  >
-                    Shipping Details
-                  </Typography>
-                  <Typography>
-                    <span className="font-semibold">Name:</span>{" "}
-                    {order?.customer.shippingName}
-                  </Typography>
-                  <Typography>
-                    <span className="font-semibold">Phone:</span>{" "}
-                    {order?.customer.shippingPhone}
-                  </Typography>
-                  <Typography>
-                    <span className="font-semibold">Address:</span>{" "}
-                    {order?.customer.shippingAddress}
-                  </Typography>
-                  <Typography>
-                    <span className="font-semibold">City:</span>{" "}
-                    {order?.customer.shippingCity}
-                  </Typography>
-                  <Typography>
-                    <span className="font-semibold">Postal Code:</span>{" "}
-                    {order?.customer.shippingZip}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          )}
-        </Grid>
 
         {/* 🧮 Items */}
         <Card variant="outlined" className="shadow-sm border border-gray-100">
@@ -300,8 +262,11 @@ const OrderView = ({ orderId }: { orderId: string }) => {
                       <TableCell align="right">
                         Rs.{item.price.toFixed(2)}
                       </TableCell>
-                      <TableCell align="right">
-                        Rs.{item.discount.toFixed(2)}
+                      <TableCell
+                        align="right"
+                        sx={{ color: "green", fontWeight: "bold" }}
+                      >
+                        - Rs.{item.discount.toFixed(2)}
                       </TableCell>
                       <TableCell align="right">
                         Rs.
@@ -314,22 +279,16 @@ const OrderView = ({ orderId }: { orderId: string }) => {
 
                   {/* Totals */}
                   <TableRow>
-                    <TableCell
-                      colSpan={6}
-                      align="right"
-                      className="font-semibold"
-                    >
+                    <TableCell colSpan={6} align="right" className="font-semibold">
                       Subtotal
                     </TableCell>
-                    <TableCell align="right">
-                      Rs.{subtotal.toFixed(2)}
-                    </TableCell>
+                    <TableCell align="right">Rs.{subtotal.toFixed(2)}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell colSpan={6} align="right">
                       Discount
                     </TableCell>
-                    <TableCell align="right">
+                    <TableCell align="right" sx={{ color: "green" }}>
                       - Rs.{discount.toFixed(2)}
                     </TableCell>
                   </TableRow>
@@ -347,8 +306,6 @@ const OrderView = ({ orderId }: { orderId: string }) => {
                     </TableCell>
                     <TableCell align="right">Rs.{fee.toFixed(2)}</TableCell>
                   </TableRow>
-
-                  {/* --- MODIFIED ROW --- */}
                   <TableRow>
                     <TableCell colSpan={6} align="right" className="font-bold">
                       Grand Total
@@ -357,24 +314,21 @@ const OrderView = ({ orderId }: { orderId: string }) => {
                       align="right"
                       className="font-bold text-primary-600"
                     >
-                      {/* Use the total from the order object */}
                       Rs.{(order?.total || 0).toFixed(2)}
                     </TableCell>
                   </TableRow>
-                  {/* --- NEW ROW --- */}
-                  <TableRow
-                    style={{
-                      color: "red",
-                    }}
-                  >
-                    <TableCell colSpan={6} align="right">
+                  <TableRow>
+                    <TableCell
+                      colSpan={6}
+                      align="right"
+                      sx={{ color: "red", fontWeight: "bold" }}
+                    >
                       Transaction Fee
                     </TableCell>
-                    <TableCell align="right">
+                    <TableCell align="right" sx={{ color: "red" }}>
                       Rs.{transactionFeeCharge.toFixed(2)}
                     </TableCell>
                   </TableRow>
-
                   <TableRow>
                     <TableCell colSpan={6} align="right">
                       Merchant Total
@@ -391,51 +345,6 @@ const OrderView = ({ orderId }: { orderId: string }) => {
             </TableContainer>
           </CardContent>
         </Card>
-
-        {/* 💳 Payments */}
-        {order?.paymentReceived && order.paymentReceived.length > 0 && (
-          <Card variant="outlined" className="shadow-sm">
-            <CardContent>
-              <Typography
-                variant="h6"
-                className="font-medium text-gray-800 mb-3"
-              >
-                Payments
-              </Typography>
-              <Divider className="mb-3" />
-              <TableContainer component={Paper} variant="outlined">
-                <Table size="small">
-                  <TableHead className="bg-gray-50">
-                    <TableRow>
-                      <TableCell>Payment ID</TableCell>
-                      <TableCell>Method ID</TableCell>
-                      <TableCell>Method</TableCell>
-                      <TableCell align="right">Amount</TableCell>
-                      <TableCell>Card</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {order.paymentReceived.map((p) => (
-                      <TableRow key={p.id} hover>
-                        <TableCell>{p.id}</TableCell>
-                        <TableCell>
-                          {/* This assumes 'paymentMethodId' was added 
-                              to the Payment type during migration */}
-                          {(p as any)?.paymentMethodId?.toUpperCase() || "N/A"}
-                        </TableCell>
-                        <TableCell>{p.paymentMethod.toUpperCase()}</TableCell>
-                        <TableCell align="right">
-                          Rs.{p.amount.toFixed(2)}
-                        </TableCell>
-                        <TableCell>{p.cardNumber}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            </CardContent>
-          </Card>
-        )}
       </Stack>
     </motion.div>
   );

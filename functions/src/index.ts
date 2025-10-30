@@ -1,13 +1,107 @@
-import { onSchedule } from "firebase-functions/v2/scheduler";
 import * as admin from "firebase-admin";
-import { BATCH_LIMIT, Item, Order, PaymentStatus } from "./constant";
-import { calculateTotal, commitBatch, generateDocumentHash } from "./util";
+import { onSchedule } from "firebase-functions/v2/scheduler";
+import * as crypto from "crypto";
+import * as stringify from "json-stable-stringify";
 
 admin.initializeApp();
+
 const db = admin.firestore();
 const FieldValue = admin.firestore.FieldValue;
 
-export const scheduledOrdersCleanup = onSchedule(
+// ==========================
+// 🔧 Constants & Interfaces
+// ==========================
+const BATCH_LIMIT = 450;
+
+interface Size {
+  size: string;
+  stock: number;
+}
+
+interface Variant {
+  variantId: string;
+  variantName: string;
+  images: string[];
+  sizes: Size[];
+}
+
+interface OrderItem {
+  itemId: string;
+  variantId: string;
+  name: string;
+  variantName: string;
+  size: string;
+  quantity: number;
+  price: number;
+}
+
+interface Item {
+  itemId: string;
+  type: string;
+  brand: string;
+  thumbnail: string;
+  variants: Variant[];
+  manufacturer: string;
+  name: string;
+  sellingPrice: number;
+  discount: number;
+  createdAt: FirebaseFirestore.Timestamp;
+  updatedAt: FirebaseFirestore.Timestamp;
+}
+
+interface Order {
+  orderId: string;
+  paymentId: string;
+  items: OrderItem[];
+  fee: number;
+  userId?: string;
+  shippingFee: number;
+  status: string;
+  paymentMethodId: string;
+  paymentStatus: string;
+  discount: number;
+  paymentMethod: string;
+  createdAt: FirebaseFirestore.Timestamp;
+  updatedAt: FirebaseFirestore.Timestamp;
+}
+
+enum PaymentStatus {
+  Pending = "Pending",
+  Paid = "Paid",
+  Failed = "Failed",
+  Refunded = "Refunded",
+}
+
+// ==========================
+// 🧮 Utility Functions
+// ==========================
+const calculateTotal = (items: OrderItem[]): number => {
+  return items.reduce((total, item) => total + item.price * item.quantity, 0);
+};
+
+const commitBatch = async (
+  batch: FirebaseFirestore.WriteBatch,
+  opCount: number
+): Promise<FirebaseFirestore.WriteBatch> => {
+  if (opCount >= BATCH_LIMIT) {
+    await batch.commit();
+    console.log(`Committed a batch of ${opCount} operations.`);
+    return admin.firestore().batch();
+  }
+  return batch;
+};
+
+const generateDocumentHash = (docData: any) => {
+  const dataToHash = { ...docData };
+  const canonicalString = stringify(dataToHash) || "";
+  const hash = crypto.createHash("sha256").update(canonicalString).digest("hex");
+  return hash;
+};
+
+// ==========================
+// 🕒 Scheduled Function
+// ==========================
+export const SheduleOrdersCleanup = onSchedule(
   {
     schedule: "every 24 hours",
     timeZone: "Asia/Colombo",
@@ -79,7 +173,6 @@ export const scheduledOrdersCleanup = onSchedule(
           size.stock += orderItem.quantity;
           batch.set(inventoryDocRef, inventoryData, { merge: true });
           opCount++;
-
           if (opCount >= BATCH_LIMIT) {
             batch = await commitBatch(batch, opCount);
             opCount = 0;
