@@ -1,21 +1,17 @@
 import { adminFirestore } from "@/firebase/firebaseAdmin";
 import crypto from "crypto";
-import { FieldValue } from "firebase-admin/firestore";
 import stringify from "json-stable-stringify";
 
 const HASH_LEDGER_COLLECTION = "hash_ledger";
+const HASH_SECRET = process.env.HASH_SECRET;
 
 export const generateDocumentHash = (docData: any) => {
-  // 1. Create a copy of the data
   const dataToHash = { ...docData };
-
-  // 3. Create the canonical string (keys are sorted alphabetically)
   const canonicalString = stringify(dataToHash);
-
-  // 4. Generate the hash
+  const hashingString = `${canonicalString}${HASH_SECRET}`
   const hash = crypto
     .createHash("sha256")
-    .update(canonicalString)
+    .update(hashingString)
     .digest("hex");
 
   return hash;
@@ -26,7 +22,6 @@ export const validateDocumentIntegrity = async (
   docId: string
 ) => {
   try {
-    // 1. Get the document's current data
     const docRef = adminFirestore.collection(collectionName).doc(docId);
     const doc = await docRef.get();
 
@@ -36,7 +31,6 @@ export const validateDocumentIntegrity = async (
     }
     const docData = doc.data();
 
-    // 2. Determine the ledger ID and get the stored hash
     const ledgerId = `hash_${docId}`;
     const hashRef = adminFirestore
       .collection(HASH_LEDGER_COLLECTION)
@@ -49,10 +43,8 @@ export const validateDocumentIntegrity = async (
     }
     const storedHash = hashDoc?.data()?.hashValue;
 
-    // 3. Generate a new hash from the current data
     const currentHash = generateDocumentHash(docData);
 
-    // 4. Compare
     if (currentHash === storedHash) {
       const message = `✅ Integrity check PASSED for ${collectionName}/${docId}.`;
       console.log(message);
@@ -75,23 +67,21 @@ export const validateDocumentIntegrity = async (
 
 export const updateOrAddOrderHash = async (data: any) => {
   try {
-    // 1. Generate the hash using the global helper
     const hashValue = generateDocumentHash(data);
-    // 2. Use the standard naming convention: {collection}_{docId}
-    const ledgerId = `hash_${data.orderId}`; // Assuming data has an orderId
+    const ledgerId = `hash_${data.orderId}`;
 
     // 3. Save to the ledger
     await adminFirestore.collection(HASH_LEDGER_COLLECTION).doc(ledgerId).set(
       {
         id: ledgerId,
         hashValue: hashValue,
-        sourceCollection: "orders", // Assuming this is for orders
+        sourceCollection: "orders",
         sourceDocId: data.orderId,
-        createdAt: FieldValue.serverTimestamp(),
-        updatedAt: FieldValue.serverTimestamp(),
+        createdAt: new Date(),
+        updatedAt: new Date(),
       },
       { merge: true }
-    ); // Use merge to update if exists, create if not
+    );
 
     console.log(`Hash ledger updated/created for: ${ledgerId}`);
   } catch (error) {

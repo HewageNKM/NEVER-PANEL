@@ -60,15 +60,6 @@ function toSafeLocaleString(
   return null;
 }
 
-/**
- * Assumes validateDocumentIntegrity(db, collectionName, docId) is in this file
- * and returns a Promise<{valid: boolean, message: string}>
- */
-// import { validateDocumentIntegrity } from './your-hash-utils';
-// import { Order } from './your-interfaces';
-
-// --- Fixed Function ---
-
 export const getOrders = async (pageNumber: number = 1, size: number = 20) => {
   try {
     const offset = (pageNumber - 1) * size;
@@ -90,14 +81,10 @@ export const getOrders = async (pageNumber: number = 1, size: number = 20) => {
       // 2. Passed 'adminFirestore' as the first argument
       const integrityResult = await validateDocumentIntegrity("orders", doc.id);
 
-      // 3. Fixed object creation:
-      // - 'orderId' is now correctly set to the doc.id
-      // - 'integrity' field is now added
-      // - 'toSafeLocaleString' helper is used for crash-safe date conversion
       const order: Order = {
         ...orderData,
-        orderId: doc.id, // 4. Correctly overwrites orderData.orderId with the doc ID
-        integrity: integrityResult, // 3. Added the integrity check result
+        orderId: doc.id,
+        integrity: integrityResult,
         customer: orderData.customer
           ? {
               ...orderData.customer,
@@ -108,6 +95,9 @@ export const getOrders = async (pageNumber: number = 1, size: number = 20) => {
           : null,
         createdAt: toSafeLocaleString(orderData.createdAt), // 5. Safe conversion
         updatedAt: toSafeLocaleString(orderData.updatedAt), // 5. Safe conversion
+        restockedAt: orderData.restockedAt
+          ? toSafeLocaleString(orderData.restockedAt)
+          : null,
       };
 
       orders.push(order);
@@ -187,6 +177,9 @@ export const getOrder = async (orderId: string): Promise<Order | null> => {
       createdAt: data.createdAt?.toDate().toLocaleString() ?? "",
       updatedAt: data.updatedAt?.toDate().toLocaleString() ?? "",
       integrity: integrity,
+      restockedAt: data.restockedAt
+        ? toSafeLocaleString(data.restockedAt)
+        : null,
     } as Order;
   } catch (error) {
     console.error("Error fetching order:", error);
@@ -843,6 +836,9 @@ export const getOrdersByDate = async (date: string) => {
               ...orderData.customer,
               updatedAt: toSafeLocaleString(orderData.customer.updatedAt),
             }
+          : null,
+        restockedAt: orderData.restockedAt
+          ? toSafeLocaleString(orderData.restockedAt)
           : null,
       };
 
