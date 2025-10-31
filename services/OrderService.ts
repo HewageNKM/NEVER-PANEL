@@ -51,7 +51,6 @@ export const getOrders = async (pageNumber: number = 1, size: number = 20) => {
 
       // 2. Passed 'adminFirestore' as the first argument
       const integrity = await validateDocumentIntegrity(
-        adminFirestore,
         ORDERS_COLLECTION,
         doc.id
       );
@@ -117,6 +116,9 @@ export const getOrder = async (orderId: string): Promise<Order | null> => {
         : null,
       createdAt: toSafeLocaleString(data.createdAt),
       updatedAt: toSafeLocaleString(data.updatedAt),
+      restockedAt: data.restockedAt
+        ? toSafeLocaleString(data.restockedAt)
+        : null,
     } as Order;
   } catch (error) {
     console.error("Error fetching order:", error);

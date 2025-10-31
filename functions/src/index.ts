@@ -6,7 +6,6 @@ import * as stringify from "json-stable-stringify";
 admin.initializeApp();
 
 const db = admin.firestore();
-const FieldValue = admin.firestore.FieldValue;
 
 // ==========================
 // 🔧 Constants & Interfaces
@@ -60,6 +59,9 @@ interface Order {
   paymentMethodId: string;
   paymentStatus: string;
   discount: number;
+  restocked?: boolean;
+  restockedAt?: FirebaseFirestore.Timestamp;
+  cleanupProcessed?: boolean;
   paymentMethod: string;
   createdAt: FirebaseFirestore.Timestamp;
   updatedAt: FirebaseFirestore.Timestamp;
@@ -93,13 +95,20 @@ const commitBatch = async (
 
 const generateDocumentHash = (docData: any) => {
   const dataToHash = { ...docData };
-  const canonicalString = stringify(dataToHash) || "";
-  const hash = crypto.createHash("sha256").update(canonicalString).digest("hex");
+  const canonicalString = stringify(dataToHash)
+  const hash = crypto
+    .createHash("sha256")
+    //@ts-ignore
+    .update(canonicalString)
+    .digest("hex");
   return hash;
 };
 
 // ==========================
 // 🕒 Scheduled Function
+// ==========================
+// ==========================
+// 🕒 Scheduled Function (Completed)
 // ==========================
 export const SheduleOrdersCleanup = onSchedule(
   {
@@ -128,7 +137,6 @@ export const SheduleOrdersCleanup = onSchedule(
           PaymentStatus.Failed,
           PaymentStatus.Refunded,
         ])
-        .where("restocked", "in", [false, null])
         .get();
 
       if (ordersSnap.empty) {
@@ -136,16 +144,26 @@ export const SheduleOrdersCleanup = onSchedule(
         return;
       }
 
-      console.log(`⚠️ Found ${ordersSnap.size} orders to process.`);
+      const targetOrders = ordersSnap.docs.filter((doc) => {
+        const data = doc.data() as Order;
+        return !data?.restocked;
+      });
+
+      if (!targetOrders.length) {
+        console.log("✅ All orders are already restocked.");
+        return;
+      }
+
+      console.log(`⚠️ Found ${targetOrders.length} orders to process.`);
 
       let batch = db.batch();
       let opCount = 0;
       const logs: any[] = [];
 
-      for (const orderDoc of ordersSnap.docs) {
+      for (const orderDoc of targetOrders) {
         const orderData = orderDoc.data() as Order;
         const orderId = orderDoc.id;
-        const hashId = `hash${orderId}`;
+        const hashId = `hash_${orderId}`;
         const hashDocRef = hashLedgerCollection.doc(hashId);
 
         const total =
@@ -154,6 +172,7 @@ export const SheduleOrdersCleanup = onSchedule(
           (orderData?.fee || 0) -
           (orderData?.discount || 0);
 
+        // 🔄 Restock inventory items
         for (const orderItem of orderData.items) {
           const inventoryDocRef = inventoryCollection.doc(orderItem.itemId);
           const inventorySnap = await inventoryDocRef.get();
@@ -179,6 +198,7 @@ export const SheduleOrdersCleanup = onSchedule(
           }
         }
 
+        // 🔖 Prepare cleanup log
         logs.push({
           context: "order_cleanup",
           entityType: "order",
@@ -200,6 +220,7 @@ export const SheduleOrdersCleanup = onSchedule(
           timestamp: admin.firestore.Timestamp.now(),
         });
 
+        // 🔄 Update or delete orders based on paymentStatus
         if (orderData.paymentStatus === PaymentStatus.Failed) {
           batch.delete(orderDoc.ref);
           batch.delete(hashDocRef);
@@ -211,23 +232,26 @@ export const SheduleOrdersCleanup = onSchedule(
           };
           batch.update(orderDoc.ref, orderUpdate);
 
-          const updatedOrderData = { ...orderData, ...orderUpdate };
-          const hash = generateDocumentHash(updatedOrderData);
-
-          batch.set(
-            hashDocRef,
-            {
-              id: hashDocRef.id,
-              hashValue: hash,
-              sourceCollection: "orders",
-              sourceDocId: orderId,
-              paymentStatus: orderData.paymentStatus,
-              updatedAt: FieldValue.serverTimestamp(),
-              createdAt: FieldValue.serverTimestamp(),
-              cleanupFlag: true,
-            },
-            { merge: true }
-          );
+          // Update hash ledger
+          const updatedOrderData = await orderCollection.doc(orderId).get();
+          if (updatedOrderData.exists) {
+            const data = updatedOrderData.data();
+            const hash = generateDocumentHash(data);
+            batch.set(
+              hashDocRef,
+              {
+                id: hashDocRef.id,
+                hashValue: hash,
+                sourceCollection: "orders",
+                sourceDocId: orderId,
+                paymentStatus: orderData.paymentStatus,
+                updatedAt: admin.firestore.Timestamp.now(),
+                createdAt: admin.firestore.Timestamp.now(),
+                cleanupFlag: true,
+              },
+              { merge: true }
+            );
+          }
         }
 
         opCount++;
@@ -237,11 +261,13 @@ export const SheduleOrdersCleanup = onSchedule(
         }
       }
 
+      // Commit any remaining batch operations
       if (opCount > 0) {
         await batch.commit();
         console.log(`💾 Committed final batch of ${opCount} operations.`);
       }
 
+      // 🔖 Commit logs
       if (logs.length > 0) {
         const logBatch = db.batch();
         for (const log of logs) {

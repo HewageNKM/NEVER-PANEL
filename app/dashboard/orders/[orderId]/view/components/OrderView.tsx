@@ -264,7 +264,7 @@ const OrderView = ({ orderId }: { orderId: string }) => {
                       </TableCell>
                       <TableCell
                         align="right"
-                        sx={{ color: "green", fontWeight: "bold" }}
+                        sx={{ color: "red", fontWeight: "bold" }}
                       >
                         - Rs.{item.discount.toFixed(2)}
                       </TableCell>
@@ -288,7 +288,7 @@ const OrderView = ({ orderId }: { orderId: string }) => {
                     <TableCell colSpan={6} align="right">
                       Discount
                     </TableCell>
-                    <TableCell align="right" sx={{ color: "green" }}>
+                    <TableCell align="right" sx={{ color: "red" }}>
                       - Rs.{discount.toFixed(2)}
                     </TableCell>
                   </TableRow>
